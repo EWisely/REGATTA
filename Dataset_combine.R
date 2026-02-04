@@ -43,37 +43,34 @@ worms_taxa <- # used because Osteichthyes doesn't have a worms id and Actinopter
   c("Agnatha", "Chondrichthyes", "Actinopterygii") 
 taxa2 <-
   "Crustacea"
-local_poly <- "POLYGON ((-93.339844 -3.162456, -93.339844 2.547988, -87.1875 2.547988, -87.1875 -3.162456, -93.339844 -3.162456))"
-regional_poly <- "POLYGON ((-117.421875 31.952162, -91.933594 -6.315299, -81.386719 -6.315299, -76.113281 7.710992, -82.089844 8.581021, -87.011719 13.581921, -104.238281 20.303418, -112.5 32.249974, -117.421875 31.952162))"
+regional_poly <- 
+  "POLYGON ((-117.421875 31.952162, -91.933594 -6.315299, -81.386719 -6.315299, -76.113281 7.710992, -82.089844 8.581021, -87.011719 13.581921, -104.238281 20.303418, -112.5 32.249974, -117.421875 31.952162))"
 
-# read.csv(outputs)
+comb_inputnames <- c("Local_species", "OBIS_Species", "GBIF_Species") # allows for running the input functions multiple times
+# if desired
+comb_outputname <- "Comprehensive_species_list"
 # ------------------- Parameter setting -------------------
 
-if(is.na(worms_taxa[1])) {
-  worms_taxa <- obis_taxa
-} else {
-  print("Using worms_taxa")
+Species_local_comb <- data.frame()
+
+for (i in comb_inputnames) {
+  db <- read.csv(paste(here("datasets", i), 
+                       sep = "", ".csv"), 
+                 fileEncoding = "latin1", 
+                 check.names = FALSE)
+  Species_local_comb <- unique(rbind(Species_local_comb, db))
 }
 
-#Combine OBIS, GBIF and Darwin lists----
-
-Species_local_comb <- unique(rbind(obis_local_species,
-                                   #GBIF_species, 
-                                   Darwin_species))
 Species_local_comb <- Species_local_comb %>%
   filter(Species!="NA")
 
-#order alphabetically
-Species_local_comb$Species <- 
-  Species_local_comb$Species[order(Species_local_comb$Species)]
-
 ##Write  list to a txt file to use as CRABS input----
 write_delim(Species_local_comb, 
-            paste(here(),
+            paste(here("custom_db"),
                   sep = "",
-                  "/custom_db/comprehensive_sp_list.txt"), 
-            delim = '\t', 
-            col_names = FALSE)
-nrow(Species_local_comb)
+                  "/",
+                  comb_outputname,
+                  ".txt"), 
+            delim = '\t')
 
 print("Insert CRABS instructions here")

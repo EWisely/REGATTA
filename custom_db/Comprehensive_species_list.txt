@@ -1,0 +1,3915 @@
+Species	Source
+Albula esuncula	Local_csv
+Anguilla marmorata	Local_csv
+Chlopsis bicollaris	Local_csv
+Paraconger californiensis	Local_csv
+Anarchias galapagensis	Local_csv
+Enchelycore lichenosa	Local_csv
+Enchelycore octaviana	Local_csv
+Gymnomuraena zebra	Local_csv
+Gymnothorax buroensis	Local_csv
+Gymnothorax dovii	Local_csv
+Gymnothorax flavimarginatus	Local_csv
+Gymnothorax meleagris	Local_csv
+Muraena argus	Local_csv
+Muraena clepsydra	Local_csv
+Muraena lentiginosa	Local_csv
+Myroconger nigrodentatus	Local_csv
+Facciolella equatorialis	Local_csv
+Ophichtus triserialis	Local_csv
+Ariosoma gilberti	Local_csv
+Gnathophis cinctus	Local_csv
+Heteroconger klausewitzi	Local_csv
+Paraconger similis	Local_csv
+Chiloconger dentatus	Local_csv
+Xenomystax atrarius	Local_csv
+Apterichtus equatorialis	Local_csv
+Callechelys galapagensis	Local_csv
+Herpetoichthys fossatus	Local_csv
+Ichthyapus selachops	Local_csv
+Myrichthys maculosus	Local_csv
+Myrichthys tigrinus	Local_csv
+Myrichthys xysturus	Local_csv
+Ophichthus arneutes	Local_csv
+Ophichthus rugifer	Local_csv
+Phaenomonas pinnata	Local_csv
+Quassiremus evionthas	Local_csv
+Paraletharchus opercularis	Local_csv
+Scytalichthys miurus	Local_csv
+Echidna nebulosa	Local_csv
+Echidna nocturna	Local_csv
+Scuticaria tigrina	Local_csv
+Uropterygius macrocephalus	Local_csv
+Uropterygius polystictus	Local_csv
+Uropterygius versutus	Local_csv
+Gymnothorax angusticeps	Local_csv
+Gymnothorax castaneus	Local_csv
+Gymnothorax javanicus	Local_csv
+Gymnothorax panamensis	Local_csv
+Gymnothorax pictus	Local_csv
+Guentherus altivela	Local_csv
+Atherinella nesiotes	Local_csv
+Melanorhinus cyanellus	Local_csv
+Alepisaurus cf. ferox	Local_csv
+Aulopus bajacali	Local_csv
+Chlorophthalmus mento	Local_csv
+Bathypterois atricolor	Local_csv
+Ipnops agassizii	Local_csv
+Synodus lacertinus	Local_csv
+Synodus lucioceps	Local_csv
+Synodus scituliceps	Local_csv
+Porichthys margaritatus	Local_csv
+Ablennes hians	Local_csv
+Platybelone argalus	Local_csv
+Strongylura exilis	Local_csv
+Tylosurus crocodilus	Local_csv
+Tylosurus pacificus	Local_csv
+Cheilopogon atrisignis	Local_csv
+Cheilopogon dorsomacula	Local_csv
+Cheilopogon furcatus	Local_csv
+Cheilopogon spilonotopterus	Local_csv
+Cheilopogon xenopterus	Local_csv
+Cypselurus callopterus	Local_csv
+Exocoetus monocirrhus	Local_csv
+Exocoetus volitans	Local_csv
+Hirundichthys marginatus	Local_csv
+Hirundichthys rondeletii	Local_csv
+Hirundichthys speculiger	Local_csv
+Oxyporhamphus micropterus	Local_csv
+Prognichthys sealei	Local_csv
+Prognichthys tringa	Local_csv
+Euleptorhamphus viridis	Local_csv
+Hemiramphus saltator	Local_csv
+Hyporhamphus gilli	Local_csv
+Hyporhamphus naos	Local_csv
+Hyporhamphus snyderi	Local_csv
+Hyporhamphus unifasciatus	Local_csv
+Myripristis berndti	Local_csv
+Myripristis leiognathus	Local_csv
+Hoplostethus pacificus	Local_csv
+Sargocentron suborbitalis	Local_csv
+Etrumeus teres	Local_csv
+Lile stolifera	Local_csv
+Opisthonema berlangai	Local_csv
+Opisthonema libertate	Local_csv
+Sardinops sagax	Local_csv
+Anchoa ischana	Local_csv
+Cetengraulis mysticetus	Local_csv
+Engraulis ringens	Local_csv
+Elops affinis	Local_csv
+Bregmaceros mcclellandi	Local_csv
+Mataeocephalus tenuicauda	Local_csv
+Nezumia convergens	Local_csv
+Nezumia stelgidolepis	Local_csv
+Nezumia ventralis	Local_csv
+Trachyrincus helolepis	Local_csv
+Coryphaenoides anguliceps	Local_csv
+Coryphaenoides armatus	Local_csv
+Coryphaenoides boops	Local_csv
+Coryphaenoides bucephalus	Local_csv
+Coryphaenoides bulbiceps	Local_csv
+Coryphaenoides delsolari	Local_csv
+Coryphaenoides gypsochilus	Local_csv
+Coryphaenoides myersi	Local_csv
+Coelorinchus canus	Local_csv
+Merluccius gayi	Local_csv
+Antimora rostrata	Local_csv
+Gadella filifer	Local_csv
+Gadella thysthlon	Local_csv
+Laemonema gracillipes	Local_csv
+Physiculus nematopus	Local_csv
+Fistularia corneta	Local_csv
+Chanos chanos	Local_csv
+Zu cristatus	Local_csv
+Antennarius sanguineus	Local_csv
+Antennatus strigatus	Local_csv
+Lophiodes caulinaris	Local_csv
+Lophiodes spilurus	Local_csv
+Lophiodon spilurus	Local_csv
+Lophiomus setigerus	Local_csv
+Ogcocephalus darwini	Local_csv
+Antennarius avalonis	Local_csv
+Antennarius coccineus	Local_csv
+Antennarius commerson	Local_csv
+Dibranchus cracens	Local_csv
+Dibranchus discors	Local_csv
+Dibranchus erinaceus	Local_csv
+Dibranchus hystrix	Local_csv
+Halieutopsis tumifrons	Local_csv
+Agonostomus monticola	Local_csv
+Chaenomugil proboscideus	Local_csv
+Mugil cephalus	Local_csv
+Mugil curema	Local_csv
+Mugil rammelsbergi	Local_csv
+Xenomugil thoburni	Local_csv
+Diogenichthys laternatus	Local_csv
+Lampanyctus omostigma	Local_csv
+Myctophum aurolaternatum	Local_csv
+Myctophum nitidulum	Local_csv
+Halosaurus attenuatus	Local_csv
+Cataetyx simus	Local_csv
+Diplacanthopoma jordani	Local_csv
+Grammonus diagrammus	Local_csv
+Lucifuga inopinata	Local_csv
+Ogilbia deroyi	Local_csv
+Ogilbia galapagosensis	Local_csv
+Calamopteryx jeb	Local_csv
+Pseudonus acutus	Local_csv
+Carapus dubius	Local_csv
+Echiodon exsilium	Local_csv
+Encheliophis vermicularis	Local_csv
+Bathyonus caudalis	Local_csv
+Brotula ordwayi	Local_csv
+Monomitopus malispinosus	Local_csv
+Otophidium indefatigabile	Local_csv
+Dicrolene nigra	Local_csv
+Eretmichthys pinnatus	Local_csv
+Petrotyx hopkinsi	Local_csv
+Bathytroctes macrolepis	Local_csv
+Narcetes erimelas	Local_csv
+Argentina aliceae	Local_csv
+Acanthurus triostegus	Local_csv
+Prionurus laticlavius	Local_csv
+Ammodytoides gilli	Local_csv
+Apogon atradorsatus	Local_csv
+Apogon dovii	Local_csv
+Apogon pacificus	Local_csv
+Ophioblennius steindachneri	Local_csv
+Plagiotremus azaleus	Local_csv
+Brama dussumieri	Local_csv
+Taractes rubescens	Local_csv
+Synchiropus atrilabiatus	Local_csv
+Alectis ciliaris	Local_csv
+Carangoides orthogrammus	Local_csv
+Caranx caballus	Local_csv
+Caranx caninus	Local_csv
+Caranx ignobilis	Local_csv
+Caranx latus	Local_csv
+Caranx lugubris	Local_csv
+Caranx melampygus	Local_csv
+Caranx tille	Local_csv
+Decapterus macrosoma	Local_csv
+Decapterus muroadsi	Local_csv
+Elagatis bipinnulata	Local_csv
+Selar crumenophthalmus	Local_csv
+Selene peruviana	Local_csv
+Seriola lalandi	Local_csv
+Seriola rivoliana	Local_csv
+Trachinotus paitensis	Local_csv
+Trachinotus rhodopus	Local_csv
+Trachinotus stilbe	Local_csv
+Seriolella violacea	Local_csv
+Centropomus viridis	Local_csv
+Chaetodon humeralis	Local_csv
+Oreochromis niloticus	Local_csv
+Cirrhitichthys oxycephalus	Local_csv
+Cirrhitus rivulatus	Local_csv
+Oxycirrhites typus	Local_csv
+Coryphaena equiselis	Local_csv
+Coryphaena hippurus	Local_csv
+Dactyloscopus lacteus	Local_csv
+Gillellus semicinctus	Local_csv
+Myxodagnus sagitta	Local_csv
+Platygillellus rubellulus	Local_csv
+Echeneis naucrates	Local_csv
+Dormitator latifrons	Local_csv
+Eleotris picta	Local_csv
+Gobiomorus maculatus	Local_csv
+Cymatogaster aggregata	Local_csv
+Epigonus merleni	Local_csv
+Gempylus serpens	Local_csv
+Lepidocybium flavobrunneum	Local_csv
+Nealotus tripes	Local_csv
+Ruvettus pretiosus	Local_csv
+Diapterus peruvianus	Local_csv
+Eucinostomus argenteus	Local_csv
+Eucinostomus californiensis	Local_csv
+Eucinostomus currani	Local_csv
+Eucinostomus dowii	Local_csv
+Eucinostomus gracilis	Local_csv
+Eugerres lineatus	Local_csv
+Gerres cinereus	Local_csv
+Lythrypnus gilberti	Local_csv
+Haemulon sexfasciatum	Local_csv
+Orthopristis chalceus	Local_csv
+Xenichthys agassizii	Local_csv
+Xenocys jessiae	Local_csv
+Orthopristis forbesi	Local_csv
+Istiophorus platypterus	Local_csv
+Makaira indica	Local_csv
+Makaira mazara	Local_csv
+Kyphosus analogus	Local_csv
+Kyphosus elegans	Local_csv
+Girella fremenvillei	Local_csv
+Sectator ocyurus	Local_csv
+Bodianus diplotaenia	Local_csv
+Bodianus eclancheri	Local_csv
+Halichoeres dispilus	Local_csv
+Halichoeres nicholsi	Local_csv
+Semicossyphus darwini	Local_csv
+Thalassoma grammaticum	Local_csv
+Thalassoma lucasanum	Local_csv
+Xyrichtys victory	Local_csv
+Lutjanus aratus	Local_csv
+Lutjanus argentiventris	Local_csv
+Lutjanus inermis	Local_csv
+Lutjanus jordani	Local_csv
+Lutjanus novemfasciatus	Local_csv
+Lutjanus viridis	Local_csv
+Luvarus imperialis	Local_csv
+Caulolatilus princeps	Local_csv
+Clarkichthys bilineatus	Local_csv
+Microdesmus dipus	Local_csv
+Mulloidichthys dentatus	Local_csv
+Nematistius pectoralis	Local_csv
+Opistognathus galapagensis	Local_csv
+Howella pammelas	Local_csv
+Polydactylus approximans	Local_csv
+Holacanthus passer	Local_csv
+Pomacanthus zonipectus	Local_csv
+Abudefduf concolor	Local_csv
+Abudefduf troschelii	Local_csv
+Azurina eupalama	Local_csv
+Chromis alta	Local_csv
+Chromis atrilobata	Local_csv
+Microspathodon bairdii	Local_csv
+Microspathodon dorsalis	Local_csv
+Stegastes acapulcoensis	Local_csv
+Stegastes arcifrons	Local_csv
+Stegastes beebei	Local_csv
+Stegastes flavilatus	Local_csv
+Nexilosus latifrons	Local_csv
+Scarus perrico	Local_csv
+Scarus ghobban	Local_csv
+Odontoscion eurymesops	Local_csv
+Pareques perissa	Local_csv
+Umbrina galapagorum	Local_csv
+Acanthocybium solandri	Local_csv
+Euthynnus lineatus	Local_csv
+Katsuwonus pelamis	Local_csv
+Sarda orientalis	Local_csv
+Scomber japonicus	Local_csv
+Scomberomorus sierra	Local_csv
+Thunnus alalunga	Local_csv
+Thunnus albacares	Local_csv
+Thunnus obesus	Local_csv
+Epinephelus analogus	Local_csv
+Liopropoma fasciatum	Local_csv
+Mycteroperca olfax	Local_csv
+Paranthias colonus	Local_csv
+Rypticus bicolor	Local_csv
+Rypticus nigripinnis	Local_csv
+Cratinus agassizii	Local_csv
+Paralabrax albomaculatus	Local_csv
+Archosargus pourtalesii	Local_csv
+Calamus brachysomus	Local_csv
+Calamus taurinus	Local_csv
+Sphyraena idiastes	Local_csv
+Peprilus medius	Local_csv
+Aphanopus capricornis	Local_csv
+Benthodesmus tenuis	Local_csv
+Lepidopus manis	Local_csv
+Lepidonectes corallicola	Local_csv
+Kathetostoma averruncus	Local_csv
+Xiphias gladius	Local_csv
+Lycodapus australis	Local_csv
+Melanostigma bathium	Local_csv
+Thermarces cerberus	Local_csv
+Acanthurus nigricans	Local_csv
+Acanthurus xanthopterus	Local_csv
+Naso annulatus	Local_csv
+Naso brevirostris	Local_csv
+Naso hexacanthus	Local_csv
+Naso vlamingii	Local_csv
+Prionurus punctatus	Local_csv
+Zanclus cornutus	Local_csv
+Entomacrodus chiostictus	Local_csv
+Hypsoblennius brevipinnis	Local_csv
+Acanthemblemaria castroi	Local_csv
+Chaenopsis schmitti	Local_csv
+Cottoclinus canops	Local_csv
+Dialommus fuscus	Local_csv
+Labrisomus dendriticus	Local_csv
+Labrisomus jenkinsi	Local_csv
+Labrisomus multiporosus	Local_csv
+Malacoctenus tetranemus	Local_csv
+Malacoctenus zonogaster	Local_csv
+Starksia galapagensis	Local_csv
+Tomicodon chilensis	Local_csv
+Tomicodon petersii	Local_csv
+Arcos poecilophthalmos	Local_csv
+Eleotrica cableae	Local_csv
+Bathygobius lineatus	Local_csv
+Coryphopterus urospilus	Local_csv
+Elacatinus nesiotes	Local_csv
+Chriolepis tagus	Local_csv
+Lythrypnus dalli	Local_csv
+Lythrypnus rhizophora	Local_csv
+Decodon melasma	Local_csv
+Halichoeres adustus	Local_csv
+Halichoeres chierchiae	Local_csv
+Halichoeres melanotis	Local_csv
+Halichoeres notospilus	Local_csv
+Halichoeres raisneri	Local_csv
+Iniistius pavo	Local_csv
+Novaculichthys taeniourus	Local_csv
+Stethojulis bandanensis	Local_csv
+Thalassoma purpureum	Local_csv
+Calotomus carolinus	Local_csv
+Scarus compressus	Local_csv
+Scarus rubroviolaceus	Local_csv
+Nicholsina denticulata	Local_csv
+Caranx sexfasciatus	Local_csv
+Decapterus macarellus	Local_csv
+Decapterus punctatus	Local_csv
+Gnathanodon speciosus	Local_csv
+Naucrates ductor	Local_csv
+Oligoplites saurus	Local_csv
+Trachurus murphyi	Local_csv
+Uraspis helvola	Local_csv
+Chaetodon auriga	Local_csv
+Chaetodon kleinii	Local_csv
+Chaetodon lunula	Local_csv
+Chaetodon meyeri	Local_csv
+Chaetodon unimaculatus	Local_csv
+Forcipiger flavissimus	Local_csv
+Johnrandallia nigrirostris	Local_csv
+Prognathodes falcifer	Local_csv
+Phtheirichthys lineatus	Local_csv
+Remora brachyptera	Local_csv
+Remora osteochir	Local_csv
+Remora remora	Local_csv
+Remorina albescens	Local_csv
+Chaetodipterus zonatus	Local_csv
+Anisotremus interruptus	Local_csv
+Anisotremus scapularis	Local_csv
+Haemulon scudderii	Local_csv
+Haemulon steindachneri	Local_csv
+Orthopristis cantharinus	Local_csv
+Orthopristis lethopristis	Local_csv
+Xenichthys xanti	Local_csv
+Kuhlia mugil	Local_csv
+Hoplopagrus guentherii	Local_csv
+Lutjanus guttatus	Local_csv
+Pristipomoides zonatus	Local_csv
+Malacanthus brevirostris	Local_csv
+Caulolatilus affinis	Local_csv
+Pseudupeneus grandisquamis	Local_csv
+Opistognathus rhomaleus	Local_csv
+Oplegnathus insignis	Local_csv
+Cookeolus japonicus	Local_csv
+Heteropriacanthus cruentatus	Local_csv
+Priacanthus cf. meeki	Local_csv
+Pristigenys serrula	Local_csv
+Cilus gilberti	Local_csv
+Corvula macrops	Local_csv
+Cynoscion phoxocephalus	Local_csv
+Larimus pacificus	Local_csv
+Alphestes immaculatus	Local_csv
+Anthias noeli	Local_csv
+Cephalopholis panamensis	Local_csv
+Dermatolepis dermatolepis	Local_csv
+Diplectrum eumelum	Local_csv
+Diplectrum euryplectrum	Local_csv
+Diplectrum macropoma	Local_csv
+Diplectrum rostrum	Local_csv
+Epinephelus cifuentesi	Local_csv
+Epinephelus labriformis	Local_csv
+Hemanthias peruanus	Local_csv
+Hemilutjanus macrophthalmos	Local_csv
+Hyporthodus mystacinus	Local_csv
+Hyporthodus niveatus	Local_csv
+Liopropoma longilepis	Local_csv
+Mycteroperca xenarcha	Local_csv
+Pronotogrammus multifasciatus	Local_csv
+Serranus aequidens	Local_csv
+Serranus psittacinus	Local_csv
+Serranus stilbostigma	Local_csv
+Auxis rochei	Local_csv
+Auxis thazard	Local_csv
+Sphyraena barracuda	Local_csv
+Sphyraena ensis	Local_csv
+Cubiceps pauciradiatus	Local_csv
+Nomeus gronovii	Local_csv
+Psenes arafurensis	Local_csv
+Psenes cyanophrys	Local_csv
+Psenes pellucidus	Local_csv
+Psenes sio	Local_csv
+Trinectes fonsecensis	Local_csv
+Bothus leopardinus	Local_csv
+Bothus mancus	Local_csv
+Symphurus varius	Local_csv
+Citharichthys gnathus	Local_csv
+Hippoglossina bollmani	Local_csv
+Paralichthys woolmani	Local_csv
+Aseraggodes herrei	Local_csv
+Monolene maculipinna	Local_csv
+Syacium ovale	Local_csv
+Symphurus atramentatus	Local_csv
+Symphurus diabolicus	Local_csv
+Paraliparis darwini	Local_csv
+Paraliparis galapagosensis	Local_csv
+Peristedion crustosum	Local_csv
+Pontinus clemensi	Local_csv
+Pontinus furcirhinus	Local_csv
+Scorpaena histrio	Local_csv
+Scorpaena mystes	Local_csv
+Scorpaenodes xyris	Local_csv
+Taenianotus triacanthus	Local_csv
+Trachyscorpia osheri	Local_csv
+Ectreposebastes imus	Local_csv
+Prionotus miles	Local_csv
+Pontinus sp. A	Local_csv
+Pontinus sp. B	Local_csv
+Pontinus sp. C	Local_csv
+Pontinus strigatus	Local_csv
+Pontinus vaughani	Local_csv
+Scorpaenodes rubrivinctus	Local_csv
+Idiastion hageyi	Local_csv
+Scorpaena cocosensis	Local_csv
+Bellator farrago	Local_csv
+Prionotus albirostris	Local_csv
+Prionotus stephanophrys	Local_csv
+Astronesthes galapagensis	Local_csv
+Bathophilus filifer	Local_csv
+Aulostomus chinensis	Local_csv
+Fistularia commersonii	Local_csv
+Hippocampus ingens	Local_csv
+Bryx veleronis	Local_csv
+Cosmocampus arctus	Local_csv
+Doryrhamphus excisus	Local_csv
+Balistes polylepis	Local_csv
+Melichthys niger	Local_csv
+Melichthys vidua	Local_csv
+Sufflamen verres	Local_csv
+Xanthichthys caeruleolineatus	Local_csv
+Xanthichthys mento	Local_csv
+Diodon holocanthus	Local_csv
+Diodon hystrix	Local_csv
+Mola mola	Local_csv
+Mola ramsayi	Local_csv
+Ranzania laevis	Local_csv
+Aluterus scriptus	Local_csv
+Ostracion meleagris	Local_csv
+Arothron hispidus	Local_csv
+Arothron meleagris	Local_csv
+Canthigaster punctatissima	Local_csv
+Pseudobalistes naufragium	Local_csv
+Chilomycterus reticulatus	Local_csv
+Cyclichthys spilostylus	Local_csv
+Diodon eydouxii	Local_csv
+Masturus lanceolatus	Local_csv
+Aluterus monoceros	Local_csv
+Cantherhines dumerilii	Local_csv
+Lactoria diaphana	Local_csv
+Lagocephalus lagocephalus	Local_csv
+Canthigaster amboinensis	Local_csv
+Canthigaster janthinoptera	Local_csv
+Canthigaster valentini	Local_csv
+Arothron nigropunctatus	Local_csv
+Sphoeroides angusticeps	Local_csv
+Sphoeroides annulatus	Local_csv
+Sphoeroides lobatus	Local_csv
+Carcharhinus albimarginatus	Local_csv
+Carcharhinus falciformis	Local_csv
+Carcharhinus galapagensis	Local_csv
+Galeocerdo cuvier	Local_csv
+Nasolamia velox	Local_csv
+Prionace glauca	Local_csv
+Carcharhinus altimus	Local_csv
+Carcharhinus longimanus	Local_csv
+Carcharhinus plumbeus	Local_csv
+Apristurus kampae	Local_csv
+Sphyrna lewini	Local_csv
+Sphyrna mokarran	Local_csv
+Sphyrna tiburo	Local_csv
+Mustelus sp. nov.	Local_csv
+Triakis maculata	Local_csv
+Carcharhinus amblyrhynchos	Local_csv
+Carcharhinus leucas	Local_csv
+Carcharhinus limbatus	Local_csv
+Triaenodon obesus	Local_csv
+Sphyrna zygaena	Local_csv
+Mustelus albipinnis	Local_csv
+Mustelus mento	Local_csv
+Heterodontus mexicanus	Local_csv
+Heterodontus quoyi	Local_csv
+Alopias pelagicus	Local_csv
+Alopias superciliosus	Local_csv
+Odontaspis ferox	Local_csv
+Carcharodon carcharias	Local_csv
+Isurus oxyrinchus	Local_csv
+Rhincodon typus	Local_csv
+Dasyatis brevis	Local_csv
+Dasyatis dipterura	Local_csv
+Dasyatis longa	Local_csv
+Himantura pacifica	Local_csv
+Pteroplatytrygon violacea	Local_csv
+Taeniura meyeni	Local_csv
+Myliobatis californica	Local_csv
+Pteromylaeus asperrimus	Local_csv
+Manta birostris	Local_csv
+Mobula japanica	Local_csv
+Mobula munkiana	Local_csv
+Mobula tarapacana	Local_csv
+Aetobatus narinari	Local_csv
+Myliobatis peruvianus	Local_csv
+Rhinoptera steindachneri	Local_csv
+Bathyraja spinosissima	Local_csv
+Gurgesiella furvescens	Local_csv
+Raja velezi	Local_csv
+Rajella eisenhardti	Local_csv
+Rhinobatos planiceps	Local_csv
+Centrophorus squamosus	Local_csv
+Centroscyllium nigrum	Local_csv
+Isistius brasiliensis	Local_csv
+Echinorhinus cookei	Local_csv
+Narcine entemedor	Local_csv
+Torpedo peruana	Local_csv
+Torpedo tremens	Local_csv
+Hydrolagus alphus	Local_csv
+Hydrolagus mccoskeri	Local_csv
+Branchiostoma elongatum	Local_csv
+Eptatretus grouseri	Local_csv
+Eptatretus mccoskeri	Local_csv
+Eptatretus wisneri	Local_csv
+Eptatretus lakeside	Local_csv
+Actinopteri	OBIS
+Epinephelus labriformis	OBIS
+Holacanthus passer	OBIS
+Mycteroperca olfax	OBIS
+Scarus ghobban	OBIS
+Bodianus diplotaenia	OBIS
+Thalassoma lucasanum	OBIS
+Johnrandallia nigrirostris	OBIS
+Sufflamen verres	OBIS
+Ophioblennius steindachneri	OBIS
+Halichoeres dispilus	OBIS
+Acanthurus xanthopterus	OBIS
+Rhincodon typus	OBIS
+Stegastes beebei	OBIS
+Lutjanus viridis	OBIS
+Plagiotremus azaleus	OBIS
+Cephalopholis panamensis	OBIS
+Lutjanus argentiventris	OBIS
+Arothron meleagris	OBIS
+Mobula birostris	OBIS
+Cirrhitichthys oxycephalus	OBIS
+Cephalopholis colonus	OBIS
+Dermatolepis dermatolepis	OBIS
+Stegastes arcifrons	OBIS
+Serranus psittacinus	OBIS
+Apogon atradorsatus	OBIS
+Azurina atrilobata	OBIS
+Halichoeres nicholsi	OBIS
+Cirrhitus rivulatus	OBIS
+Scarus rubroviolaceus	OBIS
+Tylosurus acus	OBIS
+Serranidae	OBIS
+Thunnus	OBIS
+Abudefduf troschelii	OBIS
+Mugil thoburni	OBIS
+Lutjanus	OBIS
+Seriola rivoliana	OBIS
+Acanthocybium solandri	OBIS
+Sphoeroides annulatus	OBIS
+Cephalopholis	OBIS
+Zanclus cornutus	OBIS
+Melichthys niger	OBIS
+Chaetodon humeralis	OBIS
+Mugil curema	OBIS
+Canthigaster punctatissima	OBIS
+Scorpaena mystes	OBIS
+Semicossyphus darwini	OBIS
+Bathygobius soporator	OBIS
+Caulolatilus princeps	OBIS
+Lepidonectes corallicola	OBIS
+Stegastes acapulcoensis	OBIS
+Paralabrax albomaculatus	OBIS
+Melichthys	OBIS
+Microspathodon dorsalis	OBIS
+Ariopsis seemanni	OBIS
+Bodianus eclancheri	OBIS
+Elagatis bipinnulata	OBIS
+Abudefduf	OBIS
+Scarus	OBIS
+Lutjanus guttatus	OBIS
+Sphyrna lewini	OBIS
+Kyphosus	OBIS
+Girella freminvillii	OBIS
+Myripristis	OBIS
+Gymnothorax dovii	OBIS
+Clupeidae	OBIS
+Orthopristis forbesi	OBIS
+Caranx	OBIS
+Scomberomorus sierra	OBIS
+Lythrypnus gilberti	OBIS
+Balistes polylepis	OBIS
+Muraena lentiginosa	OBIS
+Mulloidichthys dentatus	OBIS
+Pontinus	OBIS
+Fistularia commersonii	OBIS
+Rypticus bicolor	OBIS
+Scorpaenodes xyris	OBIS
+Lutjanus novemfasciatus	OBIS
+Kyphosus elegans	OBIS
+Aulostomus chinensis	OBIS
+Coryphopterus urospilus	OBIS
+Acanthurus nigricans	OBIS
+Opisthonema libertate	OBIS
+Anisotremus scapularis	OBIS
+Diodon holocanthus	OBIS
+Centropomus armatus	OBIS
+Myripristis leiognathus	OBIS
+Triaenodon obesus	OBIS
+Epinephelus	OBIS
+Bathygobius lineatus	OBIS
+Caranx caballus	OBIS
+Thalassoma	OBIS
+Pomacentridae	OBIS
+Stegastes flavilatus	OBIS
+Alphestes immaculatus	OBIS
+Arothron hispidus	OBIS
+Caranx melampygus	OBIS
+Lile stolifera	OBIS
+Sargocentron suborbitale	OBIS
+Scombridae	OBIS
+Mugil cephalus	OBIS
+Eucinostomus currani	OBIS
+Tylosurus	OBIS
+Vinciguerria lucetia	OBIS
+Haemulon maculicauda	OBIS
+Scarus perrico	OBIS
+Hyporhamphus unifasciatus	OBIS
+Eucinostomus dowii	OBIS
+Synodus lacertinus	OBIS
+Mugil	OBIS
+Microspathodon bairdii	OBIS
+Haemulon aurolineatum	OBIS
+Rypticus nigripinnis	OBIS
+Diogenichthys laternatus	OBIS
+Synodus scituliceps	OBIS
+Paralabrax maculatofasciatus	OBIS
+Apogon retrosella	OBIS
+Chanos chanos	OBIS
+Poeciliopsis	OBIS
+Oplegnathus insignis	OBIS
+Acanthurus triostegus	OBIS
+Haemulon scudderii	OBIS
+Haemulidae	OBIS
+Diapterus peruvianus	OBIS
+Halichoeres	OBIS
+Atherinopsidae	OBIS
+Etropus crossotus	OBIS
+Hoplopagrus guentherii	OBIS
+Hypanus dipterurus	OBIS
+Scarus compressus	OBIS
+Coryphaena hippurus	OBIS
+Nicholsina denticulata	OBIS
+Pseudobalistes naufragium	OBIS
+Anisotremus interruptus	OBIS
+Polydactylus approximans	OBIS
+Citharichthys gilberti	OBIS
+Tomicodon petersii	OBIS
+Gobiomorus maculatus	OBIS
+Mugil galapagensis	OBIS
+Entomacrodus chiostictus	OBIS
+Poecilia	OBIS
+Canthidermis maculata	OBIS
+Kyphosus vaigiensis	OBIS
+Ctenogobius sagittula	OBIS
+Trachinotus rhodopus	OBIS
+Stegastes rectifraenum	OBIS
+Labrisomus xanti	OBIS
+Euthynnus affinis	OBIS
+Gerres cinereus	OBIS
+Albula vulpes	OBIS
+Symphurus atramentatus	OBIS
+Holacanthus	OBIS
+Syacium ovale	OBIS
+Prionotus stephanophrys	OBIS
+Carangidae	OBIS
+Canthigaster janthinoptera	OBIS
+Sphyraena idiastes	OBIS
+Phosichthyidae	OBIS
+Malacoctenus tetranemus	OBIS
+Caranx sexfasciatus	OBIS
+Thalassoma grammaticum	OBIS
+Poecilia sphenops	OBIS
+Poeciliopsis turrubarensis	OBIS
+Bathygobius ramosus	OBIS
+Rhencus macracanthus	OBIS
+Haemulopsis leuciscus	OBIS
+Diodon hystrix	OBIS
+Malacoctenus hubbsi	OBIS
+Harengula thrissina	OBIS
+Eucinostomus gracilis	OBIS
+Gymnothorax panamensis	OBIS
+Tetraodontiformes	OBIS
+Achirus mazatlanus	OBIS
+Sardinops sagax	OBIS
+Carcharhinus galapagensis	OBIS
+Myctophum aurolaternatum	OBIS
+Selar crumenophthalmus	OBIS
+Pseudupeneus grandisquamis	OBIS
+Gobiesox pinniger	OBIS
+Urobatis halleri	OBIS
+Acanthemblemaria crockeri	OBIS
+Myrichthys tigrinus	OBIS
+Halichoeres notospilus	OBIS
+Caranx caninus	OBIS
+Euthynnus lineatus	OBIS
+Zalieutes elater	OBIS
+Selene peruviana	OBIS
+Auxis	OBIS
+Labrisomus multiporosus	OBIS
+Doryrhamphus excisus	OBIS
+Trachinotus	OBIS
+Oligoplites saurus	OBIS
+Arothron	OBIS
+Oxyporhamphus micropterus	OBIS
+Pomacanthus zonipectus	OBIS
+Apogon	OBIS
+Ophioblennius atlanticus	OBIS
+Centropomus medius	OBIS
+Oligoplites altus	OBIS
+Stegastes	OBIS
+Chilomycterus reticulatus	OBIS
+Diplectrum pacificum	OBIS
+Calamus brachysomus	OBIS
+Benthosema pterotum	OBIS
+Novaculichthys taeniourus	OBIS
+Gymnothorax castaneus	OBIS
+Engraulis	OBIS
+Porichthys margaritatus	OBIS
+Anchoa	OBIS
+Cratinus agassizii	OBIS
+Decapterus macarellus	OBIS
+Hemilutjanus macrophthalmos	OBIS
+Chromis alta	OBIS
+Anchoa ischana	OBIS
+Calamus taurinus	OBIS
+Eucinostomus melanopterus	OBIS
+Cetengraulis mysticetus	OBIS
+Lythrypnus dalli	OBIS
+Hypsoblennius brevipinnis	OBIS
+Apogon dovii	OBIS
+Dormitator latifrons	OBIS
+Enneanectes carminalis	OBIS
+Peprilus medius	OBIS
+Chaenomugil proboscideus	OBIS
+Dajaus monticola	OBIS
+Bagre panamensis	OBIS
+Abantennarius sanguineus	OBIS
+Hypsoblennius gentilis	OBIS
+Trachinotus paitensis	OBIS
+Haemulon flaviguttatum	OBIS
+Hippocampus ingens	OBIS
+Gobiidae	OBIS
+Caranx hippos	OBIS
+Gobiosoma chiquita	OBIS
+Girella simplicidens	OBIS
+Lutjanus jordani	OBIS
+Lutjanus aratus	OBIS
+Paralichthys californicus	OBIS
+Eleotris picta	OBIS
+Elacatinus puncticulatus	OBIS
+Myrophis vafer	OBIS
+Haemulon sexfasciatum	OBIS
+Eucinostomus entomelas	OBIS
+Argyropelecus lychnus	OBIS
+Chloroscombrus orqueta	OBIS
+Kyphosus ocyurus	OBIS
+Triphoturus mexicanus	OBIS
+Scomber japonicus	OBIS
+Eucinostomus	OBIS
+Sciaenidae	OBIS
+Synodus evermanni	OBIS
+Awaous banana	OBIS
+Tomicodon boehlkei	OBIS
+Diapterus brevirostris	OBIS
+Taeniurops meyeni	OBIS
+Coryphaena equiselis	OBIS
+Bathygobius	OBIS
+Epinephelus analogus	OBIS
+Gobiesox adustus	OBIS
+Fundulus parvipinnis	OBIS
+Axoclinus	OBIS
+Heterodontus quoyi	OBIS
+Sarda orientalis	OBIS
+Euthynnus	OBIS
+Atherinops affinis	OBIS
+Engraulidae	OBIS
+Atherinella eriarcha	OBIS
+Chaetodipterus zonatus	OBIS
+Sufflamen	OBIS
+Lampanyctus omostigma	OBIS
+Labridae	OBIS
+Acanthurus	OBIS
+Acanthemblemaria castroi	OBIS
+Rhencus panamensis	OBIS
+Canthigaster	OBIS
+Orthopristis reddingi	OBIS
+Sphoeroides lobatus	OBIS
+Uropterygius	OBIS
+Diplobatis ommata	OBIS
+Trichiurus lepturus	OBIS
+Sphoeroides angusticeps	OBIS
+Gymnothorax	OBIS
+Peprilus snyderi	OBIS
+Hyporthodus cifuentesi	OBIS
+Abudefduf saxatilis	OBIS
+Malacoctenus zonogaster	OBIS
+Anchovia macrolepidota	OBIS
+Anchoa nasus	OBIS
+Ostracion meleagris	OBIS
+Urobatis maculatus	OBIS
+Sphyraena ensis	OBIS
+Pleuronichthys guttulatus	OBIS
+Sternoptyx diaphana	OBIS
+Haemulon steindachneri	OBIS
+Scorpaena histrio	OBIS
+Sphoeroides rosenblatti	OBIS
+Strongylura exilis	OBIS
+Ogilbia	OBIS
+Citharichthys platophrys	OBIS
+Larimus argenteus	OBIS
+Lutjanus colorado	OBIS
+Decapterus	OBIS
+Quietula y-cauda	OBIS
+Engyophrys sanctilaurentii	OBIS
+Malacoctenus gigas	OBIS
+Myripristis berndti	OBIS
+Orthopristis chalceus	OBIS
+Paraclinus sini	OBIS
+Coralliozetus micropes	OBIS
+Halichoeres chierchiae	OBIS
+Pareques viola	OBIS
+Paralichthys aestuarius	OBIS
+Centropomus robalito	OBIS
+Stathmonotus sinuscalifornici	OBIS
+Mycteroperca rosacea	OBIS
+Lutjanus inermis	OBIS
+Rhizoprionodon longurio	OBIS
+Umbrina xanti	OBIS
+Stellifer	OBIS
+Actinopterygii	OBIS
+Paraclinus mexicanus	OBIS
+Paralichthys woolmani	OBIS
+Bellator loxias	OBIS
+Gonichthys cocco	OBIS
+Muraenidae	OBIS
+Symphurus	OBIS
+Ariidae	OBIS
+Echidna nocturna	OBIS
+Myctophum affine	OBIS
+Girella nigricans	OBIS
+Oxycirrhites typus	OBIS
+Thunnus albacares	OBIS
+Tylosurus crocodilus	OBIS
+Cyclothone acclinidens	OBIS
+Haemulon	OBIS
+Apogon pacificus	OBIS
+Scorpaena sonorae	OBIS
+Tripterygiidae	OBIS
+Malacoctenus ebisui	OBIS
+Myctophum nitidulum	OBIS
+Cyclopsetta querna	OBIS
+Prognathodes carlhubbsi	OBIS
+Rhynchoconger nitens	OBIS
+Gonichthys tenuiculus	OBIS
+Isopisthus remifer	OBIS
+Occidentarius platypogon	OBIS
+Gnathanodon speciosus	OBIS
+Bregmaceros bathymaster	OBIS
+Fowlerichthys avalonis	OBIS
+Exocoetus monocirrhus	OBIS
+Anchoa walkeri	OBIS
+Symphurus callopterus	OBIS
+Echidna nebulosa	OBIS
+Alectis ciliaris	OBIS
+Fodiator acutus	OBIS
+Dactylagnus mundus	OBIS
+Synodus lucioceps	OBIS
+Bellator xenisma	OBIS
+Carcharhinus limbatus	OBIS
+Symphurus chabanaudi	OBIS
+Porichthys analis	OBIS
+Archosargus pourtalesii	OBIS
+Nematistius pectoralis	OBIS
+Gymnomuraena zebra	OBIS
+Scorpaena russula	OBIS
+Axoclinus lucillae	OBIS
+Lythrypnus rhizophora	OBIS
+Uropterygius macrocephalus	OBIS
+Ophichthus zophochir	OBIS
+Pristigenys serrula	OBIS
+Synodus	OBIS
+Prionotus ruscarius	OBIS
+Heteropriacanthus cruentatus	OBIS
+Mobula	OBIS
+Lophiodes caulinaris	OBIS
+Eucinostomus argenteus	OBIS
+Alphestes multiguttatus	OBIS
+Anchoa curta	OBIS
+Bellator gymnostethus	OBIS
+Benthosema panamense	OBIS
+Bathygobius andrei	OBIS
+Carcharhinus	OBIS
+Remora remora	OBIS
+Anableps dowii	OBIS
+Cynoscion phoxocephalus	OBIS
+Aetobatus narinari	OBIS
+Ophichthidae	OBIS
+Pseudogramma thaumasia	OBIS
+Coralliozetus angelicus	OBIS
+Auxis thazard	OBIS
+Gymnothorax equatorialis	OBIS
+Nexilosus latifrons	OBIS
+Cynoscion	OBIS
+Engraulis mordax	OBIS
+Aruma histrio	OBIS
+Thunnus obesus	OBIS
+Barbulifer pantherinus	OBIS
+Bathylagoides nigrigenys	OBIS
+Hemiramphus saltator	OBIS
+Menticirrhus nasus	OBIS
+Menticirrhus undulatus	OBIS
+Malacoctenus zonifer	OBIS
+Selene brevoortii	OBIS
+Symphurus elongatus	OBIS
+Brotula clarkae	OBIS
+Diplectrum euryplectrum	OBIS
+Centropomus nigrescens	OBIS
+Holocentridae	OBIS
+Trachinotus stilbe	OBIS
+Bothus leopardinus	OBIS
+Cynoscion reticulatus	OBIS
+Ctenochaetus marginatus	OBIS
+Bathophilus filifer	OBIS
+Syacium latifrons	OBIS
+Haemulopsis nitidus	OBIS
+Symbolophorus evermanni	OBIS
+Diplectrum macropoma	OBIS
+Gobioclinus dendriticus	OBIS
+Caranx lugubris	OBIS
+Anchoa argentivittata	OBIS
+Opisthopterus dovii	OBIS
+Acanthemblemaria hancocki	OBIS
+Carcharhinus falciformis	OBIS
+Abudefduf declivifrons	OBIS
+Ogcocephalus darwini	OBIS
+Gillichthys seta	OBIS
+Pleuronichthys ocellatus	OBIS
+Stomias colubrinus	OBIS
+Hypanus longus	OBIS
+Tomicodon	OBIS
+Scombriformes	OBIS
+Malacoctenus	OBIS
+Diaphus pacificus	OBIS
+Naucrates ductor	OBIS
+Lepophidium prorates	OBIS
+Halichoeres semicinctus	OBIS
+Acanthemblemaria macrospilus	OBIS
+Scorpaena	OBIS
+Aluterus scriptus	OBIS
+Anchoa starksi	OBIS
+Strongylura scapularis	OBIS
+Chaenopsis alepidota	OBIS
+Narcine entemedor	OBIS
+Citharichthys stigmaeus	OBIS
+Fistularia corneta	OBIS
+Brachygenys californiensis	OBIS
+Pomadasys branickii	OBIS
+Microlepidotus inornatus	OBIS
+Lutjanus griseus	OBIS
+Psenes cyanophrys	OBIS
+Elops affinis	OBIS
+Anchoa mundeoloides	OBIS
+Stegastes leucorus	OBIS
+Heterodontus francisci	OBIS
+Centropomus viridis	OBIS
+Pherallodiscus funebris	OBIS
+Diplodus	OBIS
+Heteroconger klausewitzi	OBIS
+Halichoeres melanotis	OBIS
+Crocodilichthys gracilis	OBIS
+Dialommus macrocephalus	OBIS
+Pleuronichthys verticalis	OBIS
+Gerreidae	OBIS
+Syngnathus auliscus	OBIS
+Ariosoma gilberti	OBIS
+Dactyloscopus lunaticus	OBIS
+Cynoscion parvipinnis	OBIS
+Diplectrum labarum	OBIS
+Trachinotus kennedyi	OBIS
+Tomicodon humeralis	OBIS
+Sphyraena	OBIS
+Synchiropus atrilabiatus	OBIS
+Cheilopogon xenopterus	OBIS
+Stomias atriventer	OBIS
+Bairdiella icistia	OBIS
+Pareques perissa	OBIS
+Tomicodon chilensis	OBIS
+Prionotus albirostris	OBIS
+Gobionellus microdon	OBIS
+Acanthemblemaria exilispinus	OBIS
+Gillichthys mirabilis	OBIS
+Blenniidae	OBIS
+Mustelus lunulatus	OBIS
+Starksia spinipenis	OBIS
+Dialommus fuscus	OBIS
+Ekemblemaria myersi	OBIS
+Gymneleotris seminuda	OBIS
+Odontoscion eurymesops	OBIS
+Euleptorhamphus viridis	OBIS
+Bothus constellatus	OBIS
+Pontinus sierra	OBIS
+Hyporhamphus	OBIS
+Kuhlia mugil	OBIS
+Clinidae	OBIS
+Larimus pacificus	OBIS
+Micropogonias ectenes	OBIS
+Pliosteostoma lutipinnis	OBIS
+Fistularia petimba	OBIS
+Caranx vinctus	OBIS
+Anchoa lucida	OBIS
+Xenichthys xanti	OBIS
+Opisthonema	OBIS
+Oligoplites refulgens	OBIS
+Enneanectes reticulatus	OBIS
+Achirus scutum	OBIS
+Lampanyctus parvicauda	OBIS
+Tigrigobius digueti	OBIS
+Hemanthias signifer	OBIS
+Porichthys notatus	OBIS
+Kathetostoma averruncus	OBIS
+Urotrygon chilensis	OBIS
+Decodon melasma	OBIS
+Pseudobatos productus	OBIS
+Atheriniformes	OBIS
+Baldwinella eos	OBIS
+Muraena clepsydra	OBIS
+Ilypnus gilberti	OBIS
+Synbranchus marmoratus	OBIS
+Leuroglossus stilbius	OBIS
+Anarchias galapagensis	OBIS
+Hemanthias peruanus	OBIS
+Istiophorus platypterus	OBIS
+Larimus acclivis	OBIS
+Paranthias furcifer	OBIS
+Sphoeroides	OBIS
+Lutjanus kasmira	OBIS
+Symphurus gorgonae	OBIS
+Symphurus oligomerus	OBIS
+Notarius cookei	OBIS
+Urotrygon munda	OBIS
+Myctophidae	OBIS
+Scorpaena plumieri	OBIS
+Parapsettus panamensis	OBIS
+Arcos erythrops	OBIS
+Hemiramphus	OBIS
+Diplectrum	OBIS
+Awaous	OBIS
+Abudefduf concolor	OBIS
+Symphurus melanurus	OBIS
+Hippoglossina bollmani	OBIS
+Prionotus horrens	OBIS
+Evorthodus minutus	OBIS
+Hyporthodus niphobles	OBIS
+Hyporthodus acanthistius	OBIS
+Exocoetidae	OBIS
+Mugilidae	OBIS
+Diplectrum eumelum	OBIS
+Eugerres axillaris	OBIS
+Nebris occidentalis	OBIS
+Sicydium salvini	OBIS
+Hyporhamphus rosae	OBIS
+Ophioscion scierus	OBIS
+Cosmocampus arctus	OBIS
+Vinciguerria	OBIS
+Hygophum reinhardtii	OBIS
+Cherublemma emmelas	OBIS
+Lythrypnus pulchellus	OBIS
+Brockius striatus	OBIS
+Carcharhinidae	OBIS
+Centropomus	OBIS
+Cypselurus callopterus	OBIS
+Haemulopsis axillaris	OBIS
+Diodon	OBIS
+Lutjanidae	OBIS
+Porichthys	OBIS
+Gymnothorax undulatus	OBIS
+Anisotremus taeniatus	OBIS
+Xenomedea rhodopyga	OBIS
+Gobiesox	OBIS
+Anchoa panamensis	OBIS
+Bollmannia umbrosa	OBIS
+Protemblemaria bicirrus	OBIS
+Xystreurys liolepis	OBIS
+Lampanyctus idostigma	OBIS
+Nemichthys scolopaceus	OBIS
+Menticirrhus elongatus	OBIS
+Sphoeroides lispus	OBIS
+Pseudobatos leucorhynchus	OBIS
+Acanthuridae	OBIS
+Hippoglossina tetrophthalma	OBIS
+Axoclinus nigricaudus	OBIS
+Xenichthys agassizii	OBIS
+Umbrina galapagorum	OBIS
+Trinectes fonsecensis	OBIS
+Narcine vermiculata	OBIS
+Opisthonema berlangai	OBIS
+Emblemaria hypacanthus	OBIS
+Agonostomus	OBIS
+Lampanyctus macropterus	OBIS
+Ichthyapus selachops	OBIS
+Symphurus atricauda	OBIS
+Anchoa eigenmannia	OBIS
+Paralonchurus dumerilii	OBIS
+Tomicodon zebra	OBIS
+Seriola lalandi	OBIS
+Citharichthys fragilis	OBIS
+Cyclothone	OBIS
+Mulloidichthys	OBIS
+Opisthonema medirastre	OBIS
+Haemulopsis elongatus	OBIS
+Ogilbia ventralis	OBIS
+Balistidae	OBIS
+Monolene maculipinna	OBIS
+Rhonciscus bayanus	OBIS
+Serranus	OBIS
+Scopelengys tristis	OBIS
+Mustelus henlei	OBIS
+Myrichthys xysturus	OBIS
+Stellifer fuerthii	OBIS
+Genyatremus dovii	OBIS
+Scorpaenidae	OBIS
+Sphoeroides trichocephalus	OBIS
+Porichthys myriaster	OBIS
+Anisotremus surinamensis	OBIS
+Atherinella argentea	OBIS
+Atherinella serrivomer	OBIS
+Chitonotus pugetensis	OBIS
+Chriolepis zebra	OBIS
+Leuresthes sardina	OBIS
+Paralabrax nebulifer	OBIS
+Deckertichthys aureolus	OBIS
+Micropogonias altipinnis	OBIS
+Elattarchus archidium	OBIS
+Urotrygon rogersi	OBIS
+Paraclinus asper	OBIS
+Hemiramphidae	OBIS
+Katsuwonus pelamis	OBIS
+Oligoplites	OBIS
+Gymnura marmorata	OBIS
+Ophichthus remiger	OBIS
+Physiculus nematopus	OBIS
+Starksia fulva	OBIS
+Syngnathus californiensis	OBIS
+Centropomus unionensis	OBIS
+Colpichthys regis	OBIS
+Poeciliidae	OBIS
+Rhinoptera steindachneri	OBIS
+Pontinus furcirhinus	OBIS
+Lycengraulis poeyi	OBIS
+Chloroscombrus chrysurus	OBIS
+Seriola peruana	OBIS
+Heterostichus rostratus	OBIS
+Pleuronichthys ritteri	OBIS
+Pomacentrus	OBIS
+Stellifer illecebrosus	OBIS
+Lutjanus peru	OBIS
+Zapteryx exasperata	OBIS
+Cubiceps pauciradiatus	OBIS
+Dormitator maculatus	OBIS
+Peristedion barbiger	OBIS
+Carangoides otrynter	OBIS
+Tigrigobius limbaughi	OBIS
+Opisthonema oglinum	OBIS
+Labrisomus	OBIS
+Antennatus strigatus	OBIS
+Chaetodon	OBIS
+Entomacrodus sealei	OBIS
+Bollmannia chlamydes	OBIS
+Ginglymostoma cirratum	OBIS
+Enchelycore octaviana	OBIS
+Ophichthus triserialis	OBIS
+Citharichthys	OBIS
+Hyporhamphus gilli	OBIS
+Cyclopsetta panamensis	OBIS
+Menticirrhus panamensis	OBIS
+Quietula guaymasiae	OBIS
+Malacoctenus sudensis	OBIS
+Mycteroperca xenarcha	OBIS
+Cynoscion squamipinnis	OBIS
+Batrachoides waltersi	OBIS
+Congridae	OBIS
+Idiacanthus	OBIS
+Idiacanthus antrostomus	OBIS
+Hemicaranx leucurus	OBIS
+Dactyloscopus pectoralis	OBIS
+Heterodontus mexicanus	OBIS
+Citharichthys xanthostigma	OBIS
+Larimus effulgens	OBIS
+Lophiodes spilurus	OBIS
+Gobiomorus dormitor	OBIS
+Neoopisthopterus tropicus	OBIS
+Perissias taeniopterus	OBIS
+Monolene asaedae	OBIS
+Paraclinus altivelis	OBIS
+Thermarces cerberus	OBIS
+Scorpaenodes	OBIS
+Symphurus williamsi	OBIS
+Stellifer zestocarus	OBIS
+Ilisha fuerthii	OBIS
+Diplophos taenia	OBIS
+Hyporhamphus naos	OBIS
+Gerres	OBIS
+Harengula	OBIS
+Microspathodon	OBIS
+Axoclinus storeyae	OBIS
+Symphurus leeorum	OBIS
+Platybelone argalus	OBIS
+Atherinopsis californiensis	OBIS
+Ctenogobius	OBIS
+Rypticus saponaceus	OBIS
+Coelorinchus canus	OBIS
+Brachygenys jessiae	OBIS
+Umbrina roncador	OBIS
+Ariosoma prorigerum	OBIS
+Anguilliformes	OBIS
+Belonidae	OBIS
+Entomacrodus	OBIS
+Mycteroperca jordani	OBIS
+Arcos rhodospilus	OBIS
+Anisotremus davidsonii	OBIS
+Tomicodon myersi	OBIS
+Bollmannia	OBIS
+Muraena argus	OBIS
+Bagre pinnimaculatus	OBIS
+Paralonchurus petersii	OBIS
+Exocoetus volitans	OBIS
+Malacanthus brevirostris	OBIS
+Orthopristis cantharinus	OBIS
+Liopropoma fasciatum	OBIS
+Cynoscion albus	OBIS
+Neobythites stelliferoides	OBIS
+Prognichthys tringa	OBIS
+Myliobatis californica	OBIS
+Hypsoblennius jenkinsi	OBIS
+Pseudobatos glaucostigma	OBIS
+Pomadasys	OBIS
+Serrivomer sector	OBIS
+Anchoa exigua	OBIS
+Bothidae	OBIS
+Bodianus	OBIS
+Anchoa spinifer	OBIS
+Aetobatus laticeps	OBIS
+Notolychnus valdiviae	OBIS
+Brachyrhaphis	OBIS
+Rostroraja velezi	OBIS
+Astyanax	OBIS
+Paraclinus walkeri	OBIS
+Paralabrax auroguttatus	OBIS
+Ariosoma	OBIS
+Parexocoetus brachypterus	OBIS
+Stellifer oscitans	OBIS
+Scopelarchoides nicholsi	OBIS
+Ophioscion typicus	OBIS
+Bathycongrus	OBIS
+Symphurus fasciolaris	OBIS
+Porichthys greenei	OBIS
+Chlorophthalmus mento	OBIS
+Scorpaena guttata	OBIS
+Opisthonema bulleri	OBIS
+Cantherhines dumerilii	OBIS
+Lepidonectes clarkhubbsi	OBIS
+Menticirrhus	OBIS
+Mustelus californicus	OBIS
+Xanthichthys mento	OBIS
+Poeciliopsis fasciata	OBIS
+Grammonus diagrammus	OBIS
+Uropterygius versutus	OBIS
+Malacoctenus margaritae	OBIS
+Synodus synodus	OBIS
+Micropogonias megalops	OBIS
+Gillellus semicinctus	OBIS
+Paraclinus beebei	OBIS
+Chelon	OBIS
+Gymnothorax flavimarginatus	OBIS
+Cynoponticus coniceps	OBIS
+Merluccius angustimanus	OBIS
+Mustelus	OBIS
+Stomias	OBIS
+Sternoptyx obscura	OBIS
+Vinciguerria nimbaria	OBIS
+Mobula munkiana	OBIS
+Anchoa helleri	OBIS
+Microgobius erectus	OBIS
+Prionotus birostratus	OBIS
+Atherinella nepenthe	OBIS
+Cathorops fuerthii	OBIS
+Hyporhamphus roberti	OBIS
+Cirrhitidae	OBIS
+Anisotremus	OBIS
+Urotrygon	OBIS
+Serranus aequidens	OBIS
+Paralabrax clathratus	OBIS
+Dasyatis brevis	OBIS
+Carapus dubius	OBIS
+Echiodon exsilium	OBIS
+Porichthys ephippiatus	OBIS
+Stellifer chrysoleuca	OBIS
+Balistes	OBIS
+Astroscopus zephyreus	OBIS
+Corvula macrops	OBIS
+Gibbonsia metzi	OBIS
+Diplectrum sciurus	OBIS
+Batrachoides pacifici	OBIS
+Paralonchurus goodei	OBIS
+Urobatis concentricus	OBIS
+Urotrygon nana	OBIS
+Hirundichthys marginatus	OBIS
+Hemicaranx zelotes	OBIS
+Starksia cremnobates	OBIS
+Uropterygius macularius	OBIS
+Merluccius productus	OBIS
+Peristedion crustosum	OBIS
+Diplectrum maximum	OBIS
+Arcos poecilophthalmos	OBIS
+Alopias pelagicus	OBIS
+Decapterus muroadsi	OBIS
+Gobiesox schultzi	OBIS
+Melanorhinus cyanellus	OBIS
+Pronotogrammus multifasciatus	OBIS
+Kyphosus azureus	OBIS
+Hypanus	OBIS
+Galeocerdo cuvier	OBIS
+Bothus mancus	OBIS
+Hyporhamphus snyderi	OBIS
+Chauliodus barbatus	OBIS
+Poecilia mexicana	OBIS
+Conodon serrifer	OBIS
+Erotelis armiger	OBIS
+Myxodagnus opercularis	OBIS
+Ablennes hians	OBIS
+Hypsoblennius	OBIS
+Cynoscion xanthulus	OBIS
+Apodichthys fucorum	OBIS
+Etrumeus sadina	OBIS
+Sphyrna zygaena	OBIS
+Physiculus	OBIS
+Iniistius pavo	OBIS
+Odontesthes	OBIS
+Synodus sechurae	OBIS
+Lepophidium negropinna	OBIS
+Trinectes xanthurus	OBIS
+Oxyzygonectes dovii	OBIS
+Priapichthys panamensis	OBIS
+Cheilopogon	OBIS
+Bregmaceros	OBIS
+Heteroconger digueti	OBIS
+Ophichthus rugifer	OBIS
+Symbolophorus reversus	OBIS
+Sebastes auriculatus	OBIS
+Starksia galapagensis	OBIS
+Achirus klunzingeri	OBIS
+Coralliozetus boehlkei	OBIS
+Gibbonsia elegans	OBIS
+Notarius planiceps	OBIS
+Tylosurus fodiator	OBIS
+Blenniiformes	OBIS
+Carcharhinus leucas	OBIS
+Starksia	OBIS
+Carcharhinus porosus	OBIS
+Gobiosoma paradoxum	OBIS
+Clevelandia ios	OBIS
+Daector dowi	OBIS
+Totoaba macdonaldi	OBIS
+Etrumeus acuminatus	OBIS
+Caulolatilus affinis	OBIS
+Clupea	OBIS
+Anchoviella	OBIS
+Hygophum atratum	OBIS
+Stellifer ericymba	OBIS
+Diplectrum rostrum	OBIS
+Coralliozetus rosenblatti	OBIS
+Lampanyctus ritteri	OBIS
+Bodianus pulcher	OBIS
+Remora australis	OBIS
+Gymnura crebripunctata	OBIS
+Scomberomorus concolor	OBIS
+Anisotremus caesius	OBIS
+Cathorops steindachneri	OBIS
+Microlepidotus brevipinnis	OBIS
+Rostroraja equatorialis	OBIS
+Opistognathus punctatus	OBIS
+Leuresthes tenuis	OBIS
+Mccoskerichthys sandae	OBIS
+Sphoeroides sechurae	OBIS
+Ancylopsetta dendritica	OBIS
+Atherinella starksi	OBIS
+Diaphus	OBIS
+Rypticus	OBIS
+Diapterus auratus	OBIS
+Trinectes fimbriatus	OBIS
+Bathycongrus macrurus	OBIS
+Bollmannia stigmatura	OBIS
+Ogilbia davidsmithi	OBIS
+Scopelogadus bispinosus	OBIS
+Chromis	OBIS
+Remora brachyptera	OBIS
+Coryphaenoides anguliceps	OBIS
+Ophidion galeoides	OBIS
+Bollmannia marginalis	OBIS
+Odontoscion xanthops	OBIS
+Opisthopterus equatorialis	OBIS
+Platygillellus rubellulus	OBIS
+Stathmonotus culebrai	OBIS
+Tomicodon eos	OBIS
+Notarius troschelii	OBIS
+Gobionellus	OBIS
+Opistognathus rhomaleus	OBIS
+Paraletharchus pacificus	OBIS
+Microgobius emblematicus	OBIS
+Stethojulis bandanensis	OBIS
+Atractoscion nobilis	OBIS
+Bollmannia ocellata	OBIS
+Clinocottus analis	OBIS
+Fodiator rostratus	OBIS
+Ilypnus luculentus	OBIS
+Odontopyxis trispinosa	OBIS
+Ariopsis guatemalensis	OBIS
+Cichlidae	OBIS
+Sphyrna tiburo	OBIS
+Larimus	OBIS
+Ophichthus longipenis	OBIS
+Dibranchus spinosus	OBIS
+Lepophidium pardale	OBIS
+Membras gilberti	OBIS
+Dactyloscopus lacteus	OBIS
+Ctenogobius manglicola	OBIS
+Triakis semifasciata	OBIS
+Odontognathus panamensis	OBIS
+Melichthys vidua	OBIS
+Enchelycore lichenosa	OBIS
+Umbrina dorsalis	OBIS
+Cynoscion othonopterus	OBIS
+Sternoptychidae	OBIS
+Umbrina	OBIS
+Gempylus serpens	OBIS
+Lagocephalus lagocephalus	OBIS
+Gymnothorax funebris	OBIS
+Leptocottus armatus	OBIS
+Gymnothorax monostigma	OBIS
+Gobulus hancocki	OBIS
+Tetronarce tremens	OBIS
+Remora osteochir	OBIS
+Argyropelecus affinis	OBIS
+Arius	OBIS
+Syacium	OBIS
+Mugil hospes	OBIS
+Cynoscion stolzmanni	OBIS
+Acanthemblemaria stephensi	OBIS
+Axoclinus cocoensis	OBIS
+Eleotrica cableae	OBIS
+Paralabrax humeralis	OBIS
+Enneanectes macrops	OBIS
+Auxis rochei	OBIS
+Eucinostomus gula	OBIS
+Carcharhinus albimarginatus	OBIS
+Physiculus rastrelliger	OBIS
+Micrometrus minimus	OBIS
+Parachromis friedrichsthalii	OBIS
+Istiophoridae	OBIS
+Sicydium	OBIS
+Squatina californica	OBIS
+Paraconger californiensis	OBIS
+Ophidion imitator	OBIS
+Psenes sio	OBIS
+Stellifer mancorensis	OBIS
+Triphoturus	OBIS
+Gobiesox papillifer	OBIS
+Elops saurus	OBIS
+Gymnothorax buroensis	OBIS
+Nasolamia velox	OBIS
+Dactyloscopus byersorum	OBIS
+Phtheirichthys lineatus	OBIS
+Prionotus	OBIS
+Bairdiella armata	OBIS
+Petrotyx hopkinsi	OBIS
+Scorpaenichthys marmoratus	OBIS
+Sicydium cocoense	OBIS
+Cookeolus japonicus	OBIS
+Rhamdia	OBIS
+Symphurus melasmatotheca	OBIS
+Microdesmus dorsipunctatus	OBIS
+Acanthemblemaria balanorum	OBIS
+Chiloconger dentatus	OBIS
+Tigrigobius nesiotes	OBIS
+Sebastes	OBIS
+Apogon binotatus	OBIS
+Gobiesox rhessodon	OBIS
+Citharichthys gordae	OBIS
+Syacium longidorsale	OBIS
+Bollmannia macropoma	OBIS
+Emblemaria piratica	OBIS
+Notarius kessleri	OBIS
+Lampanyctus	OBIS
+Bothus	OBIS
+Microgobius	OBIS
+Oxyporhamphus	OBIS
+Myrichthys aspetocheiros	OBIS
+Cynoscion nannus	OBIS
+Prionotus miles	OBIS
+Thalassoma purpureum	OBIS
+Gymnothorax phalarus	OBIS
+Trachurus symmetricus	OBIS
+Opistognathus rosenblatti	OBIS
+Bathycongrus varidens	OBIS
+Atherinella pachylepis	OBIS
+Poeciliopsis latidens	OBIS
+Urotrygon aspidura	OBIS
+Micromesistius poutassou	OBIS
+Chaetodipterus faber	OBIS
+Nezumia convergens	OBIS
+Physiculus japonicus	OBIS
+Prognathodes falcifer	OBIS
+Paralabrax loro	OBIS
+Chriolepis semisquamata	OBIS
+Aluterus monoceros	OBIS
+Cyclothone signata	OBIS
+Etropus	OBIS
+Dibranchus hystrix	OBIS
+Umbrina bussingi	OBIS
+Etropus ectenes	OBIS
+Dicrolene nigra	OBIS
+Cathorops dasycephalus	OBIS
+Centropomus pectinatus	OBIS
+Gobulus crescentalis	OBIS
+Cyclopsetta	OBIS
+Polydactylus virginicus	OBIS
+Ophidion iris	OBIS
+Argentina aliceae	OBIS
+Symphurus prolatinaris	OBIS
+Anchoa scofieldi	OBIS
+Otophidium indefatigabile	OBIS
+Citharichthys mariajorisae	OBIS
+Daector schmitti	OBIS
+Sciades dowii	OBIS
+Pleuronectidae	OBIS
+Scomberomorus maculatus	OBIS
+Carapus mourlani	OBIS
+Lophiomus setigerus	OBIS
+Myliobatis longirostris	OBIS
+Guentherus altivela	OBIS
+Microgobius crocatus	OBIS
+Halichoeres discolor	OBIS
+Prionotus teaguei	OBIS
+Coelorinchus scaphopsis	OBIS
+Lonchopisthus sinuscalifornicus	OBIS
+Malacoctenus costaricanus	OBIS
+Paralonchurus peruanus	OBIS
+Synodontidae	OBIS
+Exocoetus	OBIS
+Diaphus rafinesquii	OBIS
+Chlopsis bicollaris	OBIS
+Tylosurus pacificus	OBIS
+Sphyraena argentea	OBIS
+Gobionellus liolepis	OBIS
+Polydactylus opercularis	OBIS
+Pteroplatytrygon violacea	OBIS
+Opistognathus	OBIS
+Tetrapturus angustirostris	OBIS
+Lepidopus fitchi	OBIS
+Albula argentea	OBIS
+Gobiesox daedaleus	OBIS
+Halichoeres aestuaricola	OBIS
+Hippoglossina stomata	OBIS
+Oligocottus snyderi	OBIS
+Ophichthus	OBIS
+Carapus	OBIS
+Coryphaena	OBIS
+Hirundichthys speculiger	OBIS
+Pomatoschistus microps	OBIS
+Paralichthys	OBIS
+Chaenopsis	OBIS
+Halichoeres adustus	OBIS
+Triphoturus oculeum	OBIS
+Macrodon mordax	OBIS
+Aboma etheostoma	OBIS
+Remora albescens	OBIS
+Platybelone pterura	OBIS
+Heteroconger	OBIS
+Embiotoca jacksoni	OBIS
+Ophidion scrippsae	OBIS
+Argentina sialis	OBIS
+Opistognathus panamaensis	OBIS
+Paraclinus integripinnis	OBIS
+Tomicodon abuelorum	OBIS
+Lepidonectes bimaculatus	OBIS
+Sphyrna	OBIS
+Mullidae	OBIS
+Nealotus tripes	OBIS
+Haemulon plumierii	OBIS
+Bregmaceros mcclellandi	OBIS
+Atherinella	OBIS
+Lythrypnus	OBIS
+Paraclinus	OBIS
+Ophichthus frontalis	OBIS
+Umbrina wintersteeni	OBIS
+Mataeocephalus tenuicauda	OBIS
+Cheilotrema saturnum	OBIS
+Labrisomus jenkinsi	OBIS
+Notarius osculus	OBIS
+Terapontidae	OBIS
+Cubiceps	OBIS
+Sphyrna media	OBIS
+Avocettina bowersii	OBIS
+Coryphaenoides capito	OBIS
+Lobotes pacifica	OBIS
+Symphurus diabolicus	OBIS
+Symphurus undecimplerus	OBIS
+Careproctus hyaleius	OBIS
+Syngnathus carinatus	OBIS
+Callechelys eristigma	OBIS
+Acanthemblemaria atrata	OBIS
+Chriolepis dialepta	OBIS
+Coralliozetus springeri	OBIS
+Gillellus greyae	OBIS
+Ogilbia nigromarginata	OBIS
+Abantennarius coccineus	OBIS
+Ophioblennius	OBIS
+Sargocentron rubrum	OBIS
+Nerophis lumbriciformis	OBIS
+Poecilia reticulata	OBIS
+Thunnus tonggol	OBIS
+Nezumia liolepis	OBIS
+Sphyraena lucasana	OBIS
+Neoconger vermiformis	OBIS
+Microgobius tabogensis	OBIS
+Brotula ordwayi	OBIS
+Amphistichus argenteus	OBIS
+Eugerres lineatus	OBIS
+Icelinus quadriseriatus	OBIS
+Quassiremus nothochir	OBIS
+Carcharhinus obscurus	OBIS
+Mobula mobular	OBIS
+Gymnothorax elegans	OBIS
+Lepophidium microlepis	OBIS
+Micrometrus aurora	OBIS
+Chlorophthalmus	OBIS
+Sphyraena guachancho	OBIS
+Gobiomorus	OBIS
+Urobatis	OBIS
+Bolinichthys longipes	OBIS
+Chromis limbaughi	OBIS
+Chaenopsis schmitti	OBIS
+Chriolepis lepidota	OBIS
+Cirriemblemaria lucasana	OBIS
+Heteristius cinctus	OBIS
+Malacoctenus zacae	OBIS
+Zapteryx xyster	OBIS
+Ostorhinchus	OBIS
+Dactyloscopus fallax	OBIS
+Nemichthys	OBIS
+Ophidion	OBIS
+Mycteroperca	OBIS
+Melamphaes	OBIS
+Nannobrachium	OBIS
+Ectreposebastes imus	OBIS
+Istiblennius	OBIS
+Myripristis murdjan	OBIS
+Oxyjulis californica	OBIS
+Parophrys vetulus	OBIS
+Chriolepis	OBIS
+Sphyrna corona	OBIS
+Dibranchus erinaceus	OBIS
+Halosaurus radiatus	OBIS
+Hoplunnis pacifica	OBIS
+Gobiosoma nudum	OBIS
+Ogilbia nudiceps	OBIS
+Sarda chiliensis	OBIS
+Hyporthodus exsul	OBIS
+Hyporthodus niveatus	OBIS
+Malacoctenus mexicanus	OBIS
+Microlepidotus lethopristis	OBIS
+Selene vomer	OBIS
+Decapterus macrosoma	OBIS
+Craterocephalus	OBIS
+Girella	OBIS
+Paralabrax	OBIS
+Mycteroperca prionura	OBIS
+Peprilus simillimus	OBIS
+Ammodytoides gilli	OBIS
+Ptereleotris carinata	OBIS
+Enneanectes glendae	OBIS
+Gobiesocidae	OBIS
+Selene	OBIS
+Makaira	OBIS
+Eleotridae	OBIS
+Orthopristis	OBIS
+Myliobatiformes	OBIS
+Anableps	OBIS
+Pontinus strigatus	OBIS
+Sebastes miniatus	OBIS
+Syacium maculiferum	OBIS
+Opistognathus scops	OBIS
+Cephalopholis cruentata	OBIS
+Alphestes afer	OBIS
+Chilara taylori	OBIS
+Ruscarius creaseri	OBIS
+Mayaheros beani	OBIS
+Negaprion brevirostris	OBIS
+Macrouridae	OBIS
+Bregmaceros atlanticus	OBIS
+Xiphias gladius	OBIS
+Lutjanus campechanus	OBIS
+Enneanectes	OBIS
+Centroscyllium nigrum	OBIS
+Pisodonophis daspilotus	OBIS
+Monomitopus torvus	OBIS
+Ophidion fulvum	OBIS
+Citharichthys sordidus	OBIS
+Dicrolene filamentosa	OBIS
+Hypsoblennius striatus	OBIS
+Phaenomonas pinnata	OBIS
+Ophioscion strabo	OBIS
+Poeciliopsis elongata	OBIS
+Bathylagidae	OBIS
+Plagiotremus	OBIS
+Pseudophallus	OBIS
+Galeus piperatus	OBIS
+Mustelus dorsalis	OBIS
+Squatina armata	OBIS
+Gymnothorax mordax	OBIS
+Thalassoma lutescens	OBIS
+Ogcocephalus porrectus	OBIS
+Clarkichthys bilineatus	OBIS
+Cymatogaster aggregata	OBIS
+Emblemaria nivipes	OBIS
+Teleostei	OBIS
+Harengula humeralis	OBIS
+Pseudobatos planiceps	OBIS
+Prionace glauca	OBIS
+Ophidiidae	OBIS
+Argyropelecus	OBIS
+Chauliodus	OBIS
+Nomeus gronovii	OBIS
+Cyprinodon	OBIS
+Dactyloscopus	OBIS
+Myripristis botche	OBIS
+Sebastes chrysomelas	OBIS
+Clupeoides	OBIS
+Pareques	OBIS
+Cheilopogon spilonotopterus	OBIS
+Symphurus varius	OBIS
+Dactyloscopus amnis	OBIS
+Akko brevis	OBIS
+Calamopteryx jeb	OBIS
+Lythrypnus cobalus	OBIS
+Quassiremus evionthas	OBIS
+Genyatremus pacifici	OBIS
+Serrivomer	OBIS
+Remora	OBIS
+Bathophilus	OBIS
+Elops	OBIS
+Argyropelecus sladeni	OBIS
+Hemicaranx	OBIS
+Batrachoides	OBIS
+Gymnothorax meleagris	OBIS
+Hoplostethus pacificus	OBIS
+Thalassoma robertsoni	OBIS
+Yarrella argenteola	OBIS
+Cynoscion praedatorius	OBIS
+Rhinogobiops nicholsii	OBIS
+Merluccius gayi	OBIS
+Coryphaenoides	OBIS
+Sternoptyx	OBIS
+Chaenopsidae	OBIS
+Paralichthyidae	OBIS
+Peprilus	OBIS
+Uraspis helvola	OBIS
+Oreochromis mossambicus	OBIS
+Achirus	OBIS
+Rosenblattichthys volucris	OBIS
+Diplacanthopoma jordani	OBIS
+Encheliophis vermicularis	OBIS
+Ctenosciaena peruviana	OBIS
+Gillellus chathamensis	OBIS
+Gobioides peruanus	OBIS
+Stereolepis gigas	OBIS
+Sympterygia brevicaudata	OBIS
+Chelon dumerili	OBIS
+Rhinobatos	OBIS
+Bathytroctes	OBIS
+Trinectes	OBIS
+Pristigenys	OBIS
+Myrichthys maculosus	OBIS
+Hygophum proximum	OBIS
+Mustelus mento	OBIS
+Scopelosaurus hubbsi	OBIS
+Laemonema gracillipes	OBIS
+Pontinus clemensi	OBIS
+Syngnathus exilis	OBIS
+Microgobius cyclolepis	OBIS
+Halichoeres malpelo	OBIS
+Diplectrum radiale	OBIS
+Hypsoblennius gilberti	OBIS
+Axoclinus rubinoffi	OBIS
+Chaenopsis coheni	OBIS
+Eugerres brevimanus	OBIS
+Gillellus arenicola	OBIS
+Paralonchurus rathbuni	OBIS
+Polylepion cruentum	OBIS
+Istiompax indica	OBIS
+Gerres simillimus	OBIS
+Lutjanus lutjanus	OBIS
+Erotelis	OBIS
+Nematistius	OBIS
+Sphoeroides kendalli	OBIS
+Microdesmus suttkusi	OBIS
+Arcos decoris	OBIS
+Cathorops multiradiatus	OBIS
+Malacoctenus triangulatus	OBIS
+Beringraja inornata	OBIS
+Raja	OBIS
+Peristedion	OBIS
+Lepidocybium flavobrunneum	OBIS
+Chloroscombrus	OBIS
+Eleotris	OBIS
+Ophioscion	OBIS
+Bathypterois pectinatus	OBIS
+Narcine leoparda	OBIS
+Microgobius brevispinis	OBIS
+Bairdiella ensifera	OBIS
+Chiloscyllium plagiosum	OBIS
+Labrisomus wigginsi	OBIS
+Paraclinus tanygnathus	OBIS
+Serranus tico	OBIS
+Gobiosoma seminudum	OBIS
+Beringraja binoculata	OBIS
+Achiridae	OBIS
+Lepophidium	OBIS
+Odontoscion	OBIS
+Synbranchus	OBIS
+Apterichtus equatorialis	OBIS
+Hoplostethus mento	OBIS
+Coryphaenoides bulbiceps	OBIS
+Gadella filifer	OBIS
+Dibranchus discors	OBIS
+Bodianus rufus	OBIS
+Aseraggodes herrei	OBIS
+Atherinella nesiotes	OBIS
+Myroconger nigrodentatus	OBIS
+Oligocottus rubellio	OBIS
+Symphodus	OBIS
+Oncorhynchus mykiss	OBIS
+Mola mola	OBIS
+Narcine brasiliensis	OBIS
+Otophidium	OBIS
+Brotula	OBIS
+Diapterus	OBIS
+Scorpaenopsis gibbosa	OBIS
+Brama dussumieri	OBIS
+Arcos	OBIS
+Pimelodella	OBIS
+Priapichthys	OBIS
+Ophichthus mecopterus	OBIS
+Nezumia latirostrata	OBIS
+Opistognathus galapagensis	OBIS
+Borophryne apogon	OBIS
+Dactylagnus parvus	OBIS
+Emblemaria walkeri	OBIS
+Myxodagnus macrognathus	OBIS
+Myxodagnus sagitta	OBIS
+Rimicola eigenmanni	OBIS
+Zaniolepis latipinnis	OBIS
+Oreochromis niloticus	OBIS
+Malacoctenus polyporosus	OBIS
+Tigrigobius janssi	OBIS
+Chaetodontidae	OBIS
+Scopelogadus	OBIS
+Nototheniidae	OBIS
+Scopelarchoides	OBIS
+Mobulidae	OBIS
+Aetobatus	OBIS
+Mobula thurstoni	OBIS
+Paralonchurus	OBIS
+Sciades	OBIS
+Urolophus	OBIS
+Echinorhinus cookei	OBIS
+Chlopsis apterus	OBIS
+Coryphaenoides delsolari	OBIS
+Gadella thysthlon	OBIS
+Umbrina analis	OBIS
+Ichthyococcus irregularis	OBIS
+Bryx veleronis	OBIS
+Gorgasia punctata	OBIS
+Daector reticulata	OBIS
+Genyonemus lineatus	OBIS
+Lythrypnus zebra	OBIS
+Platygillellus bussingi	OBIS
+Xyrichtys	OBIS
+Benthosema suborbitale	OBIS
+Astronesthes niger	OBIS
+Fundulus	OBIS
+Epinephelus itajara	OBIS
+Starksia ocellata	OBIS
+Triphoturus nigrescens	OBIS
+Aulopus bajacali	OBIS
+Dibranchus nudivomer	OBIS
+Anthias noeli	OBIS
+Lycenchelys porifer	OBIS
+Sebastes atrovirens	OBIS
+Sebastes carnatus	OBIS
+Sebastes serranoides	OBIS
+Liopropoma longilepis	OBIS
+Stellifer ephelis	OBIS
+Hypsoblennius caulopus	OBIS
+Agonopsis sterletus	OBIS
+Gillellus searcheri	OBIS
+Hyperprosopon argenteum	OBIS
+Notarius biffi	OBIS
+Paraclinus monophthalmus	OBIS
+Roncador stearnsii	OBIS
+Scytalichthys miurus	OBIS
+Opistognathus fossoris	OBIS
+Trichiurus japonicus	OBIS
+Triglidae	OBIS
+Paraconger	OBIS
+Parexocoetus	OBIS
+Gobius	OBIS
+Vinciguerria poweriae	OBIS
+Micropogonias	OBIS
+Centropyge	OBIS
+Cheilopogon nigricans	OBIS
+Coelorinchus	OBIS
+Emblemaria	OBIS
+Gobulus	OBIS
+Heteroconger pellegrini	OBIS
+Bathyonus caudalis	OBIS
+Chiasmodon subniger	OBIS
+Mugil setosus	OBIS
+Abudefduf taurus	OBIS
+Sebastes macdonaldi	OBIS
+Bascanichthys cylindricus	OBIS
+Letharchus rosenblatti	OBIS
+Diplectrum conceptione	OBIS
+Peprilus ovatus	OBIS
+Joturus pichardi	OBIS
+Ogilbia deroyi	OBIS
+Xiphister atropurpureus	OBIS
+Kajikia audax	OBIS
+Perciformes	OBIS
+Dasyatidae	OBIS
+Carcharodon carcharias	OBIS
+Tetraodontidae	OBIS
+Diogenichthys	OBIS
+Sciaena	OBIS
+Ephippidae	OBIS
+Etrumeus	OBIS
+Holocentrus adscensionis	OBIS
+Caulolatilus	OBIS
+Selene setapinnis	OBIS
+Gillichthys	OBIS
+Facciolella gilbertii	OBIS
+Pomadasys empherus	OBIS
+Symphodus melops	OBIS
+Serranus huascarii	OBIS
+Sebastes constellatus	OBIS
+Microdesmus dipus	OBIS
+Opistognathus mexicanus	OBIS
+Batrachoides boulengeri	OBIS
+Astyanax aeneus	OBIS
+Lepidogobius lepidus	OBIS
+Parachromis motaguensis	OBIS
+Paralabrax callaensis	OBIS
+Pythonichthys asodes	OBIS
+Kali kerberti	OBIS
+Acanthemblemaria hastingsi	OBIS
+Cyclopsettidae	OBIS
+Stellifer vermicularis	OBIS
+Nemichthyidae	OBIS
+Scopelengys	OBIS
+Seriola	OBIS
+Avocettina infans	OBIS
+Maurolicus muelleri	OBIS
+Pomacanthidae	OBIS
+Notoscopelus resplendens	OBIS
+Citharichthys spilopterus	OBIS
+Calamus penna	OBIS
+Galeichthys	OBIS
+Oreochromis	OBIS
+Prognichthys sealei	OBIS
+Mulloidichthys vanicolensis	OBIS
+Forcipiger flavissimus	OBIS
+Coralliozetus	OBIS
+Gnathophis cinctus	OBIS
+Dibranchus cracens	OBIS
+Porichthys mimeticus	OBIS
+Etropus peruvianus	OBIS
+Microgobius miraflorensis	OBIS
+Chaenopsis deltarrhis	OBIS
+Guentheridia formosa	OBIS
+Herpetoichthys fossatus	OBIS
+Lile gracilis	OBIS
+Platygillellus altivelis	OBIS
+Pseudomyrophis micropinna	OBIS
+Bythaelurus giddingsi	OBIS
+Platybelone platyura	OBIS
+Brotulidae	OBIS
+Chlopsidae	OBIS
+Melanocetus	OBIS
+Alectis	OBIS
+Hirundichthys rondeletii	OBIS
+Gasterosteus aculeatus	OBIS
+Pachycara bulbiceps	OBIS
+Coryphaenoides armatus	OBIS
+Sardinops	OBIS
+Notorynchus cepedianus	OBIS
+Lactoria diaphana	OBIS
+Engraulis japonicus	OBIS
+Cathorops	OBIS
+Laemonema verecundum	OBIS
+Lycenchelys monstrosa	OBIS
+Argyropelecus olfersii	OBIS
+Bascanichthys bascanoides	OBIS
+Halichoeres salmofasciatus	OBIS
+Trinectes fluviatilis	OBIS
+Microdesmus affinis	OBIS
+Azurina eupalama	OBIS
+Cathorops tuyra	OBIS
+Chriolepis minutilla	OBIS
+Gobiomorus polylepis	OBIS
+Paraletharchus opercularis	OBIS
+Poeciliopsis prolifica	OBIS
+Hyporthodus	OBIS
+Lepophidium inca	OBIS
+Pseudobatos prahli	OBIS
+Carcharhinus longimanus	OBIS
+Diplophos	OBIS
+Trachinotus ovatus	OBIS
+Chiasmodon niger	OBIS
+Bascanichthys	OBIS
+Hemiramphus balao	OBIS
+Bryx dunckeri	OBIS
+Anoplopoma fimbria	OBIS
+Chelidoperca	OBIS
+Scuticaria tigrina	OBIS
+Myripristis kuntee	OBIS
+Enchelycore nigricans	OBIS
+Coryphaenoides boops	OBIS
+Dibranchus spongiosa	OBIS
+Notacanthus spinosus	OBIS
+Xyrichtys mundiceps	OBIS
+Scorpaena afuerae	OBIS
+Sebastes sinensis	OBIS
+Monolene dubiosa	OBIS
+Stellifer wintersteenorum	OBIS
+Caulolatilus hubbsi	OBIS
+Starksia posthon	OBIS
+Eleotris tecta	OBIS
+Uropterygius polystictus	OBIS
+Mulloidichthys martinicus	OBIS
+Oreochromis aureus	OBIS
+Artedius lateralis	OBIS
+Gillellus ornatus	OBIS
+Xenomystax atrarius	OBIS
+Pseudobatos buthi	OBIS
+Alopias vulpinus	OBIS
+Chiasmodontidae	OBIS
+Melamphaidae	OBIS
+Chiasmodon	OBIS
+Scomberomorus	OBIS
+Centrophryne spinulosa	OBIS
+Lamprogrammus niger	OBIS
+Makaira nigricans	OBIS
+Chauliodus sloani	OBIS
+Gambusia	OBIS
+Coryphopterus	OBIS
+Chrysiptera	OBIS
+Gymnothorax pictus	OBIS
+Pseudocarcharias kamoharai	OBIS
+Myripristis chryseres	OBIS
+Cyclichthys spilostylus	OBIS
+Colpichthys	OBIS
+Fodiator	OBIS
+Haemulopsis	OBIS
+Coryphaenoides carminifer	OBIS
+Oneirodes luetkeni	OBIS
+Bassozetus nasus	OBIS
+Holcomycteronus digittatus	OBIS
+Apogon guadalupensis	OBIS
+Sebastes chlorostictus	OBIS
+Cyclothone atraria	OBIS
+Gobiesox woodsi	OBIS
+Cynoscion nortoni	OBIS
+Johnius grypotus	OBIS
+Dactyloscopus metoecus	OBIS
+Chriolepis cuneata	OBIS
+Conodon macrops	OBIS
+Evermannia panamensis	OBIS
+Parahypsos piersoni	OBIS
+Sicydium hildebrandi	OBIS
+Stathmonotus lugubris	OBIS
+Thermichthys hollisi	OBIS
+Ferdauia orthogrammus	OBIS
+Rhonciscus branickii	OBIS
+Odontaspis ferox	OBIS
+Amblyraja hyperborea	OBIS
+Antennariidae	OBIS
+Avocettina	OBIS
+Hoplostethus	OBIS
+Myctophum	OBIS
+Hippocampus	OBIS
+Microlophichthys microlophus	OBIS
+Oneirodes eschrichtii	OBIS
+Poromitra megalops	OBIS
+Diodon eydouxii	OBIS
+Dactyloscopidae	OBIS
+Notoscopelus elongatus	OBIS
+Bothus ocellatus	OBIS
+Dorosoma	OBIS
+Bathygobius fuscus	OBIS
+Sphyraena qenie	OBIS
+Astronesthes boulengeri	OBIS
+Cheilopogon cyanopterus	OBIS
+Amphilophus	OBIS
+Mustelus whitneyi	OBIS
+Paraconger similis	OBIS
+Cheilopogon papilio	OBIS
+Nezumia stelgidolepis	OBIS
+Apogon atricaudus	OBIS
+Sebastes exsul	OBIS
+Gobiesox eugrammus	OBIS
+Hippoglossina macrops	OBIS
+Strongylura fluviatilis	OBIS
+Holacanthus clarionensis	OBIS
+Starksia grammilaga	OBIS
+Sufflamen fraenatum	OBIS
+Cephaloscyllium ventriosum	OBIS
+Alloclinus holderi	OBIS
+Artedius notospilotus	OBIS
+Evermannia zosterura	OBIS
+Medialuna californiensis	OBIS
+Pareques fuscovittatus	OBIS
+Hydrolagus	OBIS
+Alopias superciliosus	OBIS
+Scomberesocidae	OBIS
+Caristiidae	OBIS
+Facciolella	OBIS
+Antimora rostrata	OBIS
+Dolopichthys allector	OBIS
+Narcetes stomias	OBIS
+Rouleina attrita	OBIS
+Atherininae	OBIS
+Echiophis	OBIS
+Hemanthias	OBIS
+Heterodontus	OBIS
+Uropterygius marmoratus	OBIS
+Sphyraena putnamae	OBIS
+Ophiodon elongatus	OBIS
+Conodon	OBIS
+Netuma	OBIS
+Xenichthys	OBIS
+Bathyraja spinosissima	OBIS
+Coryphaenoides ariommus	OBIS
+Trachipterus altivelis	OBIS
+Monomitopus malispinosus	OBIS
+Cubiceps whiteleggii	OBIS
+Lycenchelys incisa	OBIS
+Echiophis brunneus	OBIS
+Porogadus atripectus	OBIS
+Gobiesox milleri	OBIS
+Menticirrhus paitensis	OBIS
+Stellifer walkeri	OBIS
+Hypsoblennius paytensis	OBIS
+Atherinella nocturna	OBIS
+Belonesox belizanus	OBIS
+Cerdale ionthas	OBIS
+Colpichthys hubbsi	OBIS
+Gurgesiella furvescens	OBIS
+Malacoctenus delalandii	OBIS
+Ogilbia cayorum	OBIS
+Ogilbia jewettae	OBIS
+Rimicola dimorpha	OBIS
+Auxis brachydorax	OBIS
+Gillichthys detrusus	OBIS
+Rhonciscus crocro	OBIS
+Squatina	OBIS
+Galeorhinus galeus	OBIS
+Isurus oxyrinchus	OBIS
+Bythitidae	OBIS
+Megalops atlanticus	OBIS
+Psenes pellucidus	OBIS
+Hippoglossina	OBIS
+Lampanyctus tenuiformis	OBIS
+Chaetodon ocellatus	OBIS
+Lutjanus jocu	OBIS
+Pseudogramma	OBIS
+Bathypterois atricolor	OBIS
+Bothrocara molle	OBIS
+Evermannia	OBIS
+Hydrolagus colliei	OBIS
+Gymnothorax angusticeps	OBIS
+Lestidiops neles	OBIS
+Nezumia ventralis	OBIS
+Oneirodes heteronema	OBIS
+Sebastes rastrelliger	OBIS
+Bascanichthys panamensis	OBIS
+Anchoa compressa	OBIS
+Lepophidium stigmatistium	OBIS
+Microgobius curtus	OBIS
+Paralichthys adspersus	OBIS
+Cynoscion analis	OBIS
+Bellator farrago	OBIS
+Dactyloscopus minutus	OBIS
+Awaous tajasica	OBIS
+Harengula jaguana	OBIS
+Cathorops hypophthalmus	OBIS
+Ogilbia sedorae	OBIS
+Orthonopias triacis	OBIS
+Carcharhinus cerdale	OBIS
+Scorpaenodes rubrivinctus	OBIS
+Dactyloscopus elongatus	OBIS
+Halichoeres inornatus	OBIS
+Neoscopelidae	OBIS
+Stromateidae	OBIS
+Oncorhynchus	OBIS
+Platytroctes apus	OBIS
+Lobotes surinamensis	OBIS
+Argyropelecus aculeatus	OBIS
+Microdesmidae	OBIS
+Stemonosudis	OBIS
+Gambusia affinis	OBIS
+Genypterus	OBIS
+Parascorpaena aurita	OBIS
+Epinephelus fasciatus	OBIS
+Bothus pantherinus	OBIS
+Phanerodon furcatus	OBIS
+Notarius	OBIS
+Opisthopterus	OBIS
+Xenistius	OBIS
+Bathypterois ventralis	OBIS
+Trachyrincus helolepis	OBIS
+Trachurus murphyi	OBIS
+Chromis punctipinnis	OBIS
+Lycenchelys hadrogeneia	OBIS
+Sebastes dallii	OBIS
+Sebastes umbrosus	OBIS
+Borostomias panamensis	OBIS
+Porogadus longiceps	OBIS
+Porichthys oculellus	OBIS
+Isacia conceptionis	OBIS
+Paraclinus fehlmanni	OBIS
+Seriphus politus	OBIS
+Urotrygon cimar	OBIS
+Porogadus promelas	OBIS
+Mustelus albipinnis	OBIS
+Bathylagoides wesethi	OBIS
+Dactyloscopus heraldi	OBIS
+Gobiosoma aceras	OBIS
+Styracura pacifica	OBIS
+Azurina intercrusma	OBIS
+Carcharhinus altimus	OBIS
+Atherinidae	OBIS
+Scopelarchus	OBIS
+Nezumia	OBIS
+Gonichthys	OBIS
+Bathylagus	OBIS
+Trachurus	OBIS
+Melanocetus johnsonii	OBIS
+Sternoptyx pseudobscura	OBIS
+Brevoortia smithi	OBIS
+Menidia	OBIS
+Rypticus maculatus	OBIS
+Cypselurus	OBIS
+Hyporhamphus acutus	OBIS
+Ophichthus unicolor	OBIS
+Aphareus furca	OBIS
+Stenobrachius leucopsarus	OBIS
+Anchovia	OBIS
+Cephalurus	OBIS
+Dactylagnus	OBIS
+Leiopotherapon	OBIS
+Paranthias	OBIS
+Pleuronichthys	OBIS
+Rajella eisenhardti	OBIS
+Gymnothorax verrilli	OBIS
+Coryphaenoides bucephalus	OBIS
+Merluccius hernandezi	OBIS
+Physiculus talarae	OBIS
+Dibranchus sparsus	OBIS
+Diaphus theta	OBIS
+Cataetyx simus	OBIS
+Ophidion exul	OBIS
+Gobiesox stenocephalus	OBIS
+Halichoeres garnoti	OBIS
+Starksia hoesei	OBIS
+Asthenomacrurus fragilis	OBIS
+Cathorops manglarensis	OBIS
+Cephalurus cephalus	OBIS
+Cryptotrema seftoni	OBIS
+Eretmichthys pinnatus	OBIS
+Parrella lucretiae	OBIS
+Pleuronichthys coenosus	OBIS
+Tomicodon vermiculatus	OBIS
+Urobatis tumbesensis	OBIS
+Cosmocampus coccineus	OBIS
+Dialarchus snyderi	OBIS
+Rhinoptera	OBIS
+Squalus acanthias	OBIS
+Soleidae	OBIS
+Chlopsis	OBIS
+Aulopus	OBIS
+Dibranchus	OBIS
+Psenes	OBIS
+Scomber	OBIS
+Chaenophryne draco	OBIS
+Loweina rara	OBIS
+Malacanthidae	OBIS
+Lestidium	OBIS
+Lampanyctus nobilis	OBIS
+Monolene	OBIS
+Bairdiella	OBIS
+Dormitator	OBIS
+Kuhlia	OBIS
+Acanthopagrus	OBIS
+Antennatus	OBIS
+Tylosurus melanotus	OBIS
+Carcharhinus brachyurus	OBIS
+Rhinomuraena quaesita	OBIS
+Antennarius commerson	OBIS
+Stemonosudis macrura	OBIS
+Brachyistius frenatus	OBIS
+Embiotoca lateralis	OBIS
+Hyphessobrycon	OBIS
+Hypsopsetta	OBIS
+Venefica tentaculata	OBIS
+Ophichthus tetratrema	OBIS
+Lestidiops pacificus	OBIS
+Lestidiops ringens	OBIS
+Dibranchus velutinus	OBIS
+Diaphus similis	OBIS
+Myctophum lychnobium	OBIS
+Bathytroctes inspector	OBIS
+Talismania bifurcata	OBIS
+Liparis mucosus	OBIS
+Paraliparis rosaceus	OBIS
+Sebastes serriceps	OBIS
+Maurolicus breviculus	OBIS
+Anchoa mundeola	OBIS
+Porogadus catena	OBIS
+Stellifer stellifer	OBIS
+Myripristis tiki	OBIS
+Dactyloscopus zelotes	OBIS
+Bothrocara elongatum	OBIS
+Amphilophus hogaboomorum	OBIS
+Anisotremus virginicus	OBIS
+Neoclinus stephensae	OBIS
+Odontesthes regia	OBIS
+Ogilbia boydwalkeri	OBIS
+Ophioscion imiceps	OBIS
+Phthanophaneron harveyi	OBIS
+Zalembius rosaceus	OBIS
+Gobiosoma	OBIS
+Tetronarce californica	OBIS
+Parasaccogaster normae	OBIS
+Mesoheros atromaculatus	OBIS
+Chimaera	OBIS
+Sphyrna mokarran	OBIS
+Sphyrna tudes	OBIS
+Mobula tarapacana	OBIS
+Nettastomatidae	OBIS
+Oneirodidae	OBIS
+Callionymidae	OBIS
+Syngnathidae	OBIS
+Conger	OBIS
+Merluccius	OBIS
+Poromitra	OBIS
+Anoplogaster cornuta	OBIS
+Malacosteus niger	OBIS
+Scomber colias	OBIS
+Sphoeroides spengleri	OBIS
+Cheilopogon furcatus	OBIS
+Pomacanthus	OBIS
+Myoxocephalus octodecemspinosus	OBIS
+Dorosoma cepedianum	OBIS
+Benthodesmus tenuis	OBIS
+Decodon	OBIS
+Halichoeres nebulosus	OBIS
+Calotomus carolinus	OBIS
+Scomber australasicus	OBIS
+Alphestes	OBIS
+Myxine circifrons	OBIS
+Apristurus kampae	OBIS
+Heteroconger canabus	OBIS
+Facciolella equatorialis	OBIS
+Cheilopogon dorsomacula	OBIS
+Nezumia loricata	OBIS
+Symbolophorus californiensis	OBIS
+Melanostigma bathium	OBIS
+Scorpaena cocosensis	OBIS
+Sebastes saxicola	OBIS
+Melamphaes acanthomus	OBIS
+Melamphaes macrocephalus	OBIS
+Gordiichthys combibus	OBIS
+Hypsoblennius robustus	OBIS
+Opistognathus fenmutis	OBIS
+Artedius corallinus	OBIS
+Cryptotrema corallinum	OBIS
+Evermannia erici	OBIS
+Hypsypops rubicundus	OBIS
+Paraclinus magdalenae	OBIS
+Paraclinus stephensi	OBIS
+Seriolella violacea	OBIS
+Sicydium fayae	OBIS
+Epinephelus quinquefasciatus	OBIS
+Triakidae	OBIS
+Apristurus	OBIS
+Alopias	OBIS
+Carcharias	OBIS
+Carcharhinus brevipinna	OBIS
+Kyphosidae	OBIS
+Cynoglossidae	OBIS
+Oneirodes	OBIS
+Benthosema	OBIS
+Lobotes	OBIS
+Bathytroctes macrolepis	OBIS
+Cyclothone microdon	OBIS
+Idiacanthus fasciola	OBIS
+Ranzania laevis	OBIS
+Albula	OBIS
+Trachinotus goodei	OBIS
+Pomacentrus trilineatus	OBIS
+Pristis microdon	OBIS
+Gymnothorax javanicus	OBIS
+Diaphus fulgens	OBIS
+Lutjanus fulvus	OBIS
+Ipnops agassizii	OBIS
+Elacatinus	OBIS
+Gymneleotris	OBIS
+Pennahia	OBIS
+Saurogobio	OBIS
+Xiphophorus	OBIS
+Pristis perotteti	OBIS
+Myliobatis peruvianus	OBIS
+Ophichthus melope	OBIS
+Evermannella ahlstromi	OBIS
+Nezumia orbitalis	OBIS
+Trachipterus fukuzakii	OBIS
+Linophryne arcturi	OBIS
+Acanthurus achilles	OBIS
+Xyrichtys victori	OBIS
+Mugil incilis	OBIS
+Epinephelus corallicola	OBIS
+Lycenchelys folletti	OBIS
+Pachycara suspectum	OBIS
+Careproctus longifilis	OBIS
+Pontinus vaughani	OBIS
+Sebastes cortezi	OBIS
+Sebastes spinorbis	OBIS
+Canthigaster jactator	OBIS
+Albula nemoptera	OBIS
+Dicrolene introniger	OBIS
+Monolene danae	OBIS
+Dactyloscopus fimbriatus	OBIS
+Stegastes redemptus	OBIS
+Batrachoides gilberti	OBIS
+Halieutopsis tumifrons	OBIS
+Triakis maculata	OBIS
+Eptatretus mccoskeri	OBIS
+Lycodapus fierasfer	OBIS
+Amphistichus koelzi	OBIS
+Apodichthys flavidus	OBIS
+Atherinella guatemalensis	OBIS
+Barbulifer mexicanus	OBIS
+Clinocottus recalvus	OBIS
+Cololabis adoceta	OBIS
+Cololabis saira	OBIS
+Eugerres plumieri	OBIS
+Guavina micropus	OBIS
+Icelinus cavifrons	OBIS
+Lythrypnus alphigena	OBIS
+Neoclinus blanchardi	OBIS
+Odontamblyopus rebecca	OBIS
+Pareques lanfeari	OBIS
+Parmaturus xaniurus	OBIS
+Pherallodiscus varius	OBIS
+Photocorynus spiniceps	OBIS
+Opistognathus brochus	OBIS
+Cottoclinus canops	OBIS
+Canthidermis rotundatus	OBIS
+Pseudoscopelus lavenbergi	OBIS
+Peristedion nesium	OBIS
+Melanocetus polyactis	OBIS
+Beringraja rhina	OBIS
+Dasyscopelus spinosus	OBIS
+Myliobatidae	OBIS
+Dasyatis	OBIS
+Linophrynidae	OBIS
+Echeneidae	OBIS
+Sebastidae	OBIS
+Gonostomatidae	OBIS
+Scopelosaurus	OBIS
+Antennarius	OBIS
+Bathyonus	OBIS
+Caristius	OBIS
+Anthias	OBIS
+Sillago	OBIS
+Leptostomias	OBIS
+Photonectes	OBIS
+Spratelloides delicatulus	OBIS
+Aldrovandia phalacra	OBIS
+Caranx latus	OBIS
+Echeneis naucrates	OBIS
+Euthynnus alletteratus	OBIS
+Scopelogadus mizolepis	OBIS
+Labrisomidae	OBIS
+Ophichthinae	OBIS
+Porogadus	OBIS
+Trinectes maculatus	OBIS
+Fistularia	OBIS
+Trachinotus carolinus	OBIS
+Triaenodon	OBIS
+Pomacentrus bankanensis	OBIS
+Enchelycore bayeri	OBIS
+Diaphus parri	OBIS
+Plectrypops lima	OBIS
+Decapterus russelli	OBIS
+Chaetodon meyeri	OBIS
+Zebrasoma xanthurum	OBIS
+Hemiramphus lutkei	OBIS
+Oxylebius pictus	OBIS
+Atherinops	OBIS
+Lophogobius	OBIS
+Paraletharchus	OBIS
+Quietula	OBIS
+Stathmonotus	OBIS
+Hydrolagus alphus	OBIS
+Gymnothorax eurygnathos	OBIS
+Ophichthus apachus	OBIS
+Ophichthus arneutes	OBIS
+Coryphaenoides gypsochilus	OBIS
+Halosaurus attenuatus	OBIS
+Alepocephalus fundulus	OBIS
+Microstomus pacificus	OBIS
+Melamphaes lugubris	OBIS
+Macroramphosus gracilis	OBIS
+Syngnathus euchrous	OBIS
+Anchoa delicatissima	OBIS
+Starksia leucovitta	OBIS
+Eptatretus grouseri	OBIS
+Achirus zebrinus	OBIS
+Enchelybrotula gomoni	OBIS
+Lophogobius cristulatus	OBIS
+Opisthopterus macrops	OBIS
+Parrella ginsburgi	OBIS
+Platyrhinoidis triseriata	OBIS
+Tomicodon prodomus	OBIS
+Urotrygon simulatrix	OBIS
+Alectis indica	OBIS
+Tetronarce peruana	OBIS
+Albula pacifica	OBIS
+Hypanus guttatus	OBIS
+Merluccius peruanus	OBIS
+Anthiadidae	OBIS
+Caliraja cortezensis	OBIS
+Ginglymostoma	OBIS
+Pristis pectinata	OBIS
+Chlorophthalmidae	OBIS
+Gadidae	OBIS
+Argentinidae	OBIS
+Nomeidae	OBIS
+Nessorhamphus	OBIS
+Muraena	OBIS
+Bathypterois	OBIS
+Symbolophorus	OBIS
+Holtbyrnia	OBIS
+Istiophorus	OBIS
+Upeneus	OBIS
+Trachyscorpia	OBIS
+Histiobranchus bathybius	OBIS
+Bathypterois longipes	OBIS
+Chaenophryne longiceps	OBIS
+Taractes rubescens	OBIS
+Luvarus imperialis	OBIS
+Thunnus alalunga	OBIS
+Cyclothone pallida	OBIS
+Cyclothone pseudopallida	OBIS
+Sander	OBIS
+Melanostomiinae	OBIS
+Astroblepidae	OBIS
+Tetraodon	OBIS
+Lepisosteus	OBIS
+Anchoa hepsetus	OBIS
+Syacium papillosum	OBIS
+Ogcocephalus	OBIS
+Ablennes	OBIS
+Strongylura marina	OBIS
+Acanthurus lineatus	OBIS
+Aphanopus intermedius	OBIS
+Gyrinomimus	OBIS
+Dinematichthys	OBIS
+Triakis	OBIS
+Helcogramma	OBIS
+Enchelynassa canina	OBIS
+Chaetodon kleinii	OBIS
+Xanthichthys caeruleolineatus	OBIS
+Exerpes	OBIS
+Lepidonectes	OBIS
+Leuresthes	OBIS
+Semicossyphus	OBIS
+Hydrolagus mccoskeri	OBIS
+Bathyraja peruana	OBIS
+Paraconger ophichthys	OBIS
+Nemichthys larseni	OBIS
+Synodus marchenae	OBIS
+Coryphaenoides myersi	OBIS
+Linophryne quinqueramosa	OBIS
+Alepocephalus asperifrons	OBIS
+Serranus stilbostigma	OBIS
+Lycenchelys cicatrifer	OBIS
+Symphurus microlepis	OBIS
+Paraliparis attenuatus	OBIS
+Melamphaes spinifer	OBIS
+Astronesthes lampara	OBIS
+Hoplunnis sicarius	OBIS
+Gobiesox marijeanae	OBIS
+Citharichthys gnathus	OBIS
+Halichoeres poeyi	OBIS
+Ogcocephalus nasutus	OBIS
+Microdesmus retropinnis	OBIS
+Opistognathus inornatus	OBIS
+Entomacrodus nigricans	OBIS
+Eptatretus sinus	OBIS
+Ophthalmolycus conorhynchus	OBIS
+Akko rossi	OBIS
+Centropomus ensiferus	OBIS
+Cerdale paludicola	OBIS
+Jenkinsia stolifera	OBIS
+Lythrypnus lavenbergi	OBIS
+Ogilbia cocoensis	OBIS
+Ophioscion simulus	OBIS
+Parapocryptes serperaster	OBIS
+Pseudophallus mindii	OBIS
+Rathbunella hypoplecta	OBIS
+Tridentiger trigonocephalus	OBIS
+Xiphophorus hellerii	OBIS
+Zaniolepis frenata	OBIS
+Symphurus ocellaris	OBIS
+Trachyscorpia osheri	OBIS
+Hyporthodus mystacinus	OBIS
+Torpedo	OBIS
+Myxine greggi	OBIS
+Isurus	OBIS
+Gymnura	OBIS
+Pristis pristis	OBIS
+Anguillidae	OBIS
+Paralepididae	OBIS
+Ogcocephalidae	OBIS
+Saurenchelys	OBIS
+Sargocentron	OBIS
+Sardinella	OBIS
+Trachipterus	OBIS
+Dolichopteryx	OBIS
+Ammodytes	OBIS
+Brachydeuterus	OBIS
+Pseudupeneus	OBIS
+Nemichthys curvirostris	OBIS
+Magnisudis atlantica	OBIS
+Zu cristatus	OBIS
+Sciadonus pedicellaris	OBIS
+Conocara salmoneum	OBIS
+Diplospinus multistriatus	OBIS
+Xyrichtys novacula	OBIS
+Thunnus thynnus	OBIS
+Poromitra crassiceps	OBIS
+Scopeloberyx robustus	OBIS
+Urolophidae	OBIS
+Trachinotus blochii	OBIS
+Balistes capriscus	OBIS
+Myrichthys	OBIS
+Bagre	OBIS
+Diaphus garmani	OBIS
+Sphoeroides testudineus	OBIS
+Acanthonus armatus	OBIS
+Gigantactis perlatus	OBIS
+Hemiramphus brasiliensis	OBIS
+Uraspis secunda	OBIS
+Lutjanus apodus	OBIS
+Heniochus	OBIS
+Cirrhitichthys	OBIS
+Parupeneus	OBIS
+Acentrogobius	OBIS
+Etrumeus micropus	OBIS
+Atule mate	OBIS
+Caranx ignobilis	OBIS
+Pomadasys kaakan	OBIS
+Chaetodon auriga	OBIS
+Paracanthurus hepatus	OBIS
+Makaira mazara	OBIS
+Zenarchopterus dispar	OBIS
+Chaenogobius	OBIS
+Eugerres	OBIS
+Heterandria	OBIS
+Oxyzygonectes	OBIS
+Gymnothorax ocellatus	OBIS
+Himantolophus azurlucens	OBIS
+Oneirodes rosenblatti	OBIS
+Lampanyctus hubbsi	OBIS
+Holtbyrnia latifrons	OBIS
+Psenes arafurensis	OBIS
+Chromis crusma	OBIS
+Paraliparis latifrons	OBIS
+Melamphaes laeviceps	OBIS
+Callechelys cliffi	OBIS
+Callechelys galapagensis	OBIS
+Cyclopsetta chittendeni	OBIS
+Desmodema lorum	OBIS
+Starksia lepidogaster	OBIS
+Diapterus rhombeus	OBIS
+Stegastes partitus	OBIS
+Bothrocara brunneum	OBIS
+Achirus declivis	OBIS
+Bollmannia gomezi	OBIS
+Chaunacops coloratus	OBIS
+Chriolepis atrimelum	OBIS
+Conodon nobilis	OBIS
+Neomyxus leuciscus	OBIS
+Paraclinus ditrichus	OBIS
+Parvilux boschmai	OBIS
+Rathbunella alleni	OBIS
+Tomicodon bidens	OBIS
+Deania calceus	OBIS
+Mollienesia sphenops	OBIS
+Kyphosus sectatrix	OBIS
+Girella laevifrons	OBIS
+Tigrigobius	OBIS
+Grammistidae	OBIS
+Eptatretus bobwisneri	OBIS
+Lampanyctus hawaiiensis	OBIS
+Myxine phantasma	OBIS
+Gadiformes	OBIS
+Pleuronectiformes	OBIS
+Rhizoprionodon	OBIS
+Taeniura	OBIS
+Scopelarchidae	OBIS
+Trachichthyidae	OBIS
+Moridae	OBIS
+Diceratiidae	OBIS
+Gempylidae	OBIS
+Zoarcidae	OBIS
+Enchelycore	OBIS
+Gadella	OBIS
+Gasterosteus	OBIS
+Bolinichthys	OBIS
+Centrobranchus	OBIS
+Lampadena	OBIS
+Halosaurus	OBIS
+Echiodon	OBIS
+Parablennius	OBIS
+Callionymus	OBIS
+Selar	OBIS
+Pseudoscopelus	OBIS
+Mullus	OBIS
+Trichiurus	OBIS
+Salmo	OBIS
+Malacosteus	OBIS
+Canthidermis	OBIS
+Chilomycterus	OBIS
+Aluterus	OBIS
+Lagocephalus	OBIS
+Ilyophis brunneus	OBIS
+Alepisaurus ferox	OBIS
+Benthalbella infans	OBIS
+Dussumieria acuta	OBIS
+Caulophryne jordani	OBIS
+Einara macrolepis	OBIS
+Barbantus curvifrons	OBIS
+Callionymus maculatus	OBIS
+Trachurus picturatus	OBIS
+Ruvettus pretiosus	OBIS
+Cyclothone alba	OBIS
+Cyclothone obscura	OBIS
+Argyropelecus hemigymnus	OBIS
+Lepomis	OBIS
+Centropomidae	OBIS
+Moringuidae	OBIS
+Oncorhynchus tshawytscha	OBIS
+Paraconger caudilimbatus	OBIS
+Rhynchoconger	OBIS
+Myrophis	OBIS
+Mentodus facilis	OBIS
+Cyclopsetta fimbriata	OBIS
+Menidia menidia	OBIS
+Sparisoma rubripinne	OBIS
+Umbrina coroides	OBIS
+Microdesmus	OBIS
+Scorpaena calcarata	OBIS
+Gobionellus oceanicus	OBIS
+Ptereleotris	OBIS
+Lophiomus	OBIS
+Amoya	OBIS
+Echidna	OBIS
+Cirrhitus	OBIS
+Sphyraena forsteri	OBIS
+Enchelycore schismatorhynchus	OBIS
+Synodus variegatus	OBIS
+Cheilopogon atrisignis	OBIS
+Scorpaenodes kelloggi	OBIS
+Pseudogramma polyacantha	OBIS
+Chaetodon lunula	OBIS
+Butis koilomatodon	OBIS
+Trypauchen vagina	OBIS
+Aseraggodes	OBIS
+Azurina	OBIS
+Ctenosciaena	OBIS
+Diplobatis	OBIS
+Elattarchus	OBIS
+Hemigrammus	OBIS
+Hypoplectrus	OBIS
+Lyopsetta	OBIS
+Parapsettus	OBIS
+Xenomystax	OBIS
+Chlopsis longidens	OBIS
+Coryphaenoides acrolepis	OBIS
+Melanocetus eustalus	OBIS
+Chaenophryne ramifera	OBIS
+Bathylaco macrophthalmus	OBIS
+Thalassoma duperrey	OBIS
+Lycenchelys scaurus	OBIS
+Pachycara rimae	OBIS
+Scorpaenodes caribbaeus	OBIS
+Sebastes ensifer	OBIS
+Sebastes entomelas	OBIS
+Sebastes gilli	OBIS
+Sebastes jordani	OBIS
+Sebastes rosenblatti	OBIS
+Aristostomias scintillans	OBIS
+Stomias danae	OBIS
+Stolephorus dubiosus	OBIS
+Enophrys bison	OBIS
+Anchoa analis	OBIS
+Anchoa chamensis	OBIS
+Anchoviella balboae	OBIS
+Gobiesox maeandricus	OBIS
+Haemulon bonariense	OBIS
+Dicrolene pullata	OBIS
+Ogcocephalus radiatus	OBIS
+Cynoscion acoupa	OBIS
+Awaous flavus	OBIS
+Galeichthys peruvianus	OBIS
+Eleotris pisonis	OBIS
+Hemilepidotus spinosus	OBIS
+Amphiarius rugispinis	OBIS
+Aphos porosus	OBIS
+Atherinella chagresi	OBIS
+Erotelis smaragdus	OBIS
+Evermannia longipinnis	OBIS
+Icelinus tenuis	OBIS
+Leptenchelys vermiformis	OBIS
+Leuropharus lasiops	OBIS
+Lipolagus ochotensis	OBIS
+Lyopsetta exilis	OBIS
+Odontognathus compressus	OBIS
+Oligocottus maculosus	OBIS
+Oxuderces dentatus	OBIS
+Parrella maxillaris	OBIS
+Sciades herzbergii	OBIS
+Thaumatichthys axeli	OBIS
+Thysanactis dentex	OBIS
+Trachinops brauni	OBIS
+Xeneretmus latifrons	OBIS
+Xeneretmus ritteri	OBIS
+Opistognathus walkeri	OBIS
+Bythaelurus	OBIS
+Leptocephalus giganteus	OBIS
+Sphyraena barracuda	OBIS
+Macroparalepis johnfitchi	OBIS
+Hyporthodus septemfasciatus	OBIS
+Albula gilberti	OBIS
+Auxis eudorax	OBIS
+Rubicundus lakeside	OBIS
+Hypanus americanus	OBIS
+Osteomugil formosae	OBIS
+Xenocyprididae	OBIS
+Phenacoscorpius mccoskeri	OBIS
+Eptatretus goslinei	OBIS
+Phanerodon vacca	OBIS
+Neoniphon vexillarium	OBIS
+Labeo catla	OBIS
+Platycaranx chrysophrys	OBIS
+Myliobatis	OBIS
+Carcharhinus melanopterus	OBIS
+Cetorhinus maximus	OBIS
+Muraenesocidae	OBIS
+Serrivomeridae	OBIS
+Batrachoididae	OBIS
+Cyprinodontidae	OBIS
+Merlucciidae	OBIS
+Lophiidae	OBIS
+Polynemidae	OBIS
+Priacanthidae	OBIS
+Salmonidae	OBIS
+Gnathophis	OBIS
+Paralepis	OBIS
+Anoplogaster	OBIS
+Bathygadus	OBIS
+Laemonema	OBIS
+Gigantactis	OBIS
+Linophryne	OBIS
+Lepidophanes	OBIS
+Bellottia	OBIS
+Brama	OBIS
+Saccopharynx	OBIS
+Dactylopterus	OBIS
+Astronesthes	OBIS
+Syngnathus	OBIS
+Muraenesox cinereus	OBIS
+Bathypterois phenax	OBIS
+Hoplostethus mediterraneus	OBIS
+Stylephorus chordatus	OBIS
+Histrio histrio	OBIS
+Ctenochirichthys longimanus	OBIS
+Oneirodes carlsbergi	OBIS
+Centrobranchus nigroocellatus	OBIS
+Diaphus dumerilii	OBIS
+Diogenichthys atlanticus	OBIS
+Sphyraena sphyraena	OBIS
+Lepidopus caudatus	OBIS
+Clupea pallasii	OBIS
+Fistulariidae	OBIS
+Cyprinus carpio	OBIS
+Trichomycteridae	OBIS
+Narcine	OBIS
+Synodus foetens	OBIS
+Lachnolaimus	OBIS
+Lampadena luminosa	OBIS
+Astroscopus ygraecum	OBIS
+Kathetostoma	OBIS
+Epinephelus guttatus	OBIS
+Holocentrus	OBIS
+Fistularia tabacaria	OBIS
+Ocyurus chrysurus	OBIS
+Drepaneidae	OBIS
+Gorgasia	OBIS
+Oligolepis	OBIS
+Encheliophis	OBIS
+Stolephorus	OBIS
+Epigonus macrops	OBIS
+Uropterygius micropterus	OBIS
+Negaprion acutidens	OBIS
+Astronesthes martensii	OBIS
+Diaphus jenseni	OBIS
+Scopelarchus guentheri	OBIS
+Epinephelus chlorostigma	OBIS
+Epinephelus merra	OBIS
+Rhabdosargus sarba	OBIS
+Upeneus sulphureus	OBIS
+Calotomus spinidens	OBIS
+Plagiotremus rhinorhynchos	OBIS
+Sigmops elongatus	OBIS
+Abyssobrotula galatheae	OBIS
+Embiotoca	OBIS
+Hexagrammos decagrammus	OBIS
+Pristigasteridae	OBIS
+Chiloconger	OBIS
+Ekemblemaria	OBIS
+Eleotrica	OBIS
+Lycengraulis	OBIS
+Neoclinus	OBIS
+Notropis	OBIS
+Pimelodus	OBIS
+Xystreurys	OBIS
+Zalieutes	OBIS
+Bathyraja aguja	OBIS
+Rajella nigerrima	OBIS
+Gymnothorax serratidens	OBIS
+Lestidiops bathyopteryx	OBIS
+Nezumia parini	OBIS
+Ceratoscopelus townsendi	OBIS
+Diaphus phillipsi	OBIS
+Cataetyx rubrirostris	OBIS
+Brotulotaenia nielseni	OBIS
+Bajacalifornia burragei	OBIS
+Maulisia isaacsi	OBIS
+Callionymus hainanensis	OBIS
+Callionymus hindsii	OBIS
+Cubiceps paradoxus	OBIS
+Howella pammelas	OBIS
+Pholis schultzi	OBIS
+Umbrina broussonnetii	OBIS
+Scomberomorus brasiliensis	OBIS
+Melanostigma pammelas	OBIS
+Symphurus plagusia	OBIS
+Paraliparis fimbriatus	OBIS
+Paraliparis ulochir	OBIS
+Scorpaena isthmensis	OBIS
+Sebastes elongatus	OBIS
+Sebastes eos	OBIS
+Sebastes paucispinis	OBIS
+Sebastes rubrivinctus	OBIS
+Melamphaes janae	OBIS
+Bagre bagre	OBIS
+Gobiesox crassicorpus	OBIS
+Haemulon schrankii	OBIS
+Bairdiella ronchus	OBIS
+Johnius macrorhynus	OBIS
+Larimus breviceps	OBIS
+Prionotus rubio	OBIS
+Hypsoblennius sordidus	OBIS
+Foetorepus garthi	OBIS
+Eucinostomus jonesii	OBIS
+Decodon puellaris	OBIS
+Pempheris schomburgkii	OBIS
+Echidna catenata	OBIS
+Patagonotothen tessellata	OBIS
+Phanerodon atripes	OBIS
+Ascelichthys rhodorus	OBIS
+Centropomus mexicanus	OBIS
+Congrosoma evermanni	OBIS
+Guavina guavina	OBIS
+Leucicorus lusciosus	OBIS
+Lucifuga inopinata	OBIS
+Lumpenopsis hypochroma	OBIS
+Nebris microps	OBIS
+Neoclinus uninotatus	OBIS
+Notarius insculptus	OBIS
+Pseudonus acutus	OBIS
+Rhacochilus toxotes	OBIS
+Scartichthys gigas	OBIS
+Typhlogobius californiensis	OBIS
+Urotrygon peruanus	OBIS
+Xeneretmus triacanthus	OBIS
+Moronopsis	OBIS
+Lampanyctus niger	OBIS
+Chirodactylus variegatus	OBIS
+Corvula sanctaeluciae	OBIS
+Coptodon zillii	OBIS
+Ctenoscopelus phengodes	OBIS
+Regalecus russellii	OBIS
+Poromitra nigrofulva	OBIS
+Lepophidium hubbsi	OBIS
+Pseudobatos percellens	OBIS
+Chaenopsis celeste	OBIS
+Ophidiiformes	OBIS
+Syngnathiformes	OBIS
+Squatinidae	OBIS
+Torpedinidae	OBIS
+Galeocerdo	OBIS
+Galeorhinus	OBIS
+Rhinochimaera	OBIS
+Etmopterus	OBIS
+Apristurus nasutus	OBIS
+Raja asterias	OBIS
+Gasterosteidae	OBIS
+Carapidae	OBIS
+Emmelichthyidae	OBIS
+Cottidae	OBIS
+Muraenesox	OBIS
+Macroparalepis	OBIS
+Hirundichthys	OBIS
+Himantolophus	OBIS
+Lophius	OBIS
+Chaenophryne	OBIS
+Dolopichthys	OBIS
+Ceratoscopelus	OBIS
+Protomyctophum	OBIS
+Neoscopelus	OBIS
+Bassozetus	OBIS
+Lamprogrammus	OBIS
+Narcetes	OBIS
+Hyperoglyphe	OBIS
+Epigonus	OBIS
+Tripterygion	OBIS
+Solea	OBIS
+Ichthyococcus	OBIS
+Ophisurus serpens	OBIS
+Serrivomer beanii	OBIS
+Ilyophis arx	OBIS
+Scopelarchus analis	OBIS
+Tylosurus imperialis	OBIS
+Rondeletia loricata	OBIS
+Sardinella aurita	OBIS
+Diaphus mollis	OBIS
+Diaphus termophilus	OBIS
+Taaningichthys paurolychnus	OBIS
+Notacanthus chemnitzii	OBIS
+Bathylaco nigricans	OBIS
+Bathytroctes macrognathus	OBIS
+Photostylus pycnopterus	OBIS
+Bathylagichthys greyae	OBIS
+Leptochilichthys agassizii	OBIS
+Searsia koefoedi	OBIS
+Caranx crysos	OBIS
+Decapterus punctatus	OBIS
+Seriola dumerili	OBIS
+Kali macrodon	OBIS
+Aphanopus carbo	OBIS
+Bothus podas	OBIS
+Oncorhynchus gorbuscha	OBIS
+Poromitra capito	OBIS
+Margrethia obtusirostra	OBIS
+Valenciennellus tripunctulatus	OBIS
+Rhadinesthes decimus	OBIS
+Masturus lanceolatus	OBIS
+Embiotocidae	OBIS
+Arripidae	OBIS
+Platichthys stellatus	OBIS
+Squatina dumeril	OBIS
+Anguilla rostrata	OBIS
+Hoplunnis	OBIS
+Venefica procera	OBIS
+Callechelys	OBIS
+Catostomus	OBIS
+Bagre marinus	OBIS
+Stomias affinis	OBIS
+Gobiesox strumosus	OBIS
+Gigantura	OBIS
+Hygophum macrochir	OBIS
+Desmodema polystictum	OBIS
+Coryphaenoides leptolepis	OBIS
+Lophius americanus	OBIS
+Membras martinica	OBIS
+Liopropoma	OBIS
+Calamus	OBIS
+Lagodon rhomboides	OBIS
+Strongylura	OBIS
+Cynoscion nebulosus	OBIS
+Menticirrhus saxatilis	OBIS
+Symphurus pusillus	OBIS
+Pseudupeneus maculatus	OBIS
+Bellator	OBIS
+Ariomma	OBIS
+Chaetodipterus	OBIS
+Lutjanus mahogoni	OBIS
+Lutjanus synagris	OBIS
+Peprilus paru	OBIS
+Polynemus	OBIS
+Alticus	OBIS
+Periophthalmus	OBIS
+Gunnellichthys	OBIS
+Muraenichthys	OBIS
+Dascyllus	OBIS
+Lophiodes	OBIS
+Phenacoscorpius	OBIS
+Doryrhamphus	OBIS
+Pseudobalistes	OBIS
+Hilsa kelee	OBIS
+Etmopterus granulosus	OBIS
+Gymnothorax eurostus	OBIS
+Scopelarchoides signifer	OBIS
+Taenianotus triacanthus	OBIS
+Lutjanus russellii	OBIS
+Gerres oblongus	OBIS
+Parupeneus forsskali	OBIS
+Heniochus acuminatus	OBIS
+Amblyglyphidodon flavilatus	OBIS
+Stegastes nigricans	OBIS
+Glossogobius giuris	OBIS
+Naso hexacanthus	OBIS
+Naso brevirostris	OBIS
+Naso vlamingii	OBIS
+Naso annulatus	OBIS
+Canthigaster amboinensis	OBIS
+Nebrius ferrugineus	OBIS
+Ambassis urotaenia	OBIS
+Ambassis gymnocephalus	OBIS
+Brama orcini	OBIS
+Lycenchelys antarctica	OBIS
+Sagamichthys abei	OBIS
+Lethops connectens	OBIS
+Stellerina xyosterna	OBIS
+Lycodes palearis	OBIS
+Lycodes brevipes	OBIS
+Aphos	OBIS
+Belonesox	OBIS
+Calamopteryx	OBIS
+Cheilotrema	OBIS
+Corvula	OBIS
+Hermosilla	OBIS
+Heros	OBIS
+Isopisthus	OBIS
+Lepidogobius	OBIS
+Ophisternon	OBIS
+Paracaristius	OBIS
+Rhinogobius	OBIS
+Trianectes	OBIS
+Zapteryx	OBIS
+Myxine hubbsi	OBIS
+Gymnura afuerae	OBIS
+Somniosus pacificus	OBIS
+Chlopsis kazuko	OBIS
+Cynoponticus savanna	OBIS
+Serrivomer jesperseni	OBIS
+Atherinomorus stipes	OBIS
+Cetomimus gillii	OBIS
+Ataxolepis henactis	OBIS
+Melanocetus niger	OBIS
+Chaenophryne melanorhabdus	OBIS
+Oneirodes mirus	OBIS
+Protomyctophum crockeri	OBIS
+Alepocephalus owstoni	OBIS
+Alepocephalus tenebrosus	OBIS
+Mentodus crassus	OBIS
+Ophioblennius macclurei	OBIS
+Schedophilus haedrichi	OBIS
+Cubiceps caeruleus	OBIS
+Priacanthus meeki	OBIS
+Epinephelus clippertonensis	OBIS
+Dentex dentex	OBIS
+Lycodes cortezianus	OBIS
+Lycodes pacificus	OBIS
+Paraliparis galapagosensis	OBIS
+Sebastes brevispinis	OBIS
+Sebastes mystinus	OBIS
+Astronesthes gibbsi	OBIS
+Chauliodus macouni	OBIS
+Sphoeroides dorsalis	OBIS
+Micropogonias furnieri	OBIS
+Poecilia formosa	OBIS
+Anchoa trinitatis	OBIS
+Arius maculatus	OBIS
+Gobiesox marmoratus	OBIS
+Haemulon parra	OBIS
+Halichoeres bicolor	OBIS
+Halichoeres insularis	OBIS
+Lestidium nudum	OBIS
+Pomacanthus paru	OBIS
+Cynoscion arenarius	OBIS
+Stellifer pizarroensis	OBIS
+Diplectrum bivittatum	OBIS
+Myripristis clarionensis	OBIS
+Myripristis gildi	OBIS
+Mugilogobius abei	OBIS
+Coloconger cadenati	OBIS
+Scorpaenopsis ramaraoi	OBIS
+Pseudogramma gregoryi	OBIS
+Takifugu niphobles	OBIS
+Batrachoides walkeri	OBIS
+Pervagor spilosoma	OBIS
+Eptatretus mcconnaugheyi	OBIS
+Patagonotothen cornucola	OBIS
+Icichthys lockingtoni	OBIS
+Lycodapus australis	OBIS
+Lycodapus endemoscotus	OBIS
+Acanthogobius flavimanus	OBIS
+Acentrophryne longidens	OBIS
+Anabas testudineus	OBIS
+Anarrhichthys ocellatus	OBIS
+Anchovia clupeoides	OBIS
+Aplatophis zorro	OBIS
+Assurger anzac	OBIS
+Barbulifer ceuthoecus	OBIS
+Benthobatis moresbyi	OBIS
+Bollmannia boqueronensis	OBIS
+Brachyamblyopus brachysoma	OBIS
+Chriodorus atherinoides	OBIS
+Clupanodon thrissa	OBIS
+Coelorinchus chilensis	OBIS
+Danaphos oculatus	OBIS
+Ekemblemaria nigra	OBIS
+Gobiopterus chuno	OBIS
+Hypoplectrus unicolor	OBIS
+Lonchopisthus micrognathus	OBIS
+Lyconema barbatum	OBIS
+Lythrypnus solanensis	OBIS
+Manducus greyae	OBIS
+Myxodagnus walkeri	OBIS
+Notarius lentiginosus	OBIS
+Odontoscion dentex	OBIS
+Ogilbia robertsoni	OBIS
+Ophioscion panamensis	OBIS
+Paraclinus fasciatus	OBIS
+Paraclinus nigripinnis	OBIS
+Prionurus laticlavius	OBIS
+Scartelaos histophorus	OBIS
+Seriolella porosa	OBIS
+Signigobius biocellatus	OBIS
+Cheilotrema fasciatum	OBIS
+Caranx ruber	OBIS
+Leiognathus equula	OBIS
+Entosphenus tridentatus	OBIS
+Polyodontidae	OBIS
+Lestidium bigelowi	OBIS
+Coelorinchus caelorhincus	OBIS
+Idiastion hageyi	OBIS
+Albula esuncula	OBIS
+Pentanchidae	OBIS
+Ginglymostoma unami	OBIS
+Himantolophus rostratus	OBIS
+Aetomylaeus asperrimus	OBIS
+Mayaheros urophthalmus	OBIS
+Etropus pacificus	OBIS
+Lampanyctus crypticus	OBIS
+Lampanyctus phyllisae	OBIS
+Arctoraja parmifera	OBIS
+Thyrinops pachylepis	OBIS
+Stellifer punctatissimus	OBIS
+Poecilia nelsoni	OBIS
+Hiatirhaphis cascajalensis	OBIS
+Aulopiformes	OBIS
+Sphyrnidae	OBIS
+Scyliorhinus	OBIS
+Squalus blainville	OBIS
+Ammodytidae	OBIS
+Centrolophidae	OBIS
+Uranoscopidae	OBIS
+Cyclopteridae	OBIS
+Platycephalidae	OBIS
+Diodontidae	OBIS
+Lestidiops	OBIS
+Platybelone	OBIS
+Cetomimus	OBIS
+Sardina	OBIS
+Cataetyx	OBIS
+Monomitopus	OBIS
+Alepocephalus	OBIS
+Conocara	OBIS
+Searsia	OBIS
+Taractes	OBIS
+Sarda	OBIS
+Arnoglossus	OBIS
+Melanostomias	OBIS
+Derichthys serpentinus	OBIS
+Cheilopogon heterurus	OBIS
+Cheilopogon pinnatibarbatus	OBIS
+Exocoetus obtusirostris	OBIS
+Parexocoetus mento	OBIS
+Ceratias holboelli	OBIS
+Melanocetus murrayi	OBIS
+Dibranchus atlanticus	OBIS
+Leptacanthichthys gracilispinis	OBIS
+Bolinichthys supralateralis	OBIS
+Ceratoscopelus warmingii	OBIS
+Lampadena urophaos	OBIS
+Lampanyctus lineatus	OBIS
+Symbolophorus veranyi	OBIS
+Argentina silus	OBIS
+Microstoma microstoma	OBIS
+Mentodus rostratus	OBIS
+Trachurus trachurus	OBIS
+Deltentosteus quadrimaculatus	OBIS
+Howella brodiei	OBIS
+Scombrolabrax heterolepis	OBIS
+Dactylopterus volitans	OBIS
+Vinciguerria attenuata	OBIS
+Eustomias schmidti	OBIS
+Canthidermis sufflamen	OBIS
+Sphoeroides marmoratus	OBIS
+Micropterus	OBIS
+Opistognathidae	OBIS
+Congrinae	OBIS
+Uroconger	OBIS
+Ariopsis felis	OBIS
+Ventrifossa	OBIS
+Stemonosudis rothschildi	OBIS
+Porogadus miles	OBIS
+Parasudis	OBIS
+Syacium micrurum	OBIS
+Diaphus fragilis	OBIS
+Diaphus perspicillatus	OBIS
+Symbolophorus rufinus	OBIS
+Desmodema	OBIS
+Sphoeroides maculatus	OBIS
+Laemonema goodebeanorum	OBIS
+Physiculus fulvus	OBIS
+Echiodon dawsoni	OBIS
+Bassogigas	OBIS
+Dicrolene	OBIS
+Halieutichthys aculeatus	OBIS
+Trichopsetta	OBIS
+Membras	OBIS
+Trichopsetta ventralis	OBIS
+Nicholsina usta	OBIS
+Microphis brachyurus	OBIS
+Carangoides	OBIS
+Xanthichthys	OBIS
+Monacanthus	OBIS
+Uraspis	OBIS
+Evorthodus lyricus	OBIS
+Polydactylus	OBIS
+Cirrhimuraena	OBIS
+Stethojulis	OBIS
+Hemipristis	OBIS
+Malthopsis	OBIS
+Prognichthys	OBIS
+Ostracion	OBIS
+Centropyge multispinis	OBIS
+Abudefduf septemfasciatus	OBIS
+Isistius brasiliensis	OBIS
+Dipturus springeri	OBIS
+Astronesthes trifibulatus	OBIS
+Plotosus lineatus	OBIS
+Lampanyctus achirus	OBIS
+Bregmaceros nectabanus	OBIS
+Cociella punctata	OBIS
+Aphareus rutilans	OBIS
+Lutjanus bohar	OBIS
+Pinjalo pinjalo	OBIS
+Gerres oyena	OBIS
+Cubiceps baxteri	OBIS
+Lycodapus	OBIS
+Bothrocara	OBIS
+Scopelosaurus hamiltoni	OBIS
+Hypsurus caryi	OBIS
+Leptocottus	OBIS
+Ammodytes hexapterus	OBIS
+Acanthemblemaria	OBIS
+Amphistichus	OBIS
+Aulopareia	OBIS
+Bertella	OBIS
+Cetengraulis	OBIS
+Cololabis	OBIS
+Eretmichthys	OBIS
+Gillellus	OBIS
+Ilypnus	OBIS
+Melanorhinus	OBIS
+Nebris	OBIS
+Parachromis	OBIS
+Xenocys	OBIS
+Apristurus stenseni	OBIS
+Mustelus lenticulatus	OBIS
+Gymnothorax porphyreus	OBIS
+Venefica ocella	OBIS
+Scopelarchus stephensi	OBIS
+Antimora microlepis	OBIS
+Linophryne macrodon	OBIS
+Bolinichthys pyrsobolus	OBIS
+Centrobranchus andreae	OBIS
+Diaphus anderseni	OBIS
+Gonichthys venetus	OBIS
+Protomyctophum beckeri	OBIS
+Nansenia crassa	OBIS
+Maulisia acuticeps	OBIS
+Brama japonica	OBIS
+Hyperoglyphe japonica	OBIS
+Prognathodes aculeatus	OBIS
+Thalassoma virens	OBIS
+Mugil trichodon	OBIS
+Sparisoma radians	OBIS
+Lycenchelys pearcyi	OBIS
+Pachycara gymninium	OBIS
+Cynoglossus abbreviatus	OBIS
+Paraliparis darwini	OBIS
+Sebastes hopkinsi	OBIS
+Sebastes ovalis	OBIS
+Sebastes peduncularis	OBIS
+Sebastes semicinctus	OBIS
+Sebastes varispinis	OBIS
+Sternoptyx pseudodiaphana	OBIS
+Bathophilus flemingi	OBIS
+Eustomias perplexus	OBIS
+Syngnathus schlegeli	OBIS
+Sphoeroides andersonianus	OBIS
+Sphoeroides parvus	OBIS
+Anchoa colonensis	OBIS
+Dicrolene gregoryi	OBIS
+Trinectes opercularis	OBIS
+Holacanthus tricolor	OBIS
+Equetus punctatus	OBIS
+Gambusia sexradiata	OBIS
+Stellifer melanocheir	OBIS
+Stellifer minor	OBIS
+Prionotus punctatus	OBIS
+Foetorepus agassizii	OBIS
+Oligoplites saliens	OBIS
+Starksia guadalupae	OBIS
+Stegastes variabilis	OBIS
+Glossogobius kokius	OBIS
+Hypoatherina harringtonensis	OBIS
+Oplegnathus fasciatus	OBIS
+Prognichthys gibbifrons	OBIS
+Genypterus maculatus	OBIS
+Acanthistius pictus	OBIS
+Coilia mystus	OBIS
+Eptatretus fritzi	OBIS
+Acanthogobius hasta	OBIS
+Achirus lineatus	OBIS
+Alectrias cirratus	OBIS
+Bathylagoides argyrogaster	OBIS
+Cathorops mapale	OBIS
+Channa striata	OBIS
+Elassodiscus tremebundus	OBIS
+Enchelybrotula paucidens	OBIS
+Esselenichthys carli	OBIS
+Gibbonsia montereyensis	OBIS
+Gunterichthys bussingi	OBIS
+Hypoplectrodes semicinctum	OBIS
+Hypsopsetta macrocephala	OBIS
+Labracoglossa argenteiventris	OBIS
+Labrisomus socorroensis	OBIS
+Leiocottus hirundo	OBIS
+Macropinna microstoma	OBIS
+Microspathodon chrysurus	OBIS
+Mirorictus taningi	OBIS
+Ogilbia galapagosensis	OBIS
+Opisthopterus effulgens	OBIS
+Oryzias curvinotus	OBIS
+Paracaristius maderensis	OBIS
+Pectinantus parini	OBIS
+Puck pinnata	OBIS
+Rhamphocetichthys savagei	OBIS
+Scartichthys variolatus	OBIS
+Scartichthys viridis	OBIS
+Schindleria praematura	OBIS
+Steindachneria argentea	OBIS
+Tarletonbeania crenularis	OBIS
+Thermarces andersoni	OBIS
+Tridentiger barbatus	OBIS
+Etropus delsmani	OBIS
+Microdesmus intermedius	OBIS
+Cheilopogon californicus	OBIS
+Symphurus civitatum	OBIS
+Poromitra cristiceps	OBIS
+Ulvicola sanctaerosae	OBIS
+Hydrolagus melanophasma	OBIS
+Hemiramphus convexus	OBIS
+Dussumieriidae	OBIS
+Paratractus caballus	OBIS
+Dasyscopelus brachygnathos	OBIS
+Gobiopsis liolepis	OBIS
+Pseudobatos percellens	GBIF
+Carcharhinus melanopterus	GBIF
+Pseudobatos lentiginosus	GBIF
+Sphyrna lewini	GBIF
+Holohalaelurus melanostigma	GBIF
+Rhincodon typus	GBIF
+Triaenodon obesus	GBIF
+Fontitrygon margarita	GBIF
+Gurgesiella atlantica	GBIF
+Gymnura micrura	GBIF
+Plesiotrygon iwamae	GBIF
+Pateobatis uarnacoides	GBIF
+Taeniura lymma	GBIF
+Pastinachus gracilicaudus	GBIF
+Chiloscyllium indicum	GBIF
+Carcharhinus dussumieri	GBIF
+Atelomycterus marmoratus	GBIF
+Potamotrygon amazona	GBIF
+Negaprion brevirostris	GBIF
+Potamotrygon motoro	GBIF
+Anoxypristis cuspidata	GBIF
+Aetobatus ocellatus	GBIF
+Taeniurops meyeni	GBIF
+Potamotrygon wallacei	GBIF
+Eusphyra blochii	GBIF
+Carcharhinus amblyrhynchos	GBIF
+Maculabatis gerrardi	GBIF
+Chiloscyllium punctatum	GBIF
+Hypanus marianae	GBIF
+Chiloscyllium hasseltii	GBIF
+Paratrygon aiereba	GBIF
+Pastinachus solocirostris	GBIF
+Gymnura poecilura	GBIF
+Fluvitrygon signifer	GBIF
+Mobula birostris	GBIF
+Mobula japanica	GBIF
+Glaucostegus cemiculus	GBIF
+Eucrossorhinus dasypogon	GBIF
+Mobula alfredi	GBIF
+Rhizoprionodon lalandii	GBIF
+Carcharhinus longimanus	GBIF
+Potamotrygon scobina	GBIF
+Neotrygon varidens	GBIF
+Potamotrygon orbignyi	GBIF
+Rhynchobatus australiae	GBIF
+Isistius brasiliensis	GBIF
+Carcharhinus falciformis	GBIF
+Galeus polli	GBIF
+Carcharhinus porosus	GBIF
+Gymnura crebripunctata	GBIF
+Pseudobatos prahli	GBIF
+Neoharriotta pinnata	GBIF
+Raja straeleni	GBIF
+Rajella barnardi	GBIF
+Rhizoprionodon porosus	GBIF
+Neotrygon orientale	GBIF
+Mustelus whitneyi	GBIF
+Hypanus guttatus	GBIF
+Neotrygon moluccensis	GBIF
+Hypanus longus	GBIF
+Urobatis tumbesensis	GBIF
+Fontitrygon margaritella	GBIF
+Carcharhinus leucas	GBIF
+Pastinachus ater	GBIF
+Carcharhinus sorrah	GBIF
+Rhinoptera steindachneri	GBIF
+Hemiscyllium freycineti	GBIF
+Aetomylaeus milvus	GBIF
+Urotrygon rogersi	GBIF
+Gymnura marmorata	GBIF
+Hypanus dipterurus	GBIF
+Orectolobus maculatus	GBIF
+Carcharhinus limbatus	GBIF
+Urogymnus granulatus	GBIF
+Maculabatis pastinacoides	GBIF
+Potamotrygon schroederi	GBIF
+Diplobatis pictus	GBIF
+Myliobatis aquila	GBIF
+Carcharhinus cerdale	GBIF
+Pristis pristis	GBIF
+Carcharhinus albimarginatus	GBIF
+Sphyrna mokarran	GBIF
+Mustelus higmani	GBIF
+Pateobatis jenkinsii	GBIF
+Fluvitrygon oxyrhynchus	GBIF
+Potamotrygon humerosa	GBIF
+Aetobatus narinari	GBIF
+Neotrygon kuhlii	GBIF
+Hypanus berthalutzae	GBIF
+Sphyrna tiburo	GBIF
+Pseudobatos leucorhynchus	GBIF
+Pastinachus sephen	GBIF
+Carcharhinus acronotus	GBIF
+Galeocerdo cuvier	GBIF
+Sphyrna zygaena	GBIF
+Narcine leoparda	GBIF
+Zapteryx xyster	GBIF
+Stegostoma fasciatum	GBIF
+Atelomycterus erdmanni	GBIF
+Eptatretus mccoskeri	GBIF
+Pteroplatytrygon violacea	GBIF
+Urotrygon chilensis	GBIF
+Euprotomicrus bispinatus	GBIF
+Nasolamia velox	GBIF
+Mobula munkiana	GBIF
+Hemiscyllium halmahera	GBIF
+Aetobatus laticeps	GBIF
+Brevitrygon heterura	GBIF
+Urolophus halleri	GBIF
+Narcine entemedor	GBIF
+Raja velezi	GBIF
+Prionace glauca	GBIF
+Torpedo torpedo	GBIF
+Rhinobatos albomaculatus	GBIF
+Carcharhinus sealei	GBIF
+Sphyrna corona	GBIF
+Gymnura sereti	GBIF
+Narcine bancroftii	GBIF
+Himantura schmardae	GBIF
+Loxodon macrorhinus	GBIF
+Pristis pectinata	GBIF
+Fontitrygon geijskesi	GBIF
+Mobula thurstoni	GBIF
+Rhizoprionodon acutus	GBIF
+Pristis perotteti	GBIF
+Carcharhinus isodon	GBIF
+Rhynchobatus djiddensis	GBIF
+Mobula tarapacana	GBIF
+Narcine brasiliensis	GBIF
+Aetomylaeus vespertilio	GBIF
+Scoliodon macrorhynchos	GBIF
+Mobula kuhlii	GBIF
+Gymnura afuerae	GBIF
+Nebrius ferrugineus	GBIF
+Carcharhinus tjutjot	GBIF
+Tetronarce tremens	GBIF
+Urogymnus polylepis	GBIF
+Leptocharias smithii	GBIF
+Rhinobatos irvinei	GBIF
+Potamotrygon constellata	GBIF
+Scoliodon laticaudus	GBIF
+Hydrolagus mirabilis	GBIF
+Etmopterus brachyurus	GBIF
+Scyliorhinus cervigoni	GBIF
+Squatina oculata	GBIF
+Centrophorus granulosus	GBIF
+Himantura uarnak	GBIF
+Squalus megalops	GBIF
+Mustelus mustelus	GBIF
+Brevitrygon imbricata	GBIF
+Tetronarce nobiliana	GBIF
+Galeus melastomus	GBIF
+Dipturus doutrei	GBIF
+Bathyraja hesperafricana	GBIF
+Alopias vulpinus	GBIF
+Cetorhinus maximus	GBIF
+Urotrygon simulatrix	GBIF
+Hemiscyllium ocellatum	GBIF
+Plesiobatis daviesi	GBIF
+Mustelus lunulatus	GBIF
+Glaucostegus typus	GBIF
+Mobula mobular	GBIF
+Carcharodon carcharias	GBIF
+Deania calcea	GBIF
+Rhynchobatus laevis	GBIF
+Centrophorus moluccensis	GBIF
+Zanobatus maculatus	GBIF
+Hemigaleus australiensis	GBIF
+Taeniura grabata	GBIF
+Alopias pelagicus	GBIF
+Torpedo sinuspersici	GBIF
+Halaelurus buergeri	GBIF
+Chiloscyllium griseum	GBIF
+Rhizoprionodon longurio	GBIF
+Urogymnus asperrimus	GBIF
+Fontitrygon colarensis	GBIF
+Urotrygon microphthalmum	GBIF
+Alopias superciliosus	GBIF
+Telatrygon biasa	GBIF
+Hemigaleus microstoma	GBIF
+Chaenogaleus macrostoma	GBIF
+Negaprion acutidens	GBIF
+Raja miraletus	GBIF
+Potamotrygon hystrix	GBIF
+Hypanus rudis	GBIF
+Eridacnis radcliffei	GBIF
+Paragaleus tengi	GBIF
+Zapteryx exasperata	GBIF
+Glaucostegus thouin	GBIF
+Mustelus mosis	GBIF
+Rhinobatos thouiniana	GBIF
+Telatrygon zugei	GBIF
+Heterodontus mexicanus	GBIF
+Squatina armata	GBIF
+Hemipristis elongata	GBIF
+Myxine circifrons	GBIF
+Isurus oxyrinchus	GBIF
+Urogymnus lobistoma	GBIF
+Carcharhinus signatus	GBIF
+Ginglymostoma cirratum	GBIF
+Myliobatis peruvianus	GBIF
+Etmopterus pusillus	GBIF
+Leucoraja leucosticta	GBIF
+Pseudobatos planiceps	GBIF
+Etmopterus polli	GBIF
+Urotrygon peruanus	GBIF
+Arctoraja parmifera	GBIF
+Scoliodon	GBIF
+Zygobates studeri	GBIF
+Acrodobatis serra	GBIF
+Orectolobus leptolineatus	GBIF
+Rhizoprionodon oligolinx	GBIF
+Cephaloscyllium stevensi	GBIF
+Mustelus canis	GBIF
+Raja equatorialis	GBIF
+Apristurus nakayai	GBIF
+Squalus edmundsi	GBIF
+Iago garricki	GBIF
+Urolophus bucculentus	GBIF
+Tetronarce formosa	GBIF
+Rhinobatos manai	GBIF
+Halaelurus boesemani	GBIF
+Okamejei heemstrai	GBIF
+Holohalaelurus grennian	GBIF
+Pateobatis fai	GBIF
+Styracura schmardae	GBIF
+Rhinoptera marginata	GBIF
+Isurus	GBIF
+Galeocerdo	GBIF
+Sphyrna magna	GBIF
+Carcharhinus	GBIF
+Rhynchobatus cooki	GBIF
+Centroscyllium nigrum	GBIF
+Squalus montalbani	GBIF
+Chiloscyllium plagiosum	GBIF
+Urotrygon aspidura	GBIF
+Glaucostegus halavi	GBIF
+Rhina ancylostoma	GBIF
+Bathytoshia lata	GBIF
+Torpedo marmorata	GBIF
+Rhinoptera jayakari	GBIF
+Paragaleus pectoralis	GBIF
+Fontitrygon ukpam	GBIF
+Carcharhinus coatesi	GBIF
+Schroederichthys tenuis	GBIF
+Echinorhinus cookei	GBIF
+Carcharhinus brevipinna	GBIF
+Aetomylaeus bovinus	GBIF
+Gurgesiella dorsalifera	GBIF
+Notoraja martinezi	GBIF
+Sphyrna tudes	GBIF
+Raja parva	GBIF
+Mustelus lenticulatus	GBIF
+Aetomylaeus nichofii	GBIF
+Potamotrygon falkneri	GBIF
+Potamotrygon albimaculata	GBIF
+Dalatias licha	GBIF
+Rhinobatos rhinobatos	GBIF
+Torpedo mackayana	GBIF
+Carcharias taurus	GBIF
+Sphyrna couardi	GBIF
+Raja radula	GBIF
+Potamotrygon marquesi	GBIF
+Gymnura altavela	GBIF
+Isurus paucus	GBIF
+Deania profundorum	GBIF
+Carcharhinus altimus	GBIF
+Pseudocarcharias kamoharai	GBIF
+Rhizoprionodon terraenovae	GBIF
+Carcharhinus obscurus	GBIF
+Heliotrygon rosai	GBIF
+Centroscymnus crepidater	GBIF
+Bathytoshia centroura	GBIF
+Dasyatis marmorata	GBIF
+Heptranchias perlo	GBIF
+Scyliorhinus stellaris	GBIF
+Potamotrygon signata	GBIF
+Squatina aculeata	GBIF
+Rhynchobatus luebberti	GBIF
+Centrophorus lusitanicus	GBIF
+Galeorhinus galeus	GBIF
+Squalus acanthias	GBIF
+Carcharhinus galapagensis	GBIF
+Etmopterus spinax	GBIF
+Oxynotus centrina	GBIF
+Scyliorhinus canicula	GBIF
+Centrophorus squamosus	GBIF
+Zanobatus schoenleinii	GBIF
+Centrophorus uyato	GBIF
+Squatina africana	GBIF
+Potamotrygon pantanensis	GBIF
+Hexanchus griseus	GBIF
+Isogomphodon oxyrhynchus	GBIF
+Carcharhinus plumbeus	GBIF
+Potamotrygon leopoldi	GBIF
+Hemiscyllium strahani	GBIF
+Potamotrygon ocellata	GBIF
+Okamejei cairae	GBIF
+Pastinachus stellurostris	GBIF
+Apristurus sibogae	GBIF
+Centrophorus isodon	GBIF
+Sphyrna prisca	GBIF
+Hemipristis serra	GBIF
+Carcharhinus priscus	GBIF
+Carcharias megalodon	GBIF
+Isistius triangulus	GBIF
+Lamna eurybathrodon	GBIF
+Myliobatis	GBIF
+Acrodobatis obliquus	GBIF
+Carcharias subauriculatus	GBIF
+Carcharhinus egertoni	GBIF
+Rhizoprionodon taxandriae	GBIF
+Atlanticopristis equatorialis	GBIF
+Plesiotrygon nana	GBIF
+Carcharhinus hemiodon	GBIF
+Odontaspis ferox	GBIF
+Himantura leoparda	GBIF
+Rhynchobatus springeri	GBIF
+Brevitrygon walga	GBIF
+Hemiscyllium galei	GBIF
+Torpedo bauchotae	GBIF
+Carcharhinus brachyurus	GBIF
+Lamna acutissima	GBIF
+Galeus aduncus	GBIF
+Nebrius obliquus	GBIF
+Mobula eregoodoo	GBIF
+Squaliolus laticaudus	GBIF
+Scyliorhinus haeckelii	GBIF
+Neoraja africana	GBIF
+Pateobatis bleekeri	GBIF
+Neotrygon bobwardi	GBIF
+Potamotrygon henlei	GBIF
+Styracura pacifica	GBIF
+Gymnura zonura	GBIF
+Dipturus springeri	GBIF
+Bathyraja richardsoni	GBIF
+Cephaloscyllium sufflans	GBIF
+Urobatis jamaicensis	GBIF
+Apristurus yangi	GBIF
+Hypanus americanus	GBIF
+Pseudobatos glaucostigmus	GBIF
