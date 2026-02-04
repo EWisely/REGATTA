@@ -59,17 +59,43 @@ obis_sp_in <- checklist(obis_taxa,
                         geometry = regional_poly)
 
 #### Pull out only the marine species list for the regional database
-obis_sp <- obis_sp_in %>% # this is not working - it removes all terrestrial but 
-  # still gets some that are freshwater
-  filter(case_when(
-    !is.na(marine) ~ is_marine == marine,
-    !is.na(terrestrial) ~ is_terrestrial == terrestrial, # this is outranking everything below it somehow
-    !is.na(freshwater) ~ is_freshwater == freshwater,
-    !is.na(brackish) ~ is_brackish == brackish,
-    .default = taxonRank == "Species"
-  )) %>% 
-  select(scientificName) %>%
-  rename(Species = scientificName) %>% 
-  mutate(Source = "OBIS")
+# This did successfully return all marine or brackish species and no freshwater or terrestrial
+# species when used with marine = NA, brackish = NA, freshwater = F, and terrestrial = F
+# Ran tests: Brackish only success, marine only success, marine T brackish agnostic success
+if (!is.na(marine)) {
+  obis_sp_in <- obis_sp_in %>% 
+    filter(is_marine == marine)
+} else {
+    print("marine agnostic")
+  }
+if (!is.na(brackish)) {
+    obis_sp_in <- obis_sp_in %>% 
+      filter(is_brackish == brackish)
+} else {
+  print("brackish agnostic")
+}
+if (!is.na(freshwater)) {
+      obis_sp_in <- obis_sp_in %>% 
+        filter(is_freshwater == freshwater)
+} else {
+  print("freshwater agnostic")
+}
+if(!is.na(terrestrial)) {
+        obis_sp_in <- obis_sp_in %>% 
+          filter(is_terrestrial == terrestrial)
+} else {
+  print("terrestrial agnostic")
+}
+
+
+obis_sp <- obis_sp_in %>% 
+  filter(taxonRank == "Species"
+         ) %>% 
+  select(scientificName
+         ) %>%
+  rename(Species = scientificName
+         ) %>% 
+  mutate(Source = "OBIS"
+         )
 
 write.csv(obis_sp, paste(here("datasets"), sep = "", "/", obis_outputname, ".csv"), row.names = F)
