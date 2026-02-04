@@ -94,6 +94,6 @@ Local_csv_download <- function(obis_taxa,
 #                   loc_outputname = "Local_Species_FunctionTest1")
 
 # test (success)
-Local_csv_download(obis_taxa = c("Agnatha", "Chondrichthyes", "Osteichthyes"),
-                   loc_csvs = c("2016Aug24_Tirado-Sanchez_et_al_Galapagos_Pisces_Checklist.csv"),
-                   loc_outputname = "Local_Species_FunctionTest1")
+#Local_csv_download(obis_taxa = c("Agnatha", "Chondrichthyes", "Osteichthyes"),
+#                   loc_csvs = c("2016Aug24_Tirado-Sanchez_et_al_Galapagos_Pisces_Checklist.csv"),
+#                   loc_outputname = "Local_Species_FunctionTest1")

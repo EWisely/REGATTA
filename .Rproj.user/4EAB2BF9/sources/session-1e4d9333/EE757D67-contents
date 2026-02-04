@@ -35,7 +35,29 @@ GBIF_download <- function(obis_taxa,
   classes <- c()
   
   for (i in worms_taxa) {
+    print(paste("Getting WoRMS ID for", i))
+    
+    tryCatch( { # Test the code first to see if it works
+      worrms::wm_name2id(name = i)
+    },
+    error = function(e) {
+      print(e)
+      message(paste("WoRMS ID Not Found, Check That Your Listed Taxon is in WoRMS:", i))
+    }
+    )
+    
     wid <- worrms::wm_name2id(name = i)
+    print(paste("Getting WoRMS Downstream for", i))
+    
+    tryCatch( { # Test the code first to see if it works
+      taxize::worms_downstream(id = wid, downto = "class")
+    },
+    error = function(e) {
+      print(e)
+      message(paste("WoRMS Downstream Not Found, Check That Your Listed Taxon is in WoRMS:", i))
+    }
+    )
+    
     classlist <- taxize::worms_downstream(id = wid, downto = "class")
     classes <- rbind(classes, classlist)
   }
