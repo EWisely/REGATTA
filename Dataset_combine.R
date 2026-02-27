@@ -23,7 +23,7 @@ dataset_combine <- function(comb_inputnames = c("GBIF_Species, Local_Species, OB
                          sep = "", ".csv"), 
                    fileEncoding = "latin1", 
                    check.names = FALSE)
-    Species_local_comb <- unique(rbind(Species_local_comb, db))
+    Species_local_comb <- unique(rbind(Species_local_comb, db)) # idk what it does if there's an OBIS and GBIF record
   }
   
   Species_local_comb <- Species_local_comb %>%

@@ -6,8 +6,8 @@ OBIS_download <- function(obis_taxa,
                           regional_poly, 
                           obis_outputname = "OBIS_Species", 
                           marine = NA,
-                          freshwater = F,
-                          terrestrial = F,
+                          freshwater = NA,
+                          terrestrial = NA,
                           brackish = NA) {
   library(usethis)
   library(rgbif)
