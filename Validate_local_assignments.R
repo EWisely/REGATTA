@@ -6,13 +6,13 @@
 
 #Compare percent ID columns of local and global assignments, and pick the lowest taxonomic rank shared between any winning global assignments and the local species checklist.
 
-validate_local_assignment <- function(Primer = NA, # defaults to default outputs
-                            local_database = NA,
+validate_local_assignment <- function(Primer = "Please Define Primer", #troubleshooting trying to get the damn thing to take arbitrary strings
+                            local_database = "Please Define local_database",
                             Local_advantage = T,  #Local advantage controls the behavior of the program when global_pctid = local_pctid.  If set to TRUE, then the local name becomes the preferred name when the percent ID values are equal.  If not, the global name remains the preferred name, and the script will check for the presence of the global species, genus, and family in the local checklist made by combining information from GBIF, OBIS, and the Darwin center, and the assignment will be downgraded to the lowest shared taxonomic rank between the global assignment and the local checklist.
-                            userout = NA,
-                            lcafile = NA,
-                            obitoolsfile = NA,
-                            asvsfile = NA
+                            userout = "Please Define userout",
+                            lcafile = "Please Define lcafile",
+                            obitoolsfile = "Please Define obitoolsfile",
+                            asvsfile = "Please Define asvsfile"
                             # sql database from before
                             ) {
 
@@ -182,7 +182,7 @@ validate_local_assignment <- function(Primer = NA, # defaults to default outputs
   #44 including NA
   Loc_nphy <- nrow(unique_phyla)
   
-  print("Local stats caluclated")
+  print("Local stats calculated")
   #Combine results from local database assignments with vsearch, and global database assignments with obitools3----
   
   #combine results of obitools and vsearch_global with lca
@@ -304,10 +304,10 @@ validate_local_assignment <- function(Primer = NA, # defaults to default outputs
   write.csv(global_preferred_assignments, here(paste0(Primer,"_output/global_preferred_assignments_before_final_LCA.csv")))
   
   #percentage of all ASVs assigned to the global database
-  (globally_assigned/nrow(best_ID_combined))*100
+  (gl_pref/nrow(best_ID_combined))*100
   #28.02503%
   #percentage of taxonomically identified ASVs assigned to the global database
-  (globally_assigned/assigned)*100
+  (gl_pref/assigned)*100
   #73.80952%
   
   #count the number of times the local database was used for the preferred assignment
@@ -463,32 +463,20 @@ validate_local_assignment <- function(Primer = NA, # defaults to default outputs
   
   #read in the comprehensive local checklist and isolate the genus column
   
+  print(here())
   
-  if (Primer=="MiFish"){
-  local_checklist<-read.csv(local_database, header = FALSE)
-  
-  #clean it up
+  local_checklist<-read.csv(here("custom_db", local_database), header = FALSE)
+    
+    #clean it upgith
   local_checklist<-local_checklist%>%
-    dplyr::mutate(V1=gsub("Gen. ", "",V1))%>%
-    dplyr::mutate(V1=gsub("indet. ", "",V1))%>%
-    dplyr::mutate(V1=gsub("\"", "",V1))%>%
-    dplyr::mutate(V1=gsub("sp. ", "",V1))%>%
-    dplyr::mutate(V1=gsub("cf. ", "",V1))%>%
-    dplyr::rename(Scientific_name=V1)
+      dplyr::mutate(V1=gsub("Gen. ", "",V1))%>%
+      dplyr::mutate(V1=gsub("indet. ", "",V1))%>%
+      dplyr::mutate(V1=gsub("\"", "",V1))%>%
+      dplyr::mutate(V1=gsub("sp. ", "",V1))%>%
+      dplyr::mutate(V1=gsub("cf. ", "",V1))%>%
+      dplyr::rename(Scientific_name=V1)
   
-  }else{
-    local_checklist<-read.csv(local_checklist, header = FALSE)
-  
-  #clean it up
-  local_checklist<-local_checklist%>%
-    dplyr::mutate(V1=gsub("Gen. ", "",V1))%>%
-    dplyr::mutate(V1=gsub("indet. ", "",V1))%>%
-    dplyr::mutate(V1=gsub("\"", "",V1))%>%
-    dplyr::mutate(V1=gsub("c.f. ", "",V1))%>%
-    dplyr::mutate(V1=gsub("cf.", "",V1))%>%
-    dplyr::rename(Scientific_name=V1)
-  }
-  
+
   #separate genus from species
   local_genuses<-local_checklist%>%
     separate(Scientific_name, into = c("listed_genus", "listed_species"), sep=" ",remove = FALSE)
@@ -728,11 +716,15 @@ validate_local_assignment <- function(Primer = NA, # defaults to default outputs
   summaryfinalglobal
 }
 
+mf <- "MiFish"
+lc_db <- here("custom_db", "comprehensive_galapagos_fish_list.txt") # for troubleshooting
+
 # Test
-validate_local_assignment(Primer = "MiFish", 
-                          local_database = here("custom_db/comprehensive_galapagos_crustaceans_list.txt"), 
+validate_local_assignment(Primer = mf, 
+                          local_database = lc_db, 
+                          Local_advantage = T,
                           userout = "userout_MiFish5-1db_Galapagos_top5_comprehensive_galapagos_results.txt",
                           lcafile = "lca_MiFish5-1db_Galapagos_top5_comprehensive_galapagos_results.txt",
-                          asvsfile = "upper_MiFish_Menu_95_named_cleared_tags.tab",
                           obitoolsfile = "MiFish_Menu_95_named.tab",
+                          asvsfile = "upper_MiFish_Menu_95_named_cleared_tags.tab"
                           )
