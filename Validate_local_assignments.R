@@ -16,11 +16,28 @@ validate_local_assignment <- function(Primer = "Please Define Primer", #troubles
                             # sql database from before
                             ) {
 
-  library(tidyverse)
   library(prettyunits)
   library(taxonomizr)
   library(here)
   library(metabaR)
+  library(tidyverse)
+  
+  # prepping empty cells in stats report
+  
+  gl_pctloc <- NA
+  gl_post_loc_pref <- NA
+  gl_post_gl_pref <- NA
+  gl_change_asvs <- NA
+  gl_gl_pctgl <- NA
+  gl_loc_pref <- NA
+  gl_gl_pref <- NA
+  Loc_pctloc <- NA
+  Loc_post_loc_pref <- NA
+  Loc_post_gl_pref <- NA
+  Loc_change_asvs <- NA
+  Loc_gl_pctgl <- NA
+  Loc_loc_pref <- NA
+  Loc_gl_pref <- NA
   
   ##################### Begin script ################
 
@@ -48,7 +65,7 @@ validate_local_assignment <- function(Primer = "Please Define Primer", #troubles
     select(c(ID,TAXID,SCIENTIFIC_NAME,BEST_IDENTITY,COUNT))
   print("OBI results read")
   ##Load local database vsearch results after a lowest common ancestor (LCA) analysis (using the in-silico PCR'ed mito file added to lsu and 16S without insilico PCR)-----
-  
+
   lca_vsearch<-readr::read_delim(vsearch_lca_file, col_names = c("ID","sintax"), delim = '\t')
   print("LCA inputs read")
   
@@ -103,7 +120,23 @@ validate_local_assignment <- function(Primer = "Please Define Primer", #troubles
   print("Vsearch results merged, beginning local only")
   
   #*****Begin Local_only
+  #*
+  print("Calculating local stats")
   
+  View(vsearch_results_all_matches)
+  
+  #total ASVs 
+  Loc_tot=nrow(vsearch_results_all_matches)
+  Loc_tot # pre-regatta local
+  
+  #Number of total ASVs assigned to a taxon
+  Loc_asg<-nrow(vsearch_results_all_matches[is.na(vsearch_results_all_matches$sintax) ==FALSE, ])
+  Loc_asg
+  # sintax has any taxonomy that is available
+  
+  #Percent of all ASVs assigned to a taxon
+  Loc_pctasg <- (Loc_asg/nrow(vsearch_results_all_matches))*100
+
   k_only<-vsearch_results_all_matches%>%
     dplyr::filter(is.na(Phylum))%>%
     dplyr::filter(Domain =="Eukaryota")
@@ -249,6 +282,8 @@ validate_local_assignment <- function(Primer = "Please Define Primer", #troubles
     
   }
   
+  View(best_ID_combined)
+  
   print("Local and global assignments chosen")
   #summarize changes to taxonomic classifications----
   ## Again, this needs to be made into an exportable table 
@@ -257,20 +292,31 @@ validate_local_assignment <- function(Primer = "Please Define Primer", #troubles
   #count how many got assigned to local vs. global and number of unassigned.
   # After REGATTA section
   #total ASVs 
-  tot_gl=nrow(obi_result95)
-  tot_gl # pre-regatta global
+  View(obi_result95)
+  gl_tot=nrow(obi_result95)
+  gl_tot # pre-regatta global
+  
+  ### Some more global stats ###
+  #Number of total ASVs assigned to a taxon global
+  gl_asg<-nrow(obi_result95[is.na(obi_result95$SCIENTIFIC_NAME) ==FALSE, ])
+  # sintax has any taxonomy that is available
+  
+  #Percent of all ASVs assigned to a taxon global
+  gl_pctasg <- (gl_asg/nrow(obi_result95))*100
+  ### Some more global stats ###
+  
   #to make sure we didn't lose any
-  tot_post=nrow(best_ID_combined)
-  tot_post # after regatta
+  post_tot <- nrow(best_ID_combined)
+  post_tot # after regatta
   #1438
   
-  #Updated number of total ASVs assigned to a taxon after regatta
-  assigned<-nrow(best_ID_combined[is.na(best_ID_combined$preferred_name) ==FALSE, ])
-  assigned
+  #Updated number of total ASVs assigned to a taxon after regatta, previously known as "assigned"
+  post_asg<-nrow(best_ID_combined[is.na(best_ID_combined$preferred_name) ==FALSE, ])
+  post_asg
   #546
   
   #Percent of all ASVs assigned to a taxon after combining vsearch and obitools
-  pctasg_post <- (assigned/nrow(best_ID_combined))*100
+  post_pctasg <- (post_asg/nrow(best_ID_combined))*100
   #37.72233
   
   #compared to just obitools
@@ -279,7 +325,7 @@ validate_local_assignment <- function(Primer = "Please Define Primer", #troubles
   #542
   
   #increase in assigned ASVs from global only
-  change_asvs_post <- assigned - obi_assigned
+  post_change_asvs <- post_asg - obi_assigned
   # spreadsheet column: change in number of ASVs assigned after local reconciliation
   #4
   
@@ -291,10 +337,14 @@ validate_local_assignment <- function(Primer = "Please Define Primer", #troubles
   #After comparing the taxonomic assignments of global and local to get preferred names----
   
   #count the number of times the global database was used for the preferred assignment
-  gl_pref<-nrow(best_ID_combined[best_ID_combined$database == 'global'& is.na(best_ID_combined$preferred_name) ==FALSE, ])
+  post_gl_pref<-nrow(best_ID_combined[best_ID_combined$database == 'global'& is.na(best_ID_combined$preferred_name) ==FALSE, ])
   
-  gl_pref
+  post_gl_pref
   #403
+  
+  # percent local assignments preferred
+  post_pctgl <- (post_gl_pref/nrow(best_ID_combined[is.na(best_ID_combined$SCIENTIFIC_NAME)==FALSE, ]))*100
+  # percentage of all assignments (rows with any scientific name) that are local
   
   #put these in a new dataframe
   global_preferred_assignments<-best_ID_combined%>%
@@ -304,10 +354,10 @@ validate_local_assignment <- function(Primer = "Please Define Primer", #troubles
   write.csv(global_preferred_assignments, here(paste0(Primer,"_output/global_preferred_assignments_before_final_LCA.csv")))
   
   #percentage of all ASVs assigned to the global database
-  (gl_pref/nrow(best_ID_combined))*100
+  (post_gl_pref/nrow(best_ID_combined))*100
   #28.02503%
   #percentage of taxonomically identified ASVs assigned to the global database
-  (gl_pref/assigned)*100
+  (post_gl_pref/post_asg)*100
   #73.80952%
   
   #count the number of times the local database was used for the preferred assignment
@@ -319,15 +369,98 @@ validate_local_assignment <- function(Primer = "Please Define Primer", #troubles
   #1.599444%
   
   #percentage of identified sequences
-  (locally_assigned/assigned)*100
+  (locally_assigned/post_asg)*100
   #4.212454% 
   
   
   #number of occurrences where local assignment changed the existing global assignment
-  loc_pref<-nrow(best_ID_combined[best_ID_combined$database == 'local'& is.na(best_ID_combined$SCIENTIFIC_NAME) ==FALSE, ])
-  loc_pref # count of local assignment preferred
+  post_loc_pref<-nrow(best_ID_combined[best_ID_combined$database == 'local'& is.na(best_ID_combined$SCIENTIFIC_NAME) ==FALSE, ])
+  post_loc_pref # count of local assignment preferred
   #19 taxa updated from existing global assignments
   
+  # percent local assignments preferred
+  post_pctloc <- (post_loc_pref/nrow(best_ID_combined[is.na(best_ID_combined$SCIENTIFIC_NAME)==FALSE, ]))*100
+  # percentage of all assignments (rows with any scientific name) that are local
+  
+  print("Calculating post-REGATTA taxon stats")
+  
+  k_only<-best_ID_combined%>%
+    dplyr::filter(is.na(Phylum))%>%
+    dplyr::filter(Domain =="Eukaryota")
+  post_kin <- nrow(k_only)
+  
+  phylum_only<-best_ID_combined%>%
+    dplyr::filter(is.na(Class))%>%
+    dplyr::filter(Domain =="Eukaryota")
+  post_phy <- nrow(phylum_only)
+  #41 observations LCA'ed to just Phylum
+  
+  cla_only<-best_ID_combined%>%
+    dplyr::filter(is.na(Order))%>%
+    dplyr::filter(Domain =="Eukaryota")
+  post_cla <- nrow(cla_only)
+  
+  ord_only<-best_ID_combined%>%
+    dplyr::filter(is.na(Family))%>%
+    dplyr::filter(Domain =="Eukaryota")
+  post_ord <- nrow(ord_only)
+  
+  fam_only<-best_ID_combined%>%
+    dplyr::filter(is.na(Genus))%>%
+    dplyr::filter(Domain =="Eukaryota")
+  post_fam <- nrow(fam_only)
+  
+  gen_only<-best_ID_combined%>%
+    dplyr::filter(is.na(Species))%>%
+    dplyr::filter(Domain =="Eukaryota")
+  post_gen <- nrow(gen_only)
+  
+  sp_only<-best_ID_combined%>%
+    dplyr::filter(!is.na(Species))%>%
+    dplyr::filter(Domain =="Eukaryota")
+  post_sp <- nrow(sp_only)
+  
+  unique_sp<-best_ID_combined%>% # currently returning empty
+    select(Species)%>%
+    unique()
+  nrow(unique_sp)
+  post_nsp <- nrow(unique_sp)
+  #46 including NA
+  
+  unique_genuses<-best_ID_combined%>%
+    select(Genus)%>%
+    unique()
+  nrow(unique_genuses)
+  #44 including NA
+  post_ngen <- nrow(unique_genuses)
+  
+  unique_families<-best_ID_combined%>%
+    select(Family)%>%
+    unique()
+  nrow(unique_families)
+  #44 including NA
+  post_nfam <- nrow(unique_families)
+  
+  unique_orders<-best_ID_combined%>%
+    select(Order)%>%
+    unique()
+  nrow(unique_orders)
+  #44 including NA
+  post_nord <- nrow(unique_orders)
+  
+  unique_classes<-best_ID_combined%>%
+    select(Class)%>%
+    unique()
+  nrow(unique_classes)
+  #44 including NA
+  post_ncla <- nrow(unique_classes)
+  
+  unique_phyla<-best_ID_combined%>%
+    select(Phylum)%>%
+    unique()
+  nrow(unique_phyla)
+  #44 including NA
+  post_nphy <- nrow(unique_phyla)
   
   #number of unique taxa after choosing the best assignment between global and local:
   
@@ -369,10 +502,96 @@ validate_local_assignment <- function(Primer = "Please Define Primer", #troubles
 
   global_taxaId<-meta_best_ID_combined$TAXID
   global_levels<-getTaxonomy(global_taxaId,'accessionTaxa.sql')
-  #print(global_levels)
+  global_levels <- as.data.frame(global_levels)
   print("Global TaxIDs got")
   
   global_taxa<-meta_best_ID_combined$SCIENTIFIC_NAME
+  
+  print("Calculating global stats")
+  
+  #*****Begin Global_only
+  
+  View(global_levels)
+  
+  k_only<-global_levels%>%
+    dplyr::filter(is.na(phylum))%>%
+    dplyr::filter(domain =="Eukaryota")
+  gl_kin <- nrow(k_only)
+  
+  phylum_only<-global_levels%>%
+    dplyr::filter(is.na(class))%>%
+    dplyr::filter(domain =="Eukaryota")
+  gl_phy <- nrow(phylum_only)
+  #41 observations LCA'ed to just Phylum
+  
+  cla_only<-global_levels%>%
+    dplyr::filter(is.na(order))%>%
+    dplyr::filter(domain =="Eukaryota")
+  gl_cla <- nrow(cla_only)
+  
+  ord_only<-global_levels%>%
+    dplyr::filter(is.na(family))%>%
+    dplyr::filter(domain =="Eukaryota")
+  gl_ord <- nrow(ord_only)
+  
+  fam_only<-global_levels%>%
+    dplyr::filter(is.na(genus))%>%
+    dplyr::filter(domain =="Eukaryota")
+  gl_fam <- nrow(fam_only)
+  
+  gen_only<-global_levels%>%
+    dplyr::filter(is.na(species))%>%
+    dplyr::filter(domain =="Eukaryota")
+  gl_gen <- nrow(gen_only)
+  
+  sp_only<-global_levels%>%
+    dplyr::filter(!is.na(species))%>%
+    dplyr::filter(domain =="Eukaryota")
+  gl_sp <- nrow(sp_only)
+  
+  unique_sp<-global_levels%>% # currently returning empty
+    select(species)%>%
+    unique()
+  nrow(unique_sp)
+  gl_nsp <- nrow(unique_sp)
+  #46 including NA
+  
+  unique_genuses<-global_levels%>%
+    select(genus)%>%
+    unique()
+  nrow(unique_genuses)
+  #44 including NA
+  gl_ngen <- nrow(unique_genuses)
+  
+  unique_families<-global_levels%>%
+    select(family)%>%
+    unique()
+  nrow(unique_families)
+  #44 including NA
+  gl_nfam <- nrow(unique_families)
+  
+  unique_orders<-global_levels%>%
+    select(order)%>%
+    unique()
+  nrow(unique_orders)
+  #44 including NA
+  gl_nord <- nrow(unique_orders)
+  
+  unique_classes<-global_levels%>%
+    select(class)%>%
+    unique()
+  nrow(unique_classes)
+  #44 including NA
+  gl_ncla <- nrow(unique_classes)
+  
+  unique_phyla<-global_levels%>%
+    select(phylum)%>%
+    unique()
+  nrow(unique_phyla)
+  #44 including NA
+  gl_nphy <- nrow(unique_phyla)
+  
+  print("Global stats calculated")
   
   
   #condenseTaxa(taxa)
@@ -485,9 +704,9 @@ validate_local_assignment <- function(Primer = "Please Define Primer", #troubles
   local_genuses<-local_checklist%>%
     separate(Scientific_name, into = c("listed_genus", "listed_species"), sep=" ",remove = FALSE)
   
-  print("local_genuses")
+  #print("local_genuses")
   #View(local_genuses)
-  print("local_checklist")
+  #print("local_checklist")
   #View(local_checklist)
   local_checklist<-unique(full_join(local_checklist, local_genuses, 
                                     by="Scientific_name", relationship = "many-to-many"))
@@ -694,14 +913,16 @@ validate_local_assignment <- function(Primer = "Please Define Primer", #troubles
                      NA,
                      database))
   
-  
+  print("final_taxa assembled")
   class(final_taxa)
   write.csv(final_taxa,here(paste0("06_local_vs_global_results/",Primer,"_Menu_ready_for_MetabaR.csv")))
   
   write.csv(best_ID_combined,here(paste0("06_local_vs_global_results/",Primer,"_best_ID_combined.csv")))
-  return(best_ID_combined)
   
-  print(paste0("Finished cross validating taxonomic assignments for ",Primer," with Local advantage set to ",Local_advantage))
+  print(paste0("Finished cross validating taxonomic assignments for ", 
+               Primer, 
+               " with Local advantage set to ", 
+               Local_advantage))
   
   
   
@@ -729,7 +950,53 @@ validate_local_assignment <- function(Primer = "Please Define Primer", #troubles
     summarise(n_finalglobal= n_distinct(preferred_name))
   summaryfinalglobal
   
+  print("Generating stats report")
+  
+  row_names <- c("total ASVs",
+                 "assigned ASVs",
+                 "Percentage of ASVs assigned",
+                 "count of local assignment preferred",
+                 "percent local assignments",
+                 "count of global assignment preferred",
+                 "percent global assignments",
+                 "change in number of ASVs assigned",
+                 "ID'ed to kingdom only",
+                 "ID'ed to phylum only",
+                 "ID'ed to class only",
+                 "ID'ed to order only",
+                 "ID'ed to family only",
+                 "ID'ed to genus only",
+                 "ID'ed to species",
+                 "Number of phyla",
+                 "Number of classes",
+                 "Number of orders",
+                 "Number of families",
+                 "Number of genera",
+                 "Number of species")
+  
+  global_stats <- c(gl_tot, gl_asg, gl_pctasg, gl_loc_pref, gl_pctloc,
+                    gl_gl_pref, gl_gl_pctgl, gl_change_asvs,
+                    gl_kin, gl_phy, gl_cla, gl_ord, gl_fam, gl_gen, gl_sp,
+                    gl_nphy, gl_ncla, gl_nord, gl_nfam, gl_ngen, gl_nsp)
+  
+  local_stats <- c(Loc_tot, Loc_asg, Loc_pctasg, Loc_loc_pref, Loc_pctloc,
+                   Loc_gl_pref, Loc_gl_pctgl, Loc_change_asvs,
+                   Loc_kin, Loc_phy, Loc_cla, Loc_ord, Loc_fam, Loc_gen, Loc_sp,
+                   Loc_nphy, Loc_ncla, Loc_nord, Loc_nfam, Loc_ngen, Loc_nsp)
+  
+  post_stats <- c(post_tot, post_asg, post_pctasg, post_loc_pref, post_pctloc,
+                  post_gl_pref, post_pctgl, post_change_asvs,
+                  post_kin, post_phy, post_cla, post_ord, post_fam, post_gen, post_sp,
+                  post_nphy, post_ncla, post_nord, post_nfam, post_ngen, post_nsp)
+  
+  stats_summary <- data.frame(row_names, global_stats, local_stats, post_stats)
+  View(stats_summary)
+  write.csv(stats_summary, 
+            here(paste0(Primer,"_output/stats_summary.csv")))
+  
+  
   "Validate_local_assignment complete"
+  return(final_taxa)
 }
 
 mf <- "MiFish"
