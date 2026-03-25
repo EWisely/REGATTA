@@ -339,6 +339,7 @@ validate_local_assignment <- function(Primer = "Please Define Primer", #troubles
   )
 
   print("Post-merge statistics calculated")
+  print("Finding LCAs between local and global IDs")
   
   #Resuming the analysis----
   
@@ -352,8 +353,6 @@ validate_local_assignment <- function(Primer = "Please Define Primer", #troubles
   
   v_species<-gsub("_"," ",meta_best_ID_combined$vsearch_species)
   meta_best_ID_combined$vsearch_species<-v_species
-  
-  print("LCAs located")
   
   taxaId<-getId(v_species,'accessionTaxa.sql')
   print(taxaId)
@@ -397,14 +396,19 @@ validate_local_assignment <- function(Primer = "Please Define Primer", #troubles
     mutate(global_v_local_lca_name = coalesce(species,genus,family,order,class,phylum)) # error: no superkingdom found, deleted
   # Given a set of vectors, coalesce() finds the first non-missing value at each position.
   
-  
   #add global_v_local_lca_name column to best_ID_combined
   
   lca_global_vs_local_assignments<-condensed_lca_global_vs_local%>%
     select(ID,global_v_local_lca_name)
   
-  best_ID_combined<-full_join(best_ID_combined, lca_global_vs_local_assignments, by ="ID")
+  print("best_ID_combined")
+  print(best_ID_combined[26,])
+  print("lca_global_vs_local_assignments")
+  print(lca_global_vs_local_assignments[26,])
   
+  best_ID_combined <- full_join(best_ID_combined, lca_global_vs_local_assignments, by ="ID")
+  
+  print("Joined best ID and LCA dataframes")
   #after visually looking at best_ID_combined for local database sequences that were assigned to 
   # very different taxa by global and local databases, and even within the local database assignments 
   # (phylum only dataframe), there were over 3,000 sequences that matched to Calanus sinicus with a 
@@ -467,7 +471,7 @@ validate_local_assignment <- function(Primer = "Please Define Primer", #troubles
   
   local_checklist<-read.csv(here("custom_db", local_database), header = FALSE)
     
-    #clean it upgith
+    #clean it up
   local_checklist<-local_checklist%>%
       dplyr::mutate(V1=gsub("Gen. ", "",V1))%>%
       dplyr::mutate(V1=gsub("indet. ", "",V1))%>%
@@ -476,13 +480,20 @@ validate_local_assignment <- function(Primer = "Please Define Primer", #troubles
       dplyr::mutate(V1=gsub("cf. ", "",V1))%>%
       dplyr::rename(Scientific_name=V1)
   
-
+  print("Local checklist cleaned")
   #separate genus from species
   local_genuses<-local_checklist%>%
     separate(Scientific_name, into = c("listed_genus", "listed_species"), sep=" ",remove = FALSE)
   
-  local_checklist<-unique(full_join(local_checklist, local_genuses, by="Scientific_name"))
+  print("local_genuses")
+  #View(local_genuses)
+  print("local_checklist")
+  #View(local_checklist)
+  local_checklist<-unique(full_join(local_checklist, local_genuses, 
+                                    by="Scientific_name", relationship = "many-to-many"))
   ##get taxonomy for everything in the comprehensive Galapagos species checklist from taxonomizr-----
+  ## "Alepisaurus ferox" gets two rows for some reason but many-to-many + unique fixed that
+  #View(local_checklist)
   
   #need the taxonomizr database to be already prepared
   checklist_taxIDs<-getId(local_checklist$Scientific_name,'accessionTaxa.sql')
@@ -562,6 +573,7 @@ validate_local_assignment <- function(Primer = "Please Define Primer", #troubles
   
   #count how many got assigned to local vs. global and number of unassigned.
   
+  # post-checklist and LCA 
   #total ASVs
   total_ASVs=nrow(obi_result95)
   print(paste("Total ASVS =", total_ASVs))
@@ -637,6 +649,7 @@ validate_local_assignment <- function(Primer = "Please Define Primer", #troubles
   
   
   #Make new motu (taxa) table for MetabaR ----
+  print("Making new MOTU table for MetabaR")
   
   ## MOTUs characteristics table
   
@@ -686,6 +699,7 @@ validate_local_assignment <- function(Primer = "Please Define Primer", #troubles
   write.csv(final_taxa,here(paste0("06_local_vs_global_results/",Primer,"_Menu_ready_for_MetabaR.csv")))
   
   write.csv(best_ID_combined,here(paste0("06_local_vs_global_results/",Primer,"_best_ID_combined.csv")))
+  return(best_ID_combined)
   
   print(paste0("Finished cross validating taxonomic assignments for ",Primer," with Local advantage set to ",Local_advantage))
   
@@ -714,13 +728,15 @@ validate_local_assignment <- function(Primer = "Please Define Primer", #troubles
   summaryfinalglobal<-finalglobal%>%
     summarise(n_finalglobal= n_distinct(preferred_name))
   summaryfinalglobal
+  
+  "Validate_local_assignment complete"
 }
 
 mf <- "MiFish"
-lc_db <- here("custom_db", "comprehensive_galapagos_fish_list.txt") # for troubleshooting
+lc_db <- "comprehensive_galapagos_fish_list.txt" # for troubleshooting
 
 # Test
-validate_local_assignment(Primer = mf, 
+best_ID_combined_test <- validate_local_assignment(Primer = mf, 
                           local_database = lc_db, 
                           Local_advantage = T,
                           userout = "userout_MiFish5-1db_Galapagos_top5_comprehensive_galapagos_results.txt",
