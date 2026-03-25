@@ -6,9 +6,15 @@
 
 #Compare percent ID columns of local and global assignments, and pick the lowest taxonomic rank shared between any winning global assignments and the local species checklist.
 
-validate_local_assignment <- function(Primer = NA, # defaults to default outputs
-                            local_database = NA,
-                            Local_advantage = T) { #Local advantage controls the behavior of the program when global_pctid = local_pctid.  If set to TRUE, then the local name becomes the preferred name when the percent ID values are equal.  If not, the global name remains the preferred name, and the script will check for the presence of the global species, genus, and family in the local checklist made by combining information from GBIF, OBIS, and the Darwin center, and the assignment will be downgraded to the lowest shared taxonomic rank between the global assignment and the local checklist.
+validate_local_assignment <- function(Primer = "Please Define Primer", #troubleshooting trying to get the damn thing to take arbitrary strings
+                            local_database = "Please Define local_database",
+                            Local_advantage = T,  #Local advantage controls the behavior of the program when global_pctid = local_pctid.  If set to TRUE, then the local name becomes the preferred name when the percent ID values are equal.  If not, the global name remains the preferred name, and the script will check for the presence of the global species, genus, and family in the local checklist made by combining information from GBIF, OBIS, and the Darwin center, and the assignment will be downgraded to the lowest shared taxonomic rank between the global assignment and the local checklist.
+                            userout = "Please Define userout",
+                            lcafile = "Please Define lcafile",
+                            obitoolsfile = "Please Define obitoolsfile",
+                            asvsfile = "Please Define asvsfile"
+                            # sql database from before
+                            ) {
 
   library(tidyverse)
   library(prettyunits)
@@ -20,37 +26,31 @@ validate_local_assignment <- function(Primer = NA, # defaults to default outputs
 
   #This takes a long time and plenty of space, but is necessary for this script
   prepareDatabase('accessionTaxa.sql')
-  system("say Done preparing database")
+  print("SQL database prepared")
   #accessed 4-26-24
 
-
-  #GitHub copy of my data (for release upon publication)
+  vsearch_userout_file <- here("script_03_inputs", userout)
   
-  #Define input files (should remove the hardcoded primer name, MiFish from the R objects)
+  vsearch_lca_file <- here("script_03_inputs", lcafile)
   
-  MiFish_vsearch_userout_file <- here("script_03_inputs/userout_MiFish5-1db_Galapagos_top5_comprehensive_galapagos_results.txt")
+  obitools_results_file <- here("script_03_inputs", obitoolsfile)
   
-  MiFish_vsearch_lca_file <- here("script_03_inputs/lca_MiFish5-1db_Galapagos_top5_comprehensive_galapagos_results.txt")
-  
-  MiFish_obitools_results_file <- here("script_03_inputs/MiFish_Menu_95_named.tab")
-  
-  MiFish_ASVs_file <- here("script_03_inputs/upper_MiFish_Menu_95_named_cleared_tags.tab")
-
+  ASVs_file <- here("script_03_inputs", asvsfile)
+  print("Input files imported")
 
   #Load global obitools database results and local vsearch database results ----
   
   
   ##Global EMBL database results in obitools3 output format----
-  obi_result95<-readr::read_delim(MiFish_obitools_results_file)
-  
+  obi_result95<-readr::read_delim(obitools_results_file)
   colnames(obi_result95)
   obi_result95<-obi_result95%>%
     select(c(ID,TAXID,SCIENTIFIC_NAME,BEST_IDENTITY,COUNT))
-  
+  print("OBI results read")
   ##Load local database vsearch results after a lowest common ancestor (LCA) analysis (using the in-silico PCR'ed mito file added to lsu and 16S without insilico PCR)-----
   
-  lca_vsearch<-readr::read_delim(MiFish_vsearch_lca_file, col_names = c("ID","sintax"), delim = '\t')
-  
+  lca_vsearch<-readr::read_delim(vsearch_lca_file, col_names = c("ID","sintax"), delim = '\t')
+  print("LCA inputs read")
   
   ###parse the sintax taxonomy column into 7 new columns.----
   
@@ -66,20 +66,20 @@ validate_local_assignment <- function(Primer = NA, # defaults to default outputs
   lca_vsearch$Genus<-str_remove_all(lca_vsearch$Genus, pattern = "g:")
   lca_vsearch$Species<-str_remove_all(lca_vsearch$Species, pattern = "s:")
   lca_vsearch$Species<-str_replace_all(lca_vsearch$Species, pattern = "_", replacement = " ")
-  
+  print("LCA vsearch taxonomy levelscleaned")
   #read in Local database vsearch results in "userout" format to get the percent identities from the local assignments
   
-  pct_vsearch<-readr::read_delim(MiFish_vsearch_userout_file, col_names =FALSE, delim = '\t')
+  pct_vsearch<-readr::read_delim(vsearch_userout_file, col_names =FALSE, delim = '\t')
   
   pct_vsearch<-pct_vsearch%>%
     separate(col = X2, sep = ";",into = c("ACC","sintax"))%>%
     dplyr::rename(ID=X1, vsearch_pctid=X3, vsearch_alnlen=X4, vsearch_mism=X5, vsearch_opens=X6)
   
-  
+  print("Pct vsearch calculated")
   #Import the obitools ASVs file so that the sequences of each can be used in making the MOTUS table for MetabaR later.
   
   
-  query_ASVs<-read_delim(MiFish_ASVs_file,col_names = FALSE)
+  query_ASVs<-read_delim(ASVs_file,col_names = FALSE)
   
   
   query_ASVs<-query_ASVs%>%
@@ -87,7 +87,7 @@ validate_local_assignment <- function(Primer = NA, # defaults to default outputs
     dplyr::rename(Sequence=X2)%>%
     select(c("ID","Sequence"))
   
-  
+  print("ASV results read")
   
   #combine the LCA taxonomy with the percent_id column from the userout file (because in vsearch I specified only the top matches so the multiples all share the same pctid with each other, so we can pick any of them)
   vsearch_results<- left_join(lca_vsearch, pct_vsearch, by ="ID", multiple ="any")
@@ -100,16 +100,51 @@ validate_local_assignment <- function(Primer = NA, # defaults to default outputs
   ## Need to add code here to save these results for export or presentation----
   #filter the local database results to check how many sequences were assigned to each taxonomic level.
   
+  print("Vsearch results merged, beginning local only")
+  
+  #*****Begin Local_only
+  
+  k_only<-vsearch_results_all_matches%>%
+    dplyr::filter(is.na(Phylum))%>%
+    dplyr::filter(Domain =="Eukaryota")
+  Loc_kin <- nrow(k_only)
+  
   phylum_only<-vsearch_results_all_matches%>%
     dplyr::filter(is.na(Class))%>%
     dplyr::filter(Domain =="Eukaryota")
-  nrow(phylum_only)
+  Loc_phy <- nrow(phylum_only)
   #41 observations LCA'ed to just Phylum
+  
+  cla_only<-vsearch_results_all_matches%>%
+    dplyr::filter(is.na(Order))%>%
+    dplyr::filter(Domain =="Eukaryota")
+  Loc_cla <- nrow(cla_only)
+  
+  ord_only<-vsearch_results_all_matches%>%
+    dplyr::filter(is.na(Family))%>%
+    dplyr::filter(Domain =="Eukaryota")
+  Loc_ord <- nrow(ord_only)
+  
+  fam_only<-vsearch_results_all_matches%>%
+    dplyr::filter(is.na(Genus))%>%
+    dplyr::filter(Domain =="Eukaryota")
+  Loc_fam <- nrow(fam_only)
+  
+  gen_only<-vsearch_results_all_matches%>%
+    dplyr::filter(is.na(Species))%>%
+    dplyr::filter(Domain =="Eukaryota")
+  Loc_gen <- nrow(gen_only)
+  
+  sp_only<-vsearch_results_all_matches%>%
+    dplyr::filter(!is.na(Species))%>%
+    dplyr::filter(Domain =="Eukaryota")
+  Loc_sp <- nrow(sp_only)
   
   unique_sp<-vsearch_results_all_matches%>% # currently returning empty
     select(Species)%>%
     unique()
   nrow(unique_sp)
+  Loc_nsp <- nrow(unique_sp)
   #46 including NA
   
   unique_genuses<-vsearch_results_all_matches%>%
@@ -117,7 +152,37 @@ validate_local_assignment <- function(Primer = NA, # defaults to default outputs
     unique()
   nrow(unique_genuses)
   #44 including NA
+  Loc_ngen <- nrow(unique_genuses)
   
+  unique_families<-vsearch_results_all_matches%>%
+    select(Family)%>%
+    unique()
+  nrow(unique_families)
+  #44 including NA
+  Loc_nfam <- nrow(unique_families)
+  
+  unique_orders<-vsearch_results_all_matches%>%
+    select(Order)%>%
+    unique()
+  nrow(unique_orders)
+  #44 including NA
+  Loc_nord <- nrow(unique_orders)
+  
+  unique_classes<-vsearch_results_all_matches%>%
+    select(Class)%>%
+    unique()
+  nrow(unique_classes)
+  #44 including NA
+  Loc_ncla <- nrow(unique_classes)
+  
+  unique_phyla<-vsearch_results_all_matches%>%
+    select(Phylum)%>%
+    unique()
+  nrow(unique_phyla)
+  #44 including NA
+  Loc_nphy <- nrow(unique_phyla)
+  
+  print("Local stats calculated")
   #Combine results from local database assignments with vsearch, and global database assignments with obitools3----
   
   #combine results of obitools and vsearch_global with lca
@@ -129,7 +194,7 @@ validate_local_assignment <- function(Primer = NA, # defaults to default outputs
   lca_obi_combined<-lca_obi_combined%>%
     mutate(lca_name = coalesce(Species,Genus,Family,Order,Class,Phylum,Domain))
   
-  
+  print("Local and global assignment databases combined")
   #Compare global and local database assignments and pick the best assignment for each ASV----
   
   #if BEST_IDENTITY*100 (percent identity of global assignment) is greater than vsearch_pctid (percent identity of local assignment) then mutate fish_combined$preferred_name is SCIENTIFIC_NAME.
@@ -184,27 +249,28 @@ validate_local_assignment <- function(Primer = NA, # defaults to default outputs
     
   }
   
+  print("Local and global assignments chosen")
   #summarize changes to taxonomic classifications----
   ## Again, this needs to be made into an exportable table 
   
   
   #count how many got assigned to local vs. global and number of unassigned.
-  
-  #total ASVs
-  total_ASVs=nrow(obi_result95)
-  total_ASVs
+  # After REGATTA section
+  #total ASVs 
+  tot_gl=nrow(obi_result95)
+  tot_gl # pre-regatta global
   #to make sure we didn't lose any
-  final_ASVs=nrow(best_ID_combined)
-  final_ASVs
+  tot_post=nrow(best_ID_combined)
+  tot_post # after regatta
   #1438
   
-  #Updated number of total ASVs assigned to a taxon
+  #Updated number of total ASVs assigned to a taxon after regatta
   assigned<-nrow(best_ID_combined[is.na(best_ID_combined$preferred_name) ==FALSE, ])
   assigned
   #546
   
   #Percent of all ASVs assigned to a taxon after combining vsearch and obitools
-  (assigned/nrow(best_ID_combined))*100
+  pctasg_post <- (assigned/nrow(best_ID_combined))*100
   #37.72233
   
   #compared to just obitools
@@ -213,20 +279,21 @@ validate_local_assignment <- function(Primer = NA, # defaults to default outputs
   #542
   
   #increase in assigned ASVs from global only
-  assigned - obi_assigned
+  change_asvs_post <- assigned - obi_assigned
+  # spreadsheet column: change in number of ASVs assigned after local reconciliation
   #4
   
   
   lca_vsearch_assigned<-nrow(best_ID_combined[is.na(best_ID_combined$lca_name) ==FALSE, ])
-  lca_vsearch_assigned
+  lca_vsearch_assigned # assigned local only
   #188
   
   #After comparing the taxonomic assignments of global and local to get preferred names----
   
   #count the number of times the global database was used for the preferred assignment
-  globally_assigned<-nrow(best_ID_combined[best_ID_combined$database == 'global'& is.na(best_ID_combined$preferred_name) ==FALSE, ])
+  gl_pref<-nrow(best_ID_combined[best_ID_combined$database == 'global'& is.na(best_ID_combined$preferred_name) ==FALSE, ])
   
-  globally_assigned
+  gl_pref
   #403
   
   #put these in a new dataframe
@@ -237,10 +304,10 @@ validate_local_assignment <- function(Primer = NA, # defaults to default outputs
   write.csv(global_preferred_assignments, here(paste0(Primer,"_output/global_preferred_assignments_before_final_LCA.csv")))
   
   #percentage of all ASVs assigned to the global database
-  (globally_assigned/nrow(best_ID_combined))*100
+  (gl_pref/nrow(best_ID_combined))*100
   #28.02503%
   #percentage of taxonomically identified ASVs assigned to the global database
-  (globally_assigned/assigned)*100
+  (gl_pref/assigned)*100
   #73.80952%
   
   #count the number of times the local database was used for the preferred assignment
@@ -257,8 +324,8 @@ validate_local_assignment <- function(Primer = NA, # defaults to default outputs
   
   
   #number of occurrences where local assignment changed the existing global assignment
-  global_to_local_assigment<-nrow(best_ID_combined[best_ID_combined$database == 'local'& is.na(best_ID_combined$SCIENTIFIC_NAME) ==FALSE, ])
-  global_to_local_assigment
+  loc_pref<-nrow(best_ID_combined[best_ID_combined$database == 'local'& is.na(best_ID_combined$SCIENTIFIC_NAME) ==FALSE, ])
+  loc_pref # count of local assignment preferred
   #19 taxa updated from existing global assignments
   
   
@@ -270,7 +337,9 @@ validate_local_assignment <- function(Primer = NA, # defaults to default outputs
               n_combined_IDed_taxa= n_distinct(preferred_name)
   
   )
-  
+
+  print("Post-merge statistics calculated")
+  print("Finding LCAs between local and global IDs")
   
   #Resuming the analysis----
   
@@ -285,20 +354,23 @@ validate_local_assignment <- function(Primer = NA, # defaults to default outputs
   v_species<-gsub("_"," ",meta_best_ID_combined$vsearch_species)
   meta_best_ID_combined$vsearch_species<-v_species
   
-  
   taxaId<-getId(v_species,'accessionTaxa.sql')
-  #print(taxaId)
+  print(taxaId)
+  
+  print("Taxa IDs got")
   
   meta_best_ID_combined$v_taxID<-taxaId
-  
+  print("vsearch TaxIDs got")
   #get the taxonomy for the vsearch TaxIDs (even though we have the sintax format already, this is getting it ready to do LCA in this program)
   
   local_levels<-getTaxonomy(taxaId,'accessionTaxa.sql')
-  #print(local_levels)
-  
+  print(local_levels)
+  print("Local TaxIDs got") # current error before this: Error: no such table: nodes
+
   global_taxaId<-meta_best_ID_combined$TAXID
   global_levels<-getTaxonomy(global_taxaId,'accessionTaxa.sql')
   #print(global_levels)
+  print("Global TaxIDs got")
   
   global_taxa<-meta_best_ID_combined$SCIENTIFIC_NAME
   
@@ -324,14 +396,19 @@ validate_local_assignment <- function(Primer = NA, # defaults to default outputs
     mutate(global_v_local_lca_name = coalesce(species,genus,family,order,class,phylum)) # error: no superkingdom found, deleted
   # Given a set of vectors, coalesce() finds the first non-missing value at each position.
   
-  
   #add global_v_local_lca_name column to best_ID_combined
   
   lca_global_vs_local_assignments<-condensed_lca_global_vs_local%>%
     select(ID,global_v_local_lca_name)
   
-  best_ID_combined<-full_join(best_ID_combined, lca_global_vs_local_assignments, by ="ID")
+  print("best_ID_combined")
+  print(best_ID_combined[26,])
+  print("lca_global_vs_local_assignments")
+  print(lca_global_vs_local_assignments[26,])
   
+  best_ID_combined <- full_join(best_ID_combined, lca_global_vs_local_assignments, by ="ID")
+  
+  print("Joined best ID and LCA dataframes")
   #after visually looking at best_ID_combined for local database sequences that were assigned to 
   # very different taxa by global and local databases, and even within the local database assignments 
   # (phylum only dataframe), there were over 3,000 sequences that matched to Calanus sinicus with a 
@@ -390,38 +467,33 @@ validate_local_assignment <- function(Primer = NA, # defaults to default outputs
   
   #read in the comprehensive local checklist and isolate the genus column
   
+  print(here())
   
-  if (Primer=="MiFish"){
-  local_checklist<-read.csv(local_database, header = FALSE)
-  
-  #clean it up
+  local_checklist<-read.csv(here("custom_db", local_database), header = FALSE)
+    
+    #clean it up
   local_checklist<-local_checklist%>%
-    dplyr::mutate(V1=gsub("Gen. ", "",V1))%>%
-    dplyr::mutate(V1=gsub("indet. ", "",V1))%>%
-    dplyr::mutate(V1=gsub("\"", "",V1))%>%
-    dplyr::mutate(V1=gsub("sp. ", "",V1))%>%
-    dplyr::mutate(V1=gsub("cf. ", "",V1))%>%
-    dplyr::rename(Scientific_name=V1)
+      dplyr::mutate(V1=gsub("Gen. ", "",V1))%>%
+      dplyr::mutate(V1=gsub("indet. ", "",V1))%>%
+      dplyr::mutate(V1=gsub("\"", "",V1))%>%
+      dplyr::mutate(V1=gsub("sp. ", "",V1))%>%
+      dplyr::mutate(V1=gsub("cf. ", "",V1))%>%
+      dplyr::rename(Scientific_name=V1)
   
-  }else{
-    local_checklist<-read.csv(local_checklist, header = FALSE)
-  
-  #clean it up
-  local_checklist<-local_checklist%>%
-    dplyr::mutate(V1=gsub("Gen. ", "",V1))%>%
-    dplyr::mutate(V1=gsub("indet. ", "",V1))%>%
-    dplyr::mutate(V1=gsub("\"", "",V1))%>%
-    dplyr::mutate(V1=gsub("c.f. ", "",V1))%>%
-    dplyr::mutate(V1=gsub("cf.", "",V1))%>%
-    dplyr::rename(Scientific_name=V1)
-  }
-  
+  print("Local checklist cleaned")
   #separate genus from species
   local_genuses<-local_checklist%>%
     separate(Scientific_name, into = c("listed_genus", "listed_species"), sep=" ",remove = FALSE)
   
-  local_checklist<-unique(full_join(local_checklist, local_genuses, by="Scientific_name"))
+  print("local_genuses")
+  #View(local_genuses)
+  print("local_checklist")
+  #View(local_checklist)
+  local_checklist<-unique(full_join(local_checklist, local_genuses, 
+                                    by="Scientific_name", relationship = "many-to-many"))
   ##get taxonomy for everything in the comprehensive Galapagos species checklist from taxonomizr-----
+  ## "Alepisaurus ferox" gets two rows for some reason but many-to-many + unique fixed that
+  #View(local_checklist)
   
   #need the taxonomizr database to be already prepared
   checklist_taxIDs<-getId(local_checklist$Scientific_name,'accessionTaxa.sql')
@@ -501,6 +573,7 @@ validate_local_assignment <- function(Primer = NA, # defaults to default outputs
   
   #count how many got assigned to local vs. global and number of unassigned.
   
+  # post-checklist and LCA 
   #total ASVs
   total_ASVs=nrow(obi_result95)
   print(paste("Total ASVS =", total_ASVs))
@@ -576,6 +649,7 @@ validate_local_assignment <- function(Primer = NA, # defaults to default outputs
   
   
   #Make new motu (taxa) table for MetabaR ----
+  print("Making new MOTU table for MetabaR")
   
   ## MOTUs characteristics table
   
@@ -625,6 +699,7 @@ validate_local_assignment <- function(Primer = NA, # defaults to default outputs
   write.csv(final_taxa,here(paste0("06_local_vs_global_results/",Primer,"_Menu_ready_for_MetabaR.csv")))
   
   write.csv(best_ID_combined,here(paste0("06_local_vs_global_results/",Primer,"_best_ID_combined.csv")))
+  return(best_ID_combined)
   
   print(paste0("Finished cross validating taxonomic assignments for ",Primer," with Local advantage set to ",Local_advantage))
   
@@ -653,7 +728,19 @@ validate_local_assignment <- function(Primer = NA, # defaults to default outputs
   summaryfinalglobal<-finalglobal%>%
     summarise(n_finalglobal= n_distinct(preferred_name))
   summaryfinalglobal
+  
+  "Validate_local_assignment complete"
 }
 
+mf <- "MiFish"
+lc_db <- "comprehensive_galapagos_fish_list.txt" # for troubleshooting
+
 # Test
-validate_local_assignment(Primer = "MiFish", local_database = here("custom_db/comprehensive_galapagos_crustaceans_list.txt"))
+best_ID_combined_test <- validate_local_assignment(Primer = mf, 
+                          local_database = lc_db, 
+                          Local_advantage = T,
+                          userout = "userout_MiFish5-1db_Galapagos_top5_comprehensive_galapagos_results.txt",
+                          lcafile = "lca_MiFish5-1db_Galapagos_top5_comprehensive_galapagos_results.txt",
+                          obitoolsfile = "MiFish_Menu_95_named.tab",
+                          asvsfile = "upper_MiFish_Menu_95_named_cleared_tags.tab"
+                          )
