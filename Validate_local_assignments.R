@@ -998,7 +998,7 @@ validate_local_assignment <- function(Primer = "Please Define Primer", #troubles
   "Validate_local_assignment complete"
   return(final_taxa)
 }
-
+ 
 mf <- "MiFish"
 lc_db <- "comprehensive_galapagos_fish_list.txt" # for troubleshooting
 

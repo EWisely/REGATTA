@@ -1,8 +1,7 @@
 # Eldridge Wisely
 # This copy modified for function use by Ella Crotty
 
-Local_csv_download <- function(obis_taxa,
-                               loc_csvs,
+Local_csv_download <- function(loc_csvs,
                                loc_outputname = "Local_Species") {
   library(usethis)
   library(rgbif)
@@ -97,3 +96,12 @@ Local_csv_download <- function(obis_taxa,
 #Local_csv_download(obis_taxa = c("Agnatha", "Chondrichthyes", "Osteichthyes"),
 #                   loc_csvs = c("2016Aug24_Tirado-Sanchez_et_al_Galapagos_Pisces_Checklist.csv"),
 #                   loc_outputname = "Local_Species_FunctionTest1")
+
+# test (error)
+#Local_csv_download(obis_taxa = c("Salmonidae", "Copepoda"),
+#                   loc_csvs = c("OCNMS_local_sp_badtest.csv", "OCNMS_local_invert_badtest.csv"),
+#                  loc_outputname = "OCNMS_Local_Species_FunctionTest1")
+
+# test (success)
+Local_csv_download(loc_csvs = c("OCNMS_local_sp_test.csv", "OCNMS_local_invert_test.csv"),
+                   loc_outputname = "OCNMS_Local_Species_FunctionTest")
