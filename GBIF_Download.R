@@ -59,17 +59,25 @@ GBIF_download <- function(obis_taxa,
     )
     
     classlist <- taxize::worms_downstream(id = wid, downto = "class")
+    print("Class list got")
+    print(head(classlist))
     classes <- rbind(classes, classlist)
   }
   
   class_names<-classes$name
+  
+  print(class_names)
+  print("Getting backbone keys")
   
   backbone_keys <- class_names %>% 
     name_backbone_checklist() %>% # match to backbone 
     filter(!matchType == "NONE") %>% # get matched names
     pull(usageKey) 
   
-  #### Download Galapagos Fish Checklist from GBIF ####
+  print(backbone_keys)
+  
+  print("Downloading Database from GBIF")
+  #### Download Checklist from GBIF ####
   download <- occ_download(
     pred_within(regional_poly),
     pred_in("taxonKey", backbone_keys), # important to use pred_in
@@ -77,8 +85,6 @@ GBIF_download <- function(obis_taxa,
     pred("hasGeospatialIssue", FALSE),
     format = "SPECIES_LIST"
   )
-  
-  download
   
   # Get download ID
   download_output <- capture.output(download)
@@ -109,7 +115,6 @@ GBIF_download <- function(obis_taxa,
   GBIF_list <- occ_download_get(download_id) %>%
     occ_download_import()
   
-  system("say O C C download complete")
   print("Download Complete")
   
   GBIF_species <- GBIF_list %>% 
@@ -155,7 +160,30 @@ GBIF_download <- function(obis_taxa,
 }
 
 # test run
-GBIF_download(obis_taxa = c("Agnatha", "Chondrichthyes", "Osteichthyes"),
-              worms_taxa = c("Agnatha", "Chondrichthyes", "Actinopterygii"),
-              regional_poly = "POLYGON ((-117.421875 31.952162, -91.933594 -6.315299, -81.386719 -6.315299, -76.113281 7.710992, -82.089844 8.581021, -87.011719 13.581921, -104.238281 20.303418, -112.5 32.249974, -117.421875 31.952162))",
-              gbif_outputname = "GBIF_Species_FunctionTest")
+#GBIF_download(obis_taxa = c("Agnatha", "Chondrichthyes", "Osteichthyes"),
+#              worms_taxa = c("Agnatha", "Chondrichthyes", "Actinopterygii"),
+#              regional_poly = "POLYGON ((-117.421875 31.952162, -91.933594 -6.315299, -81.386719 -6.315299, -76.113281 7.710992, -82.089844 8.581021, -87.011719 13.581921, -104.238281 20.303418, -112.5 32.249974, -117.421875 31.952162))",
+#              gbif_outputname = "GBIF_Species_FunctionTest")
+
+# so taxa must be above class to work
+
+# OCNMS test run
+GBIF_download(obis_taxa = c("Osteichthyes", "Multicrustacea"),
+              worms_taxa = c("Actinopterygii", "Multicrustacea"),
+              regional_poly = "POLYGON ((-124.848633 51.75424, -129.199219 51.151786, -128.144531 41.869561, -122.34375 42.000325, -121.860352 44.621754, -122.695313 46.589069, -121.552734 47.872144, -124.848633 51.75424))",
+              gbif_outputname = "GBIF_OCNMS_Species_FunctionTest")
+# Returned a reasonable amount of copepods but not salmon
+# salmoniformes is 10305 and it is an order in class Actinopterygii 
+# use wm_name2id() to get ids
+# worms_downstream(id = 10305, downto = "class") doesn't work
+# osteichthyes still isn't grabbing salmon???
+#> Classes in Actinopterygii
+#>        id        name  rank
+#>        1 1517379 Chondrostei class
+#>        2 1517380    Holostei class
+#>        3  293496   Teleostei class
+#>        According to wikipedia, actinopterygii is a class and this list is of subclasses.
+#>        According to WoRMS, Actinopteri (Superclass) > Teleostei (Class), so that should've worked?
+#>        Test salmon species: Oncorhynchus tshawytscha (GBIF totally shows observations in this polygon),
+#>         Oncorhynchus kisutch
+#>         Backbone keys [1] "11545536" "229"      "11699831"
