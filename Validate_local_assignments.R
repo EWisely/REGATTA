@@ -300,7 +300,7 @@ validate_local_assignment <- function(Primer = "Please Define Primer", #troubles
   #Number of total ASVs assigned to a taxon global
   gl_asg<-nrow(obi_result95[is.na(obi_result95$SCIENTIFIC_NAME) ==FALSE, ])
   # sintax has any taxonomy that is available
-  
+
   #Percent of all ASVs assigned to a taxon global
   gl_pctasg <- (gl_asg/nrow(obi_result95))*100
   ### Some more global stats ###
@@ -681,7 +681,8 @@ validate_local_assignment <- function(Primer = "Please Define Primer", #troubles
   #Compare the global taxonomic assignments and the local species checklist----
   
   
-  ##When global is still the database after comparing pctid, and global_v_local LCA name is NA, find the genus or family in the local checklist and reduce the ID to that level.----
+  ##When global is still the database after comparing pctid, and global_v_local LCA name is NA, 
+  # find the genus or family in the local checklist and reduce the ID to that level.----
   
   
   #read in the comprehensive local checklist and isolate the genus column

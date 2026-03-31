@@ -59,20 +59,8 @@ Local_csv_download <- function(loc_csvs,
     taxa2 <- db %>% 
       select(Genus) %>%
       rename(taxa = Genus)
-    taxa3 <- db %>% 
-      select(Family) %>%
-      rename(taxa=Family)
-    taxa4 <- db %>% 
-      select(Order) %>%
-      rename(taxa=Order)
-    taxa5 <-db %>% 
-      select(Class) %>%
-      rename(taxa=Class)
     local_taxaComb <- unique(rbind(taxa1,
-                                   taxa2,
-                                   taxa3,
-                                   taxa4,
-                                   taxa5)) %>% 
+                                   taxa2)) %>% 
       mutate(Source = "Local_csv")
     
     Local_species <- rbind(Local_species, sp)
@@ -93,8 +81,7 @@ Local_csv_download <- function(loc_csvs,
 #                   loc_outputname = "Local_Species_FunctionTest1")
 
 # test (success)
-#Local_csv_download(obis_taxa = c("Agnatha", "Chondrichthyes", "Osteichthyes"),
-#                   loc_csvs = c("2016Aug24_Tirado-Sanchez_et_al_Galapagos_Pisces_Checklist.csv"),
+#Local_csv_download(loc_csvs = c("2016Aug24_Tirado-Sanchez_et_al_Galapagos_Pisces_Checklist.csv"),
 #                   loc_outputname = "Local_Species_FunctionTest1")
 
 # test (error)

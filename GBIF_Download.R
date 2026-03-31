@@ -67,6 +67,7 @@ GBIF_download <- function(obis_taxa,
   class_names<-classes$name
   
   print(class_names)
+  classnameno <- length(class_names)
   print("Getting backbone keys")
   
   backbone_keys <- class_names %>% 
@@ -75,6 +76,7 @@ GBIF_download <- function(obis_taxa,
     pull(usageKey) 
   
   print(backbone_keys)
+  backbonekeyno <- length(backbone_keys)
   
   print("Downloading Database from GBIF")
   #### Download Checklist from GBIF ####
@@ -157,6 +159,7 @@ GBIF_download <- function(obis_taxa,
   write.csv(GBIF_species, paste(here("datasets"), sep = "", "/", gbif_outputname, ".csv"), row.names = F)
   
   print("GBIF Download & Export Complete. Check your datasets folder for the output.")
+  print(paste(backbonekeyno, sep = " ", "backbone keys found out of", classnameno, "classes in list"))
 }
 
 # test run
@@ -172,10 +175,12 @@ GBIF_download(obis_taxa = c("Osteichthyes", "Multicrustacea"),
               worms_taxa = c("Actinopterygii", "Multicrustacea"),
               regional_poly = "POLYGON ((-124.848633 51.75424, -129.199219 51.151786, -128.144531 41.869561, -122.34375 42.000325, -121.860352 44.621754, -122.695313 46.589069, -121.552734 47.872144, -124.848633 51.75424))",
               gbif_outputname = "GBIF_OCNMS_Species_FunctionTest")
-# Returned a reasonable amount of copepods but not salmon
+
+# Returned a reasonable amount of copepods but not salmon (not any fish!)
 # salmoniformes is 10305 and it is an order in class Actinopterygii 
 # use wm_name2id() to get ids
 # worms_downstream(id = 10305, downto = "class") doesn't work
+#> name_
 # osteichthyes still isn't grabbing salmon???
 #> Classes in Actinopterygii
 #>        id        name  rank
@@ -186,4 +191,15 @@ GBIF_download(obis_taxa = c("Osteichthyes", "Multicrustacea"),
 #>        According to WoRMS, Actinopteri (Superclass) > Teleostei (Class), so that should've worked?
 #>        Test salmon species: Oncorhynchus tshawytscha (GBIF totally shows observations in this polygon),
 #>         Oncorhynchus kisutch
-#>         Backbone keys [1] "11545536" "229"      "11699831"
+#>         [1] "Chondrostei"   "Holostei"      "Teleostei"     "Copepoda"      
+#>         "Hexanauplia"   "Malacostraca"  "Tantulocarida"
+#>         [8] "Thecostraca"  
+#>         [1] "Getting backbone keys"
+#>         [1] "11545536" "229"      "11699831"
+#>  Why fewer backbone keys than class names? Why don't the backbone keys match class names? 
+#>  I guess no fish backbone keys??
+#>  filter(!matchType == "NONE") filters out Chondrostei (in WoRMS), Holostei, Teleostei (in WoRMS), Hexanauplia, Thecostraca
+#>  Why no usseage key for Teleostei, etc.? No scientificName, no status? No notes to explain? 
+#>  Working classes: Copepoda, Malacostraca, Tantulocarida
+#>  
+#>  Eldridge decision: OBIS is getting most of it, let's just let GBIF be kinda bad and have OBIS fill in the gaps
