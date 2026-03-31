@@ -47,3 +47,8 @@ dataset_combine(comb_inputnames = c("GBIF_Species_FunctionTest",
                                     "Local_Species_FunctionTest1", 
                                     "OBIS_Species_FunctionTest1"), # defaults to default outputs
                 comb_outputname = "Comprehensive_species_list_FunctionTest1")
+
+dataset_combine(comb_inputnames = c("GBIF_OCNMS_Species_FunctionTest", 
+                                    "OCNMS_Local_Species_FunctionTest", 
+                                    "OBIS_OCNMS_Species_FunctionTest"), # defaults to default outputs
+                comb_outputname = "Comprehensive_OCNMS_species_list_FunctionTest")

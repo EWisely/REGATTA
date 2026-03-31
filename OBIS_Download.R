@@ -91,3 +91,14 @@ OBIS_download <- function(obis_taxa,
 #              terrestrial = F,
 #              brackish = NA
 #)
+
+# Test Run 2
+OBIS_download(obis_taxa = c("Salmonidae", "Copepoda"),
+              regional_poly = "POLYGON ((-117.421875 31.952162, -91.933594 -6.315299, -81.386719 -6.315299, -76.113281 7.710992, -82.089844 8.581021, -87.011719 13.581921, -104.238281 20.303418, -112.5 32.249974, -117.421875 31.952162))",
+              obis_outputname ="OBIS_OCNMS_Species_FunctionTest",
+              marine = T,
+              freshwater = NA, # necessary to get salmon probably (yup it's freshwater, brackish, and marine)
+              terrestrial = F,
+              brackish = NA
+              )
+# returned a reasonable list
