@@ -29,6 +29,8 @@ dataset_combine <- function(comb_inputnames = c("GBIF_Species, Local_Species, OB
   Species_local_comb <- Species_local_comb %>%
     filter(Species!="NA")
   
+  print(paste(nrow(Species_local_comb), sep = " ", "unique species found"))
+  
   ##Write  list to a txt file to use as CRABS input----
   write_delim(Species_local_comb, 
               paste(here("custom_db"),
@@ -39,7 +41,7 @@ dataset_combine <- function(comb_inputnames = c("GBIF_Species, Local_Species, OB
               delim = '\t')
   
   print("Your combined dataset should now be a .txt file in the 'custom_db' folder. See documentation for next steps.")
-  
+  print(paste("Output file at: ", sep = " ", paste(here("custom_db"), sep = "", "/", comb_outputname, ".txt")))
 }
 
 # test

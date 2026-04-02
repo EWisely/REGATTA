@@ -6,7 +6,7 @@
 
 #Compare percent ID columns of local and global assignments, and pick the lowest taxonomic rank shared between any winning global assignments and the local species checklist.
 
-validate_local_assignment <- function(Primer = "Please Define Primer", #troubleshooting trying to get the damn thing to take arbitrary strings
+validate_local_assignment <- function(Primer = "Primer", #troubleshooting trying to get the damn thing to take arbitrary strings
                             local_database = "Please Define local_database",
                             Local_advantage = T,  #Local advantage controls the behavior of the program when global_pctid = local_pctid.  If set to TRUE, then the local name becomes the preferred name when the percent ID values are equal.  If not, the global name remains the preferred name, and the script will check for the presence of the global species, genus, and family in the local checklist made by combining information from GBIF, OBIS, and the Darwin center, and the assignment will be downgraded to the lowest shared taxonomic rank between the global assignment and the local checklist.
                             userout = "Please Define userout",
@@ -41,7 +41,7 @@ validate_local_assignment <- function(Primer = "Please Define Primer", #troubles
   
   ##################### Begin script ################
 
-  #This takes a long time and plenty of space, but is necessary for this script
+  print("Preparing database. This takes a long time (~15 mins) and plenty of space, but is necessary for this script")
   prepareDatabase('accessionTaxa.sql')
   print("SQL database prepared")
   #accessed 4-26-24
@@ -53,7 +53,7 @@ validate_local_assignment <- function(Primer = "Please Define Primer", #troubles
   obitools_results_file <- here("script_03_inputs", obitoolsfile)
   
   ASVs_file <- here("script_03_inputs", asvsfile)
-  print("Input files imported")
+  print("Input files imported from script_03_inputs")
 
   #Load global obitools database results and local vsearch database results ----
   
@@ -292,6 +292,8 @@ validate_local_assignment <- function(Primer = "Please Define Primer", #troubles
   #count how many got assigned to local vs. global and number of unassigned.
   # After REGATTA section
   #total ASVs 
+  
+  print("Calculating global stats and changes in stats")
   View(obi_result95)
   gl_tot=nrow(obi_result95)
   gl_tot # pre-regatta global
@@ -787,12 +789,12 @@ validate_local_assignment <- function(Primer = "Please Define Primer", #troubles
   
   #print global_preferred_assignments to a csv file to maybe use as supplement.
   write.csv(off_target_global_preferred_list, here(paste0(Primer,"_output/global_preferred_assignments_after_local_db_and_checklist_LCA.csv")))
-  
+  print(paste("Output at:", sep = " ", here(paste0(Primer,"_output/global_preferred_assignments_after_local_db_and_checklist_LCA.csv"))))
   
   #re-summarize changes after LCA of global vs. local.  Now all should be local.-----
   
   #count how many got assigned to local vs. global and number of unassigned.
-  
+  print("Calculating changed stats")
   # post-checklist and LCA 
   #total ASVs
   total_ASVs=nrow(obi_result95)
@@ -917,8 +919,10 @@ validate_local_assignment <- function(Primer = "Please Define Primer", #troubles
   print("final_taxa assembled")
   class(final_taxa)
   write.csv(final_taxa,here(paste0("06_local_vs_global_results/",Primer,"_Menu_ready_for_MetabaR.csv")))
-  
+  print(paste("Output at:", sep = " ", here(paste0("06_local_vs_global_results/",Primer,"_Menu_ready_for_MetabaR.csv"))))
   write.csv(best_ID_combined,here(paste0("06_local_vs_global_results/",Primer,"_best_ID_combined.csv")))
+  print(paste("Output at:", sep = " ", here(paste0("06_local_vs_global_results/",Primer,"_best_ID_combined.csv"))))
+  
   
   print(paste0("Finished cross validating taxonomic assignments for ", 
                Primer, 
@@ -994,7 +998,7 @@ validate_local_assignment <- function(Primer = "Please Define Primer", #troubles
   View(stats_summary)
   write.csv(stats_summary, 
             here(paste0(Primer,"_output/stats_summary.csv")))
-  
+  print(paste("Summary of calculated statistics available at", sep = " ", here(paste0(Primer,"_output/stats_summary.csv"))))
   
   "Validate_local_assignment complete"
   return(final_taxa)
