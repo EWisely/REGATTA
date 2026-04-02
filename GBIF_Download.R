@@ -24,6 +24,15 @@ GBIF_download <- function(obis_taxa,
   } else {
     print("Using worms_taxa")
   }
+  
+  # throw an error if polygon is incorrect
+  if(grepl("POLYGON \\(\\([-. |[[:digit:]]|,]*\\)\\)", # finds POLYGON (( [-, space, period, 
+           # comma or any number] continue for any length, ))
+           regional_poly)) { # make sure regional_poly is formatted correctly
+    corrects <- T
+  } else {
+    corrects <- F
+  }
   ## Download GBIF dataset of occurences by geometry ####
   # Add just backbone key for a certain taxon, like fish or crustaceans
   #### Find GBIF keys for taxa of interest ####
@@ -59,13 +68,14 @@ GBIF_download <- function(obis_taxa,
     )
     
     classlist <- taxize::worms_downstream(id = wid, downto = "class")
-    print("Class list got")
+    print(paste(i, sep = " ", "class list got:"))
     print(head(classlist))
     classes <- rbind(classes, classlist)
   }
   
   class_names<-classes$name
   
+  print("Full class list:")
   print(class_names)
   classnameno <- length(class_names)
   print("Getting backbone keys")
@@ -75,6 +85,7 @@ GBIF_download <- function(obis_taxa,
     filter(!matchType == "NONE") %>% # get matched names
     pull(usageKey) 
   
+  print("GBIF backbone keys:")
   print(backbone_keys)
   backbonekeyno <- length(backbone_keys)
   
@@ -100,24 +111,30 @@ GBIF_download <- function(obis_taxa,
   # Theoretically pauses the code here until the download is done but it is not working
   still_running <- TRUE
   status_ping <- 9
-  while (still_running) {
-    print(occ_download_meta(key = download_id))
-    meta <- occ_download_meta(key = download_id)
-    print(meta)
-    print(meta$status)
-    status <- meta$status
-    print(status)
-    still_running <- !(status %in% c("SUCCEEDED", "KILLED"))
-    print(still_running)
+  print(occ_download_meta(key = download_id)) # print info about download
+  
+  while (still_running) { # starts true
+    meta <- occ_download_meta(key = download_id) # get metadata about download
+    print(meta$status) # print just the status, the rest of it won't have changed since previous print 
+    status <- meta$status 
+    still_running <- !(status %in% c("SUCCEEDED", "KILLED")) # SUCCEEDED or KILLED are end states so they stop the loop
     Sys.sleep(status_ping) # sleep between pings
   }
   
-  ##### Import Galapagos Fish and get the species list ####
+  ##### Import and get the species list ####
   
   GBIF_list <- occ_download_get(download_id) %>%
     occ_download_import()
   
   print("Download Complete")
+  
+  # Reprint all previous output because the download status stuff clogged the console
+  print("Full class list:")
+  print(class_names)
+  print("Getting backbone keys")
+  print("GBIF backbone keys:")
+  print(backbone_keys)
+  
   
   GBIF_species <- GBIF_list %>% 
     filter(taxonRank == "SPECIES") %>%
@@ -125,6 +142,8 @@ GBIF_download <- function(obis_taxa,
     rename(Species = species) %>% 
     mutate(Source = "GBIF")
   
+  print("Species list/output first few rows:")
+  print(head(GBIF_species))
   print("Getting higher taxonomic levels")
   
   #get list including higher taxonomic levels to compare the results file with
@@ -156,9 +175,13 @@ GBIF_download <- function(obis_taxa,
                             GBIF_taxa5)) %>% 
     mutate(Source = "GBIF")
   
+  print("First few lines of higher taxonomic levels:")
+  print(head(GBIF_taxa))
+  
   write.csv(GBIF_species, paste(here("datasets"), sep = "", "/", gbif_outputname, ".csv"), row.names = F)
   
   print("GBIF Download & Export Complete. Check your datasets folder for the output.")
+  print(paste("Output at:", sep = " ", paste(here("datasets"), sep = "", "/", gbif_outputname, ".csv")))
   print(paste(backbonekeyno, sep = " ", "backbone keys found out of", classnameno, "classes in list"))
 }
 

@@ -52,7 +52,7 @@ Local_csv_download <- function(loc_csvs,
       rename(Species=Genus_species) %>% 
       mutate(Source = "Local_csv")
     
-    # Get names at all taxonomic levels
+    # Get names at both taxonomic levels
     taxa1 <- sp %>% 
       select(Species) %>% 
       rename(taxa = Species)
@@ -71,8 +71,11 @@ Local_csv_download <- function(loc_csvs,
     print(paste(i, "processed"))
   }
   
+  print("First few lines of output:")
+  print(head(Local_species))
   write.csv(Local_species, paste(here("datasets"), sep = "", "/", loc_outputname, ".csv"), row.names = F)
   print("Local species csv processing complete. Check your datasets folder for the output.")
+  print(paste("Output in: ", sep = " ", paste(here("datasets"), sep = "", "/", loc_outputname, ".csv")))
 }
 
 # test (error)
