@@ -1,0 +1,3 @@
+"ASV_id","before_domain","after_domain","before_phylum","after_phylum","before_class","after_class","before_order","after_order","before_family","after_family","before_genus","after_genus","before_species","after_species","match_rank"
+"MiFish_0001389","Eukaryota","Eukaryota","Chordata","Chordata","Actinopteri","Actinopteri","Scombriformes","Scombriformes","Scombridae","Scombridae","Scomberomorus","Scomberomorus","Scomberomorus concolor",NA,"genus"
+"MiFish_0001403","Eukaryota","Eukaryota","Chordata","Chordata","Actinopteri","Actinopteri","Scombriformes","Scombriformes","Scombridae","Scombridae","Scomberomorus","Scomberomorus","Scomberomorus concolor",NA,"genus"
