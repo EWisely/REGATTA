@@ -6,9 +6,14 @@
 # obitools + EMBL/NCBI) and a LOCAL reference database (e.g.
 # vsearch + a regionally-curated DB), produce:
 #
-#   $reconciled  A clean per-ASV taxonomy table (ASV_id + 7 ranks +
-#                reconciliation_status) suitable as a phyloseq
-#                tax_table() input or a MetabaR MOTU table.
+#   $reconciled  A clean per-ASV taxonomy table containing ONLY the
+#                ASV-id column and the 7 lowercase rank columns —
+#                nothing else. Drop-in input for phyloseq tax_table()
+#                or a MetabaR MOTU table with no extra columns to
+#                strip first. All REGATTA bookkeeping (reconciliation
+#                status, per-rank decision details, inputs from both
+#                DBs) lives in $summary so reproducibility info is
+#                separated from the downstream-tool-ready output.
 #
 #   $summary     A best_ID_combined-style audit table preserving every
 #                column from both inputs (suffixed _global / _local)
@@ -125,8 +130,9 @@ reconcile_global_local <- function(global_table,
                    reconciled_ranks)
   rownames(summary) <- NULL
 
-  # Reconciled table (clean): ASV-id + 7 ranks + status — ready for
-  # phyloseq tax_table() or MetabaR MOTU input.
+  # Reconciled table (clean): ASV-id + 7 ranks ONLY. No bookkeeping
+  # columns — drop-in for phyloseq tax_table() or MetabaR MOTU input.
+  # reconciliation_status and all other audit info live in $summary.
   reconciled <- data.frame(
     placeholder = joined[[id_col]],
     domain  = reconciled_ranks$reconciled_domain,
@@ -136,7 +142,6 @@ reconcile_global_local <- function(global_table,
     family  = reconciled_ranks$reconciled_family,
     genus   = reconciled_ranks$reconciled_genus,
     species = reconciled_ranks$reconciled_species,
-    reconciliation_status = status,
     stringsAsFactors = FALSE
   )
   names(reconciled)[1] <- id_col

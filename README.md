@@ -115,7 +115,7 @@ checklist instead of being flagged.
 | `taxonomize_checklist()` | Resolve a regional species list to a 7-rank NCBI taxonomy table; synonym-aware lookup | `taxonomizr`, `RSQLite` |
 | `name_to_taxid()` *(internal)* | Synonym-aware name → NCBI taxID lookup used by the two functions above. Accepted name types are configurable via `accept_types` | `RSQLite` |
 | `regatta_checklist_lca()` | The core LCA step. Reconcile a taxonomy table against the regional checklist | none (base R) |
-| `reconcile_global_local()` | Optional reconciliation of two classifier outputs on the same ASVs — one against a global reference DB (NCBI/EMBL), one against a local curated DB. Returns `$reconciled` (clean ASV-id + 7 ranks + reconciliation_status, phyloseq/MetabaR-ready) and `$summary` (best_ID_combined-style audit with all inputs preserved and the decision rationale per ASV) | none (base R) |
+| `reconcile_global_local()` | Optional reconciliation of two classifier outputs on the same ASVs — one against a global reference DB (NCBI/EMBL), one against a local curated DB. Returns `$reconciled` (ASV-id + 7 ranks only — drop-in phyloseq/MetabaR `tax_table` with no extra columns to strip) and `$summary` (best_ID_combined-style audit with every input column preserved + reconciliation_rank + reconciliation_status + per-ASV decision rationale) | none (base R) |
 | `regatta_summary_table()` | The 21-row per-rank stats summary (counts, % assigned, ID'ed-to-rank specificity, diversity counts) across any number of named stages. Source-breakdown rows populate when a `reconcile_global_local()` result is also supplied. Format designed by Ella Crotty | none (base R) |
 
 ## Quick-start
@@ -255,10 +255,10 @@ rec <- reconcile_global_local(
   id_col       = "ASV_id"
 )
 
-rec$reconciled                       # clean: ASV_id + 7 ranks + status
+rec$reconciled                       # ASV_id + 7 ranks ONLY, no extras
 rec$summary                          # full audit: all input cols + decision
 
-# Reconciliation policy per ASV (carried in reconciliation_status):
+# Reconciliation policy per ASV (carried in rec$summary$reconciliation_status):
 #   agree_at_<rank>   both DBs reached the same taxon at this rank;
 #                     keep the agreed lineage, NA below
 #   only_global       only the global DB assigned; use its lineage as-is
