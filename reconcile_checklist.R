@@ -1,13 +1,22 @@
-# regatta_checklist_lca.R
+# reconcile_checklist.R
 # Eldridge Wisely
 
-# Reconcile a taxonomy table against a regional species checklist by
-# walking each row's lineage from species up toward domain, finding
-# the lowest rank present in the checklist, and NA-ing every rank
-# below that match. This is the REGATTA "off-target downgrade" step
-# (originally Pass 3 in Validate_local_assignments.R) — it preserves
-# specificity where the regional checklist supports it and downgrades
-# where it doesn't, without using percent-identity heuristics.
+# reconcile_checklist(): Reconcile a taxonomy table against a regional
+# species checklist by walking each row's lineage from species up
+# toward domain, finding the lowest rank present in the checklist,
+# and NA-ing every rank below that match. This is the REGATTA
+# "off-target downgrade" step (originally Pass 3 in
+# Validate_local_assignments.R) — it preserves specificity where the
+# regional checklist supports it and downgrades where it doesn't,
+# without using percent-identity heuristics.
+#
+# If output_dir is supplied, the three return-list elements are also
+# written to disk as CSVs named
+#   <output_prefix>_taxonomy_table.csv  (the corrected $result)
+#   <output_prefix>_tracking.csv        (per-ASV before/after audit)
+#   <output_prefix>_summary.csv         (the stats data frame)
+# The directory is created if it doesn't exist. The function still
+# returns the same list(result, tracking, stats) regardless.
 #
 # Accepts either:
 #   - the $result output of reconcile_global_local() (8 columns:
@@ -35,9 +44,11 @@
 #              counts of the corrected output, plus the change in
 #              number of ASVs assigned before vs. after.
 
-regatta_checklist_lca <- function(taxonomy_table,
-                                  checklist,
-                                  id_col = "ASV_id") {
+reconcile_checklist <- function(taxonomy_table,
+                                checklist,
+                                id_col = "ASV_id",
+                                output_dir = NULL,
+                                output_prefix = "reconcile_checklist") {
   ranks <- c("domain", "phylum", "class", "order", "family", "genus", "species")
 
   missing_t <- setdiff(c(id_col, ranks), names(taxonomy_table))
@@ -146,6 +157,14 @@ regatta_checklist_lca <- function(taxonomy_table,
                kin_only, phy_only, cla_only, ord_only, fam_only, gen_only, sp_ct),
     stringsAsFactors = FALSE
   )
+
+  if (!is.null(output_dir)) {
+    dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
+    utils::write.csv(result,   file.path(output_dir, paste0(output_prefix, "_taxonomy_table.csv")), row.names = FALSE)
+    utils::write.csv(tracking, file.path(output_dir, paste0(output_prefix, "_tracking.csv")),       row.names = FALSE)
+    utils::write.csv(stats,    file.path(output_dir, paste0(output_prefix, "_summary.csv")),        row.names = FALSE)
+    message("Wrote 3 CSVs to ", normalizePath(output_dir))
+  }
 
   list(result = result, tracking = tracking, stats = stats)
 }

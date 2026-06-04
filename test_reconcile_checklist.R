@@ -1,7 +1,7 @@
 # test_regatta_checklist_lca.R
 # Synthetic 6-row test for regatta_checklist_lca(). Run from project root.
 
-source("regatta_checklist_lca.R")
+source("reconcile_checklist.R")
 
 # Tiny regional checklist: 3 species across 2 families and 2 orders.
 checklist <- data.frame(
@@ -35,7 +35,7 @@ input <- data.frame(
   stringsAsFactors = FALSE
 )
 
-result <- regatta_checklist_lca(input, checklist)
+result <- reconcile_checklist(input, checklist)
 
 # --- $result is exactly 8 columns: ASV_id + 7 ranks. Nothing else. ---
 stopifnot(identical(names(result$result),
@@ -110,4 +110,4 @@ stopifnot(st$count[st$metric == "matched at species"] == 2)  # ASV_1, ASV_4
 stopifnot(st$count[st$metric == "matched at order"]   == 2)  # ASV_3, ASV_6
 stopifnot(st$count[st$metric == "not matched (off-target)"] == 1)  # ASV_5
 
-cat("All regatta_checklist_lca tests passed.\n")
+cat("All reconcile_checklist tests passed.\n")

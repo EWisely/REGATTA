@@ -1,0 +1,17 @@
+"metric","count"
+"total ASVs",1438
+"assigned ASVs",546
+"both DBs unassigned",892
+"best_pctid: local won",143
+"best_pctid: global won",403
+"global_lca_to_local triggered",45
+"Final: database = local",143
+"Final: database = global",358
+"Final: database = global_lca_to_local",45
+"ID'ed to kingdom only",0
+"ID'ed to phylum only",0
+"ID'ed to class only",95
+"ID'ed to order only",1
+"ID'ed to family only",10
+"ID'ed to genus only",125
+"ID'ed to species",410

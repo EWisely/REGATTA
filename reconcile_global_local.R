@@ -51,6 +51,16 @@
 #   Local_advantage            TRUE (default): local wins ties. FALSE:
 #                              global wins ties. Matches the original
 #                              Validate_local_assignments.R default.
+#   output_dir                 NULL (default) or a directory path. When
+#                              non-NULL, writes 3 CSVs to that directory:
+#                              <output_prefix>_taxonomy_table.csv (the
+#                              $result table), <output_prefix>_tracking.csv
+#                              (the $tracking audit), and
+#                              <output_prefix>_summary.csv (the $stats
+#                              counts). The directory is created if it
+#                              does not already exist.
+#   output_prefix              Filename prefix for the 3 CSVs above.
+#                              Default "reconcile_global_local".
 
 # Output: a list with three elements.
 #
@@ -81,7 +91,9 @@ reconcile_global_local <- function(global_table,
                                    local_pct_id_col    = "pct_id",
                                    global_pct_id_scale = c("auto", "0-1", "0-100"),
                                    local_pct_id_scale  = c("auto", "0-1", "0-100"),
-                                   Local_advantage     = TRUE) {
+                                   Local_advantage     = TRUE,
+                                   output_dir          = NULL,
+                                   output_prefix       = "reconcile_global_local") {
   ranks <- c("domain", "phylum", "class", "order", "family", "genus", "species")
   global_pct_id_scale <- match.arg(global_pct_id_scale)
   local_pct_id_scale  <- match.arg(local_pct_id_scale)
@@ -235,6 +247,37 @@ reconcile_global_local <- function(global_table,
                sum(database == "global_lca_to_local",  na.rm = TRUE)),
     stringsAsFactors = FALSE
   )
+
+  # Per-rank specificity counts: how far down each ASV's preferred
+  # lineage actually goes. Useful when this function is run standalone.
+  stats <- rbind(
+    stats,
+    data.frame(
+      metric = c("ID'ed to kingdom only",
+                 "ID'ed to phylum only",
+                 "ID'ed to class only",
+                 "ID'ed to order only",
+                 "ID'ed to family only",
+                 "ID'ed to genus only",
+                 "ID'ed to species"),
+      count  = c(sum(!is.na(result$domain)  & is.na(result$phylum)),
+                 sum(!is.na(result$phylum)  & is.na(result$class)),
+                 sum(!is.na(result$class)   & is.na(result$order)),
+                 sum(!is.na(result$order)   & is.na(result$family)),
+                 sum(!is.na(result$family)  & is.na(result$genus)),
+                 sum(!is.na(result$genus)   & is.na(result$species)),
+                 sum(!is.na(result$species))),
+      stringsAsFactors = FALSE
+    )
+  )
+
+  if (!is.null(output_dir)) {
+    dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
+    utils::write.csv(result,   file.path(output_dir, paste0(output_prefix, "_taxonomy_table.csv")), row.names = FALSE)
+    utils::write.csv(tracking, file.path(output_dir, paste0(output_prefix, "_tracking.csv")),       row.names = FALSE)
+    utils::write.csv(stats,    file.path(output_dir, paste0(output_prefix, "_summary.csv")),        row.names = FALSE)
+    message("Wrote 3 CSVs to ", normalizePath(output_dir))
+  }
 
   list(result = result, tracking = tracking, stats = stats)
 }
