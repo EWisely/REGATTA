@@ -1,0 +1,24 @@
+Package: REGATTA
+Type: Package
+Title: Reproducible Eco-Geographic Assignment Through Taxonomic Adjustment
+Version: 0.1.0
+Authors@R: c(
+    person(
+      "Eldridge", "Wisely",
+      email = "ewisely@ucsd.edu",
+      role = c("aut", "cre")
+      ),
+    person(
+      "Eleanor", "Crotty",
+      email = "eleanor.crotty@gmail.com",
+      role = c("aut", "ctb")
+    )
+  )
+Description: An R package (in development) for correcting off-target 
+  species assignments in eDNA metabarcoding results using a regional 
+  species checklist, without manual curation and while preserving as 
+  much taxonomic specificity as possible.
+License: What license is it under?
+Encoding: UTF-8
+LazyData: true
+Config/roxygen2/version: 8.0.0
