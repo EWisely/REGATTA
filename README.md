@@ -211,7 +211,7 @@ one call are not supported.
   classifier output is also NCBI-canonical) — but they don't degrade
   correctness.
 - **REGATTA does not reconcile classifier disagreements between databases.**
-  If obitools and vsearch disagree at species level (e.g. *Mugil curema*
+  If global assignments and local assignments disagree at species level (e.g. *Mugil curema*
   vs. *Mugil thoburni*), REGATTA validates each independently against the
   regional checklist. Reconciling between two classifier runs is the job
   of `regatta_compare_assignments()` *(planned)*.
