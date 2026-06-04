@@ -112,15 +112,20 @@ reconcile_global_local <- function(global_table,
 
   # Rescale pct_id to a common 0-100 scale per input.
   rescale_pct <- function(x, scale_arg, label) {
+    # Rescaling from 0-1 truncates to 3 significant figures first so the
+    # precision matches what 0-100 classifiers typically report (e.g.
+    # vsearch pctid 99.4). Matches the original Validate_local_assignments.R
+    # treatment (signif(BEST_IDENTITY, 3) * 100) and prevents tie-break
+    # flips from spurious sub-decimal differences across classifiers.
     x_num <- suppressWarnings(as.numeric(as.character(x)))
     if (scale_arg == "0-100") return(x_num)
-    if (scale_arg == "0-1")   return(x_num * 100)
+    if (scale_arg == "0-1")   return(signif(x_num, 3) * 100)
     # auto: peek at the non-NA max
     mx <- suppressWarnings(max(x_num, na.rm = TRUE))
     if (is.finite(mx) && mx <= 1) {
       message(label, " pct_id detected as 0-1 scale (max = ",
-              signif(mx, 3), "); rescaling to 0-100.")
-      return(x_num * 100)
+              signif(mx, 3), "); rescaling to 0-100 (signif(x, 3) * 100).")
+      return(signif(x_num, 3) * 100)
     }
     x_num
   }

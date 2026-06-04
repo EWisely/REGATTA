@@ -13,14 +13,14 @@
 "reconcile_global_local","ID'ed to class only",95
 "reconcile_global_local","ID'ed to order only",1
 "reconcile_global_local","ID'ed to family only",10
-"reconcile_global_local","ID'ed to genus only",125
-"reconcile_global_local","ID'ed to species",410
+"reconcile_global_local","ID'ed to genus only",114
+"reconcile_global_local","ID'ed to species",421
 "reconcile_checklist","total ASVs",1438
 "reconcile_checklist","assigned before checklist-LCA",546
 "reconcile_checklist","assigned after checklist-LCA",546
 "reconcile_checklist","change in number of ASVs assigned",0
-"reconcile_checklist","matched at species",295
-"reconcile_checklist","matched at genus",231
+"reconcile_checklist","matched at species",304
+"reconcile_checklist","matched at genus",222
 "reconcile_checklist","matched at family",19
 "reconcile_checklist","matched at order",1
 "reconcile_checklist","matched at class",0
@@ -32,5 +32,5 @@
 "reconcile_checklist","ID'ed to class only",95
 "reconcile_checklist","ID'ed to order only",1
 "reconcile_checklist","ID'ed to family only",19
-"reconcile_checklist","ID'ed to genus only",231
-"reconcile_checklist","ID'ed to species",295
+"reconcile_checklist","ID'ed to genus only",222
+"reconcile_checklist","ID'ed to species",304

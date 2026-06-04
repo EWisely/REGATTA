@@ -197,7 +197,7 @@
 "MiFish_0000196",NA,NA,NA,NA,NA,NA,NA
 "MiFish_0000197",NA,NA,NA,NA,NA,NA,NA
 "MiFish_0000198",NA,NA,NA,NA,NA,NA,NA
-"MiFish_0000199","Eukaryota","Chordata","Actinopteri","Scombriformes","Scombridae","Thunnus",NA
+"MiFish_0000199","Eukaryota","Chordata","Actinopteri","Scombriformes","Scombridae","Thunnus","Thunnus albacares"
 "MiFish_0000200","Eukaryota","Chordata","Actinopteri","Scombriformes","Scombridae","Acanthocybium","Acanthocybium solandri"
 "MiFish_0000201",NA,NA,NA,NA,NA,NA,NA
 "MiFish_0000202",NA,NA,NA,NA,NA,NA,NA
@@ -579,7 +579,7 @@
 "MiFish_0000578","Eukaryota","Chordata","Actinopteri","Labriformes","Labridae","Scarus","Scarus ghobban"
 "MiFish_0000579",NA,NA,NA,NA,NA,NA,NA
 "MiFish_0000580",NA,NA,NA,NA,NA,NA,NA
-"MiFish_0000581","Eukaryota","Chordata","Actinopteri","Scombriformes","Scombridae","Thunnus",NA
+"MiFish_0000581","Eukaryota","Chordata","Actinopteri","Scombriformes","Scombridae","Thunnus","Thunnus albacares"
 "MiFish_0000582",NA,NA,NA,NA,NA,NA,NA
 "MiFish_0000583",NA,NA,NA,NA,NA,NA,NA
 "MiFish_0000584","Eukaryota","Chordata","Actinopteri","Scombriformes","Scombridae","Acanthocybium","Acanthocybium solandri"
@@ -597,7 +597,7 @@
 "MiFish_0000596",NA,NA,NA,NA,NA,NA,NA
 "MiFish_0000597",NA,NA,NA,NA,NA,NA,NA
 "MiFish_0000598","Eukaryota","Chordata","Actinopteri","Mugiliformes","Mugilidae","Mugil","Mugil cephalus"
-"MiFish_0000599","Eukaryota","Chordata","Actinopteri","Scombriformes","Scombridae","Thunnus",NA
+"MiFish_0000599","Eukaryota","Chordata","Actinopteri","Scombriformes","Scombridae","Thunnus","Thunnus albacares"
 "MiFish_0000600","Eukaryota","Chordata","Actinopteri",NA,"Pomacentridae","Stegastes","Stegastes arcifrons"
 "MiFish_0000601","Eukaryota","Chordata","Actinopteri",NA,"Pomacentridae","Abudefduf","Abudefduf hoefleri"
 "MiFish_0000602","Eukaryota","Chordata","Actinopteri","Scombriformes","Scombridae","Acanthocybium","Acanthocybium solandri"
@@ -648,9 +648,9 @@
 "MiFish_0000647",NA,NA,NA,NA,NA,NA,NA
 "MiFish_0000648",NA,NA,NA,NA,NA,NA,NA
 "MiFish_0000649",NA,NA,NA,NA,NA,NA,NA
-"MiFish_0000650","Eukaryota","Chordata","Chondrichthyes","Carcharhiniformes","Carcharhinidae","Carcharhinus",NA
-"MiFish_0000651","Eukaryota","Chordata","Chondrichthyes","Carcharhiniformes","Carcharhinidae","Carcharhinus",NA
-"MiFish_0000652","Eukaryota","Chordata","Chondrichthyes","Carcharhiniformes","Carcharhinidae","Carcharhinus",NA
+"MiFish_0000650","Eukaryota","Chordata","Chondrichthyes","Carcharhiniformes","Carcharhinidae","Carcharhinus","Carcharhinus leucas"
+"MiFish_0000651","Eukaryota","Chordata","Chondrichthyes","Carcharhiniformes","Carcharhinidae","Carcharhinus","Carcharhinus leucas"
+"MiFish_0000652","Eukaryota","Chordata","Chondrichthyes","Carcharhiniformes","Carcharhinidae","Carcharhinus","Carcharhinus leucas"
 "MiFish_0000653",NA,NA,NA,NA,NA,NA,NA
 "MiFish_0000654",NA,NA,NA,NA,NA,NA,NA
 "MiFish_0000655",NA,NA,NA,NA,NA,NA,NA
@@ -969,7 +969,7 @@
 "MiFish_0000968","Eukaryota","Chordata","Actinopteri","Labriformes","Labridae","Scarus","Scarus ghobban"
 "MiFish_0000969",NA,NA,NA,NA,NA,NA,NA
 "MiFish_0000970",NA,NA,NA,NA,NA,NA,NA
-"MiFish_0000971","Eukaryota","Chordata","Actinopteri","Scombriformes","Scombridae","Scomber",NA
+"MiFish_0000971","Eukaryota","Chordata","Actinopteri","Scombriformes","Scombridae","Scomber","Scomber australasicus"
 "MiFish_0000972",NA,NA,NA,NA,NA,NA,NA
 "MiFish_0000973",NA,NA,NA,NA,NA,NA,NA
 "MiFish_0000974","Eukaryota","Chordata","Actinopteri","Tetraodontiformes","Tetraodontidae","Arothron","Arothron hispidus"
@@ -984,7 +984,7 @@
 "MiFish_0000983",NA,NA,NA,NA,NA,NA,NA
 "MiFish_0000984",NA,NA,NA,NA,NA,NA,NA
 "MiFish_0000985","Eukaryota","Chordata","Actinopteri","Labriformes","Labridae","Scarus","Scarus ghobban"
-"MiFish_0000986","Eukaryota","Chordata","Actinopteri","Scombriformes","Scombridae","Scomber",NA
+"MiFish_0000986","Eukaryota","Chordata","Actinopteri","Scombriformes","Scombridae","Scomber","Scomber australasicus"
 "MiFish_0000987",NA,NA,NA,NA,NA,NA,NA
 "MiFish_0000988",NA,NA,NA,NA,NA,NA,NA
 "MiFish_0000989",NA,NA,NA,NA,NA,NA,NA
@@ -1267,7 +1267,7 @@
 "MiFish_0001266",NA,NA,NA,NA,NA,NA,NA
 "MiFish_0001267",NA,NA,NA,NA,NA,NA,NA
 "MiFish_0001268","Eukaryota","Chordata","Actinopteri","Lutjaniformes","Haemulidae","Orthopristis","Orthopristis chrysoptera"
-"MiFish_0001269","Eukaryota","Chordata","Chondrichthyes","Carcharhiniformes","Carcharhinidae","Carcharhinus",NA
+"MiFish_0001269","Eukaryota","Chordata","Chondrichthyes","Carcharhiniformes","Carcharhinidae","Carcharhinus","Carcharhinus leucas"
 "MiFish_0001270",NA,NA,NA,NA,NA,NA,NA
 "MiFish_0001271",NA,NA,NA,NA,NA,NA,NA
 "MiFish_0001272",NA,NA,NA,NA,NA,NA,NA
@@ -1313,7 +1313,7 @@
 "MiFish_0001312",NA,NA,NA,NA,NA,NA,NA
 "MiFish_0001313",NA,NA,NA,NA,NA,NA,NA
 "MiFish_0001314","Eukaryota","Chordata","Actinopteri","Lutjaniformes","Lutjanidae","Lutjanus","Lutjanus argentimaculatus"
-"MiFish_0001315","Eukaryota","Chordata","Actinopteri","Scombriformes","Scombridae","Thunnus",NA
+"MiFish_0001315","Eukaryota","Chordata","Actinopteri","Scombriformes","Scombridae","Thunnus","Thunnus albacares"
 "MiFish_0001316","Eukaryota","Chordata","Actinopteri","Scombriformes","Scombridae","Auxis","Auxis rochei"
 "MiFish_0001317","Eukaryota","Chordata","Actinopteri","Scombriformes","Scombridae","Auxis","Auxis rochei"
 "MiFish_0001318","Eukaryota","Chordata","Actinopteri","Acanthuriformes","Acanthuridae","Prionurus",NA
@@ -1374,7 +1374,7 @@
 "MiFish_0001373",NA,NA,NA,NA,NA,NA,NA
 "MiFish_0001374",NA,NA,NA,NA,NA,NA,NA
 "MiFish_0001375",NA,NA,NA,NA,NA,NA,NA
-"MiFish_0001376","Eukaryota","Chordata","Actinopteri","Scombriformes","Scombridae","Thunnus",NA
+"MiFish_0001376","Eukaryota","Chordata","Actinopteri","Scombriformes","Scombridae","Thunnus","Thunnus albacares"
 "MiFish_0001377",NA,NA,NA,NA,NA,NA,NA
 "MiFish_0001378",NA,NA,NA,NA,NA,NA,NA
 "MiFish_0001379","Eukaryota","Chordata","Actinopteri","Perciformes","Scorpaenidae","Pontinus","Pontinus macrocephalus"

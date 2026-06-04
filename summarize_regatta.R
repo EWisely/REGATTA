@@ -11,19 +11,19 @@
 # Inputs are optional and combinable. The function fills whatever
 # rows it can from what you supply:
 #
+#   reconciled     The output list from reconcile_global_local() —
+#                  uses $result for the "reconciled" stage column and
+#                  $tracking for the source-breakdown rows 4-7
+#                  (count of local/global assignment preferred).
+#   post_checklist The output list from reconcile_checklist() — uses
+#                  $result for the "post" stage column and the
+#                  before/after change-in-assignment count for row 8.
 #   global_input   The raw global-DB classifier output taxonomy table
 #                  (e.g. obitools-derived). Used to populate the
 #                  "global" stage column.
 #   local_input    The raw local-DB classifier output taxonomy table
 #                  (e.g. vsearch+SINTAX-derived). Used to populate
 #                  the "local" stage column.
-#   reconciled     The output list from reconcile_global_local() —
-#                  uses $result for the "reconciled" stage column and
-#                  $tracking for the source-breakdown rows 4-7
-#                  (count of local/global assignment preferred).
-#   post_checklist The output list from regatta_checklist_lca() —
-#                  uses $result for the "post" stage column and the
-#                  before/after change-in-assignment count for row 8.
 #
 # Each supplied input becomes its own column. Stage column names are
 # fixed: global, local, reconciled, post.
@@ -38,10 +38,15 @@
 #   9-15  ID'ed-to-<rank>-only specificity counts
 #   16-21 diversity counts (distinct phyla, classes, ..., species)
 
-summarize_regatta <- function(global_input   = NULL,
-                              local_input    = NULL,
-                              reconciled     = NULL,
-                              post_checklist = NULL) {
+summarize_regatta <- function(reconciled     = NULL,
+                              post_checklist = NULL,
+                              global_input   = NULL,
+                              local_input    = NULL) {
+  # Argument order is tuned for the common call patterns:
+  #   summarize_regatta(post)                 single-DB workflow
+  #   summarize_regatta(rec, post)            two-DB workflow
+  #   summarize_regatta(rec, post, g, l)      full audit including raw inputs
+  # All four arguments are still accepted by name in any order.
   ranks <- c("domain", "phylum", "class", "order", "family", "genus", "species")
 
   # Collect stage tables in fixed order
