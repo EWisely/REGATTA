@@ -1,7 +1,7 @@
 # Eldridge Wisely
 # This copy modified for function use by Ella Crotty
 
-#' Local_csv_download
+#' Make your custom regional species checklist compatible with Build_regional_checklist()
 #'
 #' Downloads the CSV files given to it, and if those files have "Genus" and "Species"
 #' columns named exactly that, it will return a list of the species given to it that
@@ -11,17 +11,25 @@
 #' working directory and must have "Genus" and "Species" columns named exactly that.
 #'
 #'
-#' @param loc_csvs A character vector. List of names of CSV files 
+#' @param loc_csvs character vector. List of names of CSV files 
 #' in the dataset folder with lists of species known to occur in 
 #' the region or species of interest in the study. Each CSV must 
 #' have columns "Genus" and "Species" named exactly that, with capitalization.
-#' @param loc_outputname A string. Whatever you want the output file to be named (not including filetype extension .csv)
+#' @param loc_outputname string. Whatever you want the output file to be named (not including filetype extension .csv)
 #'
-#' @returns Prints the filepath to the output CSV.
-#' @export Saves a CSV file of local species that is compatible with Build_regional_checklist
+#' @returns Prints the filepath to the output CSV. Saves a CSV file of local species that is compatible with Build_regional_checklist.
+#' 
+#' @export 
 #'
 #' @examples
-#' Local_csv_download(loc_csvs = c("local_sp_test.csv", "local_invert_test.csv"), loc_outputname = "Local_Species_FunctionTest" # choose this name based on what you want your output to be. We recommend choosing something shorter than this, because you'll have to input it into Build_regional_checklist(). If you leave it blank, it will give the default name "Local_Species.csv" and Build_regional_checklist() will also default to this and the pipeline will work. This is not recommended if you are running this function multiple times for any reason.)
+#' Local_csv_download(loc_csvs = c("local_sp_test.csv", "local_invert_test.csv"), 
+#' loc_outputname = "Local_Species_FunctionTest" # choose this name based on what you want 
+#' # your output to be. We recommend choosing something shorter than this, because you'll 
+#' # have to input it into Build_regional_checklist(). If you leave it blank, it will give 
+#' # the default name "Local_Species.csv" and Build_regional_checklist() will also 
+#' # default to this and the pipeline will work. This is not recommended if you are running 
+#' # this function multiple times for any reason.
+#' )
 
 Local_csv_download <- function(loc_csvs,
                                loc_outputname = "Local_Species") {
