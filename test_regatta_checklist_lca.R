@@ -37,74 +37,77 @@ input <- data.frame(
 
 result <- regatta_checklist_lca(input, checklist)
 
-# --- corrected ---
-co <- result$corrected
+# --- $result is exactly 8 columns: ASV_id + 7 ranks. Nothing else. ---
+stopifnot(identical(names(result$result),
+                    c("ASV_id","domain","phylum","class","order","family","genus","species")))
+re <- result$result
 
 # ASV_1: full species match, unchanged
-stopifnot(co$regatta_match_rank[1] == "species")
-stopifnot(co$species[1] == "Sebastes mystinus")
-stopifnot(co$genus[1]   == "Sebastes")
+stopifnot(re$species[1] == "Sebastes mystinus")
+stopifnot(re$genus[1]   == "Sebastes")
 
 # ASV_2: downgraded to genus
-stopifnot(co$regatta_match_rank[2] == "genus")
-stopifnot(is.na(co$species[2]))
-stopifnot(co$genus[2]  == "Sebastes")
-stopifnot(co$family[2] == "Sebastidae")
+stopifnot(is.na(re$species[2]))
+stopifnot(re$genus[2]  == "Sebastes")
+stopifnot(re$family[2] == "Sebastidae")
 
 # ASV_3: downgraded to order
-stopifnot(co$regatta_match_rank[3] == "order")
-stopifnot(is.na(co$species[3]))
-stopifnot(is.na(co$genus[3]))
-stopifnot(is.na(co$family[3]))
-stopifnot(co$order[3] == "Clupeiformes")
-stopifnot(co$class[3] == "Actinopterygii")
+stopifnot(is.na(re$species[3]))
+stopifnot(is.na(re$genus[3]))
+stopifnot(is.na(re$family[3]))
+stopifnot(re$order[3] == "Clupeiformes")
+stopifnot(re$class[3] == "Actinopterygii")
 
 # ASV_4: full species match
-stopifnot(co$regatta_match_rank[4] == "species")
-stopifnot(co$species[4] == "Engraulis mordax")
+stopifnot(re$species[4] == "Engraulis mordax")
 
-# ASV_5: no match — every rank NA'd, match_rank NA
-stopifnot(is.na(co$regatta_match_rank[5]))
-stopifnot(is.na(co$domain[5]))
-stopifnot(is.na(co$phylum[5]))
-stopifnot(is.na(co$species[5]))
+# ASV_5: no match — every rank NA'd
+stopifnot(is.na(re$domain[5]))
+stopifnot(is.na(re$phylum[5]))
+stopifnot(is.na(re$species[5]))
 
 # ASV_6: order match with NAs already in input below order
-stopifnot(co$regatta_match_rank[6] == "order")
-stopifnot(co$domain[6] == "Eukaryota")
-stopifnot(co$phylum[6] == "Chordata")
-stopifnot(co$class[6]  == "Actinopterygii")
-stopifnot(co$order[6]  == "Clupeiformes")
-stopifnot(is.na(co$family[6]))
-stopifnot(is.na(co$genus[6]))
-stopifnot(is.na(co$species[6]))
+stopifnot(re$domain[6] == "Eukaryota")
+stopifnot(re$phylum[6] == "Chordata")
+stopifnot(re$class[6]  == "Actinopterygii")
+stopifnot(re$order[6]  == "Clupeiformes")
+stopifnot(is.na(re$family[6]))
+stopifnot(is.na(re$genus[6]))
+stopifnot(is.na(re$species[6]))
 
-# Non-rank columns preserved
-stopifnot(all(co$pct_id == input$pct_id))
-stopifnot(all(co$ASV_id == input$ASV_id))
+# --- $tracking carries the bookkeeping ---
+tr <- result$tracking
+stopifnot("regatta_match_rank" %in% names(tr))
+stopifnot("pct_id" %in% names(tr))   # input metadata preserved
+stopifnot("before_species" %in% names(tr))
+stopifnot("after_species"  %in% names(tr))
+stopifnot("after_scientific_name" %in% names(tr))
 
-# --- changes ---
-ch <- result$changes
+# Match-rank assertions go on $tracking
+stopifnot(tr$regatta_match_rank[1] == "species")
+stopifnot(tr$regatta_match_rank[2] == "genus")
+stopifnot(tr$regatta_match_rank[3] == "order")
+stopifnot(tr$regatta_match_rank[4] == "species")
+stopifnot(is.na(tr$regatta_match_rank[5]))
+stopifnot(tr$regatta_match_rank[6] == "order")
 
-# Should include exactly ASV_2, ASV_3, ASV_5; NOT ASV_1, ASV_4, ASV_6 (ASV_6 had NAs
-# below order before AND after, so nothing actually changed for it).
-stopifnot(setequal(ch$ASV_id, c("ASV_2", "ASV_3", "ASV_5")))
+# Before/after columns
+stopifnot(tr$before_species[2] == "Sebastes goodei")
+stopifnot(is.na(tr$after_species[2]))
+stopifnot(tr$before_species[5] == "Bacillus subtilis")
+stopifnot(is.na(tr$after_species[5]))
 
-asv2 <- ch[ch$ASV_id == "ASV_2", ]
-stopifnot(asv2$before_species == "Sebastes goodei")
-stopifnot(is.na(asv2$after_species))
-stopifnot(asv2$before_genus == "Sebastes")
-stopifnot(asv2$after_genus  == "Sebastes")
-stopifnot(asv2$match_rank   == "genus")
+# Input metadata preserved
+stopifnot(all(tr$pct_id == input$pct_id))
+stopifnot(all(tr$ASV_id == input$ASV_id))
 
-asv5 <- ch[ch$ASV_id == "ASV_5", ]
-stopifnot(asv5$before_species == "Bacillus subtilis")
-stopifnot(is.na(asv5$after_species))
-stopifnot(is.na(asv5$after_domain))
-stopifnot(is.na(asv5$match_rank))
-
-# --- before ---
-# Should be a faithful snapshot of the input
-stopifnot(identical(result$before, input))
+# --- $stats has counts ---
+st <- result$stats
+stopifnot(is.data.frame(st))
+stopifnot(all(c("metric", "count") %in% names(st)))
+stopifnot(st$count[st$metric == "total ASVs"] == 6)
+stopifnot(st$count[st$metric == "matched at species"] == 2)  # ASV_1, ASV_4
+stopifnot(st$count[st$metric == "matched at order"]   == 2)  # ASV_3, ASV_6
+stopifnot(st$count[st$metric == "not matched (off-target)"] == 1)  # ASV_5
 
 cat("All regatta_checklist_lca tests passed.\n")

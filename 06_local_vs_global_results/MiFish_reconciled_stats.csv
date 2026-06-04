@@ -1,0 +1,10 @@
+"metric","count"
+"total ASVs",1438
+"assigned ASVs",546
+"both DBs unassigned",892
+"best_pctid: local won",143
+"best_pctid: global won",403
+"global_lca_to_local triggered",45
+"Final: database = local",143
+"Final: database = global",358
+"Final: database = global_lca_to_local",45

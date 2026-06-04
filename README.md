@@ -81,11 +81,15 @@ flowchart TD
 
     L2["Local-DB classifier output<br/>(vsearch + curated local DB)"] --> Q[reconcile_global_local]
     L --> Q
-    Q --> R1[("$reconciled<br/>clean phyloseq/MetabaR tax_table")]
-    Q --> R2[("$summary<br/>best_ID_combined-style<br/>audit table")]
+    Q --> R1[("$result<br/>ASV_id + 7 ranks ONLY<br/>(REGATTA exchange format)")]
+    Q --> R2[("$tracking<br/>best_ID_combined-style<br/>per-ASV audit")]
+    Q --> R3[("$stats<br/>step-level counts")]
     R1 --> M
+    M --> M1[("$result<br/>ASV_id + 7 ranks ONLY")]
+    M --> M2[("$tracking<br/>before/after audit")]
+    M --> M3[("$stats")]
 
-    M --> S[regatta_summary_table]
+    M1 --> S[summarize_regatta]
     L --> S
     L2 --> S
     Q --> S
@@ -114,9 +118,9 @@ checklist instead of being flagged.
 | `resolve_names()` | Convert mixed-rank scientific names (Kraken2 / BestTaxon style) to a full 7-rank taxonomy table; strips sp./spp./cf./aff./Gen./indet./quotes before lookup; synonym-aware (matches NCBI scientific names + recorded synonyms, excludes common names) | `taxonomizr`, `RSQLite` |
 | `taxonomize_checklist()` | Resolve a regional species list to a 7-rank NCBI taxonomy table; synonym-aware lookup | `taxonomizr`, `RSQLite` |
 | `name_to_taxid()` *(internal)* | Synonym-aware name → NCBI taxID lookup used by the two functions above. Accepted name types are configurable via `accept_types` | `RSQLite` |
-| `regatta_checklist_lca()` | The core LCA step. Reconcile a taxonomy table against the regional checklist | none (base R) |
-| `reconcile_global_local()` | Optional reconciliation of two classifier outputs on the same ASVs — one against a global reference DB (NCBI/EMBL), one against a local curated DB. Returns `$reconciled` (ASV-id + 7 ranks only — drop-in phyloseq/MetabaR `tax_table` with no extra columns to strip) and `$summary` (best_ID_combined-style audit with every input column preserved + reconciliation_rank + reconciliation_status + per-ASV decision rationale) | none (base R) |
-| `regatta_summary_table()` | The 21-row per-rank stats summary (counts, % assigned, ID'ed-to-rank specificity, diversity counts) across any number of named stages. Source-breakdown rows populate when a `reconcile_global_local()` result is also supplied. Format designed by Ella Crotty | none (base R) |
+| `regatta_checklist_lca()` | The core LCA step. Reconcile a taxonomy table against the regional checklist. Returns `$result` (ASV_id + 7 ranks ONLY — REGATTA exchange format), `$tracking` (before/after audit per ASV), and `$stats`. Accepts either the `$result` of `reconcile_global_local()` or a standalone classifier-output table | none (base R) |
+| `reconcile_global_local()` | Optional reconciliation of two classifier outputs on the same ASVs — one against a global reference DB (NCBI/EMBL), one against a local curated DB. Two descriptive steps: **best_pctid** (per-ASV winner by percent identity) and **global_lca_to_local** (when global won best_pctid AND local also assigned, downgrade to LCA of both). Returns `$result` (same 8-column shape), `$tracking` (best_ID_combined-style per-ASV audit), and `$stats`. pct_id scale handling: user specifies the pct_id column per input and the function auto-rescales 0-1 → 0-100 as needed | none (base R) |
+| `summarize_regatta()` | The 21-row per-stage stats summary. Compares inputs (`global_input`, `local_input`) against outputs (`reconciled`, `post_checklist`) and produces Ella's format. Source-breakdown rows populate when `reconciled` is supplied; row 8 populates when both `global_input` and `reconciled` are supplied | none (base R) |
 
 ## Quick-start
 
@@ -135,7 +139,7 @@ source("resolve_taxids.R")
 source("resolve_names.R")
 source("regatta_checklist_lca.R")
 source("reconcile_global_local.R")
-source("regatta_summary_table.R")
+source("summarize_regatta.R")
 ```
 
 ### 1. Build a regional species list (one taxonomic group)
@@ -233,9 +237,9 @@ SINTAX string) are accepted and produce identical-shape output.
 ```r
 result <- regatta_checklist_lca(taxonomy_table, fish_checklist, id_col = "ASV_id")
 
-result$before     # snapshot of the input
-result$corrected  # input with ranks rewritten + a regatta_match_rank column
-result$changes    # one row per ASV that was modified, with old vs. new at each rank
+result$result    # ASV_id + 7 ranks ONLY (drop-in for phyloseq tax_table)
+result$tracking  # per-ASV before/after with regatta_match_rank + scientific_name
+result$stats     # match-rank distribution + per-rank specificity counts
 ```
 
 ### 5. (Optional) Reconcile global vs. local DB classifier outputs
@@ -243,72 +247,84 @@ result$changes    # one row per ASV that was modified, with old vs. new at each 
 When you have the same ASVs classified twice — once against a global
 reference DB (e.g. obitools + NCBI/EMBL) and once against a local
 curated DB (e.g. vsearch + a regionally-curated reference) —
-`reconcile_global_local()` produces two outputs in a single call: a
-clean reconciled taxonomy table you can drop into phyloseq or MetabaR,
-and a `best_ID_combined`-style audit table that preserves every
-column from both inputs alongside the reconciliation decision per ASV.
+`reconcile_global_local()` produces three outputs in one call:
 
 ```r
 rec <- reconcile_global_local(
-  global_table = obi_taxonomy,       # global-DB classifier output
-  local_table  = vsearch_taxonomy,   # local-DB classifier output
-  id_col       = "ASV_id"
+  global_table        = obi_taxonomy,    # global-DB classifier output
+  local_table         = vsearch_taxonomy,# local-DB classifier output
+  id_col              = "ASV_id",
+  global_pct_id_col   = "pct_id",        # column with the global %ID per ASV
+  local_pct_id_col    = "pct_id",        # column with the local %ID per ASV
+  global_pct_id_scale = "auto",          # "auto" / "0-1" / "0-100"
+  local_pct_id_scale  = "auto",
+  Local_advantage     = TRUE             # local wins ties (matches original)
 )
 
-rec$reconciled                       # ASV_id + 7 ranks ONLY, no extras
-rec$summary                          # full audit: all input cols + decision
-
-# Reconciliation policy per ASV (carried in rec$summary$reconciliation_status):
-#   agree_at_<rank>   both DBs reached the same taxon at this rank;
-#                     keep the agreed lineage, NA below
-#   only_global       only the global DB assigned; use its lineage as-is
-#   only_local        only the local DB assigned; use its lineage as-is
-#   disagree          both DBs assigned but no common ancestor; all NA
-#   both_unassigned   neither DB assigned; all NA
-
-# Feed the reconciled table straight into checklist-LCA:
-post_lca <- regatta_checklist_lca(rec$reconciled, fish_checklist, id_col = "ASV_id")
+rec$result    # ASV_id + 7 ranks ONLY — the REGATTA exchange format,
+              # drop straight into phyloseq tax_table() or into a
+              # MetabaR MOTU table after joining read counts back
+rec$tracking  # per-ASV decision record: every column from both inputs
+              # suffixed _global / _local, plus best_pctid_winner,
+              # global_lca_to_local_triggered, preferred_pctid,
+              # preferred_database, preferred_scientific_name, and
+              # the reconciled lineage preferred_<rank>
+rec$stats    # step-level counts (best_pctid winners,
+              # global_lca_to_local triggers, final per-database)
 ```
 
-The `$summary` audit table is the per-ASV decision record — origin of
-each assignment, the final reconciled name, the rank at which the
-agreement was reached, and every metadata column from both classifier
-inputs (pct_id, count, sequence, etc.) preserved with `_global` /
-`_local` suffixes. Use it for spot-checking individual ASVs or for
-publication supplements.
+Two reconciliation steps:
+
+- **best_pctid** — per ASV, the database whose pct_id to its reference is
+  higher wins. With `Local_advantage = TRUE` (default), ties go to local.
+- **global_lca_to_local** — when global won best_pctid AND local also
+  has an assignment, replace the preferred lineage with the LCA of the
+  two and label the row `global_lca_to_local`. This catches cases
+  where global says *Sebastes mystinus* and local says *S. paucispinis*
+  — the row downgrades to genus *Sebastes* instead of silently
+  trusting global.
+
+Feed `rec$result` straight into the checklist step:
+
+```r
+post <- regatta_checklist_lca(rec$result, fish_checklist, id_col = "ASV_id")
+post$result   # ASV_id + 7 ranks ONLY (same shape as rec$result)
+post$tracking # per-ASV before/after at each rank + regatta_match_rank
+post$stats    # match-rank distribution + per-rank specificity
+```
 
 ### 6. Stats summary
 
 ```r
-summary <- regatta_summary_table(
-  stages         = list(global = obi_taxonomy,
-                        local  = vsearch_taxonomy,
-                        post   = post_lca$corrected),
-  reconciliation = rec,         # optional — fills source-breakdown rows
-  lca_result     = post_lca     # optional — fills "change in number assigned"
+summary <- summarize_regatta(
+  global_input   = obi_taxonomy,    # raw global-DB classifier output
+  local_input    = vsearch_taxonomy,# raw local-DB classifier output
+  reconciled     = rec,             # reconcile_global_local() output
+  post_checklist = post             # regatta_checklist_lca() output
 )
-# 21-row data.frame with one column per stage. Drop straight into supplements.
+# 21-row data.frame with one column per stage (global / local /
+# reconciled / post). Drop straight into supplements.
 ```
 
-For a one-classifier pipeline (no reconciliation), omit
-`reconciliation`; the source-breakdown rows stay NA and the rest
-populates as expected.
+All four inputs are optional. A one-classifier pipeline can call
+`summarize_regatta(global_input = obi_tax, post_checklist = post)` —
+the function fills whatever rows it can from what you supply.
 
-## Output
+## Output shape — the REGATTA exchange format
 
-`regatta_checklist_lca()` returns a list of three data frames so you can
-keep a permanent before/after audit trail and a per-ASV change log without
-recomputing anything.
+Every REGATTA function that produces a taxonomy table returns a list
+with the same three top-level elements:
 
 | Element | Contents |
 |---|---|
-| `before` | Faithful copy of the input taxonomy table |
-| `corrected` | Input table with rank columns rewritten and a `regatta_match_rank` column added (one of `species`, `genus`, `family`, `order`, `class`, `phylum`, `domain`, or NA for fully off-target ASVs). All non-rank columns (`pct_id`, `count`, `sequence`, etc.) preserved untouched |
-| `changes` | One row per ASV whose taxonomy changed, with `before_*` / `after_*` columns at each rank and the matched rank |
+| `$result` | **The REGATTA exchange format: exactly 8 columns** — the ASV identifier plus the 7 lowercase rank columns (`domain`, `phylum`, `class`, `order`, `family`, `genus`, `species`). Nothing else. This is what you pipe into the next REGATTA function, into phyloseq's `tax_table()`, or into a MetabaR MOTU table. |
+| `$tracking` | Per-ASV decision record / audit table. Carries every input column plus REGATTA's bookkeeping (for `reconcile_global_local`: best_pctid winner, global_lca_to_local triggered, preferred lineage and database; for `regatta_checklist_lca`: before/after at each rank, regatta_match_rank, scientific_name). Use for spot-checks and supplementary tables. |
+| `$stats` | Step-level diagnostic counts. A small `(metric, count)` data.frame summarizing what the function did. |
 
-Both per-ASV change logs and aggregate stats summaries are derivable from
-`changes` — REGATTA leaves report formatting to you (or to thin reporting
-helpers shipped separately).
+The `$result` shape is deliberately strict — 8 columns, never more —
+so that REGATTA functions plug into each other and into downstream
+tools without any column-stripping on the user's part. Bookkeeping
+columns belong in `$tracking`, not `$result`.
 
 ### The `name_match_type` column
 
@@ -328,11 +344,11 @@ different reasons a corrected output differs from its input:
    canonical (`name_match_type == "synonym"`).
 2. **Checklist downgrade** — the species/genus/family wasn't in the
    regional checklist; the LCA walk downgraded to a higher rank.
-   Visible in `regatta_checklist_lca()`'s `changes` element.
+   Visible in `regatta_checklist_lca()`'s `$tracking` element.
 3. **Global vs. local DB disagreement** — global-DB and local-DB
    classifier runs assigned different taxa to the same ASV. Surfaced
-   by `reconcile_global_local()` via the `reconciliation_status`
-   column.
+   by `reconcile_global_local()` via the `preferred_database` column
+   in `$tracking` (`local` / `global` / `global_lca_to_local`).
 
 The three are independent and can stack — a single ASV might be
 synonym-normalized AND downgraded AND disagree with a comparison
