@@ -1,0 +1,22 @@
+"row_names","global","local","post"
+"total ASVs",1438,1438,1438
+"assigned ASVs",542,188,184
+"Percentage of ASVs assigned",37.6912378303199,13.0737134909597,12.7955493741307
+"count of local assignment preferred",4,4,4
+"percent local assignments",0.278164116828929,0.278164116828929,0.278164116828929
+"count of global assignment preferred",358,358,358
+"percent global assignments",24.8956884561892,24.8956884561892,24.8956884561892
+"change in number of ASVs assigned",0,0,0
+"ID'ed to kingdom only",0,0,0
+"ID'ed to phylum only",0,0,0
+"ID'ed to class only",104,0,9
+"ID'ed to order only",1,0,0
+"ID'ed to family only",6,2,5
+"ID'ed to genus only",113,11,65
+"ID'ed to species",413,175,105
+"Number of phyla",1,1,1
+"Number of classes",2,2,2
+"Number of orders",25,14,14
+"Number of families",41,17,17
+"Number of genera",71,25,23
+"Number of species",75,26,11

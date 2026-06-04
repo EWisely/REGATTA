@@ -79,13 +79,16 @@ flowchart TD
     M --> O["changes<br/>(per-ASV old vs. new)"]
     M --> P["before<br/>(unmodified snapshot)"]
 
-    L2["Second classifier output<br/>(same ASVs, different DB)"] -.-> Q["regatta_compare_assignments<br/>(planned)"]
-    L -.-> Q
-    Q -.-> R[per-ASV agreement<br/>between classifiers]
+    L2["Second classifier output<br/>(same ASVs, different DB)"] --> Q[regatta_compare_assignments]
+    L --> Q
+    Q --> R["per-ASV agreement<br/>+ merged_* LCA"]
+    R --> M
 
-    style Q stroke-dasharray: 5 5
-    style R stroke-dasharray: 5 5
-    style L2 stroke-dasharray: 5 5
+    M --> S[regatta_summary_table]
+    L --> S
+    L2 --> S
+    Q --> S
+    S --> T["21-row stats summary<br/>counts / specificity / diversity"]
 ```
 
 ## Per-taxonomic-group separation
@@ -111,7 +114,8 @@ checklist instead of being flagged.
 | `taxonomize_checklist()` | Resolve a regional species list to a 7-rank NCBI taxonomy table; synonym-aware lookup | `taxonomizr`, `RSQLite` |
 | `name_to_taxid()` *(internal)* | Synonym-aware name → NCBI taxID lookup used by the two functions above. Accepted name types are configurable via `accept_types` | `RSQLite` |
 | `regatta_checklist_lca()` | The core LCA step. Reconcile a taxonomy table against the regional checklist | none (base R) |
-| `regatta_compare_assignments()` *(planned)* | Optional comparison of two classifier outputs on the same ASVs | TBD |
+| `regatta_compare_assignments()` | Optional comparison of two classifier outputs on the same ASVs. Per-ASV side-by-side with `agreement_rank`, `agreement_category` (`agree_at_<rank>` / `disagree` / `only_<label>` / `both_unassigned`), and `merged_*` LCA columns feedable into `regatta_checklist_lca()` | none (base R) |
+| `regatta_summary_table()` | The 21-row per-rank stats summary (counts, % assigned, ID'ed-to-rank specificity, diversity counts) across any number of named stages. Source-breakdown rows populate when a `regatta_compare_assignments()` result and DB labels are also supplied. Format designed by Ella Crotty | none (base R) |
 
 ## Quick-start
 
@@ -129,6 +133,8 @@ source("parse_sintax.R")
 source("resolve_taxids.R")
 source("resolve_names.R")
 source("regatta_checklist_lca.R")
+source("regatta_compare_assignments.R")
+source("regatta_summary_table.R")
 ```
 
 ### 1. Build a regional species list (one taxonomic group)
@@ -231,6 +237,56 @@ result$corrected  # input with ranks rewritten + a regatta_match_rank column
 result$changes    # one row per ASV that was modified, with old vs. new at each rank
 ```
 
+### 5. (Optional) Compare two classifier outputs
+
+When you have the same ASVs classified by two reference databases (e.g.
+obitools+global vs. vsearch+local), `regatta_compare_assignments()`
+produces a side-by-side per-ASV comparison plus an LCA "merged" table
+you can feed back into `regatta_checklist_lca()`:
+
+```r
+cmp <- regatta_compare_assignments(
+  table_A  = obi_taxonomy,
+  table_B  = vsearch_taxonomy,
+  id_col   = "ASV_id",
+  label_A  = "obi",
+  label_B  = "vsearch"
+)
+
+cmp$agreement_rank      # lowest rank A and B agree on, or NA
+cmp$agreement_category  # agree_at_<rank> / disagree / only_<label> / both_unassigned
+# merged_domain ... merged_species columns hold the LCA of both inputs.
+# Build a feedable taxonomy_table:
+merged_tbl <- data.frame(
+  ASV_id  = cmp$ASV_id,
+  domain  = cmp$merged_domain,  phylum = cmp$merged_phylum,
+  class   = cmp$merged_class,   order  = cmp$merged_order,
+  family  = cmp$merged_family,  genus  = cmp$merged_genus,
+  species = cmp$merged_species,
+  stringsAsFactors = FALSE
+)
+post_lca <- regatta_checklist_lca(merged_tbl, fish_checklist, id_col = "ASV_id")
+```
+
+### 6. Stats summary
+
+```r
+summary <- regatta_summary_table(
+  stages       = list(global = obi_taxonomy,
+                      local  = vsearch_taxonomy,
+                      post   = post_lca$corrected),
+  comparison   = cmp,           # optional — fills source-breakdown rows
+  global_label = "obi",
+  local_label  = "vsearch",
+  lca_result   = post_lca       # optional — fills "change in number assigned"
+)
+# 21-row data.frame with one column per stage. Drop straight into supplements.
+```
+
+For a one-classifier pipeline (no comparison), omit `comparison` and the
+two label arguments; the source-breakdown rows stay NA and the rest
+populates as expected.
+
 ## Output
 
 `regatta_checklist_lca()` returns a list of three data frames so you can
@@ -267,8 +323,8 @@ different reasons a corrected output differs from its input:
    regional checklist; the LCA walk downgraded to a higher rank.
    Visible in `regatta_checklist_lca()`'s `changes` element.
 3. **Database disagreement** — two classifier runs assigned different
-   taxa to the same ASV. Surfaced by the planned
-   `regatta_compare_assignments()`.
+   taxa to the same ASV. Surfaced by `regatta_compare_assignments()`
+   via the `agreement_category` column.
 
 The three are independent and can stack — a single ASV might be
 synonym-normalized AND downgraded AND disagree with a comparison
@@ -307,7 +363,7 @@ separately and concatenate the resulting tables first).
   If global assignments and local assignments disagree at species level (e.g. *Mugil curema*
   vs. *Mugil thoburni*), REGATTA validates each independently against the
   regional checklist. Reconciling between two classifier runs is the job
-  of `regatta_compare_assignments()` *(planned)*.
+  of `regatta_compare_assignments()`.
 - **Synonym normalization sometimes lands in surprising places.** The
   canonical name in the output is whatever NCBI's current dump says is
   scientific name. Some recent taxonomic revisions are contested or
