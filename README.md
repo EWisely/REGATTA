@@ -31,6 +31,28 @@ in a temperate-region checklist with no *Sebastes* at all gets walked up
 the tree until something matches, or flagged as fully off-target if
 nothing does.
 
+### Method advantages
+
+- **Synonym-aware name lookup.** Classifier outputs and regional
+  checklists are routed through a synonym-aware NCBI lookup. Names that
+  reflect older nomenclature get **automatically updated to the current
+  canonical taxonomy** during preprocessing — e.g. *Lagenorhynchus
+  obliquidens* → *Sagmatias obliquidens* (recent cetacean revision),
+  *Antennarius sanguineus* → *Abantennarius sanguineus* (frogfish genus
+  split), *Caranx ruber* → *Carangoides ruber* (jack revision). This
+  normalizes both the classifier output and the regional checklist to
+  the same canonical names, so a synonym on either side still matches
+  in the LCA walk. Each row's `name_match_type` column flags whether
+  the name resolved as a canonical scientific name or via a synonym,
+  so the downstream summary report can distinguish "this name was
+  updated to current taxonomy" from a checklist-based downgrade.
+- **No manual curation.** The whole pipeline is deterministic and
+  scriptable. Given the same inputs (source CSVs, regional polygon,
+  NCBI taxonomy snapshot), the same outputs come back.
+- **Specificity-preserving.** Downgrades only happen when the
+  checklist forces them. No flat percent-identity cutoffs that throw
+  away species-level information unnecessarily.
+
 ## Pipeline
 
 ```mermaid
@@ -225,6 +247,34 @@ Both per-ASV change logs and aggregate stats summaries are derivable from
 `changes` — REGATTA leaves report formatting to you (or to thin reporting
 helpers shipped separately).
 
+### The `name_match_type` column
+
+Both `resolve_names()` and `taxonomize_checklist()` add a
+`name_match_type` column to their output. Values:
+
+| Value | Meaning |
+|---|---|
+| `"scientific name"` | The input name is the current canonical NCBI name. No taxonomy update happened. |
+| `"synonym"` | The input name resolved as a recorded NCBI synonym; the canonical name in the `species` (or other rank) column has been **auto-updated to current taxonomy**. Original input is preserved in `input_name`. |
+| `NA` | The name did not resolve in NCBI under any accepted type. |
+
+This column lets a summary report distinguish three categorically
+different reasons a corrected output differs from its input:
+
+1. **Synonym normalization** — same organism, name updated to current
+   canonical (`name_match_type == "synonym"`).
+2. **Checklist downgrade** — the species/genus/family wasn't in the
+   regional checklist; the LCA walk downgraded to a higher rank.
+   Visible in `regatta_checklist_lca()`'s `changes` element.
+3. **Database disagreement** — two classifier runs assigned different
+   taxa to the same ASV. Surfaced by the planned
+   `regatta_compare_assignments()`.
+
+The three are independent and can stack — a single ASV might be
+synonym-normalized AND downgraded AND disagree with a comparison
+database. Keeping them distinct in the report is important for
+interpreting where taxonomic detail was lost or shifted.
+
 ## Accepted input shapes
 
 The taxonomy table you feed to `regatta_checklist_lca()` must be uniform
@@ -258,6 +308,14 @@ separately and concatenate the resulting tables first).
   vs. *Mugil thoburni*), REGATTA validates each independently against the
   regional checklist. Reconciling between two classifier runs is the job
   of `regatta_compare_assignments()` *(planned)*.
+- **Synonym normalization sometimes lands in surprising places.** The
+  canonical name in the output is whatever NCBI's current dump says is
+  scientific name. Some recent taxonomic revisions are contested or
+  unexpected — e.g. taxID 240204 (input *Phalaropus lobatus*, the
+  red-necked phalarope) currently has *Tringa tobata* as its canonical
+  scientific name in NCBI. The lookup is correctly applying NCBI's
+  policy, but spot-checking synonym-recovered names is worthwhile,
+  especially during stress testing on new datasets.
 - **Rank set is fixed at 7 levels:** `domain`, `phylum`, `class`, `order`,
   `family`, `genus`, `species`. Subspecies and superkingdom are not used.
 

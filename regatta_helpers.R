@@ -13,10 +13,20 @@
 # similar categories are excluded to keep the lookup explicit and
 # defensible for downstream methods reporting.
 
-# Returns an integer vector of taxIDs aligned to the input. Unmatched
-# names get NA. When a name maps to taxIDs across multiple types (e.g.
-# it is both a scientific name for one taxon and a synonym for another),
-# the scientific-name match is preferred and a warning is emitted.
+# Returns a data.frame aligned to the input with columns:
+#   taxID      — integer NCBI taxID, NA for unmatched names
+#   match_type — the NCBI name type that matched ("scientific name",
+#                "synonym", or whatever else is in accept_types). NA
+#                for unmatched names.
+# Surfacing match_type lets downstream code distinguish "this name
+# resolved via a synonym (the assignment got normalized to current
+# canonical NCBI taxonomy)" from "this name is the current canonical
+# name" — both for reporting (which the summary table will use to
+# label the change category) and for filtering.
+
+# When a name maps to taxIDs across multiple types (e.g. it is both a
+# scientific name for one taxon and a synonym for another), the
+# scientific-name match is preferred and a warning is emitted.
 
 name_to_taxid <- function(taxa,
                           sql_path,
@@ -29,9 +39,14 @@ name_to_taxid <- function(taxa,
   }
 
   taxa <- as.character(taxa)
+  na_result <- data.frame(
+    taxID      = rep(NA_integer_,   length(taxa)),
+    match_type = rep(NA_character_, length(taxa)),
+    stringsAsFactors = FALSE
+  )
   unique_taxa <- unique(taxa[!is.na(taxa) & nzchar(taxa)])
   if (length(unique_taxa) == 0) {
-    return(rep(NA_integer_, length(taxa)))
+    return(na_result)
   }
 
   # ATTACH a temp DB with the query names — same pattern taxonomizr uses
@@ -69,24 +84,34 @@ name_to_taxid <- function(taxa,
   res <- RSQLite::dbGetQuery(db, q)
 
   # For each query name, pick the best match: prefer scientific over
-  # synonym; warn on ambiguity (multiple distinct taxIDs).
+  # synonym; warn on ambiguity (multiple distinct taxIDs). Return both
+  # the chosen taxID and the matched type so callers can label rows.
   pick_best <- function(rows) {
-    if (all(is.na(rows$taxid))) return(NA_integer_)
+    if (all(is.na(rows$taxid))) {
+      return(c(taxid = NA_integer_, match_type = NA_character_))
+    }
     rows <- rows[!is.na(rows$taxid), , drop = FALSE]
     if (any(rows$is_scientific == 1, na.rm = TRUE)) {
-      return(as.integer(rows$taxid[which(rows$is_scientific == 1)[1]]))
+      i <- which(rows$is_scientific == 1)[1]
+    } else {
+      i <- 1L
     }
-    as.integer(rows$taxid[1])
+    c(taxid = as.integer(rows$taxid[i]), match_type = rows$match_type[i])
   }
   is_ambiguous <- function(rows) {
     rows <- rows[!is.na(rows$taxid), , drop = FALSE]
     length(unique(rows$taxid)) > 1
   }
 
-  per_name   <- split(res, res$query_name)
-  best       <- vapply(per_name, pick_best, integer(1))
-  ambiguous  <- vapply(per_name, is_ambiguous, logical(1))
-
+  per_name  <- split(res, res$query_name)
+  picks     <- do.call(rbind, lapply(per_name, pick_best))
+  picks_df  <- data.frame(
+    query_name = rownames(picks),
+    taxID      = as.integer(picks[, "taxid"]),
+    match_type = unname(picks[, "match_type"]),
+    stringsAsFactors = FALSE
+  )
+  ambiguous <- vapply(per_name, is_ambiguous, logical(1))
   if (any(ambiguous)) {
     warning("Multiple taxIDs found for: ",
             paste(names(ambiguous)[ambiguous], collapse = ", "),
@@ -94,5 +119,15 @@ name_to_taxid <- function(taxa,
             call. = FALSE)
   }
 
-  unname(best[match(taxa, names(best))])
+  # Align to original input order (preserves NA + duplicate handling)
+  idx <- match(taxa, picks_df$query_name)
+  out <- data.frame(
+    taxID      = picks_df$taxID[idx],
+    match_type = picks_df$match_type[idx],
+    stringsAsFactors = FALSE
+  )
+  # taxa that were NA or empty in the input get NA taxID and NA match_type
+  out$taxID[is.na(taxa)      | !nzchar(as.character(taxa))] <- NA_integer_
+  out$match_type[is.na(taxa) | !nzchar(as.character(taxa))] <- NA_character_
+  out
 }

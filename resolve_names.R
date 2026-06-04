@@ -76,8 +76,8 @@ resolve_names <- function(input,
   names_vec <- as.character(df[[name_col]])
   if (clean) names_vec <- clean_taxon_names(names_vec)
 
-  taxids <- name_to_taxid(names_vec, sql_path, accept_types = accept_types)
-  taxa_mat <- taxonomizr::getTaxonomy(taxids, sql_path, desiredTaxa = ranks)
+  lookup <- name_to_taxid(names_vec, sql_path, accept_types = accept_types)
+  taxa_mat <- taxonomizr::getTaxonomy(lookup$taxID, sql_path, desiredTaxa = ranks)
   taxa_df  <- as.data.frame(taxa_mat, stringsAsFactors = FALSE)
   rownames(taxa_df) <- NULL
 
@@ -88,14 +88,25 @@ resolve_names <- function(input,
     names(taxa_df) <- paste0("resolved_", ranks)
   }
 
-  out <- cbind(df, taxa_df[, intersect(c(ranks, paste0("resolved_", ranks)),
-                                       names(taxa_df)), drop = FALSE])
+  # Attach name_match_type so downstream code (and the summary report)
+  # can tell whether each row resolved via canonical scientific name or
+  # via a synonym (i.e. the name was normalized to current NCBI
+  # taxonomy). NA means the name did not resolve.
+  out <- cbind(df,
+               name_match_type = lookup$match_type,
+               taxa_df[, intersect(c(ranks, paste0("resolved_", ranks)),
+                                   names(taxa_df)), drop = FALSE])
   rownames(out) <- NULL
 
-  n_unres <- sum(is.na(taxids))
+  n_unres <- sum(is.na(lookup$taxID))
   if (n_unres > 0) {
-    message(n_unres, " of ", length(taxids),
+    message(n_unres, " of ", length(lookup$taxID),
             " name(s) did not resolve in NCBI — see NA rows.")
+  }
+  n_syn <- sum(lookup$match_type == "synonym", na.rm = TRUE)
+  if (n_syn > 0) {
+    message(n_syn, " of ", length(lookup$taxID),
+            " name(s) resolved via synonym (auto-updated to current canonical NCBI taxonomy).")
   }
 
   if (!is.null(output_prefix)) {

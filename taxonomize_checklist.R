@@ -81,17 +81,21 @@ taxonomize_checklist <- function(input,
 
   ranks <- c("domain", "phylum", "class", "order", "family", "genus", "species")
 
-  taxids <- name_to_taxid(cleaned, sql_path, accept_types = accept_types)
+  lookup <- name_to_taxid(cleaned, sql_path, accept_types = accept_types)
   # Request domain explicitly — getTaxonomy's default asks for "superkingdom",
   # which is NA in current NCBI dumps where the top rank is named "domain".
-  taxa_mat <- taxonomizr::getTaxonomy(taxids, sql_path, desiredTaxa = ranks)
+  taxa_mat <- taxonomizr::getTaxonomy(lookup$taxID, sql_path, desiredTaxa = ranks)
   taxa_df <- as.data.frame(taxa_mat, stringsAsFactors = FALSE)
 
+  # name_match_type carries the NCBI type each name matched on
+  # ("scientific name" or "synonym" by default; NA for unresolved).
+  # resolution_status is kept as a coarse pass/fail for back-compat.
   out <- cbind(
     data.frame(
       input_name        = cleaned,
-      resolution_status = ifelse(is.na(taxids), "unresolved", "resolved"),
-      taxID             = taxids,
+      resolution_status = ifelse(is.na(lookup$taxID), "unresolved", "resolved"),
+      name_match_type   = lookup$match_type,
+      taxID             = lookup$taxID,
       stringsAsFactors  = FALSE
     ),
     taxa_df[, ranks, drop = FALSE]
@@ -102,6 +106,11 @@ taxonomize_checklist <- function(input,
   if (n_unresolved > 0) {
     message(n_unresolved, " of ", nrow(out),
             " name(s) did not resolve — see resolution_status column.")
+  }
+  n_syn <- sum(out$name_match_type == "synonym", na.rm = TRUE)
+  if (n_syn > 0) {
+    message(n_syn, " of ", nrow(out),
+            " name(s) resolved via synonym (auto-updated to current canonical NCBI taxonomy).")
   }
 
   out
