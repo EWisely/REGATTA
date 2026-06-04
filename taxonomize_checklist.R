@@ -8,14 +8,25 @@
 # lowercase rank columns (domain → species). Unresolved names stay in
 # the output with NA ranks and resolution_status = "unresolved".
 
+# Name lookup is synonym-aware: matches against NCBI scientific names
+# AND recorded synonyms (via name_to_taxid in regatta_helpers.R), so
+# regional checklists that contain older or synonymous names still
+# resolve correctly. Common names and other categories are excluded by
+# default. Override via accept_types to broaden or restrict the policy.
+
 # Intended to run once per region per taxonomic group. The resulting
 # data.frame is the checklist input to regatta_checklist_lca().
 
 taxonomize_checklist <- function(input,
                                  sql_path = "accessionTaxa.sql",
-                                 prepare_db = !file.exists(sql_path)) {
+                                 prepare_db = !file.exists(sql_path),
+                                 accept_types = c("scientific name", "synonym")) {
   if (!requireNamespace("taxonomizr", quietly = TRUE)) {
     stop("Package 'taxonomizr' is required.")
+  }
+  # Synonym-aware lookup lives in regatta_helpers.R. Source if not yet loaded.
+  if (!exists("name_to_taxid", mode = "function")) {
+    source("regatta_helpers.R")
   }
 
   # Normalize input to a character vector of names
@@ -70,7 +81,7 @@ taxonomize_checklist <- function(input,
 
   ranks <- c("domain", "phylum", "class", "order", "family", "genus", "species")
 
-  taxids <- taxonomizr::getId(cleaned, sql_path)
+  taxids <- name_to_taxid(cleaned, sql_path, accept_types = accept_types)
   # Request domain explicitly — getTaxonomy's default asks for "superkingdom",
   # which is NA in current NCBI dumps where the top rank is named "domain".
   taxa_mat <- taxonomizr::getTaxonomy(taxids, sql_path, desiredTaxa = ranks)

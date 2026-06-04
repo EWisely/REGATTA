@@ -19,6 +19,13 @@
 # reach. Common abbreviations (sp., spp., cf., aff., Gen., indet.) and
 # embedded quotes are stripped before lookup.
 
+# Name lookup is synonym-aware: matches against NCBI scientific names
+# AND recorded synonyms (via name_to_taxid in regatta_helpers.R), so
+# inputs like "Lagenorhynchus obliquidens" resolve correctly to
+# Sagmatias obliquidens after the recent cetacean revisions. Common
+# names and other categories are excluded by default. Override via
+# accept_types to broaden or restrict the policy.
+
 # Cleanup applied: strips sp., spp., cf., aff., Gen., indet., and quote
 # characters; collapses whitespace. Word-boundary anchored so e.g.
 # "Sebastes" is not corrupted to "ebastes".
@@ -34,13 +41,18 @@ resolve_names <- function(input,
                           sql_path      = "accessionTaxa.sql",
                           output_prefix = NULL,
                           output_dir    = ".",
-                          clean         = TRUE) {
+                          clean         = TRUE,
+                          accept_types  = c("scientific name", "synonym")) {
   if (!requireNamespace("taxonomizr", quietly = TRUE)) {
     stop("Package 'taxonomizr' is required.")
   }
   if (!file.exists(sql_path)) {
     stop("SQL DB not found at ", sql_path,
          ". Build it with taxonomizr::prepareDatabase() or pass a path to an existing DB.")
+  }
+  # Synonym-aware lookup lives in regatta_helpers.R. Source if not yet loaded.
+  if (!exists("name_to_taxid", mode = "function")) {
+    source("regatta_helpers.R")
   }
 
   ranks <- c("domain", "phylum", "class", "order", "family", "genus", "species")
@@ -64,7 +76,7 @@ resolve_names <- function(input,
   names_vec <- as.character(df[[name_col]])
   if (clean) names_vec <- clean_taxon_names(names_vec)
 
-  taxids <- taxonomizr::getId(names_vec, sql_path)
+  taxids <- name_to_taxid(names_vec, sql_path, accept_types = accept_types)
   taxa_mat <- taxonomizr::getTaxonomy(taxids, sql_path, desiredTaxa = ranks)
   taxa_df  <- as.data.frame(taxa_mat, stringsAsFactors = FALSE)
   rownames(taxa_df) <- NULL

@@ -62,7 +62,7 @@
 "RL2501_F006_1_3_MV1","Luidia foliolata","Asteroidea",14,"Eukaryota","Echinodermata","Asteroidea","Paxillosida","Luidiidae","Luidia","Luidia foliolata"
 "RL2501_F006_1_3_MV1","Merluccius productus","Actinopteri",1327,"Eukaryota","Chordata","Actinopteri","Gadiformes","Merlucciidae","Merluccius","Merluccius productus"
 "RL2501_F006_1_3_MV1","Mola","Actinopteri",19,"Eukaryota","Chordata","Actinopteri","Tetraodontiformes","Molidae","Mola",NA
-"RL2501_F006_1_3_MV1","Ostreococcus sp. lucimarinus","Mamiellophyceae",3,NA,NA,NA,NA,NA,NA,NA
+"RL2501_F006_1_3_MV1","Ostreococcus sp. lucimarinus","Mamiellophyceae",3,"Eukaryota","Chlorophyta","Mamiellophyceae","Mamiellales","Bathycoccaceae","Ostreococcus","Ostreococcus sp. 'lucimarinus'"
 "RL2501_F006_1_3_MV1","Patiria miniata","Asteroidea",20,"Eukaryota","Echinodermata","Asteroidea","Valvatida","Asterinidae","Patiria","Patiria miniata"
 "RL2501_F006_1_3_MV1","Pisaster","Asteroidea",6,"Eukaryota","Echinodermata","Asteroidea","Forcipulatida","Asteriidae","Pisaster",NA
 "RL2501_F006_1_3_MV1","Psenes pellucidus","Actinopteri",18,"Eukaryota","Chordata","Actinopteri","Scombriformes","Nomeidae","Psenes","Psenes pellucidus"
@@ -124,7 +124,7 @@
 "RL2501_F011_3_MV1","Isurus oxyrinchus","Chondrichthyes",23,"Eukaryota","Chordata","Chondrichthyes","Lamniformes","Lamnidae","Isurus","Isurus oxyrinchus"
 "RL2501_F011_3_MV1","Lampanyctus tenuiformis","Actinopteri",303,"Eukaryota","Chordata","Actinopteri","Myctophiformes","Myctophidae","Lampanyctus","Lampanyctus tenuiformis"
 "RL2501_F011_3_MV1","Myctophum nitidulum","Actinopteri",7,"Eukaryota","Chordata","Actinopteri","Myctophiformes","Myctophidae","Myctophum","Myctophum nitidulum"
-"RL2501_F011_3_MV1","Ostreococcus sp. lucimarinus","Mamiellophyceae",6,NA,NA,NA,NA,NA,NA,NA
+"RL2501_F011_3_MV1","Ostreococcus sp. lucimarinus","Mamiellophyceae",6,"Eukaryota","Chlorophyta","Mamiellophyceae","Mamiellales","Bathycoccaceae","Ostreococcus","Ostreococcus sp. 'lucimarinus'"
 "RL2501_F011_3_MV1","Phosichthyidae","Actinopteri",2089,"Eukaryota","Chordata","Actinopteri","Stomiiformes","Phosichthyidae",NA,NA
 "RL2501_F011_3_MV1","Sebastes","Actinopteri",381,"Eukaryota","Chordata","Actinopteri","Perciformes","Sebastidae","Sebastes",NA
 "RL2501_F011_3_MV1","Stenella coeruleoalba","Mammalia",96,"Eukaryota","Chordata","Mammalia","Artiodactyla","Delphinidae","Stenella","Stenella coeruleoalba"
@@ -821,7 +821,7 @@
 "RL2501_F023_3_MV1","Engraulis mordax","Actinopteri",1189,"Eukaryota","Chordata","Actinopteri","Clupeiformes","Engraulidae","Engraulis","Engraulis mordax"
 "RL2501_F023_3_MV1","Homo sapiens","Mammalia",554,"Eukaryota","Chordata","Mammalia","Primates","Hominidae","Homo","Homo sapiens"
 "RL2501_F023_3_MV1","Icichthys lockingtoni","Actinopteri",516,"Eukaryota","Chordata","Actinopteri","Scombriformes","Centrolophidae","Icichthys","Icichthys lockingtoni"
-"RL2501_F023_3_MV1","Ostreococcus sp. lucimarinus","Mamiellophyceae",61,NA,NA,NA,NA,NA,NA,NA
+"RL2501_F023_3_MV1","Ostreococcus sp. lucimarinus","Mamiellophyceae",61,"Eukaryota","Chlorophyta","Mamiellophyceae","Mamiellales","Bathycoccaceae","Ostreococcus","Ostreococcus sp. 'lucimarinus'"
 "RL2501_F023_3_MV1","Phosichthyidae","Actinopteri",282,"Eukaryota","Chordata","Actinopteri","Stomiiformes","Phosichthyidae",NA,NA
 "RL2501_F023_3_MV1","Prionace glauca","Chondrichthyes",45,"Eukaryota","Chordata","Chondrichthyes","Carcharhiniformes","Carcharhinidae","Prionace","Prionace glauca"
 "RL2501_F023_3_MV1","Symbolophorus californiensis","Actinopteri",20932,"Eukaryota","Chordata","Actinopteri","Myctophiformes","Myctophidae","Symbolophorus","Symbolophorus californiensis"
@@ -996,7 +996,7 @@
 "RL2501_F026_3_MV1","Evadne","Branchiopoda",172,"Eukaryota","Arthropoda","Branchiopoda","Diplostraca","Podonidae","Evadne",NA
 "RL2501_F026_3_MV1","Homo sapiens","Mammalia",1549,"Eukaryota","Chordata","Mammalia","Primates","Hominidae","Homo","Homo sapiens"
 "RL2501_F026_3_MV1","Leuroglossus","Actinopteri",428,"Eukaryota","Chordata","Actinopteri","Argentiniformes","Bathylagidae","Leuroglossus",NA
-"RL2501_F026_3_MV1","Ostreococcus sp. lucimarinus","Mamiellophyceae",231,NA,NA,NA,NA,NA,NA,NA
+"RL2501_F026_3_MV1","Ostreococcus sp. lucimarinus","Mamiellophyceae",231,"Eukaryota","Chlorophyta","Mamiellophyceae","Mamiellales","Bathycoccaceae","Ostreococcus","Ostreococcus sp. 'lucimarinus'"
 "RL2501_F026_3_MV1","Patiria miniata","Asteroidea",1059,"Eukaryota","Echinodermata","Asteroidea","Valvatida","Asterinidae","Patiria","Patiria miniata"
 "RL2501_F026_3_MV1","Sebastes","Actinopteri",2771,"Eukaryota","Chordata","Actinopteri","Perciformes","Sebastidae","Sebastes",NA
 "RL2501_F026_3_MV1","Stenella coeruleoalba","Mammalia",254,"Eukaryota","Chordata","Mammalia","Artiodactyla","Delphinidae","Stenella","Stenella coeruleoalba"
@@ -1049,10 +1049,10 @@
 "RL2501_F027_2_MV1","Engraulis mordax","Actinopteri",98790,"Eukaryota","Chordata","Actinopteri","Clupeiformes","Engraulidae","Engraulis","Engraulis mordax"
 "RL2501_F027_2_MV1","Homo sapiens","Mammalia",591,"Eukaryota","Chordata","Mammalia","Primates","Hominidae","Homo","Homo sapiens"
 "RL2501_F027_2_MV1","Icichthys lockingtoni","Actinopteri",515,"Eukaryota","Chordata","Actinopteri","Scombriformes","Centrolophidae","Icichthys","Icichthys lockingtoni"
-"RL2501_F027_2_MV1","Lagenorhynchus obliquidens","Mammalia",162,NA,NA,NA,NA,NA,NA,NA
+"RL2501_F027_2_MV1","Lagenorhynchus obliquidens","Mammalia",162,"Eukaryota","Chordata","Mammalia","Artiodactyla","Delphinidae","Sagmatias","Sagmatias obliquidens"
 "RL2501_F027_2_MV1","Leuroglossus","Actinopteri",220,"Eukaryota","Chordata","Actinopteri","Argentiniformes","Bathylagidae","Leuroglossus",NA
 "RL2501_F027_2_MV1","Merluccius productus","Actinopteri",439,"Eukaryota","Chordata","Actinopteri","Gadiformes","Merlucciidae","Merluccius","Merluccius productus"
-"RL2501_F027_2_MV1","Ostreococcus sp. lucimarinus","Mamiellophyceae",75,NA,NA,NA,NA,NA,NA,NA
+"RL2501_F027_2_MV1","Ostreococcus sp. lucimarinus","Mamiellophyceae",75,"Eukaryota","Chlorophyta","Mamiellophyceae","Mamiellales","Bathycoccaceae","Ostreococcus","Ostreococcus sp. 'lucimarinus'"
 "RL2501_F027_2_MV1","Paralepididae","Actinopteri",351,"Eukaryota","Chordata","Actinopteri","Aulopiformes","Paralepididae",NA,NA
 "RL2501_F027_2_MV1","Patiria miniata","Asteroidea",62,"Eukaryota","Echinodermata","Asteroidea","Valvatida","Asterinidae","Patiria","Patiria miniata"
 "RL2501_F027_2_MV1","Phosichthyidae","Actinopteri",539,"Eukaryota","Chordata","Actinopteri","Stomiiformes","Phosichthyidae",NA,NA
@@ -1094,7 +1094,7 @@
 "RL2501_F027_4_MV1","Engraulis mordax","Actinopteri",85618,"Eukaryota","Chordata","Actinopteri","Clupeiformes","Engraulidae","Engraulis","Engraulis mordax"
 "RL2501_F027_4_MV1","Homo sapiens","Mammalia",564,"Eukaryota","Chordata","Mammalia","Primates","Hominidae","Homo","Homo sapiens"
 "RL2501_F027_4_MV1","Icichthys lockingtoni","Actinopteri",755,"Eukaryota","Chordata","Actinopteri","Scombriformes","Centrolophidae","Icichthys","Icichthys lockingtoni"
-"RL2501_F027_4_MV1","Lagenorhynchus obliquidens","Mammalia",43,NA,NA,NA,NA,NA,NA,NA
+"RL2501_F027_4_MV1","Lagenorhynchus obliquidens","Mammalia",43,"Eukaryota","Chordata","Mammalia","Artiodactyla","Delphinidae","Sagmatias","Sagmatias obliquidens"
 "RL2501_F027_4_MV1","Lampanyctus tenuiformis","Actinopteri",279,"Eukaryota","Chordata","Actinopteri","Myctophiformes","Myctophidae","Lampanyctus","Lampanyctus tenuiformis"
 "RL2501_F027_4_MV1","Leuroglossus","Actinopteri",233,"Eukaryota","Chordata","Actinopteri","Argentiniformes","Bathylagidae","Leuroglossus",NA
 "RL2501_F027_4_MV1","Merluccius productus","Actinopteri",432,"Eukaryota","Chordata","Actinopteri","Gadiformes","Merlucciidae","Merluccius","Merluccius productus"
@@ -1128,7 +1128,7 @@
 "RL2501_F028_2_MV1","Delphinidae","Mammalia",51,"Eukaryota","Chordata","Mammalia","Artiodactyla","Delphinidae",NA,NA
 "RL2501_F028_2_MV1","Engraulis mordax","Actinopteri",177776,"Eukaryota","Chordata","Actinopteri","Clupeiformes","Engraulidae","Engraulis","Engraulis mordax"
 "RL2501_F028_2_MV1","Homo sapiens","Mammalia",339,"Eukaryota","Chordata","Mammalia","Primates","Hominidae","Homo","Homo sapiens"
-"RL2501_F028_2_MV1","Lagenorhynchus obliquidens","Mammalia",213,NA,NA,NA,NA,NA,NA,NA
+"RL2501_F028_2_MV1","Lagenorhynchus obliquidens","Mammalia",213,"Eukaryota","Chordata","Mammalia","Artiodactyla","Delphinidae","Sagmatias","Sagmatias obliquidens"
 "RL2501_F028_2_MV1","Leuroglossus","Actinopteri",219,"Eukaryota","Chordata","Actinopteri","Argentiniformes","Bathylagidae","Leuroglossus",NA
 "RL2501_F028_2_MV1","Merluccius productus","Actinopteri",86,"Eukaryota","Chordata","Actinopteri","Gadiformes","Merlucciidae","Merluccius","Merluccius productus"
 "RL2501_F028_2_MV1","Patiria miniata","Asteroidea",20,"Eukaryota","Echinodermata","Asteroidea","Valvatida","Asterinidae","Patiria","Patiria miniata"
@@ -1145,7 +1145,7 @@
 "RL2501_F028_3_MV1","Delphinidae","Mammalia",150,"Eukaryota","Chordata","Mammalia","Artiodactyla","Delphinidae",NA,NA
 "RL2501_F028_3_MV1","Engraulis mordax","Actinopteri",168659,"Eukaryota","Chordata","Actinopteri","Clupeiformes","Engraulidae","Engraulis","Engraulis mordax"
 "RL2501_F028_3_MV1","Homo sapiens","Mammalia",298,"Eukaryota","Chordata","Mammalia","Primates","Hominidae","Homo","Homo sapiens"
-"RL2501_F028_3_MV1","Lagenorhynchus obliquidens","Mammalia",53,NA,NA,NA,NA,NA,NA,NA
+"RL2501_F028_3_MV1","Lagenorhynchus obliquidens","Mammalia",53,"Eukaryota","Chordata","Mammalia","Artiodactyla","Delphinidae","Sagmatias","Sagmatias obliquidens"
 "RL2501_F028_3_MV1","Patiria miniata","Asteroidea",19,"Eukaryota","Echinodermata","Asteroidea","Valvatida","Asterinidae","Patiria","Patiria miniata"
 "RL2501_F028_3_MV1","Phosichthyidae","Actinopteri",71,"Eukaryota","Chordata","Actinopteri","Stomiiformes","Phosichthyidae",NA,NA
 "RL2501_F028_3_MV1","Sebastes","Actinopteri",23054,"Eukaryota","Chordata","Actinopteri","Perciformes","Sebastidae","Sebastes",NA
@@ -1727,7 +1727,7 @@
 "RL2501_F040_2_MV1","Engraulis mordax","Actinopteri",179083,"Eukaryota","Chordata","Actinopteri","Clupeiformes","Engraulidae","Engraulis","Engraulis mordax"
 "RL2501_F040_2_MV1","Grampus griseus","Mammalia",1241,"Eukaryota","Chordata","Mammalia","Artiodactyla","Delphinidae","Grampus","Grampus griseus"
 "RL2501_F040_2_MV1","Homo sapiens","Mammalia",1024,"Eukaryota","Chordata","Mammalia","Primates","Hominidae","Homo","Homo sapiens"
-"RL2501_F040_2_MV1","Lagenorhynchus obliquidens","Mammalia",173,NA,NA,NA,NA,NA,NA,NA
+"RL2501_F040_2_MV1","Lagenorhynchus obliquidens","Mammalia",173,"Eukaryota","Chordata","Mammalia","Artiodactyla","Delphinidae","Sagmatias","Sagmatias obliquidens"
 "RL2501_F040_2_MV1","Merluccius productus","Actinopteri",1907,"Eukaryota","Chordata","Actinopteri","Gadiformes","Merlucciidae","Merluccius","Merluccius productus"
 "RL2501_F040_2_MV1","Patiria miniata","Asteroidea",64,"Eukaryota","Echinodermata","Asteroidea","Valvatida","Asterinidae","Patiria","Patiria miniata"
 "RL2501_F040_2_MV1","Pelecanus occidentalis","Aves",1906,"Eukaryota","Chordata","Aves","Pelecaniformes","Pelecanidae","Pelecanus","Pelecanus occidentalis"
@@ -1758,7 +1758,7 @@
 "RL2501_F040_4_MV1","Engraulis mordax","Actinopteri",268848,"Eukaryota","Chordata","Actinopteri","Clupeiformes","Engraulidae","Engraulis","Engraulis mordax"
 "RL2501_F040_4_MV1","Homo sapiens","Mammalia",2,"Eukaryota","Chordata","Mammalia","Primates","Hominidae","Homo","Homo sapiens"
 "RL2501_F040_4_MV1","Merluccius productus","Actinopteri",5683,"Eukaryota","Chordata","Actinopteri","Gadiformes","Merlucciidae","Merluccius","Merluccius productus"
-"RL2501_F040_4_MV1","Ostreococcus sp. lucimarinus","Mamiellophyceae",4,NA,NA,NA,NA,NA,NA,NA
+"RL2501_F040_4_MV1","Ostreococcus sp. lucimarinus","Mamiellophyceae",4,"Eukaryota","Chlorophyta","Mamiellophyceae","Mamiellales","Bathycoccaceae","Ostreococcus","Ostreococcus sp. 'lucimarinus'"
 "RL2501_F040_4_MV1","Patiria miniata","Asteroidea",86,"Eukaryota","Echinodermata","Asteroidea","Valvatida","Asterinidae","Patiria","Patiria miniata"
 "RL2501_F040_4_MV1","Sebastes","Actinopteri",5396,"Eukaryota","Chordata","Actinopteri","Perciformes","Sebastidae","Sebastes",NA
 "RL2501_F040_4_MV1","Sebastes pinniger","Actinopteri",1771,"Eukaryota","Chordata","Actinopteri","Perciformes","Sebastidae","Sebastes","Sebastes pinniger"
@@ -2069,7 +2069,7 @@
 "RL2501_F071_2_MV1","Engraulis mordax","Actinopteri",2581,"Eukaryota","Chordata","Actinopteri","Clupeiformes","Engraulidae","Engraulis","Engraulis mordax"
 "RL2501_F071_2_MV1","Evadne","Branchiopoda",59,"Eukaryota","Arthropoda","Branchiopoda","Diplostraca","Podonidae","Evadne",NA
 "RL2501_F071_2_MV1","Homo sapiens","Mammalia",168,"Eukaryota","Chordata","Mammalia","Primates","Hominidae","Homo","Homo sapiens"
-"RL2501_F071_2_MV1","Ostreococcus sp. lucimarinus","Mamiellophyceae",266,NA,NA,NA,NA,NA,NA,NA
+"RL2501_F071_2_MV1","Ostreococcus sp. lucimarinus","Mamiellophyceae",266,"Eukaryota","Chlorophyta","Mamiellophyceae","Mamiellales","Bathycoccaceae","Ostreococcus","Ostreococcus sp. 'lucimarinus'"
 "RL2501_F071_2_MV1","Sebastes","Actinopteri",325,"Eukaryota","Chordata","Actinopteri","Perciformes","Sebastidae","Sebastes",NA
 "RL2501_F071_2_MV1",NA,NA,18915,NA,NA,NA,NA,NA,NA,NA
 "RL2501_F071_3_MV1","Astropecten verrilli","Asteroidea",625,"Eukaryota","Echinodermata","Asteroidea","Paxillosida","Astropectinidae","Astropecten","Astropecten verrilli"
@@ -2092,7 +2092,7 @@
 "RL2501_F071_4_MV1","Evadne","Branchiopoda",185,"Eukaryota","Arthropoda","Branchiopoda","Diplostraca","Podonidae","Evadne",NA
 "RL2501_F071_4_MV1","Gallus","Aves",198,"Eukaryota","Chordata","Aves","Galliformes","Phasianidae","Gallus",NA
 "RL2501_F071_4_MV1","Homo sapiens","Mammalia",160,"Eukaryota","Chordata","Mammalia","Primates","Hominidae","Homo","Homo sapiens"
-"RL2501_F071_4_MV1","Ostreococcus sp. lucimarinus","Mamiellophyceae",321,NA,NA,NA,NA,NA,NA,NA
+"RL2501_F071_4_MV1","Ostreococcus sp. lucimarinus","Mamiellophyceae",321,"Eukaryota","Chlorophyta","Mamiellophyceae","Mamiellales","Bathycoccaceae","Ostreococcus","Ostreococcus sp. 'lucimarinus'"
 "RL2501_F071_4_MV1","Patiria miniata","Asteroidea",2,"Eukaryota","Echinodermata","Asteroidea","Valvatida","Asterinidae","Patiria","Patiria miniata"
 "RL2501_F071_4_MV1","Sarda","Actinopteri",91,"Eukaryota","Chordata","Actinopteri","Scombriformes","Scombridae","Sarda",NA
 "RL2501_F071_4_MV1","Sardinops sagax","Actinopteri",58,"Eukaryota","Chordata","Actinopteri","Clupeiformes","Clupeidae","Sardinops","Sardinops sagax"
@@ -2142,7 +2142,7 @@
 "RL2501_F072_3_MV1","Homo sapiens","Mammalia",511,"Eukaryota","Chordata","Mammalia","Primates","Hominidae","Homo","Homo sapiens"
 "RL2501_F072_3_MV1","Icichthys lockingtoni","Actinopteri",4,"Eukaryota","Chordata","Actinopteri","Scombriformes","Centrolophidae","Icichthys","Icichthys lockingtoni"
 "RL2501_F072_3_MV1","Isurus oxyrinchus","Chondrichthyes",2,"Eukaryota","Chordata","Chondrichthyes","Lamniformes","Lamnidae","Isurus","Isurus oxyrinchus"
-"RL2501_F072_3_MV1","Lagenorhynchus obliquidens","Mammalia",14,NA,NA,NA,NA,NA,NA,NA
+"RL2501_F072_3_MV1","Lagenorhynchus obliquidens","Mammalia",14,"Eukaryota","Chordata","Mammalia","Artiodactyla","Delphinidae","Sagmatias","Sagmatias obliquidens"
 "RL2501_F072_3_MV1","Merluccius productus","Actinopteri",69,"Eukaryota","Chordata","Actinopteri","Gadiformes","Merlucciidae","Merluccius","Merluccius productus"
 "RL2501_F072_3_MV1","Oneirodes","Actinopteri",12,"Eukaryota","Chordata","Actinopteri","Lophiiformes","Oneirodidae","Oneirodes",NA
 "RL2501_F072_3_MV1","Paralichthys californicus","Actinopteri",5,"Eukaryota","Chordata","Actinopteri","Pleuronectiformes","Paralichthyidae","Paralichthys","Paralichthys californicus"
@@ -2180,7 +2180,7 @@
 "RL2501_F072_4_MV1","Homo sapiens","Mammalia",3023,"Eukaryota","Chordata","Mammalia","Primates","Hominidae","Homo","Homo sapiens"
 "RL2501_F072_4_MV1","Icichthys lockingtoni","Actinopteri",6,"Eukaryota","Chordata","Actinopteri","Scombriformes","Centrolophidae","Icichthys","Icichthys lockingtoni"
 "RL2501_F072_4_MV1","Merluccius productus","Actinopteri",231,"Eukaryota","Chordata","Actinopteri","Gadiformes","Merlucciidae","Merluccius","Merluccius productus"
-"RL2501_F072_4_MV1","Ostreococcus sp. lucimarinus","Mamiellophyceae",73,NA,NA,NA,NA,NA,NA,NA
+"RL2501_F072_4_MV1","Ostreococcus sp. lucimarinus","Mamiellophyceae",73,"Eukaryota","Chlorophyta","Mamiellophyceae","Mamiellales","Bathycoccaceae","Ostreococcus","Ostreococcus sp. 'lucimarinus'"
 "RL2501_F072_4_MV1","Paralichthys californicus","Actinopteri",149,"Eukaryota","Chordata","Actinopteri","Pleuronectiformes","Paralichthyidae","Paralichthys","Paralichthys californicus"
 "RL2501_F072_4_MV1","Patiria miniata","Asteroidea",51,"Eukaryota","Echinodermata","Asteroidea","Valvatida","Asterinidae","Patiria","Patiria miniata"
 "RL2501_F072_4_MV1","Sarda","Actinopteri",2084,"Eukaryota","Chordata","Actinopteri","Scombriformes","Scombridae","Sarda",NA
@@ -2221,7 +2221,7 @@
 "RL2501_F087_2_2_MV1","Delphinidae","Mammalia",524,"Eukaryota","Chordata","Mammalia","Artiodactyla","Delphinidae",NA,NA
 "RL2501_F087_2_2_MV1","Engraulis mordax","Actinopteri",8848,"Eukaryota","Chordata","Actinopteri","Clupeiformes","Engraulidae","Engraulis","Engraulis mordax"
 "RL2501_F087_2_2_MV1","Homo sapiens","Mammalia",13005,"Eukaryota","Chordata","Mammalia","Primates","Hominidae","Homo","Homo sapiens"
-"RL2501_F087_2_2_MV1","Phalaropus lobatus","Aves",1073,NA,NA,NA,NA,NA,NA,NA
+"RL2501_F087_2_2_MV1","Phalaropus lobatus","Aves",1073,"Eukaryota","Chordata","Aves","Charadriiformes","Scolopacidae","Tringa","Tringa tobata"
 "RL2501_F087_2_2_MV1","Sebastes","Actinopteri",1990,"Eukaryota","Chordata","Actinopteri","Perciformes","Sebastidae","Sebastes",NA
 "RL2501_F087_2_2_MV1","Stenella coeruleoalba","Mammalia",583,"Eukaryota","Chordata","Mammalia","Artiodactyla","Delphinidae","Stenella","Stenella coeruleoalba"
 "RL2501_F087_2_2_MV1",NA,NA,13737,NA,NA,NA,NA,NA,NA,NA
@@ -2241,7 +2241,7 @@
 "RL2501_F087_2_4_MV1","Bathycoccus prasinos","Mamiellophyceae",201,"Eukaryota","Chlorophyta","Mamiellophyceae","Mamiellales","Bathycoccaceae","Bathycoccus","Bathycoccus prasinos"
 "RL2501_F087_2_4_MV1","Engraulis mordax","Actinopteri",2981,"Eukaryota","Chordata","Actinopteri","Clupeiformes","Engraulidae","Engraulis","Engraulis mordax"
 "RL2501_F087_2_4_MV1","Homo sapiens","Mammalia",2076,"Eukaryota","Chordata","Mammalia","Primates","Hominidae","Homo","Homo sapiens"
-"RL2501_F087_2_4_MV1","Ostreococcus sp. lucimarinus","Mamiellophyceae",6,NA,NA,NA,NA,NA,NA,NA
+"RL2501_F087_2_4_MV1","Ostreococcus sp. lucimarinus","Mamiellophyceae",6,"Eukaryota","Chlorophyta","Mamiellophyceae","Mamiellales","Bathycoccaceae","Ostreococcus","Ostreococcus sp. 'lucimarinus'"
 "RL2501_F087_2_4_MV1","Paralabrax clathratus","Actinopteri",20,"Eukaryota","Chordata","Actinopteri","Perciformes","Serranidae","Paralabrax","Paralabrax clathratus"
 "RL2501_F087_2_4_MV1","Python","Lepidosauria",8,"Eukaryota","Chordata","Lepidosauria","Squamata","Pythonidae","Python",NA
 "RL2501_F087_2_4_MV1","Sardinops sagax","Actinopteri",72,"Eukaryota","Chordata","Actinopteri","Clupeiformes","Clupeidae","Sardinops","Sardinops sagax"
@@ -2319,7 +2319,7 @@
 "RL2501_F089_1_MV1","Hominidae","Mammalia",47,"Eukaryota","Chordata","Mammalia","Primates","Hominidae",NA,NA
 "RL2501_F089_1_MV1","Homo sapiens","Mammalia",9590,"Eukaryota","Chordata","Mammalia","Primates","Hominidae","Homo","Homo sapiens"
 "RL2501_F089_1_MV1","Icichthys lockingtoni","Actinopteri",8187,"Eukaryota","Chordata","Actinopteri","Scombriformes","Centrolophidae","Icichthys","Icichthys lockingtoni"
-"RL2501_F089_1_MV1","Lagenorhynchus obliquidens","Mammalia",73,NA,NA,NA,NA,NA,NA,NA
+"RL2501_F089_1_MV1","Lagenorhynchus obliquidens","Mammalia",73,"Eukaryota","Chordata","Mammalia","Artiodactyla","Delphinidae","Sagmatias","Sagmatias obliquidens"
 "RL2501_F089_1_MV1","Lamna ditropis","Chondrichthyes",33,"Eukaryota","Chordata","Chondrichthyes","Lamniformes","Lamnidae","Lamna","Lamna ditropis"
 "RL2501_F089_1_MV1","Leuroglossus","Actinopteri",67,"Eukaryota","Chordata","Actinopteri","Argentiniformes","Bathylagidae","Leuroglossus",NA
 "RL2501_F089_1_MV1","Luidia foliolata","Asteroidea",67,"Eukaryota","Echinodermata","Asteroidea","Paxillosida","Luidiidae","Luidia","Luidia foliolata"
@@ -2378,7 +2378,7 @@
 "RL2501_F089_3_MV1","Engraulis mordax","Actinopteri",16919,"Eukaryota","Chordata","Actinopteri","Clupeiformes","Engraulidae","Engraulis","Engraulis mordax"
 "RL2501_F089_3_MV1","Homo sapiens","Mammalia",4222,"Eukaryota","Chordata","Mammalia","Primates","Hominidae","Homo","Homo sapiens"
 "RL2501_F089_3_MV1","Icichthys lockingtoni","Actinopteri",5075,"Eukaryota","Chordata","Actinopteri","Scombriformes","Centrolophidae","Icichthys","Icichthys lockingtoni"
-"RL2501_F089_3_MV1","Lagenorhynchus obliquidens","Mammalia",60,NA,NA,NA,NA,NA,NA,NA
+"RL2501_F089_3_MV1","Lagenorhynchus obliquidens","Mammalia",60,"Eukaryota","Chordata","Mammalia","Artiodactyla","Delphinidae","Sagmatias","Sagmatias obliquidens"
 "RL2501_F089_3_MV1","Luidia foliolata","Asteroidea",21,"Eukaryota","Echinodermata","Asteroidea","Paxillosida","Luidiidae","Luidia","Luidia foliolata"
 "RL2501_F089_3_MV1","Merluccius productus","Actinopteri",171,"Eukaryota","Chordata","Actinopteri","Gadiformes","Merlucciidae","Merluccius","Merluccius productus"
 "RL2501_F089_3_MV1","Myctophidae","Actinopteri",393,"Eukaryota","Chordata","Actinopteri","Myctophiformes","Myctophidae",NA,NA
@@ -2422,7 +2422,7 @@
 "RL2501_F090_1_MV1","Hominidae","Mammalia",39,"Eukaryota","Chordata","Mammalia","Primates","Hominidae",NA,NA
 "RL2501_F090_1_MV1","Homo sapiens","Mammalia",8922,"Eukaryota","Chordata","Mammalia","Primates","Hominidae","Homo","Homo sapiens"
 "RL2501_F090_1_MV1","Icichthys lockingtoni","Actinopteri",3270,"Eukaryota","Chordata","Actinopteri","Scombriformes","Centrolophidae","Icichthys","Icichthys lockingtoni"
-"RL2501_F090_1_MV1","Lagenorhynchus obliquidens","Mammalia",401,NA,NA,NA,NA,NA,NA,NA
+"RL2501_F090_1_MV1","Lagenorhynchus obliquidens","Mammalia",401,"Eukaryota","Chordata","Mammalia","Artiodactyla","Delphinidae","Sagmatias","Sagmatias obliquidens"
 "RL2501_F090_1_MV1","Lamna ditropis","Chondrichthyes",25,"Eukaryota","Chordata","Chondrichthyes","Lamniformes","Lamnidae","Lamna","Lamna ditropis"
 "RL2501_F090_1_MV1","Leuroglossus","Actinopteri",21,"Eukaryota","Chordata","Actinopteri","Argentiniformes","Bathylagidae","Leuroglossus",NA
 "RL2501_F090_1_MV1","Lipolagus ochotensis","Actinopteri",8,"Eukaryota","Chordata","Actinopteri","Argentiniformes","Bathylagidae","Lipolagus","Lipolagus ochotensis"
@@ -2458,7 +2458,7 @@
 "RL2501_F090_2_MV1","Astropecten verrilli","Asteroidea",995,"Eukaryota","Echinodermata","Asteroidea","Paxillosida","Astropectinidae","Astropecten","Astropecten verrilli"
 "RL2501_F090_2_MV1","Engraulis mordax","Actinopteri",167084,"Eukaryota","Chordata","Actinopteri","Clupeiformes","Engraulidae","Engraulis","Engraulis mordax"
 "RL2501_F090_2_MV1","Homo sapiens","Mammalia",1225,"Eukaryota","Chordata","Mammalia","Primates","Hominidae","Homo","Homo sapiens"
-"RL2501_F090_2_MV1","Lagenorhynchus obliquidens","Mammalia",220,NA,NA,NA,NA,NA,NA,NA
+"RL2501_F090_2_MV1","Lagenorhynchus obliquidens","Mammalia",220,"Eukaryota","Chordata","Mammalia","Artiodactyla","Delphinidae","Sagmatias","Sagmatias obliquidens"
 "RL2501_F090_2_MV1","Megaptera novaeangliae","Mammalia",5171,"Eukaryota","Chordata","Mammalia","Artiodactyla","Balaenopteridae","Megaptera","Megaptera novaeangliae"
 "RL2501_F090_2_MV1","Patiria miniata","Asteroidea",140,"Eukaryota","Echinodermata","Asteroidea","Valvatida","Asterinidae","Patiria","Patiria miniata"
 "RL2501_F090_2_MV1","Pisaster","Asteroidea",54,"Eukaryota","Echinodermata","Asteroidea","Forcipulatida","Asteriidae","Pisaster",NA
@@ -2473,7 +2473,7 @@
 "RL2501_F090_3_MV1","Diogenichthys atlanticus","Actinopteri",8,"Eukaryota","Chordata","Actinopteri","Myctophiformes","Myctophidae","Diogenichthys","Diogenichthys atlanticus"
 "RL2501_F090_3_MV1","Engraulis mordax","Actinopteri",67594,"Eukaryota","Chordata","Actinopteri","Clupeiformes","Engraulidae","Engraulis","Engraulis mordax"
 "RL2501_F090_3_MV1","Homo sapiens","Mammalia",235,"Eukaryota","Chordata","Mammalia","Primates","Hominidae","Homo","Homo sapiens"
-"RL2501_F090_3_MV1","Lagenorhynchus obliquidens","Mammalia",49,NA,NA,NA,NA,NA,NA,NA
+"RL2501_F090_3_MV1","Lagenorhynchus obliquidens","Mammalia",49,"Eukaryota","Chordata","Mammalia","Artiodactyla","Delphinidae","Sagmatias","Sagmatias obliquidens"
 "RL2501_F090_3_MV1","Lampanyctus bristori","Actinopteri",6,"Eukaryota","Chordata","Actinopteri","Myctophiformes","Myctophidae","Lampanyctus","Lampanyctus bristori"
 "RL2501_F090_3_MV1","Medialuna californiensis","Actinopteri",2,"Eukaryota","Chordata","Actinopteri","Centrarchiformes","Kyphosidae","Medialuna","Medialuna californiensis"
 "RL2501_F090_3_MV1","Patiria miniata","Asteroidea",36,"Eukaryota","Echinodermata","Asteroidea","Valvatida","Asterinidae","Patiria","Patiria miniata"
@@ -2485,7 +2485,7 @@
 "RL2501_F090_3_MV1",NA,NA,7880,NA,NA,NA,NA,NA,NA,NA
 "RL2501_F090_4_MV1","Astropecten verrilli","Asteroidea",652,"Eukaryota","Echinodermata","Asteroidea","Paxillosida","Astropectinidae","Astropecten","Astropecten verrilli"
 "RL2501_F090_4_MV1","Engraulis mordax","Actinopteri",82739,"Eukaryota","Chordata","Actinopteri","Clupeiformes","Engraulidae","Engraulis","Engraulis mordax"
-"RL2501_F090_4_MV1","Lagenorhynchus obliquidens","Mammalia",665,NA,NA,NA,NA,NA,NA,NA
+"RL2501_F090_4_MV1","Lagenorhynchus obliquidens","Mammalia",665,"Eukaryota","Chordata","Mammalia","Artiodactyla","Delphinidae","Sagmatias","Sagmatias obliquidens"
 "RL2501_F090_4_MV1","Luidia foliolata","Asteroidea",10,"Eukaryota","Echinodermata","Asteroidea","Paxillosida","Luidiidae","Luidia","Luidia foliolata"
 "RL2501_F090_4_MV1","Megaptera novaeangliae","Mammalia",905,"Eukaryota","Chordata","Mammalia","Artiodactyla","Balaenopteridae","Megaptera","Megaptera novaeangliae"
 "RL2501_F090_4_MV1","Patiria miniata","Asteroidea",32,"Eukaryota","Echinodermata","Asteroidea","Valvatida","Asterinidae","Patiria","Patiria miniata"
@@ -2577,7 +2577,7 @@
 "RL2501_F092_2_MV1","Ceratoscopelus","Actinopteri",434,"Eukaryota","Chordata","Actinopteri","Myctophiformes","Myctophidae","Ceratoscopelus",NA
 "RL2501_F092_2_MV1","Engraulis mordax","Actinopteri",16900,"Eukaryota","Chordata","Actinopteri","Clupeiformes","Engraulidae","Engraulis","Engraulis mordax"
 "RL2501_F092_2_MV1","Homo sapiens","Mammalia",2334,"Eukaryota","Chordata","Mammalia","Primates","Hominidae","Homo","Homo sapiens"
-"RL2501_F092_2_MV1","Lagenorhynchus obliquidens","Mammalia",629,NA,NA,NA,NA,NA,NA,NA
+"RL2501_F092_2_MV1","Lagenorhynchus obliquidens","Mammalia",629,"Eukaryota","Chordata","Mammalia","Artiodactyla","Delphinidae","Sagmatias","Sagmatias obliquidens"
 "RL2501_F092_2_MV1","Luidia foliolata","Asteroidea",26,"Eukaryota","Echinodermata","Asteroidea","Paxillosida","Luidiidae","Luidia","Luidia foliolata"
 "RL2501_F092_2_MV1","Merluccius productus","Actinopteri",1213,"Eukaryota","Chordata","Actinopteri","Gadiformes","Merlucciidae","Merluccius","Merluccius productus"
 "RL2501_F092_2_MV1","Prionace glauca","Chondrichthyes",32,"Eukaryota","Chordata","Chondrichthyes","Carcharhiniformes","Carcharhinidae","Prionace","Prionace glauca"
@@ -2595,7 +2595,7 @@
 "RL2501_F092_3_MV1","Evadne","Branchiopoda",19,"Eukaryota","Arthropoda","Branchiopoda","Diplostraca","Podonidae","Evadne",NA
 "RL2501_F092_3_MV1","Homo sapiens","Mammalia",2907,"Eukaryota","Chordata","Mammalia","Primates","Hominidae","Homo","Homo sapiens"
 "RL2501_F092_3_MV1","Luidia foliolata","Asteroidea",16,"Eukaryota","Echinodermata","Asteroidea","Paxillosida","Luidiidae","Luidia","Luidia foliolata"
-"RL2501_F092_3_MV1","Ostreococcus sp. lucimarinus","Mamiellophyceae",486,NA,NA,NA,NA,NA,NA,NA
+"RL2501_F092_3_MV1","Ostreococcus sp. lucimarinus","Mamiellophyceae",486,"Eukaryota","Chlorophyta","Mamiellophyceae","Mamiellales","Bathycoccaceae","Ostreococcus","Ostreococcus sp. 'lucimarinus'"
 "RL2501_F092_3_MV1","Patiria miniata","Asteroidea",115,"Eukaryota","Echinodermata","Asteroidea","Valvatida","Asterinidae","Patiria","Patiria miniata"
 "RL2501_F092_3_MV1","Peprilus","Actinopteri",194,"Eukaryota","Chordata","Actinopteri","Scombriformes","Stromateidae","Peprilus",NA
 "RL2501_F092_3_MV1","Pisaster","Asteroidea",53,"Eukaryota","Echinodermata","Asteroidea","Forcipulatida","Asteriidae","Pisaster",NA
@@ -2657,7 +2657,7 @@
 "RL2501_F093_3_MV1","Evadne","Branchiopoda",37,"Eukaryota","Arthropoda","Branchiopoda","Diplostraca","Podonidae","Evadne",NA
 "RL2501_F093_3_MV1","Homo sapiens","Mammalia",2756,"Eukaryota","Chordata","Mammalia","Primates","Hominidae","Homo","Homo sapiens"
 "RL2501_F093_3_MV1","Luidia foliolata","Asteroidea",40,"Eukaryota","Echinodermata","Asteroidea","Paxillosida","Luidiidae","Luidia","Luidia foliolata"
-"RL2501_F093_3_MV1","Ostreococcus sp. lucimarinus","Mamiellophyceae",62,NA,NA,NA,NA,NA,NA,NA
+"RL2501_F093_3_MV1","Ostreococcus sp. lucimarinus","Mamiellophyceae",62,"Eukaryota","Chlorophyta","Mamiellophyceae","Mamiellales","Bathycoccaceae","Ostreococcus","Ostreococcus sp. 'lucimarinus'"
 "RL2501_F093_3_MV1","Patiria miniata","Asteroidea",306,"Eukaryota","Echinodermata","Asteroidea","Valvatida","Asterinidae","Patiria","Patiria miniata"
 "RL2501_F093_3_MV1","Peprilus","Actinopteri",796,"Eukaryota","Chordata","Actinopteri","Scombriformes","Stromateidae","Peprilus",NA
 "RL2501_F093_3_MV1","Pisaster","Asteroidea",87,"Eukaryota","Echinodermata","Asteroidea","Forcipulatida","Asteriidae","Pisaster",NA
@@ -2717,7 +2717,7 @@
 "RL2501_F094_3_MV1","Engraulis mordax","Actinopteri",36453,"Eukaryota","Chordata","Actinopteri","Clupeiformes","Engraulidae","Engraulis","Engraulis mordax"
 "RL2501_F094_3_MV1","Evadne","Branchiopoda",242,"Eukaryota","Arthropoda","Branchiopoda","Diplostraca","Podonidae","Evadne",NA
 "RL2501_F094_3_MV1","Homo sapiens","Mammalia",1382,"Eukaryota","Chordata","Mammalia","Primates","Hominidae","Homo","Homo sapiens"
-"RL2501_F094_3_MV1","Ostreococcus sp. lucimarinus","Mamiellophyceae",181,NA,NA,NA,NA,NA,NA,NA
+"RL2501_F094_3_MV1","Ostreococcus sp. lucimarinus","Mamiellophyceae",181,"Eukaryota","Chlorophyta","Mamiellophyceae","Mamiellales","Bathycoccaceae","Ostreococcus","Ostreococcus sp. 'lucimarinus'"
 "RL2501_F094_3_MV1","Patiria miniata","Asteroidea",34,"Eukaryota","Echinodermata","Asteroidea","Valvatida","Asterinidae","Patiria","Patiria miniata"
 "RL2501_F094_3_MV1","Peprilus","Actinopteri",142,"Eukaryota","Chordata","Actinopteri","Scombriformes","Stromateidae","Peprilus",NA
 "RL2501_F094_3_MV1","Sebastes","Actinopteri",40924,"Eukaryota","Chordata","Actinopteri","Perciformes","Sebastidae","Sebastes",NA
@@ -2730,7 +2730,7 @@
 "RL2501_F094_4_MV1","Engraulis mordax","Actinopteri",15121,"Eukaryota","Chordata","Actinopteri","Clupeiformes","Engraulidae","Engraulis","Engraulis mordax"
 "RL2501_F094_4_MV1","Evadne","Branchiopoda",63,"Eukaryota","Arthropoda","Branchiopoda","Diplostraca","Podonidae","Evadne",NA
 "RL2501_F094_4_MV1","Homo sapiens","Mammalia",2319,"Eukaryota","Chordata","Mammalia","Primates","Hominidae","Homo","Homo sapiens"
-"RL2501_F094_4_MV1","Ostreococcus sp. lucimarinus","Mamiellophyceae",353,NA,NA,NA,NA,NA,NA,NA
+"RL2501_F094_4_MV1","Ostreococcus sp. lucimarinus","Mamiellophyceae",353,"Eukaryota","Chlorophyta","Mamiellophyceae","Mamiellales","Bathycoccaceae","Ostreococcus","Ostreococcus sp. 'lucimarinus'"
 "RL2501_F094_4_MV1","Paralabrax clathratus","Actinopteri",727,"Eukaryota","Chordata","Actinopteri","Perciformes","Serranidae","Paralabrax","Paralabrax clathratus"
 "RL2501_F094_4_MV1","Sebastes","Actinopteri",24702,"Eukaryota","Chordata","Actinopteri","Perciformes","Sebastidae","Sebastes",NA
 "RL2501_F094_4_MV1","Seriola lalandi","Actinopteri",314,"Eukaryota","Chordata","Actinopteri","Carangiformes","Carangidae","Seriola","Seriola lalandi"
@@ -2884,7 +2884,7 @@
 "RL2501_F098_1_MV1","Gallus","Aves",1166,"Eukaryota","Chordata","Aves","Galliformes","Phasianidae","Gallus",NA
 "RL2501_F098_1_MV1","Homo sapiens","Mammalia",49609,"Eukaryota","Chordata","Mammalia","Primates","Hominidae","Homo","Homo sapiens"
 "RL2501_F098_1_MV1","Icichthys lockingtoni","Actinopteri",91,"Eukaryota","Chordata","Actinopteri","Scombriformes","Centrolophidae","Icichthys","Icichthys lockingtoni"
-"RL2501_F098_1_MV1","Lagenorhynchus obliquidens","Mammalia",107,NA,NA,NA,NA,NA,NA,NA
+"RL2501_F098_1_MV1","Lagenorhynchus obliquidens","Mammalia",107,"Eukaryota","Chordata","Mammalia","Artiodactyla","Delphinidae","Sagmatias","Sagmatias obliquidens"
 "RL2501_F098_1_MV1","Megaptera novaeangliae","Mammalia",294,"Eukaryota","Chordata","Mammalia","Artiodactyla","Balaenopteridae","Megaptera","Megaptera novaeangliae"
 "RL2501_F098_1_MV1","Merluccius productus","Actinopteri",420,"Eukaryota","Chordata","Actinopteri","Gadiformes","Merlucciidae","Merluccius","Merluccius productus"
 "RL2501_F098_1_MV1","Oneirodes","Actinopteri",32,"Eukaryota","Chordata","Actinopteri","Lophiiformes","Oneirodidae","Oneirodes",NA
@@ -3029,7 +3029,7 @@
 "RL2501_F122_3_MV1","Delphinidae","Mammalia",161,"Eukaryota","Chordata","Mammalia","Artiodactyla","Delphinidae",NA,NA
 "RL2501_F122_3_MV1","Engraulis mordax","Actinopteri",5689,"Eukaryota","Chordata","Actinopteri","Clupeiformes","Engraulidae","Engraulis","Engraulis mordax"
 "RL2501_F122_3_MV1","Homo sapiens","Mammalia",2265,"Eukaryota","Chordata","Mammalia","Primates","Hominidae","Homo","Homo sapiens"
-"RL2501_F122_3_MV1","Ostreococcus sp. lucimarinus","Mamiellophyceae",43,NA,NA,NA,NA,NA,NA,NA
+"RL2501_F122_3_MV1","Ostreococcus sp. lucimarinus","Mamiellophyceae",43,"Eukaryota","Chlorophyta","Mamiellophyceae","Mamiellales","Bathycoccaceae","Ostreococcus","Ostreococcus sp. 'lucimarinus'"
 "RL2501_F122_3_MV1","Prionace glauca","Chondrichthyes",60,"Eukaryota","Chordata","Chondrichthyes","Carcharhiniformes","Carcharhinidae","Prionace","Prionace glauca"
 "RL2501_F122_3_MV1","Sebastes","Actinopteri",20,"Eukaryota","Chordata","Actinopteri","Perciformes","Sebastidae","Sebastes",NA
 "RL2501_F122_3_MV1","Sebastes paucispinis","Actinopteri",728,"Eukaryota","Chordata","Actinopteri","Perciformes","Sebastidae","Sebastes","Sebastes paucispinis"
@@ -3043,7 +3043,7 @@
 "RL2501_F122_4_MV1","Balaenoptera physalus","Mammalia",151,"Eukaryota","Chordata","Mammalia","Artiodactyla","Balaenopteridae","Balaenoptera","Balaenoptera physalus"
 "RL2501_F122_4_MV1","Engraulis mordax","Actinopteri",1035,"Eukaryota","Chordata","Actinopteri","Clupeiformes","Engraulidae","Engraulis","Engraulis mordax"
 "RL2501_F122_4_MV1","Homo sapiens","Mammalia",1078,"Eukaryota","Chordata","Mammalia","Primates","Hominidae","Homo","Homo sapiens"
-"RL2501_F122_4_MV1","Ostreococcus sp. lucimarinus","Mamiellophyceae",111,NA,NA,NA,NA,NA,NA,NA
+"RL2501_F122_4_MV1","Ostreococcus sp. lucimarinus","Mamiellophyceae",111,"Eukaryota","Chlorophyta","Mamiellophyceae","Mamiellales","Bathycoccaceae","Ostreococcus","Ostreococcus sp. 'lucimarinus'"
 "RL2501_F122_4_MV1","Prionace glauca","Chondrichthyes",62,"Eukaryota","Chordata","Chondrichthyes","Carcharhiniformes","Carcharhinidae","Prionace","Prionace glauca"
 "RL2501_F122_4_MV1","Sebastes paucispinis","Actinopteri",298,"Eukaryota","Chordata","Actinopteri","Perciformes","Sebastidae","Sebastes","Sebastes paucispinis"
 "RL2501_F122_4_MV1","Strongylocentrotus purpuratus","Echinoidea",1783,"Eukaryota","Echinodermata","Echinoidea","Camarodonta","Strongylocentrotidae","Strongylocentrotus","Strongylocentrotus purpuratus"
@@ -3086,7 +3086,7 @@
 "RL2501_F129_3_MV1","Engraulis mordax","Actinopteri",2027,"Eukaryota","Chordata","Actinopteri","Clupeiformes","Engraulidae","Engraulis","Engraulis mordax"
 "RL2501_F129_3_MV1","Eschrichtius robustus","Mammalia",1896,"Eukaryota","Chordata","Mammalia","Artiodactyla","Eschrichtiidae","Eschrichtius","Eschrichtius robustus"
 "RL2501_F129_3_MV1","Homo sapiens","Mammalia",613,"Eukaryota","Chordata","Mammalia","Primates","Hominidae","Homo","Homo sapiens"
-"RL2501_F129_3_MV1","Lagenorhynchus obliquidens","Mammalia",897,NA,NA,NA,NA,NA,NA,NA
+"RL2501_F129_3_MV1","Lagenorhynchus obliquidens","Mammalia",897,"Eukaryota","Chordata","Mammalia","Artiodactyla","Delphinidae","Sagmatias","Sagmatias obliquidens"
 "RL2501_F129_3_MV1","Mola","Actinopteri",5,"Eukaryota","Chordata","Actinopteri","Tetraodontiformes","Molidae","Mola",NA
 "RL2501_F129_3_MV1","Ovis","Mammalia",13694,"Eukaryota","Chordata","Mammalia","Artiodactyla","Bovidae","Ovis",NA
 "RL2501_F129_3_MV1","Patiria miniata","Asteroidea",50,"Eukaryota","Echinodermata","Asteroidea","Valvatida","Asterinidae","Patiria","Patiria miniata"
@@ -3210,7 +3210,7 @@
 "RL2501_F131_3_MV1","Homo sapiens","Mammalia",10645,"Eukaryota","Chordata","Mammalia","Primates","Hominidae","Homo","Homo sapiens"
 "RL2501_F131_3_MV1","Icichthys lockingtoni","Actinopteri",408,"Eukaryota","Chordata","Actinopteri","Scombriformes","Centrolophidae","Icichthys","Icichthys lockingtoni"
 "RL2501_F131_3_MV1","Merluccius productus","Actinopteri",306,"Eukaryota","Chordata","Actinopteri","Gadiformes","Merlucciidae","Merluccius","Merluccius productus"
-"RL2501_F131_3_MV1","Ostreococcus sp. lucimarinus","Mamiellophyceae",105,NA,NA,NA,NA,NA,NA,NA
+"RL2501_F131_3_MV1","Ostreococcus sp. lucimarinus","Mamiellophyceae",105,"Eukaryota","Chlorophyta","Mamiellophyceae","Mamiellales","Bathycoccaceae","Ostreococcus","Ostreococcus sp. 'lucimarinus'"
 "RL2501_F131_3_MV1","Sebastes","Actinopteri",165480,"Eukaryota","Chordata","Actinopteri","Perciformes","Sebastidae","Sebastes",NA
 "RL2501_F131_3_MV1","Sebastes mystinus","Actinopteri",2367,"Eukaryota","Chordata","Actinopteri","Perciformes","Sebastidae","Sebastes","Sebastes mystinus"
 "RL2501_F131_3_MV1","Stenobrachius leucopsarus","Actinopteri",973,"Eukaryota","Chordata","Actinopteri","Myctophiformes","Myctophidae","Stenobrachius","Stenobrachius leucopsarus"
@@ -3438,7 +3438,7 @@
 "RL2501_F139_3_MV1","Melanitta perspicillata","Aves",10,"Eukaryota","Chordata","Aves","Anseriformes","Anatidae","Melanitta","Melanitta perspicillata"
 "RL2501_F139_3_MV1","Mola","Actinopteri",9,"Eukaryota","Chordata","Actinopteri","Tetraodontiformes","Molidae","Mola",NA
 "RL2501_F139_3_MV1","Oneirodes","Actinopteri",73,"Eukaryota","Chordata","Actinopteri","Lophiiformes","Oneirodidae","Oneirodes",NA
-"RL2501_F139_3_MV1","Ostreococcus sp. lucimarinus","Mamiellophyceae",2,NA,NA,NA,NA,NA,NA,NA
+"RL2501_F139_3_MV1","Ostreococcus sp. lucimarinus","Mamiellophyceae",2,"Eukaryota","Chlorophyta","Mamiellophyceae","Mamiellales","Bathycoccaceae","Ostreococcus","Ostreococcus sp. 'lucimarinus'"
 "RL2501_F139_3_MV1","Paralichthys californicus","Actinopteri",533,"Eukaryota","Chordata","Actinopteri","Pleuronectiformes","Paralichthyidae","Paralichthys","Paralichthys californicus"
 "RL2501_F139_3_MV1","Patiria miniata","Asteroidea",2,"Eukaryota","Echinodermata","Asteroidea","Valvatida","Asterinidae","Patiria","Patiria miniata"
 "RL2501_F139_3_MV1","Phosichthyidae","Actinopteri",4,"Eukaryota","Chordata","Actinopteri","Stomiiformes","Phosichthyidae",NA,NA
@@ -3494,7 +3494,7 @@
 "RL2501_F1_1_4_MV1","Cololabis saira","Actinopteri",533,"Eukaryota","Chordata","Actinopteri","Beloniformes","Belonidae","Cololabis","Cololabis saira"
 "RL2501_F1_1_4_MV1","Delphinidae","Mammalia",2350,"Eukaryota","Chordata","Mammalia","Artiodactyla","Delphinidae",NA,NA
 "RL2501_F1_1_4_MV1","Engraulis mordax","Actinopteri",4347,"Eukaryota","Chordata","Actinopteri","Clupeiformes","Engraulidae","Engraulis","Engraulis mordax"
-"RL2501_F1_1_4_MV1","Ostreococcus sp. lucimarinus","Mamiellophyceae",15,NA,NA,NA,NA,NA,NA,NA
+"RL2501_F1_1_4_MV1","Ostreococcus sp. lucimarinus","Mamiellophyceae",15,"Eukaryota","Chlorophyta","Mamiellophyceae","Mamiellales","Bathycoccaceae","Ostreococcus","Ostreococcus sp. 'lucimarinus'"
 "RL2501_F1_1_4_MV1","Stenella coeruleoalba","Mammalia",159,"Eukaryota","Chordata","Mammalia","Artiodactyla","Delphinidae","Stenella","Stenella coeruleoalba"
 "RL2501_F1_1_4_MV1","Symbolophorus californiensis","Actinopteri",712,"Eukaryota","Chordata","Actinopteri","Myctophiformes","Myctophidae","Symbolophorus","Symbolophorus californiensis"
 "RL2501_F1_1_4_MV1","Syngnathus","Actinopteri",1133,"Eukaryota","Chordata","Actinopteri","Syngnathiformes","Syngnathidae","Syngnathus",NA
@@ -3593,7 +3593,7 @@
 "RL2501_F2_2_2_MV1","Delphinidae","Mammalia",4129,"Eukaryota","Chordata","Mammalia","Artiodactyla","Delphinidae",NA,NA
 "RL2501_F2_2_2_MV1","Engraulis mordax","Actinopteri",119049,"Eukaryota","Chordata","Actinopteri","Clupeiformes","Engraulidae","Engraulis","Engraulis mordax"
 "RL2501_F2_2_2_MV1","Evadne","Branchiopoda",102,"Eukaryota","Arthropoda","Branchiopoda","Diplostraca","Podonidae","Evadne",NA
-"RL2501_F2_2_2_MV1","Ostreococcus sp. lucimarinus","Mamiellophyceae",44,NA,NA,NA,NA,NA,NA,NA
+"RL2501_F2_2_2_MV1","Ostreococcus sp. lucimarinus","Mamiellophyceae",44,"Eukaryota","Chlorophyta","Mamiellophyceae","Mamiellales","Bathycoccaceae","Ostreococcus","Ostreococcus sp. 'lucimarinus'"
 "RL2501_F2_2_2_MV1","Stenella coeruleoalba","Mammalia",836,"Eukaryota","Chordata","Mammalia","Artiodactyla","Delphinidae","Stenella","Stenella coeruleoalba"
 "RL2501_F2_2_2_MV1","Syngnathus","Actinopteri",918,"Eukaryota","Chordata","Actinopteri","Syngnathiformes","Syngnathidae","Syngnathus",NA
 "RL2501_F2_2_2_MV1",NA,NA,12018,NA,NA,NA,NA,NA,NA,NA
@@ -3605,7 +3605,7 @@
 "RL2501_F2_2_3_MV1","Eschrichtius robustus","Mammalia",22,"Eukaryota","Chordata","Mammalia","Artiodactyla","Eschrichtiidae","Eschrichtius","Eschrichtius robustus"
 "RL2501_F2_2_3_MV1","Evadne","Branchiopoda",134,"Eukaryota","Arthropoda","Branchiopoda","Diplostraca","Podonidae","Evadne",NA
 "RL2501_F2_2_3_MV1","Homo sapiens","Mammalia",18,"Eukaryota","Chordata","Mammalia","Primates","Hominidae","Homo","Homo sapiens"
-"RL2501_F2_2_3_MV1","Lagenorhynchus obliquidens","Mammalia",14,NA,NA,NA,NA,NA,NA,NA
+"RL2501_F2_2_3_MV1","Lagenorhynchus obliquidens","Mammalia",14,"Eukaryota","Chordata","Mammalia","Artiodactyla","Delphinidae","Sagmatias","Sagmatias obliquidens"
 "RL2501_F2_2_3_MV1","Lampanyctus tenuiformis","Actinopteri",824,"Eukaryota","Chordata","Actinopteri","Myctophiformes","Myctophidae","Lampanyctus","Lampanyctus tenuiformis"
 "RL2501_F2_2_3_MV1","Mola","Actinopteri",2,"Eukaryota","Chordata","Actinopteri","Tetraodontiformes","Molidae","Mola",NA
 "RL2501_F2_2_3_MV1","Ovis","Mammalia",109,"Eukaryota","Chordata","Mammalia","Artiodactyla","Bovidae","Ovis",NA
@@ -3638,7 +3638,7 @@
 "RL2501_F3_2_2_MV1","Engraulis mordax","Actinopteri",60343,"Eukaryota","Chordata","Actinopteri","Clupeiformes","Engraulidae","Engraulis","Engraulis mordax"
 "RL2501_F3_2_2_MV1","Homo sapiens","Mammalia",968,"Eukaryota","Chordata","Mammalia","Primates","Hominidae","Homo","Homo sapiens"
 "RL2501_F3_2_2_MV1","Leuroglossus","Actinopteri",2588,"Eukaryota","Chordata","Actinopteri","Argentiniformes","Bathylagidae","Leuroglossus",NA
-"RL2501_F3_2_2_MV1","Ostreococcus sp. lucimarinus","Mamiellophyceae",759,NA,NA,NA,NA,NA,NA,NA
+"RL2501_F3_2_2_MV1","Ostreococcus sp. lucimarinus","Mamiellophyceae",759,"Eukaryota","Chlorophyta","Mamiellophyceae","Mamiellales","Bathycoccaceae","Ostreococcus","Ostreococcus sp. 'lucimarinus'"
 "RL2501_F3_2_2_MV1","Triphoturus mexicanus","Actinopteri",3205,"Eukaryota","Chordata","Actinopteri","Myctophiformes","Myctophidae","Triphoturus","Triphoturus mexicanus"
 "RL2501_F3_2_2_MV1",NA,NA,45253,NA,NA,NA,NA,NA,NA,NA
 "RL2501_F3_2_3_MV1","Astropecten verrilli","Asteroidea",36,"Eukaryota","Echinodermata","Asteroidea","Paxillosida","Astropectinidae","Astropecten","Astropecten verrilli"
@@ -3704,7 +3704,7 @@
 "RL2501_F4_2_2_MV1","Diogenichthys atlanticus","Actinopteri",857,"Eukaryota","Chordata","Actinopteri","Myctophiformes","Myctophidae","Diogenichthys","Diogenichthys atlanticus"
 "RL2501_F4_2_2_MV1","Engraulis mordax","Actinopteri",80775,"Eukaryota","Chordata","Actinopteri","Clupeiformes","Engraulidae","Engraulis","Engraulis mordax"
 "RL2501_F4_2_2_MV1","Homo sapiens","Mammalia",598,"Eukaryota","Chordata","Mammalia","Primates","Hominidae","Homo","Homo sapiens"
-"RL2501_F4_2_2_MV1","Ostreococcus sp. lucimarinus","Mamiellophyceae",60,NA,NA,NA,NA,NA,NA,NA
+"RL2501_F4_2_2_MV1","Ostreococcus sp. lucimarinus","Mamiellophyceae",60,"Eukaryota","Chlorophyta","Mamiellophyceae","Mamiellales","Bathycoccaceae","Ostreococcus","Ostreococcus sp. 'lucimarinus'"
 "RL2501_F4_2_2_MV1","Pisaster ochraceus","Asteroidea",137,"Eukaryota","Echinodermata","Asteroidea","Forcipulatida","Asteriidae","Pisaster","Pisaster ochraceus"
 "RL2501_F4_2_2_MV1","Triphoturus mexicanus","Actinopteri",2821,"Eukaryota","Chordata","Actinopteri","Myctophiformes","Myctophidae","Triphoturus","Triphoturus mexicanus"
 "RL2501_F4_2_2_MV1",NA,NA,32462,NA,NA,NA,NA,NA,NA,NA
@@ -3712,7 +3712,7 @@
 "RL2501_F4_2_3_MV1","Delphinidae","Mammalia",2649,"Eukaryota","Chordata","Mammalia","Artiodactyla","Delphinidae",NA,NA
 "RL2501_F4_2_3_MV1","Delphinus bairdii","Mammalia",217,"Eukaryota","Chordata","Mammalia","Artiodactyla","Delphinidae","Delphinus","Delphinus bairdii"
 "RL2501_F4_2_3_MV1","Engraulis mordax","Actinopteri",84386,"Eukaryota","Chordata","Actinopteri","Clupeiformes","Engraulidae","Engraulis","Engraulis mordax"
-"RL2501_F4_2_3_MV1","Ostreococcus sp. lucimarinus","Mamiellophyceae",6,NA,NA,NA,NA,NA,NA,NA
+"RL2501_F4_2_3_MV1","Ostreococcus sp. lucimarinus","Mamiellophyceae",6,"Eukaryota","Chlorophyta","Mamiellophyceae","Mamiellales","Bathycoccaceae","Ostreococcus","Ostreococcus sp. 'lucimarinus'"
 "RL2501_F4_2_3_MV1","Prionace glauca","Chondrichthyes",76,"Eukaryota","Chordata","Chondrichthyes","Carcharhiniformes","Carcharhinidae","Prionace","Prionace glauca"
 "RL2501_F4_2_3_MV1",NA,NA,58371,NA,NA,NA,NA,NA,NA,NA
 "RL2501_F4_2_4_MV1","Astropecten verrilli","Asteroidea",7,"Eukaryota","Echinodermata","Asteroidea","Paxillosida","Astropectinidae","Astropecten","Astropecten verrilli"
@@ -3720,7 +3720,7 @@
 "RL2501_F4_2_4_MV1","Diogenichthys atlanticus","Actinopteri",303,"Eukaryota","Chordata","Actinopteri","Myctophiformes","Myctophidae","Diogenichthys","Diogenichthys atlanticus"
 "RL2501_F4_2_4_MV1","Engraulis mordax","Actinopteri",29007,"Eukaryota","Chordata","Actinopteri","Clupeiformes","Engraulidae","Engraulis","Engraulis mordax"
 "RL2501_F4_2_4_MV1","Homo sapiens","Mammalia",270,"Eukaryota","Chordata","Mammalia","Primates","Hominidae","Homo","Homo sapiens"
-"RL2501_F4_2_4_MV1","Ostreococcus sp. lucimarinus","Mamiellophyceae",204,NA,NA,NA,NA,NA,NA,NA
+"RL2501_F4_2_4_MV1","Ostreococcus sp. lucimarinus","Mamiellophyceae",204,"Eukaryota","Chlorophyta","Mamiellophyceae","Mamiellales","Bathycoccaceae","Ostreococcus","Ostreococcus sp. 'lucimarinus'"
 "RL2501_F4_2_4_MV1","Triphoturus mexicanus","Actinopteri",1273,"Eukaryota","Chordata","Actinopteri","Myctophiformes","Myctophidae","Triphoturus","Triphoturus mexicanus"
 "RL2501_F4_2_4_MV1",NA,NA,29758,NA,NA,NA,NA,NA,NA,NA
 "RL2501_F5_1_1_MV1","Astropecten verrilli","Asteroidea",103,"Eukaryota","Echinodermata","Asteroidea","Paxillosida","Astropectinidae","Astropecten","Astropecten verrilli"
@@ -3742,7 +3742,7 @@
 "RL2501_F5_1_2_MV1","Engraulis mordax","Actinopteri",94212,"Eukaryota","Chordata","Actinopteri","Clupeiformes","Engraulidae","Engraulis","Engraulis mordax"
 "RL2501_F5_1_2_MV1","Homo sapiens","Mammalia",783,"Eukaryota","Chordata","Mammalia","Primates","Hominidae","Homo","Homo sapiens"
 "RL2501_F5_1_2_MV1","Mola","Actinopteri",2201,"Eukaryota","Chordata","Actinopteri","Tetraodontiformes","Molidae","Mola",NA
-"RL2501_F5_1_2_MV1","Ostreococcus sp. lucimarinus","Mamiellophyceae",107,NA,NA,NA,NA,NA,NA,NA
+"RL2501_F5_1_2_MV1","Ostreococcus sp. lucimarinus","Mamiellophyceae",107,"Eukaryota","Chlorophyta","Mamiellophyceae","Mamiellales","Bathycoccaceae","Ostreococcus","Ostreococcus sp. 'lucimarinus'"
 "RL2501_F5_1_2_MV1","Patiria miniata","Asteroidea",19,"Eukaryota","Echinodermata","Asteroidea","Valvatida","Asterinidae","Patiria","Patiria miniata"
 "RL2501_F5_1_2_MV1","Sebastes","Actinopteri",5986,"Eukaryota","Chordata","Actinopteri","Perciformes","Sebastidae","Sebastes",NA
 "RL2501_F5_1_2_MV1","Sebastes pinniger","Actinopteri",13763,"Eukaryota","Chordata","Actinopteri","Perciformes","Sebastidae","Sebastes","Sebastes pinniger"
@@ -3795,7 +3795,7 @@
 "RL2501_F5_2_2_MV1","Cololabis saira","Actinopteri",815,"Eukaryota","Chordata","Actinopteri","Beloniformes","Belonidae","Cololabis","Cololabis saira"
 "RL2501_F5_2_2_MV1","Delphinidae","Mammalia",839,"Eukaryota","Chordata","Mammalia","Artiodactyla","Delphinidae",NA,NA
 "RL2501_F5_2_2_MV1","Engraulis mordax","Actinopteri",104892,"Eukaryota","Chordata","Actinopteri","Clupeiformes","Engraulidae","Engraulis","Engraulis mordax"
-"RL2501_F5_2_2_MV1","Ostreococcus sp. lucimarinus","Mamiellophyceae",13,NA,NA,NA,NA,NA,NA,NA
+"RL2501_F5_2_2_MV1","Ostreococcus sp. lucimarinus","Mamiellophyceae",13,"Eukaryota","Chlorophyta","Mamiellophyceae","Mamiellales","Bathycoccaceae","Ostreococcus","Ostreococcus sp. 'lucimarinus'"
 "RL2501_F5_2_2_MV1","Patiria miniata","Asteroidea",67,"Eukaryota","Echinodermata","Asteroidea","Valvatida","Asterinidae","Patiria","Patiria miniata"
 "RL2501_F5_2_2_MV1","Pisaster","Asteroidea",33,"Eukaryota","Echinodermata","Asteroidea","Forcipulatida","Asteriidae","Pisaster",NA
 "RL2501_F5_2_2_MV1","Sebastes","Actinopteri",8921,"Eukaryota","Chordata","Actinopteri","Perciformes","Sebastidae","Sebastes",NA
@@ -3859,7 +3859,7 @@
 "RL2501_F87_1_3_MV1","Evadne","Branchiopoda",21,"Eukaryota","Arthropoda","Branchiopoda","Diplostraca","Podonidae","Evadne",NA
 "RL2501_F87_1_3_MV1","Homo sapiens","Mammalia",1854,"Eukaryota","Chordata","Mammalia","Primates","Hominidae","Homo","Homo sapiens"
 "RL2501_F87_1_3_MV1","Luidia foliolata","Asteroidea",25,"Eukaryota","Echinodermata","Asteroidea","Paxillosida","Luidiidae","Luidia","Luidia foliolata"
-"RL2501_F87_1_3_MV1","Ostreococcus sp. lucimarinus","Mamiellophyceae",240,NA,NA,NA,NA,NA,NA,NA
+"RL2501_F87_1_3_MV1","Ostreococcus sp. lucimarinus","Mamiellophyceae",240,"Eukaryota","Chlorophyta","Mamiellophyceae","Mamiellales","Bathycoccaceae","Ostreococcus","Ostreococcus sp. 'lucimarinus'"
 "RL2501_F87_1_3_MV1","Patiria miniata","Asteroidea",121,"Eukaryota","Echinodermata","Asteroidea","Valvatida","Asterinidae","Patiria","Patiria miniata"
 "RL2501_F87_1_3_MV1","Peprilus","Actinopteri",172,"Eukaryota","Chordata","Actinopteri","Scombriformes","Stromateidae","Peprilus",NA
 "RL2501_F87_1_3_MV1","Pisaster","Asteroidea",34,"Eukaryota","Echinodermata","Asteroidea","Forcipulatida","Asteriidae","Pisaster",NA

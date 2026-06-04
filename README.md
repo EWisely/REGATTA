@@ -83,10 +83,11 @@ checklist instead of being flagged.
 | `OBIS_download()` | Pull an OBIS species list with optional marine/brackish/freshwater filters | `robis` |
 | `Local_csv_download()` | Read user-supplied checklist CSVs (Genus, Species columns) | none |
 | `build_regional_checklist()` | Merge the three source outputs into one deduplicated regional list (currently named `dataset_combine`; rename pending) | none |
-| `taxonomize_checklist()` | Resolve a regional list to a 7-rank NCBI taxonomy table | `taxonomizr` |
 | `parse_sintax()` | Convert vsearch SINTAX taxonomy strings to a full 7-rank taxonomy table | none |
 | `resolve_taxids()` | Convert NCBI taxIDs to a full 7-rank taxonomy table (e.g. obitools output) | `taxonomizr` |
-| `resolve_names()` | Convert mixed-rank scientific names (Kraken2 / BestTaxon style) to a full 7-rank taxonomy table; strips sp./spp./cf./aff./Gen./indet./quotes before lookup | `taxonomizr` |
+| `resolve_names()` | Convert mixed-rank scientific names (Kraken2 / BestTaxon style) to a full 7-rank taxonomy table; strips sp./spp./cf./aff./Gen./indet./quotes before lookup; synonym-aware (matches NCBI scientific names + recorded synonyms, excludes common names) | `taxonomizr`, `RSQLite` |
+| `taxonomize_checklist()` | Resolve a regional species list to a 7-rank NCBI taxonomy table; synonym-aware lookup | `taxonomizr`, `RSQLite` |
+| `name_to_taxid()` *(internal)* | Synonym-aware name → NCBI taxID lookup used by the two functions above. Accepted name types are configurable via `accept_types` | `RSQLite` |
 | `regatta_checklist_lca()` | The core LCA step. Reconcile a taxonomy table against the regional checklist | none (base R) |
 | `regatta_compare_assignments()` *(planned)* | Optional comparison of two classifier outputs on the same ASVs | TBD |
 
@@ -245,7 +246,13 @@ separately and concatenate the resulting tables first).
   misspelled names in your local CSVs that don't resolve in NCBI become
   inert entries (they can never match anything in classifier output, since
   classifier output is also NCBI-canonical) — but they don't degrade
-  correctness.
+  correctness. Synonym-aware lookup (see `name_to_taxid()`) recovers
+  many of these automatically — for example, the Galapagos test
+  recovered ~39 species in the checklist whose names had been
+  reclassified in NCBI (e.g. *Antennarius sanguineus* → current
+  *Abantennarius sanguineus*). Both classifier output and checklist
+  are normalized to the same canonical taxonomy, so synonyms on either
+  side match correctly in the LCA walk.
 - **REGATTA does not reconcile classifier disagreements between databases.**
   If global assignments and local assignments disagree at species level (e.g. *Mugil curema*
   vs. *Mugil thoburni*), REGATTA validates each independently against the
