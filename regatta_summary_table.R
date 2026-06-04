@@ -19,35 +19,32 @@
 #         species)
 
 # Inputs:
-#   stages       Named list of taxonomy tables (each: ASV-id + 7 rank
-#                columns; other columns ignored for stats). Names become
-#                column headers in the output. Use whatever labels make
-#                sense for the user's pipeline ("global", "local",
-#                "post", or just "before"/"after").
-#   comparison   Optional output of regatta_compare_assignments(). When
-#                supplied with both labels, the source-breakdown rows
-#                fill in (counts and percentages of only_<label> cases).
-#   global_label, local_label
-#                Character labels matching the `label_A`/`label_B` used
-#                in the comparison call. Required together with
-#                `comparison` to fill the source-breakdown rows.
-#   lca_result   Optional output of regatta_checklist_lca(). When
-#                supplied, row 8 is populated as nrow(corrected with
-#                preferred_name) minus nrow(before with preferred_name).
+#   stages          Named list of taxonomy tables (each: ASV-id + 7 rank
+#                   columns; other columns ignored for stats). Names
+#                   become column headers in the output. Common shape
+#                   is list(global=..., local=..., post=...).
+#   reconciliation  Optional output of reconcile_global_local() — either
+#                   the full list or just its $summary data.frame.
+#                   When supplied, the source-breakdown rows (4-7)
+#                   fill in (counts and percentages of "only_global"
+#                   and "only_local" cases from the symmetric
+#                   reconciliation).
+#   lca_result      Optional output of regatta_checklist_lca(). When
+#                   supplied, row 8 (change in number of ASVs assigned)
+#                   is populated as nrow(corrected non-NA domain) minus
+#                   nrow(before non-NA domain).
 #
 # The "assignment-source breakdown" semantics differ slightly from the
 # original Validate_local_assignments.R, which counted cases where one
-# DB was *picked over* the other based on percent identity. In the
-# redesigned symmetric comparison there is no winner-takes-all step;
-# only_<label> counts the cases where one classifier had an assignment
-# and the other did not — a clean, well-defined version of the same
-# "which DB contributed this ASV" question.
+# DB was picked over the other based on percent identity. In the
+# redesigned reconciliation there is no winner-takes-all step;
+# "only_global" and "only_local" count the cases where one DB had an
+# assignment and the other did not — a clean, well-defined version of
+# the same "which DB contributed this ASV" question.
 
 regatta_summary_table <- function(stages,
-                                  comparison   = NULL,
-                                  global_label = NULL,
-                                  local_label  = NULL,
-                                  lca_result   = NULL) {
+                                  reconciliation = NULL,
+                                  lca_result     = NULL) {
   ranks <- c("domain", "phylum", "class", "order", "family", "genus", "species")
 
   if (!is.list(stages) || is.null(names(stages)) || any(!nzchar(names(stages)))) {
@@ -92,22 +89,33 @@ regatta_summary_table <- function(stages,
   out <- as.data.frame(cols, stringsAsFactors = FALSE)
   names(out) <- names(stages)
 
-  # Source-breakdown rows (4-7) when comparison + both labels supplied
-  if (!is.null(comparison) && !is.null(global_label) && !is.null(local_label)) {
-    if (!"agreement_category" %in% names(comparison)) {
-      stop("`comparison` must be the output of regatta_compare_assignments().")
+  # Source-breakdown rows (4-7) when reconciliation supplied.
+  # Accept either the full reconcile_global_local() list (with
+  # $summary) or a bare summary data.frame.
+  if (!is.null(reconciliation)) {
+    summary_df <- if (is.list(reconciliation) && "summary" %in% names(reconciliation)) {
+      reconciliation$summary
+    } else if (is.data.frame(reconciliation)) {
+      reconciliation
+    } else {
+      stop("`reconciliation` must be the output of reconcile_global_local() ",
+           "(a list with $summary), or its $summary data.frame.")
     }
-    n_local  <- sum(comparison$agreement_category == paste0("only_", local_label))
-    n_global <- sum(comparison$agreement_category == paste0("only_", global_label))
-    n_cmp    <- nrow(comparison)
-    # Fill the source-breakdown rows for EVERY stage column with the same
-    # comparison-derived numbers. They are properties of the comparison,
-    # not of any single stage.
+    if (!"reconciliation_status" %in% names(summary_df)) {
+      stop("`reconciliation` is missing the `reconciliation_status` column. ",
+           "Did you pass the output of reconcile_global_local()?")
+    }
+    n_local  <- sum(summary_df$reconciliation_status == "only_local")
+    n_global <- sum(summary_df$reconciliation_status == "only_global")
+    n_rec    <- nrow(summary_df)
+    # Fill the source-breakdown rows for EVERY stage column with the
+    # same reconciliation-derived numbers. They are properties of the
+    # reconciliation, not of any single stage.
     for (j in seq_along(out)) {
       out[[j]][4] <- n_local
-      out[[j]][5] <- if (n_cmp > 0) 100 * n_local / n_cmp else NA_real_
+      out[[j]][5] <- if (n_rec > 0) 100 * n_local / n_rec else NA_real_
       out[[j]][6] <- n_global
-      out[[j]][7] <- if (n_cmp > 0) 100 * n_global / n_cmp else NA_real_
+      out[[j]][7] <- if (n_rec > 0) 100 * n_global / n_rec else NA_real_
     }
   }
 
