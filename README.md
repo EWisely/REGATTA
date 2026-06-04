@@ -41,12 +41,14 @@ flowchart TD
     D --> E[taxonomize_checklist]
     E --> F[("Regional checklist<br/>7-rank table<br/>one taxonomic group")]
 
-    G["eDNA classifier output<br/>obitools / vsearch+SINTAX /<br/>Kraken2 / BLAST / etc."] --> H{Input shape?}
+    G["eDNA classifier output<br/>obitools / vsearch+SINTAX /<br/>Kraken2 / MURI / BLAST / etc."] --> H{Input shape?}
     H -->|SINTAX strings| I[parse_sintax]
     H -->|NCBI taxIDs| J[resolve_taxids]
+    H -->|"Mixed-rank names<br/>(BestTaxon)"| N1[resolve_names]
     H -->|7 rank columns| K[no preprocessing needed]
     I --> L[("Taxonomy table<br/>ASV + 7 ranks")]
     J --> L
+    N1 --> L
     K --> L
 
     F --> M[regatta_checklist_lca]
@@ -82,8 +84,9 @@ checklist instead of being flagged.
 | `Local_csv_download()` | Read user-supplied checklist CSVs (Genus, Species columns) | none |
 | `build_regional_checklist()` | Merge the three source outputs into one deduplicated regional list (currently named `dataset_combine`; rename pending) | none |
 | `taxonomize_checklist()` | Resolve a regional list to a 7-rank NCBI taxonomy table | `taxonomizr` |
-| `parse_sintax()` | Convert vsearch SINTAX taxonomy strings to 7 rank columns | none |
-| `resolve_taxids()` | Convert NCBI taxIDs to 7 rank columns (e.g. obitools output) | `taxonomizr` |
+| `parse_sintax()` | Convert vsearch SINTAX taxonomy strings to a full 7-rank taxonomy table | none |
+| `resolve_taxids()` | Convert NCBI taxIDs to a full 7-rank taxonomy table (e.g. obitools output) | `taxonomizr` |
+| `resolve_names()` | Convert mixed-rank scientific names (Kraken2 / BestTaxon style) to a full 7-rank taxonomy table; strips sp./spp./cf./aff./Gen./indet./quotes before lookup | `taxonomizr` |
 | `regatta_checklist_lca()` | The core LCA step. Reconcile a taxonomy table against the regional checklist | none (base R) |
 | `regatta_compare_assignments()` *(planned)* | Optional comparison of two classifier outputs on the same ASVs | TBD |
 
@@ -97,10 +100,11 @@ directly:
 source("GBIF_download.R")
 source("OBIS_download.R")
 source("Local_csv_download.R")
-source("Dataset_combine.R")          # to be renamed build_regional_checklist
+source("Build_regional_checklist.R")
 source("taxonomize_checklist.R")
 source("parse_sintax.R")
 source("resolve_taxids.R")
+source("resolve_names.R")
 source("regatta_checklist_lca.R")
 ```
 
@@ -140,29 +144,59 @@ subsequent calls.
 
 ### 3. Convert your classifier output to a 7-rank taxonomy table
 
-For vsearch with SINTAX-format output:
+Each preprocessor takes your classifier's table and adds the 7 rank
+columns, preserving all your other columns (sample names, read counts,
+percent identities, etc.) untouched. If you pass `output_prefix`, it
+also writes the augmented table to disk as
+`<output_prefix>_full_tax_table.csv` for downstream phyloseq / MetabaR
+use.
+
+For vsearch SINTAX output:
 
 ```r
 vs <- readr::read_delim("lca_results.txt", col_names = c("ASV_id", "sintax"), delim = "\t")
-taxonomy_table <- cbind(ASV_id = vs$ASV_id, parse_sintax(vs$sintax))
+taxonomy_table <- parse_sintax(
+  input         = vs,
+  sintax_col    = "sintax",
+  output_prefix = "MiFish_vsearch"
+)
 ```
 
 For obitools (NCBI taxID column):
 
 ```r
 obi <- readr::read_delim("MiFish_Menu_95_named.tab", delim = "\t")
-ranks <- resolve_taxids(obi$TAXID, sql_path = "/path/to/accessionTaxa.sql")
-taxonomy_table <- cbind(
-  ASV_id = obi$ID,
-  pct_id = obi$BEST_IDENTITY * 100,
-  count  = obi$COUNT,
-  ranks
+taxonomy_table <- resolve_taxids(
+  input         = obi,
+  taxid_col     = "TAXID",
+  sql_path      = "/path/to/accessionTaxa.sql",
+  output_prefix = "MiFish_obitools"
 )
 ```
 
-For any other classifier, supply a data.frame with an ASV ID column plus
-the 7 ranks `domain`, `phylum`, `class`, `order`, `family`, `genus`,
-`species` (NA where unresolved). No preprocessing needed.
+For Kraken2-style "BestTaxon"-name outputs where each row has a single
+scientific name at whatever rank the classifier reached (species, genus,
+family, etc.):
+
+```r
+muri <- read.csv("RL2501_MV1_taxon_table.csv", stringsAsFactors = FALSE)
+taxonomy_table <- resolve_names(
+  input         = muri,
+  name_col      = "BestTaxon",
+  sql_path      = "/path/to/accessionTaxa.sql",
+  output_prefix = "run2_RL2501_MV1"
+)
+# Strips sp., spp., cf., aff., Gen., indet., and quote characters before
+# NCBI lookup. Pass `clean = FALSE` to disable.
+```
+
+For any classifier whose output already has 7 rank columns named
+`domain`, `phylum`, `class`, `order`, `family`, `genus`, `species` (NA
+where unresolved), no preprocessing is needed — pass the table straight
+to `regatta_checklist_lca()`.
+
+All four input shapes (pre-resolved ranks, taxID, scientific name,
+SINTAX string) are accepted and produce identical-shape output.
 
 ### 4. Run the LCA reconciliation
 
@@ -193,15 +227,17 @@ helpers shipped separately).
 ## Accepted input shapes
 
 The taxonomy table you feed to `regatta_checklist_lca()` must be uniform
-in shape — all rows in one of the four forms below. Mixed shapes within
-one call are not supported.
+in shape — all rows in one of the forms below. Mixed shapes within one
+call are not supported (run each shape through its preprocessor
+separately and concatenate the resulting tables first).
 
 | Shape | Required columns | Preprocessor |
 |---|---|---|
 | 1. Pre-resolved ranks | `ASV_id` + 7 rank columns | none |
 | 2. NCBI taxIDs | `ASV_id` + `taxID` | `resolve_taxids()` |
-| 3. NCBI accessions | `ASV_id` + `accession` | (planned) |
-| 4. Scientific names | `ASV_id` + `scientific_name` | (planned, fuzziest) |
+| 3. Scientific names (mixed ranks OK) | `ASV_id` + a name column | `resolve_names()` |
+| 4. vsearch SINTAX strings | `ASV_id` + a SINTAX column | `parse_sintax()` |
+| 5. NCBI accessions | `ASV_id` + `accession` | (planned) |
 
 ## Caveats
 
