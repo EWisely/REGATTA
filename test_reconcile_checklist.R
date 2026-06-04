@@ -35,7 +35,7 @@ input <- data.frame(
   stringsAsFactors = FALSE
 )
 
-result <- reconcile_checklist(input, checklist)
+result <- reconcile_checklist(input, checklist, output_dir = NULL)
 
 # --- $result is exactly 8 columns: ASV_id + 7 ranks. Nothing else. ---
 stopifnot(identical(names(result$result),

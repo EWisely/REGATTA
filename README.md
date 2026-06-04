@@ -118,8 +118,8 @@ checklist instead of being flagged.
 | `resolve_names()` | Convert mixed-rank scientific names (Kraken2 / BestTaxon style) to a full 7-rank taxonomy table; strips sp./spp./cf./aff./Gen./indet./quotes before lookup; synonym-aware (matches NCBI scientific names + recorded synonyms, excludes common names) | `taxonomizr`, `RSQLite` |
 | `taxonomize_checklist()` | Resolve a regional species list to a 7-rank NCBI taxonomy table; synonym-aware lookup | `taxonomizr`, `RSQLite` |
 | `name_to_taxid()` *(internal)* | Synonym-aware name → NCBI taxID lookup used by the two functions above. Accepted name types are configurable via `accept_types` | `RSQLite` |
-| `reconcile_checklist()` | The core LCA step. Reconcile a taxonomy table against the regional checklist. Returns `$result` (ASV_id + 7 ranks ONLY — REGATTA exchange format), `$tracking` (before/after audit per ASV), and `$stats`. Accepts either the `$result` of `reconcile_global_local()` or a standalone classifier-output table. Also accepts `output_dir` and `output_prefix` — when `output_dir` is set, writes 3 CSVs (`<prefix>_taxonomy_table.csv`, `<prefix>_tracking.csv`, `<prefix>_summary.csv`) | none (base R) |
-| `reconcile_global_local()` | Optional reconciliation of two classifier outputs on the same ASVs — one against a global reference DB (NCBI/EMBL), one against a local curated DB. Two descriptive steps: **best_pctid** (per-ASV winner by percent identity) and **global_lca_to_local** (when global won best_pctid AND local also assigned, downgrade to LCA of both). Returns `$result` (same 8-column shape), `$tracking` (best_ID_combined-style per-ASV audit), and `$stats`. pct_id scale handling: user specifies the pct_id column per input and the function auto-rescales 0-1 → 0-100 as needed. Also accepts `output_dir` and `output_prefix` — when `output_dir` is set, writes 3 CSVs (`<prefix>_taxonomy_table.csv`, `<prefix>_tracking.csv`, `<prefix>_summary.csv`) | none (base R) |
+| `reconcile_checklist()` | The core LCA step. Reconcile a taxonomy table against the regional checklist. Returns `$result` (ASV_id + 7 ranks ONLY — REGATTA exchange format), `$tracking` (before/after audit per ASV), and `$stats`. Accepts either the `$result` of `reconcile_global_local()` or a standalone classifier-output table. Writes 3 CSVs (`<prefix>_taxonomy_table.csv`, `<prefix>_tracking.csv`, `<prefix>_summary.csv`) — defaults: `output_dir = "reconcile_checklist_out"`, `output_prefix = "reconcile_checklist"`. Pass `output_dir = NULL` to disable file writing. By default also reads from `prior_dir = "reconcile_global_local_out"` (`prior_prefix = "reconcile_global_local"`); if that folder exists with the prior stage's tracking + summary CSVs, the written `tracking.csv` and `summary.csv` are **augmented** with the global-vs-local columns/rows. | none (base R) |
+| `reconcile_global_local()` | Optional reconciliation of two classifier outputs on the same ASVs — one against a global reference DB (NCBI/EMBL), one against a local curated DB. Two descriptive steps: **best_pctid** (per-ASV winner by percent identity) and **global_lca_to_local** (when global won best_pctid AND local also assigned, downgrade to LCA of both). Returns `$result` (same 8-column shape), `$tracking` (best_ID_combined-style per-ASV audit), and `$stats`. pct_id scale handling: user specifies the pct_id column per input and the function auto-rescales 0-1 → 0-100 as needed. Writes 3 CSVs (`<prefix>_taxonomy_table.csv`, `<prefix>_tracking.csv`, `<prefix>_summary.csv`) — defaults: `output_dir = "reconcile_global_local_out"`, `output_prefix = "reconcile_global_local"`. Pass `output_dir = NULL` to disable file writing. | none (base R) |
 | `summarize_regatta()` | The 21-row per-stage stats summary. Compares inputs (`global_input`, `local_input`) against outputs (`reconciled`, `post_checklist`) and produces Ella's format. Source-breakdown rows populate when `reconciled` is supplied; row 8 populates when both `global_input` and `reconciled` are supplied | none (base R) |
 
 ## Quick-start
@@ -243,8 +243,7 @@ result$stats     # match-rank distribution + per-rank specificity counts
 ```
 
 > **Note — file output behavior.** Both `reconcile_global_local()` and
-> `reconcile_checklist()` write 3 CSV files when given an `output_dir`
-> argument:
+> `reconcile_checklist()` write 3 CSV files per stage by default:
 >
 > ```
 > <prefix>_taxonomy_table.csv  — the $result (ASV_id + 7 ranks ONLY)
@@ -252,17 +251,46 @@ result$stats     # match-rank distribution + per-rank specificity counts
 > <prefix>_summary.csv         — the $stats step-level summary
 > ```
 >
-> You can run either function alone or chain them — either way the
-> output folder ends up with the same 3-file shape per stage. Chained
-> example:
+> The defaults are descriptive folder/prefix pairs, so a user who calls
+> either function with no output arguments still ends up with the 3-file
+> triple in a labeled folder in their working directory:
+>
+> | Function | `output_dir` default | `output_prefix` default |
+> |---|---|---|
+> | `reconcile_global_local()` | `"reconcile_global_local_out"` | `"reconcile_global_local"` |
+> | `reconcile_checklist()`    | `"reconcile_checklist_out"`    | `"reconcile_checklist"`    |
+>
+> Pass `output_dir = NULL` to disable file writing entirely (pure
+> in-memory call).
+>
+> **Augmentation behavior of `reconcile_checklist()`.** By default it
+> also looks at `prior_dir = "reconcile_global_local_out"` and
+> `prior_prefix = "reconcile_global_local"`. If that folder exists and
+> contains the prior stage's `tracking.csv` and `summary.csv`, the
+> `tracking.csv` and `summary.csv` written into
+> `reconcile_checklist_out/` are **augmented**: they carry both the
+> `reconcile_global_local` columns/rows AND the new `reconcile_checklist`
+> columns/rows side by side, so the audit and summary stay end-to-end
+> across the two stages. The `taxonomy_table.csv` is always the strict
+> 8-column post-LCA result regardless of augmentation.
+>
+> Two clean workflows:
 >
 > ```r
-> rec  <- reconcile_global_local(g, l,
->                                output_dir    = "out/step1",
->                                output_prefix = "rec")
-> post <- reconcile_checklist(rec$result, fish_checklist,
->                             output_dir    = "out/step2",
->                             output_prefix = "post")
+> # SINGLE-DB
+> post <- reconcile_checklist(my_tax, fish_checklist)
+> # Writes 3 CSVs to reconcile_checklist_out/
+> ```
+>
+> ```r
+> # TWO-DB
+> rec  <- reconcile_global_local(global_in, local_in)
+> # Writes 3 CSVs to reconcile_global_local_out/
+>
+> post <- reconcile_checklist(rec$result, fish_checklist)
+> # Auto-detects reconcile_global_local_out/, reads its tracking + summary,
+> # writes AUGMENTED tracking + summary plus the post-LCA taxonomy_table
+> # into reconcile_checklist_out/
 > ```
 
 ### 5. (Optional) Reconcile global vs. local DB classifier outputs

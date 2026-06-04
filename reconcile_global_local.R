@@ -51,14 +51,18 @@
 #   Local_advantage            TRUE (default): local wins ties. FALSE:
 #                              global wins ties. Matches the original
 #                              Validate_local_assignments.R default.
-#   output_dir                 NULL (default) or a directory path. When
-#                              non-NULL, writes 3 CSVs to that directory:
-#                              <output_prefix>_taxonomy_table.csv (the
-#                              $result table), <output_prefix>_tracking.csv
-#                              (the $tracking audit), and
+#   output_dir                 Directory path. Defaults to
+#                              "reconcile_global_local_out" (relative to
+#                              the working directory). Writes 3 CSVs
+#                              there: <output_prefix>_taxonomy_table.csv
+#                              (the $result table),
+#                              <output_prefix>_tracking.csv (the
+#                              $tracking audit), and
 #                              <output_prefix>_summary.csv (the $stats
 #                              counts). The directory is created if it
-#                              does not already exist.
+#                              does not already exist. Pass
+#                              output_dir = NULL to disable file writing
+#                              entirely.
 #   output_prefix              Filename prefix for the 3 CSVs above.
 #                              Default "reconcile_global_local".
 
@@ -92,7 +96,7 @@ reconcile_global_local <- function(global_table,
                                    global_pct_id_scale = c("auto", "0-1", "0-100"),
                                    local_pct_id_scale  = c("auto", "0-1", "0-100"),
                                    Local_advantage     = TRUE,
-                                   output_dir          = NULL,
+                                   output_dir          = "reconcile_global_local_out",
                                    output_prefix       = "reconcile_global_local") {
   ranks <- c("domain", "phylum", "class", "order", "family", "genus", "species")
   global_pct_id_scale <- match.arg(global_pct_id_scale)

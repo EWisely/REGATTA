@@ -10,13 +10,26 @@
 # regional checklist supports it and downgrades where it doesn't,
 # without using percent-identity heuristics.
 #
-# If output_dir is supplied, the three return-list elements are also
-# written to disk as CSVs named
-#   <output_prefix>_taxonomy_table.csv  (the corrected $result)
+# By default, output_dir = "reconcile_checklist_out" and the three
+# return-list elements are written to disk there as CSVs named
+#   <output_prefix>_taxonomy_table.csv  (the corrected $result, strict 8 cols)
 #   <output_prefix>_tracking.csv        (per-ASV before/after audit)
 #   <output_prefix>_summary.csv         (the stats data frame)
-# The directory is created if it doesn't exist. The function still
-# returns the same list(result, tracking, stats) regardless.
+# The directory is created if it doesn't exist. Pass output_dir = NULL
+# to disable file writing entirely. The function still returns the same
+# list(result, tracking, stats) regardless.
+#
+# prior_dir / prior_prefix: if a folder named prior_dir exists in the
+# working directory at call time AND contains both
+#   <prior_prefix>_tracking.csv  and  <prior_prefix>_summary.csv
+# (i.e. the outputs of a previous reconcile_global_local() run),
+# reconcile_checklist() will READ those files and write AUGMENTED
+# versions of tracking + summary into output_dir, combining the
+# reconcile_global_local stage columns/rows with the new
+# reconcile_checklist columns/rows. The taxonomy_table.csv is ALWAYS
+# strict 8 columns (id_col + 7 ranks), regardless of prior detection.
+# Defaults: prior_dir = "reconcile_global_local_out",
+#           prior_prefix = "reconcile_global_local".
 #
 # Accepts either:
 #   - the $result output of reconcile_global_local() (8 columns:
@@ -46,9 +59,11 @@
 
 reconcile_checklist <- function(taxonomy_table,
                                 checklist,
-                                id_col = "ASV_id",
-                                output_dir = NULL,
-                                output_prefix = "reconcile_checklist") {
+                                id_col        = "ASV_id",
+                                output_dir    = "reconcile_checklist_out",
+                                output_prefix = "reconcile_checklist",
+                                prior_dir     = "reconcile_global_local_out",
+                                prior_prefix  = "reconcile_global_local") {
   ranks <- c("domain", "phylum", "class", "order", "family", "genus", "species")
 
   missing_t <- setdiff(c(id_col, ranks), names(taxonomy_table))
@@ -160,9 +175,75 @@ reconcile_checklist <- function(taxonomy_table,
 
   if (!is.null(output_dir)) {
     dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
-    utils::write.csv(result,   file.path(output_dir, paste0(output_prefix, "_taxonomy_table.csv")), row.names = FALSE)
-    utils::write.csv(tracking, file.path(output_dir, paste0(output_prefix, "_tracking.csv")),       row.names = FALSE)
-    utils::write.csv(stats,    file.path(output_dir, paste0(output_prefix, "_summary.csv")),        row.names = FALSE)
+
+    # taxonomy_table is ALWAYS the strict 8-column result.
+    utils::write.csv(result,
+                     file.path(output_dir, paste0(output_prefix, "_taxonomy_table.csv")),
+                     row.names = FALSE)
+
+    # Default behavior for tracking + summary: just write the reconcile_checklist
+    # versions. But if a prior reconcile_global_local output folder is present,
+    # read its tracking + summary and AUGMENT before writing.
+    tracking_to_write <- tracking
+    summary_to_write  <- stats
+
+    prior_tracking_path <- if (!is.null(prior_dir)) file.path(prior_dir, paste0(prior_prefix, "_tracking.csv")) else NULL
+    prior_summary_path  <- if (!is.null(prior_dir)) file.path(prior_dir, paste0(prior_prefix, "_summary.csv"))  else NULL
+    prior_detected <- !is.null(prior_dir) && dir.exists(prior_dir) &&
+                      !is.null(prior_tracking_path) && file.exists(prior_tracking_path) &&
+                      !is.null(prior_summary_path)  && file.exists(prior_summary_path)
+
+    if (prior_detected) {
+      message("Detected prior reconcile_global_local output at ", normalizePath(prior_dir),
+              "; augmenting tracking + summary.")
+      prior_tracking <- utils::read.csv(prior_tracking_path, stringsAsFactors = FALSE)
+      prior_summary  <- utils::read.csv(prior_summary_path,  stringsAsFactors = FALSE)
+
+      # Pull the new (post-checklist) columns from the freshly-built tracking.
+      # Only the columns that are NEW relative to the prior stage:
+      new_cols <- c(id_col,
+                    paste0("after_",  ranks),
+                    "regatta_match_rank",
+                    "after_scientific_name")
+      new_cols <- intersect(new_cols, names(tracking))
+      addons   <- tracking[, new_cols, drop = FALSE]
+      # Rename "after_*" to "post_checklist_*" in the augmented view so the
+      # two stages are unambiguous when read alongside preferred_* columns
+      # from reconcile_global_local.
+      rename_map <- c(paste0("after_", ranks),
+                      "after_scientific_name")
+      new_names  <- c(paste0("post_checklist_", ranks),
+                      "post_checklist_scientific_name")
+      for (i in seq_along(rename_map)) {
+        hit <- which(names(addons) == rename_map[i])
+        if (length(hit) == 1) names(addons)[hit] <- new_names[i]
+      }
+      tracking_to_write <- merge(prior_tracking, addons, by = id_col, all.x = TRUE)
+
+      # Augmented summary: stack reconcile_global_local stats rows on top of
+      # reconcile_checklist stats rows, with a stage label so each row is
+      # clearly attributed.
+      if (all(c("metric", "count") %in% names(prior_summary)) &&
+          all(c("metric", "count") %in% names(stats))) {
+        summary_to_write <- rbind(
+          data.frame(stage = "reconcile_global_local",
+                     metric = prior_summary$metric,
+                     count  = prior_summary$count,
+                     stringsAsFactors = FALSE),
+          data.frame(stage = "reconcile_checklist",
+                     metric = stats$metric,
+                     count  = stats$count,
+                     stringsAsFactors = FALSE)
+        )
+      }
+    }
+
+    utils::write.csv(tracking_to_write,
+                     file.path(output_dir, paste0(output_prefix, "_tracking.csv")),
+                     row.names = FALSE)
+    utils::write.csv(summary_to_write,
+                     file.path(output_dir, paste0(output_prefix, "_summary.csv")),
+                     row.names = FALSE)
     message("Wrote 3 CSVs to ", normalizePath(output_dir))
   }
 
