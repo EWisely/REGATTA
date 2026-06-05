@@ -97,7 +97,20 @@ reconcile_global_local <- function(global_table,
                                    local_pct_id_scale  = c("auto", "0-1", "0-100"),
                                    Local_advantage     = TRUE,
                                    output_dir          = "reconcile_global_local_out",
-                                   output_prefix       = "reconcile_global_local") {
+                                   output_prefix       = "reconcile_global_local",
+                                   tracking_drop_pattern =
+                                     "^(MERGED_sample:|obiclean_|seq_rank|ID_STATUS|DEFINITION)") {
+  # tracking_drop_pattern is a regex matched against column names in the
+  # input tables BEFORE they get joined into $tracking. The default
+  # strips obitools per-sample read-count matrices (MERGED_sample:*),
+  # the obitools obiclean_* family, seq_rank, ID_STATUS, and
+  # DEFINITION. These are not specific to the taxonomic assignment
+  # decision REGATTA records, and they balloon the tracking CSV to
+  # hundreds of irrelevant columns. BEST_MATCH_IDS / BEST_MATCH_TAXIDS
+  # are NOT dropped by default because they record the obitools
+  # winning accession and taxID — useful audit information. Pass
+  # tracking_drop_pattern = NULL (or "") to keep everything.
+
   ranks <- c("domain", "phylum", "class", "order", "family", "genus", "species")
   global_pct_id_scale <- match.arg(global_pct_id_scale)
   local_pct_id_scale  <- match.arg(local_pct_id_scale)
@@ -109,6 +122,17 @@ reconcile_global_local <- function(global_table,
   if (length(mg) > 0) stop("global_table is missing required columns: ", paste(mg, collapse = ", "))
   ml <- setdiff(c(id_col, ranks, local_pct_id_col),  names(local_table))
   if (length(ml) > 0) stop("local_table is missing required columns: ",  paste(ml, collapse = ", "))
+
+  # Drop obitools / per-sample bookkeeping from tracking. Essential
+  # columns (id, ranks, pct_id) are preserved regardless of pattern.
+  drop_extra <- function(df, essential) {
+    if (is.null(tracking_drop_pattern) || !nzchar(tracking_drop_pattern)) return(df)
+    candidates <- setdiff(names(df), essential)
+    to_drop    <- candidates[grepl(tracking_drop_pattern, candidates)]
+    df[, setdiff(names(df), to_drop), drop = FALSE]
+  }
+  global_table <- drop_extra(global_table, c(id_col, ranks, global_pct_id_col))
+  local_table  <- drop_extra(local_table,  c(id_col, ranks, local_pct_id_col))
 
   # Rescale pct_id to a common 0-100 scale per input.
   rescale_pct <- function(x, scale_arg, label) {

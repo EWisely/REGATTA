@@ -16,7 +16,7 @@
 #                  $tracking for the source-breakdown rows 4-7
 #                  (count of local/global assignment preferred).
 #   post_checklist The output list from reconcile_checklist() — uses
-#                  $result for the "post" stage column and the
+#                  $result for the "regatta" stage column and the
 #                  before/after change-in-assignment count for row 8.
 #   global_input   The raw global-DB classifier output taxonomy table
 #                  (e.g. obitools-derived). Used to populate the
@@ -26,7 +26,7 @@
 #                  the "local" stage column.
 #
 # Each supplied input becomes its own column. Stage column names are
-# fixed: global, local, reconciled, post.
+# fixed: global, local, reconciled, regatta.
 #
 # Row groups (the 21 rows are Ella's layout):
 #   1-3   counts (total, assigned, % assigned)
@@ -63,7 +63,7 @@ summarize_regatta <- function(reconciled     = NULL,
     if (!"result" %in% names(post_checklist)) {
       stop("`post_checklist` must be the output of regatta_checklist_lca() (a list with $result).")
     }
-    stages[["post"]] <- post_checklist$result
+    stages[["regatta"]] <- post_checklist$result
   }
 
   if (length(stages) == 0) {

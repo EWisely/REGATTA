@@ -63,7 +63,20 @@ reconcile_checklist <- function(taxonomy_table,
                                 output_dir    = "reconcile_checklist_out",
                                 output_prefix = "reconcile_checklist",
                                 prior_dir     = "reconcile_global_local_out",
-                                prior_prefix  = "reconcile_global_local") {
+                                prior_prefix  = "reconcile_global_local",
+                                tracking_drop_pattern =
+                                  "^(MERGED_sample:|obiclean_|seq_rank|ID_STATUS|DEFINITION)") {
+  # tracking_drop_pattern is a regex matched against column names in
+  # the input taxonomy_table BEFORE they get carried into $tracking.
+  # Default strips obitools per-sample read-count matrices
+  # (MERGED_sample:*), the obiclean_* family, seq_rank, ID_STATUS, and
+  # DEFINITION. These are not specific to the checklist-LCA decision
+  # REGATTA records, and they balloon the tracking CSV to hundreds of
+  # irrelevant columns. BEST_MATCH_IDS / BEST_MATCH_TAXIDS are NOT
+  # dropped by default because they record the obitools winning
+  # accession and taxID. Pass tracking_drop_pattern = NULL (or "")
+  # to keep everything.
+
   ranks <- c("domain", "phylum", "class", "order", "family", "genus", "species")
 
   missing_t <- setdiff(c(id_col, ranks), names(taxonomy_table))
@@ -75,6 +88,18 @@ reconcile_checklist <- function(taxonomy_table,
   if (length(missing_c) > 0) {
     stop("checklist is missing required rank columns: ",
          paste(missing_c, collapse = ", "))
+  }
+
+  # Drop obitools / per-sample bookkeeping from the input before it
+  # flows into tracking. Essential columns (id, ranks) are preserved.
+  if (!is.null(tracking_drop_pattern) && nzchar(tracking_drop_pattern)) {
+    essential  <- c(id_col, ranks)
+    candidates <- setdiff(names(taxonomy_table), essential)
+    to_drop    <- candidates[grepl(tracking_drop_pattern, candidates)]
+    if (length(to_drop) > 0) {
+      taxonomy_table <- taxonomy_table[, setdiff(names(taxonomy_table), to_drop),
+                                       drop = FALSE]
+    }
   }
 
   checklist_sets <- lapply(ranks, function(r) unique(na.omit(checklist[[r]])))

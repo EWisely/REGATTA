@@ -79,7 +79,7 @@ cat("\n--- reconcile_checklist (against crustacean regional checklist) ---\n")
 t0 <- Sys.time()
 post <- reconcile_checklist(rec$result, crust_checklist, id_col = "ASV_id",
                             output_dir   = "stress_crustaceans_out/reconcile_checklist",
-                            output_prefix = "berrycrust_post",
+                            output_prefix = "berrycrust_regatta",
                             prior_dir    = "stress_crustaceans_out/reconcile_global_local",
                             prior_prefix = "berrycrust_reconciled")
 cat("  Done in", format(Sys.time() - t0), "\n")
