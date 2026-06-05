@@ -18,11 +18,17 @@ ASV. If FALSE, returns every hit.}
 A data.frame: `id_col` + 7 rank columns + `pct_id`.
 }
 \description{
-Reads a vsearch `--userout` file, takes the first hit per ASV
-(matching the original code's `multiple = "any"` semantics), strips
-the sequence prefix off column 2, parses the SINTAX taxonomy via
-[parse_sintax()], and returns a clean table with `ASV_id` + the 7
-rank columns + `pct_id`. Drop-in as `local_table` to
-[reconcile_global_local()] or as a standalone taxonomy table to
-[reconcile_checklist()].
+Reads a vsearch `--userout` file, takes the first hit per ASV,
+strips the sequence prefix off column 2, parses the SINTAX taxonomy
+via [parse_sintax()], and returns a clean table with `ASV_id` + the
+7 rank columns + `pct_id`.
+}
+\details{
+**Use [parse_vsearch_results()] in preference to this function**
+when you also have the vsearch LCA file. The userout column-2
+taxonomy is the *best hit's* taxonomy per ASV — which can be
+species-level even when vsearch's top-N hits disagree at species.
+The LCA file carries the more conservative consensus across the
+top-N. This function exists for the rarer case where only the
+userout file is available.
 }

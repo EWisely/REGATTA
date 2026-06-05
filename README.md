@@ -223,7 +223,10 @@ checklist instead of being flagged.
 | `OBIS_download()` | Pull an OBIS species list with optional marine/brackish/freshwater filters | `robis` |
 | `Local_csv_download()` | Read user-supplied checklist CSVs (Genus, Species columns) | none |
 | `build_regional_checklist()` | Merge the three source outputs into one deduplicated regional list | none |
+| `run_regatta()` | **High-level wrapper.** Accepts file paths (single classifier, a vsearch `lca + userout` pair, a named `list(global=, local=)`, or a folder of classifier files). Auto-detects file formats (obitools `.tab`, vsearch `userout`, vsearch `lca`, `BestTaxon` `.csv`), dispatches to the right preprocessor, runs `reconcile_global_local` (when two-DB) and `reconcile_checklist`, and writes the standard 3-CSV-per-stage output triples plus a 21-row summary and a `run_log.txt` into an `out_dir` that defaults to `<input>/regatta_out/`. The recommended entry point for most users | (uses the package's own preprocessors) |
 | `parse_sintax()` | Convert vsearch SINTAX taxonomy strings to a full 7-rank taxonomy table | none |
+| `parse_vsearch_results()` | **Canonical vsearch preprocessor.** Joins a vsearch LCA file (taxonomy) with a vsearch `--userout` file (pct_id) on ASV id. Use this when you have both files — it carries the conservative LCA consensus taxonomy plus the first-hit pct_id from userout | none |
+| `parse_vsearch_userout()` | Fallback parser for the rarer case where only a vsearch `--userout` file is available. Returns the *best hit's* taxonomy + pct_id (potentially more specific than the LCA across the top-N) | none |
 | `resolve_taxids()` | Convert NCBI taxIDs to a full 7-rank taxonomy table (e.g. obitools output) | `taxonomizr` |
 | `resolve_names()` | Convert mixed-rank scientific names (Kraken2 / BestTaxon style) to a full 7-rank taxonomy table; strips sp./spp./cf./aff./Gen./indet./quotes before lookup; synonym-aware (matches NCBI scientific names + recorded synonyms, excludes common names) | `taxonomizr`, `RSQLite` |
 | `taxonomize_checklist()` | Resolve a regional species list to a 7-rank NCBI taxonomy table; synonym-aware lookup | `taxonomizr`, `RSQLite` |
@@ -245,13 +248,82 @@ source("Local_csv_download.R")
 source("Build_regional_checklist.R")
 source("taxonomize_checklist.R")
 source("parse_sintax.R")
+source("parse_vsearch_results.R")
 source("parse_vsearch_userout.R")
+source("run_regatta.R")
 source("resolve_taxids.R")
 source("resolve_names.R")
 source("reconcile_checklist.R")
 source("reconcile_global_local.R")
 source("summarize_regatta.R")
 ```
+
+### The one-call path: `run_regatta()`
+
+For most users, the whole pipeline collapses to a single call once you
+have a taxonomized regional checklist. `run_regatta()` accepts file
+paths, a vsearch `lca + userout` pair, a folder of inputs, or an
+explicit `list(global = ..., local = ...)` for the two-DB workflow.
+File formats are auto-detected; the right preprocessor is dispatched
+automatically. Outputs land under `<input>/regatta_out/` by default
+(or `dirname(input)/regatta_out/` when `input` is a file path), with a
+`run_log.txt` recording what was detected and run.
+
+```r
+# Single-DB workflow (one classifier output, any tool)
+run_regatta(
+  input     = "data/MiFish_obi.tab",                  # obitools .tab
+  checklist = "custom_db/galapagos_fish_checklist.rds"
+)
+# → data/regatta_out/{reconcile_checklist/*, regatta_summary.csv, run_log.txt}
+```
+
+```r
+# Single-DB workflow with a vsearch lca + userout pair (the canonical
+# vsearch input — LCA taxonomy + userout pct_id, joined by ASV id)
+run_regatta(
+  input     = c("data/vs_lca.txt", "data/vs_userout.txt"),
+  checklist = "custom_db/galapagos_fish_checklist.rds"
+)
+```
+
+```r
+# Two-DB workflow (global-DB classifier + local-DB classifier).
+# Roles are always declared explicitly via the named list — never
+# inferred from filenames. Either side can be a single file or a
+# vsearch lca + userout pair.
+run_regatta(
+  input = list(
+    global = "data/obi.tab",
+    local  = c("data/vs_lca.txt", "data/vs_userout.txt")
+  ),
+  checklist = "custom_db/galapagos_fish_checklist.rds"
+)
+# → data/regatta_out/{
+#     reconcile_global_local/*,
+#     reconcile_checklist/* (tracking + summary AUGMENTED with both stages),
+#     regatta_summary.csv (21-row Ella format),
+#     run_log.txt
+#   }
+```
+
+```r
+# Folder convention. Drop your files into a folder and run:
+run_regatta(
+  input     = "data/my_run/",
+  checklist = "custom_db/galapagos_fish_checklist.rds"
+)
+# The folder may contain any of:
+#   - one classifier file                              → single-DB
+#   - vsearch LCA + userout pair                       → single-DB vsearch
+#   - files starting global.* and local.*              → two-DB (any pairing)
+```
+
+If you want fine-grained control (custom column names, per-input pct_id
+scale overrides, etc.), the lower-level `reconcile_global_local()` /
+`reconcile_checklist()` / `summarize_regatta()` functions remain
+available and unchanged — `run_regatta()` is a thin orchestrator on top
+of them. The detailed steps below walk through that lower-level API.
 
 ### 1. Build a regional species list (one taxonomic group)
 

@@ -41,13 +41,18 @@
 
 #' Parse a vsearch `--userout` file into a REGATTA taxonomy table
 #'
-#' Reads a vsearch `--userout` file, takes the first hit per ASV
-#' (matching the original code's `multiple = "any"` semantics), strips
-#' the sequence prefix off column 2, parses the SINTAX taxonomy via
-#' [parse_sintax()], and returns a clean table with `ASV_id` + the 7
-#' rank columns + `pct_id`. Drop-in as `local_table` to
-#' [reconcile_global_local()] or as a standalone taxonomy table to
-#' [reconcile_checklist()].
+#' Reads a vsearch `--userout` file, takes the first hit per ASV,
+#' strips the sequence prefix off column 2, parses the SINTAX taxonomy
+#' via [parse_sintax()], and returns a clean table with `ASV_id` + the
+#' 7 rank columns + `pct_id`.
+#'
+#' **Use [parse_vsearch_results()] in preference to this function**
+#' when you also have the vsearch LCA file. The userout column-2
+#' taxonomy is the *best hit's* taxonomy per ASV — which can be
+#' species-level even when vsearch's top-N hits disagree at species.
+#' The LCA file carries the more conservative consensus across the
+#' top-N. This function exists for the rarer case where only the
+#' userout file is available.
 #'
 #' @param path Path to the vsearch userout file.
 #' @param id_col Column name to use for the ASV identifier in the output.
@@ -61,6 +66,11 @@
 parse_vsearch_userout <- function(path,
                                   id_col         = "ASV_id",
                                   first_hit_only = TRUE) {
+  message("Note: parse_vsearch_userout() returns the BEST-HIT taxonomy ",
+          "per ASV, which can be more specific than the LCA across the ",
+          "top-N hits. If you also have the vsearch LCA file, call ",
+          "parse_vsearch_results(lca_path, userout_path) instead for the ",
+          "more conservative consensus taxonomy.")
   if (!file.exists(path)) {
     stop("vsearch userout file not found at ", path)
   }
