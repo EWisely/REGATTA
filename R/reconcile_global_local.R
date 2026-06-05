@@ -88,6 +88,50 @@
 #              triggers, and final per-database categories. A small
 #              data.frame of (metric, count) rows for diagnostics.
 
+#' Reconcile global-DB vs. local-DB classifier outputs
+#'
+#' Given two taxonomy tables for the same set of ASVs — one from a global
+#' reference database (e.g. obitools + NCBI/EMBL) and one from a local
+#' curated database (e.g. vsearch + a regional reference) — pick a per-ASV
+#' preferred lineage. The function compares percent identity across the two
+#' databases (the `best_pctid` step) and, when global wins but local also
+#' has an assignment, downgrades the preferred lineage to the LCA of the
+#' two (the `global_lca_to_local` step). Returns a strict 8-column
+#' `$result` (REGATTA exchange format), a per-ASV `$tracking` audit, and a
+#' step-level `$stats` summary; optionally writes those as three CSVs.
+#'
+#' @param global_table Taxonomy table from the global-DB classifier:
+#'   `id_col` + 7 lowercase rank columns + a percent-identity column.
+#' @param local_table  Taxonomy table from the local-DB classifier: same shape.
+#' @param id_col       ASV identifier column name, same in both inputs.
+#' @param global_pct_id_col,local_pct_id_col Percent-identity column name
+#'   in each input.
+#' @param global_pct_id_scale,local_pct_id_scale One of `"auto"` (default),
+#'   `"0-1"`, or `"0-100"`. `"auto"` detects 0-1 scale by checking if the
+#'   input max is <= 1 and rescales to 0-100 with `signif(x, 3) * 100`.
+#' @param Local_advantage TRUE (default): local wins ties at the
+#'   `best_pctid` step. FALSE: global wins ties.
+#' @param output_dir Directory path; defaults to `"reconcile_global_local_out"`.
+#'   When non-NULL, writes `<output_prefix>_taxonomy_table.csv`,
+#'   `<output_prefix>_tracking.csv`, and `<output_prefix>_summary.csv`.
+#'   Pass NULL to disable file writing.
+#' @param output_prefix Filename prefix for the 3 CSVs. Default
+#'   `"reconcile_global_local"`.
+#' @param tracking_drop_pattern Regex matched against input column names;
+#'   matching columns are dropped before they enter `$tracking`. Default
+#'   strips obitools per-sample matrices and internal bookkeeping but
+#'   preserves `BEST_MATCH_*`, `COUNT`, `TAXID`, `BEST_IDENTITY`,
+#'   `NUC_SEQ`, and `SCIENTIFIC_NAME`.
+#'
+#' @return A list with three elements:
+#'   * `result`: data.frame with `id_col` + 7 rank columns (strict 8-col
+#'     REGATTA exchange format).
+#'   * `tracking`: per-ASV decision record (both inputs preserved with
+#'     `_global` / `_local` suffixes plus REGATTA bookkeeping).
+#'   * `stats`: (metric, count) data.frame.
+#'
+#' @importFrom utils write.csv
+#' @export
 reconcile_global_local <- function(global_table,
                                    local_table,
                                    id_col              = "ASV_id",

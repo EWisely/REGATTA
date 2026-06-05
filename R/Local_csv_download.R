@@ -1,6 +1,18 @@
 # Eldridge Wisely
 # This copy modified for function use by Ella Crotty
 
+#' Read user-supplied local checklist CSVs
+#'
+#' Reads one or more CSV files of locally-known species (each must have
+#' `Genus` and `Species` columns), drops `sp.` rows, unites Genus + species
+#' into a single Genus_species string, and writes the deduplicated result
+#' to `datasets/<loc_outputname>.csv`.
+#'
+#' @param loc_csvs Character vector of CSV basenames (with `.csv`
+#'   extension) in `datasets/`.
+#' @param loc_outputname Basename (no extension) for the output CSV.
+#' @return Invisibly NULL; writes a CSV as a side effect.
+#' @export
 Local_csv_download <- function(loc_csvs,
                                loc_outputname = "Local_Species") {
   library(usethis)
@@ -78,20 +90,3 @@ Local_csv_download <- function(loc_csvs,
   print(paste("Output in: ", sep = " ", paste(here("datasets"), sep = "", "/", loc_outputname, ".csv")))
 }
 
-# test (error)
-#Local_csv_download(obis_taxa = c("Agnatha", "Chondrichthyes", "Osteichthyes"),
-#                   loc_csvs = c("2016Aug24_Tirado-Sanchez_et_al_Galapagos_Pisces_Checklist.csv", "badcheck.csv"),
-#                   loc_outputname = "Local_Species_FunctionTest1")
-
-# test (success)
-#Local_csv_download(loc_csvs = c("2016Aug24_Tirado-Sanchez_et_al_Galapagos_Pisces_Checklist.csv"),
-#                   loc_outputname = "Local_Species_FunctionTest1")
-
-# test (error)
-#Local_csv_download(obis_taxa = c("Salmonidae", "Copepoda"),
-#                   loc_csvs = c("OCNMS_local_sp_badtest.csv", "OCNMS_local_invert_badtest.csv"),
-#                  loc_outputname = "OCNMS_Local_Species_FunctionTest1")
-
-# test (success)
-Local_csv_download(loc_csvs = c("OCNMS_local_sp_test.csv", "OCNMS_local_invert_test.csv"),
-                   loc_outputname = "OCNMS_Local_Species_FunctionTest")

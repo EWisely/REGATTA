@@ -14,6 +14,23 @@
 # This is the preprocessor for shape-2 inputs (e.g. obitools3 output
 # where each ASV has a TAXID column).
 
+#' Convert NCBI taxIDs to a 7-rank taxonomy table
+#'
+#' Resolves a column of NCBI taxIDs into a full 7-rank lineage using
+#' `taxonomizr`. Accepts either a vector or a data.frame plus `taxid_col`.
+#' NA taxIDs become all-NA rows. Optionally writes the augmented table to
+#' disk as `<output_prefix>_full_tax_table.csv`.
+#'
+#' @param input A numeric/character vector of taxIDs, or a data.frame.
+#' @param taxid_col Required when `input` is a data.frame.
+#' @param sql_path Path to the local `accessionTaxa.sql` taxonomizr DB.
+#' @param output_prefix If non-NULL, writes a CSV with this prefix.
+#' @param output_dir Directory to write the CSV into.
+#'
+#' @return A data.frame with `domain`-through-`species` columns.
+#'
+#' @importFrom utils write.csv
+#' @export
 resolve_taxids <- function(input,
                            taxid_col     = NULL,
                            sql_path      = "accessionTaxa.sql",

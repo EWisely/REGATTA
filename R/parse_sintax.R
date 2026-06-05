@@ -15,6 +15,24 @@
 #   <output_dir>/<output_prefix>_full_tax_table.csv
 # for use in downstream phyloseq / MetabaR pipelines.
 
+#' Parse a vsearch SINTAX taxonomy string into a 7-rank table
+#'
+#' Splits SINTAX taxonomy strings (e.g.
+#' `d:Eukaryota,p:Chordata,...,s:Foo_bar`) into the 7 lowercase rank
+#' columns. Accepts either a character vector or a data.frame plus
+#' `sintax_col`. Truncated strings (e.g. only down to genus) are
+#' accepted; missing ranks come back as NA. Species values have
+#' underscores converted to spaces.
+#'
+#' @param input A character vector or a data.frame.
+#' @param sintax_col Required when `input` is a data.frame.
+#' @param output_prefix If non-NULL, writes a CSV with this prefix.
+#' @param output_dir Directory to write the CSV into.
+#'
+#' @return The input augmented with the 7 rank columns.
+#'
+#' @importFrom utils write.csv
+#' @export
 parse_sintax <- function(input,
                          sintax_col    = NULL,
                          output_prefix = NULL,

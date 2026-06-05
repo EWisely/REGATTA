@@ -39,6 +39,25 @@
 #               FALSE returns every hit, suffixed with `_hit_rank`
 #               for the row's position within the per-ASV block.
 
+#' Parse a vsearch `--userout` file into a REGATTA taxonomy table
+#'
+#' Reads a vsearch `--userout` file, takes the first hit per ASV
+#' (matching the original code's `multiple = "any"` semantics), strips
+#' the sequence prefix off column 2, parses the SINTAX taxonomy via
+#' [parse_sintax()], and returns a clean table with `ASV_id` + the 7
+#' rank columns + `pct_id`. Drop-in as `local_table` to
+#' [reconcile_global_local()] or as a standalone taxonomy table to
+#' [reconcile_checklist()].
+#'
+#' @param path Path to the vsearch userout file.
+#' @param id_col Column name to use for the ASV identifier in the output.
+#' @param first_hit_only If TRUE (default), take only the first row per
+#'   ASV. If FALSE, returns every hit.
+#'
+#' @return A data.frame: `id_col` + 7 rank columns + `pct_id`.
+#'
+#' @importFrom utils read.delim
+#' @export
 parse_vsearch_userout <- function(path,
                                   id_col         = "ASV_id",
                                   first_hit_only = TRUE) {

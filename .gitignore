@@ -8,3 +8,5 @@ CLAUDE.local.md
 .claude/settings.local.json
 .claude/projects/
 
+..Rcheck/
+jaguar_data_test.R

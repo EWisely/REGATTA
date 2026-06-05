@@ -57,6 +57,42 @@
 #              counts of the corrected output, plus the change in
 #              number of ASVs assigned before vs. after.
 
+#' Reconcile a taxonomy table against a regional species checklist
+#'
+#' The core REGATTA step. Walks each ASV's lineage species -> domain,
+#' finds the lowest rank present in the regional checklist, and NAs every
+#' rank below that match. Preserves taxonomic specificity where the
+#' checklist supports it; downgrades to a higher rank where it does not.
+#' Accepts either the `$result` output of [reconcile_global_local()] or a
+#' standalone classifier-output taxonomy table.
+#'
+#' Returns a strict 8-column `$result` (REGATTA exchange format), a per-ASV
+#' `$tracking` before/after audit, and a `$stats` summary; optionally
+#' writes those as three CSVs. If a `reconcile_global_local` output folder
+#' is present, the `$tracking` and `$stats` written to disk are *augmented*
+#' versions combining both stages.
+#'
+#' @param taxonomy_table A data.frame with `id_col` + 7 lowercase rank
+#'   columns. Additional metadata columns are passed through to `$tracking`
+#'   unless they match `tracking_drop_pattern`.
+#' @param checklist A taxonomized regional checklist (output of
+#'   [taxonomize_checklist()]) — a data.frame with the 7 rank columns.
+#' @param id_col ASV identifier column name.
+#' @param output_dir Directory path; defaults to `"reconcile_checklist_out"`.
+#'   Pass NULL to disable file writing.
+#' @param output_prefix Filename prefix for the 3 CSVs. Default
+#'   `"reconcile_checklist"`.
+#' @param prior_dir,prior_prefix Where to look for a prior
+#'   [reconcile_global_local()] output folder. When found, the tracking
+#'   and summary CSVs written into `output_dir` are augmented with the
+#'   prior stage's columns/rows. Pass `prior_dir = NULL` to disable.
+#' @param tracking_drop_pattern Regex matched against input column names;
+#'   matching columns are dropped before they enter `$tracking`.
+#'
+#' @return A list with `result`, `tracking`, and `stats` elements.
+#'
+#' @importFrom utils write.csv read.csv
+#' @export
 reconcile_checklist <- function(taxonomy_table,
                                 checklist,
                                 id_col        = "ASV_id",

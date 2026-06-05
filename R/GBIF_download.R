@@ -1,6 +1,19 @@
 # Eldridge Wisely
 # This copy modified for function use by Ella Crotty
 
+#' Download a GBIF species list inside a WKT polygon
+#'
+#' Resolves the given taxa via WoRMS, finds GBIF backbone keys for the
+#' resulting classes, and submits a GBIF occurrence download restricted
+#' to the polygon. Writes the result to `datasets/<gbif_outputname>.csv`.
+#'
+#' @param obis_taxa Character vector of OBIS-style high-level taxa.
+#' @param worms_taxa Character vector of WoRMS-style high-level taxa
+#'   (if WoRMS labels differ from OBIS), or NA to reuse `obis_taxa`.
+#' @param regional_poly WKT POLYGON string.
+#' @param gbif_outputname Basename (no extension) for the output CSV.
+#' @return Invisibly NULL; writes a CSV under `datasets/` as a side effect.
+#' @export
 GBIF_download <- function(obis_taxa,
                           worms_taxa = NA,
                           regional_poly,
@@ -185,44 +198,3 @@ GBIF_download <- function(obis_taxa,
   print(paste(backbonekeyno, sep = " ", "backbone keys found out of", classnameno, "classes in list"))
 }
 
-# test run
-#GBIF_download(obis_taxa = c("Agnatha", "Chondrichthyes", "Osteichthyes"),
-#              worms_taxa = c("Agnatha", "Chondrichthyes", "Actinopterygii"),
-#              regional_poly = "POLYGON ((-117.421875 31.952162, -91.933594 -6.315299, -81.386719 -6.315299, -76.113281 7.710992, -82.089844 8.581021, -87.011719 13.581921, -104.238281 20.303418, -112.5 32.249974, -117.421875 31.952162))",
-#              gbif_outputname = "GBIF_Species_FunctionTest")
-
-# so taxa must be above class to work
-
-# OCNMS test run
-GBIF_download(obis_taxa = c("Osteichthyes", "Multicrustacea"),
-              worms_taxa = c("Actinopterygii", "Multicrustacea"),
-              regional_poly = "POLYGON ((-124.848633 51.75424, -129.199219 51.151786, -128.144531 41.869561, -122.34375 42.000325, -121.860352 44.621754, -122.695313 46.589069, -121.552734 47.872144, -124.848633 51.75424))",
-              gbif_outputname = "GBIF_OCNMS_Species_FunctionTest")
-
-# Returned a reasonable amount of copepods but not salmon (not any fish!)
-# salmoniformes is 10305 and it is an order in class Actinopterygii 
-# use wm_name2id() to get ids
-# worms_downstream(id = 10305, downto = "class") doesn't work
-#> name_
-# osteichthyes still isn't grabbing salmon???
-#> Classes in Actinopterygii
-#>        id        name  rank
-#>        1 1517379 Chondrostei class
-#>        2 1517380    Holostei class
-#>        3  293496   Teleostei class
-#>        According to wikipedia, actinopterygii is a class and this list is of subclasses.
-#>        According to WoRMS, Actinopteri (Superclass) > Teleostei (Class), so that should've worked?
-#>        Test salmon species: Oncorhynchus tshawytscha (GBIF totally shows observations in this polygon),
-#>         Oncorhynchus kisutch
-#>         [1] "Chondrostei"   "Holostei"      "Teleostei"     "Copepoda"      
-#>         "Hexanauplia"   "Malacostraca"  "Tantulocarida"
-#>         [8] "Thecostraca"  
-#>         [1] "Getting backbone keys"
-#>         [1] "11545536" "229"      "11699831"
-#>  Why fewer backbone keys than class names? Why don't the backbone keys match class names? 
-#>  I guess no fish backbone keys??
-#>  filter(!matchType == "NONE") filters out Chondrostei (in WoRMS), Holostei, Teleostei (in WoRMS), Hexanauplia, Thecostraca
-#>  Why no usseage key for Teleostei, etc.? No scientificName, no status? No notes to explain? 
-#>  Working classes: Copepoda, Malacostraca, Tantulocarida
-#>  
-#>  Eldridge decision: OBIS is getting most of it, let's just let GBIF be kinda bad and have OBIS fill in the gaps

@@ -38,6 +38,21 @@
 #   9-15  ID'ed-to-<rank>-only specificity counts
 #   16-21 diversity counts (distinct phyla, classes, ..., species)
 
+#' Summarize a REGATTA run as a 21-row stats table
+#'
+#' Compares inputs and outputs across stages and produces Ella's 21-row
+#' summary: counts, source breakdown, ID'ed-to-rank specificity, and
+#' diversity. Each supplied input becomes its own column in the output.
+#' Stage columns are fixed: `global`, `local`, `reconciled`, `regatta`.
+#'
+#' @param reconciled Output list of [reconcile_global_local()].
+#' @param post_checklist Output list of [reconcile_checklist()].
+#' @param global_input Raw global-DB classifier output taxonomy table.
+#' @param local_input Raw local-DB classifier output taxonomy table.
+#'
+#' @return A 21-row data.frame with one column per supplied stage.
+#'
+#' @export
 summarize_regatta <- function(reconciled     = NULL,
                               post_checklist = NULL,
                               global_input   = NULL,

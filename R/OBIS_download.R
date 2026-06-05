@@ -1,10 +1,25 @@
 # Eldridge Wisely
 # This copy modified for function use by Ella Crotty
 
-OBIS_download <- function(obis_taxa, 
-                          worms_taxa = NA, 
-                          regional_poly, 
-                          obis_outputname = "OBIS_Species", 
+#' Download an OBIS species list inside a WKT polygon
+#'
+#' Pulls an OBIS checklist for the given taxa within the polygon, with
+#' optional `marine` / `brackish` / `freshwater` / `terrestrial` filters.
+#' Writes the result to `datasets/<obis_outputname>.csv`.
+#'
+#' @param obis_taxa Character vector of high-level taxa.
+#' @param worms_taxa Reserved for API symmetry with [GBIF_download()];
+#'   currently unused.
+#' @param regional_poly WKT POLYGON string.
+#' @param obis_outputname Basename (no extension) for the output CSV.
+#' @param marine,freshwater,terrestrial,brackish Optional habitat filters
+#'   (TRUE / FALSE / NA = no filter).
+#' @return Invisibly NULL; writes a CSV under `datasets/` as a side effect.
+#' @export
+OBIS_download <- function(obis_taxa,
+                          worms_taxa = NA,
+                          regional_poly,
+                          obis_outputname = "OBIS_Species",
                           marine = NA,
                           freshwater = NA,
                           terrestrial = NA,
@@ -94,39 +109,4 @@ OBIS_download <- function(obis_taxa,
   print("OBIS download complete.  Check your datasets folder for the output.")
   print(paste("Find your output at:", paste(here("datasets"), sep = "", "/", obis_outputname, ".csv")), sep = " ")
 }
-
-# Test Run
-
-#OBIS_download(obis_taxa = c("Agnatha", "Chondrichthyes", "Osteichthyes"),
-#              worms_taxa = c("Agnatha", "Chondrichthyes", "Actinopterygii"),
-#              regional_poly = "POLYGON ((-117.421875 31.952162, -91.933594 -6.315299, -81.386719 -6.315299, -76.113281 7.710992, -82.089844 8.581021, -87.011719 13.581921, -104.238281 20.303418, -112.5 32.249974, -117.421875 31.952162))",
-#              obis_outputname ="OBIS_Species_FunctionTest1",
-#              marine = NA,
-#              freshwater = F,
-#              terrestrial = F,
-#              brackish = NA
-#)
-
-# Test Run Polygon Error
-#OBIS_download(obis_taxa = c("Salmonidae", "Copepoda"),
-#              regional_poly = "POLYGON (-117.421875 31.952162, -91.933594 -6.315299, 
-#              -81.386719 -6.315299, -76.113281 7.710992, -82.089844 8.581021, 
-#              -87.011719 13.581921, -104.238281 20.303418, -112.5 32.249974, -117.421875 31.952162))",
-#              obis_outputname = "OBIS_OCNMS_Species_FunctionTest",
-#              marine = T,
-#              freshwater = NA, # necessary to get salmon probably (yup it's freshwater, brackish, and marine)
-#              terrestrial = F,
-#              brackish = NA
-#)
-
-# Test Run 2
-OBIS_download(obis_taxa = c("Salmonidae", "Copepoda"),
-              regional_poly = "POLYGON ((-117.421875 31.952162, -91.933594 -6.315299, -81.386719 -6.315299, -76.113281 7.710992, -82.089844 8.581021, -87.011719 13.581921, -104.238281 20.303418, -112.5 32.249974, -117.421875 31.952162))",
-              obis_outputname = "OBIS_OCNMS_Species_FunctionTest",
-              marine = T,
-              freshwater = NA, # necessary to get salmon probably (yup it's freshwater, brackish, and marine)
-              terrestrial = F,
-              brackish = NA
-              )
-# returned a reasonable list
 

@@ -1,0 +1,25 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^\.git$
+^\.gitignore$
+^\.gitattributes$
+^\.DS_Store$
+^.*\.zip$
+^Icon$
+^README\.Rmd$
+^06_local_vs_global_results$
+^MiFish_output$
+^script_03_inputs$
+^datasets$
+^custom_db$
+^reconcile_global_local_out$
+^reconcile_checklist_out$
+^stress_crustaceans_out$
+^Proposed REGATTA Report - Sheet1\.csv$
+^custom_dbComprehensive_species_list\.txt$
+^inst/legacy$
+^\.claude$
+^jaguar_data_test\.R$
+^cran-comments\.md$
+^doc$
+^Meta$

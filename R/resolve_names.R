@@ -29,6 +29,9 @@
 # Cleanup applied: strips sp., spp., cf., aff., Gen., indet., and quote
 # characters; collapses whitespace. Word-boundary anchored so e.g.
 # "Sebastes" is not corrupted to "ebastes".
+#' Strip common taxonomic abbreviations from names (internal)
+#' @keywords internal
+#' @noRd
 clean_taxon_names <- function(x) {
   x <- gsub('"', "", x, fixed = TRUE)
   x <- gsub("\\b(spp?|cf|aff|Gen|indet)\\.\\s*", "", x, perl = TRUE)
@@ -36,6 +39,29 @@ clean_taxon_names <- function(x) {
   trimws(x)
 }
 
+#' Convert scientific names (mixed ranks) to a 7-rank taxonomy table
+#'
+#' Resolves a column of scientific names (e.g. Kraken2 / BestTaxon-style
+#' outputs where the rank varies row-to-row) into a full 7-rank lineage.
+#' Strips common abbreviations (`sp.`, `spp.`, `cf.`, `aff.`, `Gen.`,
+#' `indet.`, quotes) before NCBI lookup. Synonym-aware: matches the NCBI
+#' `scientific name` and `synonym` types by default so older nomenclature
+#' is normalized to the current canonical name.
+#'
+#' @param input A character vector or a data.frame.
+#' @param name_col Required when `input` is a data.frame.
+#' @param sql_path Path to the local `accessionTaxa.sql` taxonomizr DB.
+#' @param output_prefix If non-NULL, writes a CSV with this prefix.
+#' @param output_dir Directory to write the CSV into.
+#' @param clean If TRUE (default), strip junk strings before lookup.
+#' @param accept_types NCBI name types to accept; default is scientific
+#'   name plus recorded synonyms.
+#'
+#' @return The input augmented with the 7 rank columns + an
+#'   `name_match_type` column (`"scientific name"` / `"synonym"` / NA).
+#'
+#' @importFrom utils write.csv
+#' @export
 resolve_names <- function(input,
                           name_col      = NULL,
                           sql_path      = "accessionTaxa.sql",

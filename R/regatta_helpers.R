@@ -28,6 +28,9 @@
 # scientific name for one taxon and a synonym for another), the
 # scientific-name match is preferred and a warning is emitted.
 
+#' Synonym-aware NCBI name -> taxID lookup (internal)
+#' @keywords internal
+#' @noRd
 name_to_taxid <- function(taxa,
                           sql_path,
                           accept_types = c("scientific name", "synonym")) {
