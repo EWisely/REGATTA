@@ -3,15 +3,37 @@
 
 #' Read user-supplied local checklist CSVs
 #'
-#' Reads one or more CSV files of locally-known species (each must have
-#' `Genus` and `Species` columns), drops `sp.` rows, unites Genus + species
-#' into a single Genus_species string, and writes the deduplicated result
-#' to `datasets/<loc_outputname>.csv`.
+#' Reads one or more CSV files of locally-known species, drops rows
+#' where `Species` is `"sp."`, unites `Genus` and `Species` into a
+#' single `Genus_species` column, and writes the deduplicated result
+#' to `datasets/<loc_outputname>.csv` along with a `Source` column
+#' marking each row as `"Local_csv"`.
 #'
-#' @param loc_csvs Character vector of CSV basenames (with `.csv`
-#'   extension) in `datasets/`.
-#' @param loc_outputname Basename (no extension) for the output CSV.
-#' @return Invisibly NULL; writes a CSV as a side effect.
+#' @param loc_csvs Character vector of CSV file names (**including** the
+#'   `.csv` extension) inside the `datasets/` folder. Each CSV must have
+#'   columns named exactly `Genus` and `Species` (capitalization matters).
+#' @param loc_outputname Basename (no `.csv` extension) for the output
+#'   file under `datasets/`. Default `"Local_Species"`. Choose a
+#'   distinctive name — you will pass it into
+#'   [build_regional_checklist()] later.
+#'
+#' @details
+#' Input CSVs live in `datasets/` (alongside the outputs of
+#' [GBIF_download()] and [OBIS_download()]). Rows with `Species ==
+#' "sp."` are dropped because they cannot be matched against
+#' species-level NCBI taxonomy downstream.
+#'
+#' @return Invisibly NULL. Writes
+#'   `datasets/<loc_outputname>.csv` as a side effect.
+#'
+#' @examples
+#' \dontrun{
+#' Local_csv_download(
+#'   loc_csvs       = c("local_sp_test.csv", "local_invert_test.csv"),
+#'   loc_outputname = "Local_OCNMS_fish_invert"
+#' )
+#' }
+#'
 #' @export
 Local_csv_download <- function(loc_csvs,
                                loc_outputname = "Local_Species") {

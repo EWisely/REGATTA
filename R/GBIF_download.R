@@ -3,16 +3,45 @@
 
 #' Download a GBIF species list inside a WKT polygon
 #'
-#' Resolves the given taxa via WoRMS, finds GBIF backbone keys for the
-#' resulting classes, and submits a GBIF occurrence download restricted
-#' to the polygon. Writes the result to `datasets/<gbif_outputname>.csv`.
+#' Resolves the given high-level taxa via WoRMS, finds GBIF backbone
+#' keys for the resulting classes, and submits a GBIF occurrence
+#' download restricted to the polygon. Writes the result to
+#' `datasets/<gbif_outputname>.csv` and prints the file path. GBIF
+#' login credentials must already be set in `~/.Renviron`; see the
+#' Setup section of the README.
 #'
-#' @param obis_taxa Character vector of OBIS-style high-level taxa.
-#' @param worms_taxa Character vector of WoRMS-style high-level taxa
-#'   (if WoRMS labels differ from OBIS), or NA to reuse `obis_taxa`.
-#' @param regional_poly WKT POLYGON string.
-#' @param gbif_outputname Basename (no extension) for the output CSV.
-#' @return Invisibly NULL; writes a CSV under `datasets/` as a side effect.
+#' @param obis_taxa A character vector of taxon names at **class level or
+#'   broader** (GBIF won't accept order/family/genus/species here).
+#' @param worms_taxa A character vector of substitute taxon names to use
+#'   instead of `obis_taxa` when looking up WoRMS IDs. NA reuses
+#'   `obis_taxa`. Useful when WoRMS labels differ from GBIF backbone
+#'   labels (e.g. WoRMS `Osteichthyes` vs. GBIF `Actinopterygii`).
+#' @param regional_poly A WKT POLYGON string of the form
+#'   `"POLYGON ((long lat, long lat, ...))"`. Draw a region on
+#'   [wktmap.com](https://wktmap.com) and copy the generated polygon.
+#' @param gbif_outputname Basename (no `.csv` extension) for the output
+#'   file under `datasets/`. Default `"GBIF_Species"`.
+#'
+#' @details
+#' Takes ~15 minutes to run end to end. The function prints status
+#' ("PREPARING" / "RUNNING") in the console while polling the GBIF
+#' download API; this is normal. GBIF coverage is uneven — see the
+#' Common troubleshooting section of the README for known issues
+#' (Osteichthyes not recognized, occasional timeouts, etc.).
+#'
+#' @return Invisibly NULL. Writes
+#'   `datasets/<gbif_outputname>.csv` as a side effect.
+#'
+#' @examples
+#' \dontrun{
+#' GBIF_download(
+#'   obis_taxa       = c("Osteichthyes", "Multicrustacea"),
+#'   worms_taxa      = c("Actinopterygii", "Multicrustacea"),
+#'   regional_poly   = "POLYGON ((-124.85 51.75, -129.20 51.15, -128.14 41.87, -122.34 42.00, -121.86 44.62, -122.70 46.59, -121.55 47.87, -124.85 51.75))",
+#'   gbif_outputname = "GBIF_OCNMS_fish_crust"
+#' )
+#' }
+#'
 #' @export
 GBIF_download <- function(obis_taxa,
                           worms_taxa = NA,

@@ -111,6 +111,101 @@ flowchart TD
     style M  stroke-width:4px
 ```
 
+## Setup
+
+### Project structure
+
+Create an R project. In its working directory, make two folders:
+
+- `datasets/` — holds the per-source species lists written by
+  `GBIF_download()`, `OBIS_download()`, and `Local_csv_download()`.
+  Any local checklist CSVs you supply also live here (each must have
+  `Genus` and `Species` columns, exact capitalization).
+- `custom_db/` — holds the combined regional checklist
+  `build_regional_checklist()` writes, the taxonomized `.rds` /
+  `.csv` outputs of `taxonomize_checklist()`, and the per-region
+  `accessionTaxa.sql` taxonomizr DB if you store it project-local.
+
+### GBIF account
+
+`GBIF_download()` uses your GBIF login to submit occurrence
+download requests on your behalf. Once you have an account at
+[gbif.org](https://www.gbif.org/), run
+
+```r
+usethis::edit_r_environ()
+```
+
+in the R console and add three lines to the file that opens:
+
+```
+GBIF_USER='your_gbif_username'
+GBIF_PWD='your_password'
+GBIF_EMAIL='your_email@example.org'
+```
+
+Restart R so the new environment variables take effect. See the
+[rgbif credentials guide](https://docs.ropensci.org/rgbif/articles/gbif_credentials.html)
+for the longer version.
+
+### Drawing your regional polygon
+
+The `regional_poly` argument on `GBIF_download()` and
+`OBIS_download()` takes a WKT POLYGON string of the form
+`POLYGON ((long lat, long lat, ...))`. The easiest way to make one is
+to draw the region on [wktmap.com](https://wktmap.com) and copy the
+generated WKT (including the `POLYGON(())` wrapper).
+
+### NCBI taxonomy DB for synonym lookup
+
+`taxonomize_checklist()`, `resolve_names()`, and `resolve_taxids()`
+need a local NCBI taxonomy snapshot built by `taxonomizr`. The first
+time `taxonomize_checklist()` runs, it will download and build
+`accessionTaxa.sql` (~15 minutes, several GB). On subsequent runs it
+reuses the built DB. Point each function at the file via `sql_path`.
+
+## Common troubleshooting
+
+**GBIF downloads time out or fail to start.** Try, before calling
+`GBIF_download()`:
+
+```r
+crul::set_opts(http_version = 2)
+options(timeout = 1500)
+```
+
+(See [crul#174](https://github.com/ropensci/crul/issues/174#issuecomment-1599112561)
+for context.)
+
+**GBIF won't recognize ray-finned fishes.** `Osteichthyes` is in WoRMS
+but not in GBIF's backbone. Use:
+
+```r
+GBIF_download(obis_taxa  = "Osteichthyes",
+              worms_taxa = "Actinopterygii",
+              ...)
+```
+
+`OBIS_download()` does not have this issue and will recognize
+`Osteichthyes` directly.
+
+**GBIF coverage is uneven.** This version's `GBIF_download()` does
+not reliably return all expected taxa. Recommend leaning on OBIS as
+the primary source and using GBIF as a supplement. You can also do
+your GBIF search manually on gbif.org and import the resulting
+download. `GBIF_download()` prints the class names it requested and
+the backbone usageKeys it actually got, so you can see how much
+shrinkage there was.
+
+**Missing package dependencies.** Some of the upstream taxonomy
+helpers pull in packages that are not on CRAN. If `OBIS_download()`
+or `GBIF_download()` fail to load dependencies, try:
+
+```r
+devtools::install_github('james-thorson/FishLife')
+devtools::install_github('cfree14/freeR')
+```
+
 ## Per-taxonomic-group separation
 
 Run the pipeline **once per taxonomic group** that your primer targets —

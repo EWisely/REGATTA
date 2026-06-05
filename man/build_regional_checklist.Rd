@@ -2,7 +2,7 @@
 % Please edit documentation in R/build_regional_checklist.R
 \name{build_regional_checklist}
 \alias{build_regional_checklist}
-\title{Build a regional species checklist by combining GBIF, OBIS, and local sources}
+\title{Build a regional species checklist from GBIF, OBIS, and Local sources}
 \usage{
 build_regional_checklist(
   comb_inputnames = c("GBIF_Species", "Local_Species", "OBIS_Species"),
@@ -10,25 +10,44 @@ build_regional_checklist(
 )
 }
 \arguments{
-\item{comb_inputnames}{Character vector of basenames (no extension) of the
-per-source CSVs in the `datasets/` directory. Defaults to the basenames
-the upstream download functions write.}
+\item{comb_inputnames}{A character vector of basenames (no `.csv`
+extension) of the per-source CSVs in `datasets/`. Each entry is
+optional: you can supply just one source or all three. Default
+matches the default output names of [GBIF_download()],
+[Local_csv_download()], and [OBIS_download()].}
 
-\item{comb_outputname}{Basename (no extension) of the combined output
-file under `custom_db/`.}
+\item{comb_outputname}{Basename (no `.txt` extension) of the
+combined output file under `custom_db/`. Default
+`"Comprehensive_species_list"`. Choose something descriptive —
+you will pass this path into [taxonomize_checklist()] next.}
 }
 \value{
-Invisibly NULL; writes
-  `custom_db/<comb_outputname>.txt` as a side effect.
+Invisibly NULL. Writes
+  `custom_db/<comb_outputname>.txt` as a side effect. The file is
+  tab-delimited with one species per row plus a `Source` column
+  recording which input each species came from.
 }
 \description{
-Reads the per-source CSVs written by [GBIF_download()], [OBIS_download()],
-and [Local_csv_download()] (one row per species, with columns
-`Species` and `Source`), stacks them, deduplicates, drops any literal
-`"NA"` species rows, and writes the result as a tab-delimited `.txt`
-file under `custom_db/`. The output is the input to [taxonomize_checklist()].
+Reads the per-source CSVs written by [GBIF_download()],
+[OBIS_download()], and [Local_csv_download()], stacks them,
+deduplicates, drops any literal `"NA"` species rows, and writes the
+result as a tab-delimited `.txt` file under `custom_db/`. The
+output is the input to [taxonomize_checklist()].
 }
 \details{
-Run this function **once per taxonomic group** (fish, crustaceans, ...).
-Don't mix groups in one call — the off-target check is per-group.
+Run this function **once per taxonomic group** (fish, crustaceans,
+marine mammals, ...). Don't mix groups in one call — the
+off-target check downstream is per-group, and a fish-plus-crustacean
+megalist defeats the filter.
+}
+\examples{
+\dontrun{
+build_regional_checklist(
+  comb_inputnames = c("GBIF_OCNMS_fish",
+                      "OBIS_OCNMS_fish",
+                      "Local_OCNMS_fish"),
+  comb_outputname = "Comprehensive_OCNMS_fish_list"
+)
+}
+
 }

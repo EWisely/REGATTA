@@ -3,18 +3,49 @@
 
 #' Download an OBIS species list inside a WKT polygon
 #'
-#' Pulls an OBIS checklist for the given taxa within the polygon, with
-#' optional `marine` / `brackish` / `freshwater` / `terrestrial` filters.
-#' Writes the result to `datasets/<obis_outputname>.csv`.
+#' Pulls an OBIS checklist for the given taxa within a regional WKT
+#' polygon, with optional habitat filters. Writes the result to
+#' `datasets/<obis_outputname>.csv` and prints the file path.
 #'
-#' @param obis_taxa Character vector of high-level taxa.
-#' @param worms_taxa Reserved for API symmetry with [GBIF_download()];
-#'   currently unused.
-#' @param regional_poly WKT POLYGON string.
-#' @param obis_outputname Basename (no extension) for the output CSV.
-#' @param marine,freshwater,terrestrial,brackish Optional habitat filters
-#'   (TRUE / FALSE / NA = no filter).
-#' @return Invisibly NULL; writes a CSV under `datasets/` as a side effect.
+#' @param obis_taxa A character vector of taxon names at any level (OBIS
+#'   recognizes class, order, family, genus, species, etc.).
+#' @param worms_taxa A character vector of substitute taxon names to use
+#'   instead of `obis_taxa` when looking up WoRMS IDs. NA reuses
+#'   `obis_taxa`.
+#' @param regional_poly A WKT POLYGON string of the form
+#'   `"POLYGON ((long lat, long lat, ...))"`. Draw a region on
+#'   [wktmap.com](https://wktmap.com) and copy the generated polygon.
+#' @param obis_outputname Basename (no `.csv` extension) for the output
+#'   file under `datasets/`. Default `"OBIS_Species"`. Choose a short
+#'   distinctive name — you will pass it into
+#'   [build_regional_checklist()] later.
+#' @param marine,freshwater,terrestrial,brackish Habitat filters. TRUE
+#'   returns only species marked in that habitat; FALSE excludes them;
+#'   NA (default) means no filter.
+#'
+#' @details
+#' The four habitat filters **stack as intersections, not unions**. So
+#' `marine = TRUE, freshwater = TRUE` returns only species marked both
+#' marine and freshwater (i.e. anadromous). To get marine OR
+#' freshwater, set `terrestrial = FALSE` and leave marine/freshwater
+#' as NA.
+#'
+#' @return Invisibly NULL. Writes
+#'   `datasets/<obis_outputname>.csv` as a side effect.
+#'
+#' @examples
+#' \dontrun{
+#' OBIS_download(
+#'   obis_taxa       = c("Salmonidae", "Copepoda"),
+#'   regional_poly   = "POLYGON ((-124.85 51.75, -129.20 51.15, -128.14 41.87, -122.34 42.00, -121.86 44.62, -122.70 46.59, -121.55 47.87, -124.85 51.75))",
+#'   obis_outputname = "OBIS_OCNMS_fish",
+#'   marine          = TRUE,
+#'   freshwater      = NA,    # needed to keep salmon, which spans habitats
+#'   terrestrial     = FALSE,
+#'   brackish        = NA
+#' )
+#' }
+#'
 #' @export
 OBIS_download <- function(obis_taxa,
                           worms_taxa = NA,
