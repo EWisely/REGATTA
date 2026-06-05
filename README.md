@@ -55,45 +55,60 @@ nothing does.
 
 ## Pipeline
 
+**Reading the diagram:** the **core REGATTA workflow** (solid arrows)
+runs one classifier output through `reconcile_checklist()`. The
+**optional `reconcile_global_local()` branch** (dashed arrows + dashed
+nodes) is a side-path you take only if you also have a second classifier
+output for the same ASVs — its `$result` is the same shape as the direct
+taxonomy table, so it slots in as an optional preprocessing step before
+`reconcile_checklist()`.
+
 ```mermaid
 flowchart TD
+    %% Regional-checklist construction — runs once per region + taxonomic group
     A[GBIF_download] --> D[build_regional_checklist]
     B[OBIS_download] --> D
     C[Local_csv_download] --> D
     D --> E[taxonomize_checklist]
-    E --> F[("Regional checklist<br/>7-rank table<br/>one taxonomic group")]
+    E --> F[("Regional checklist<br/>7 ranks, taxonomized")]
 
-    G["eDNA classifier output<br/>obitools / vsearch+SINTAX /<br/>Kraken2 / MURI / BLAST / etc."] --> H{Input shape?}
+    %% Classifier-output preprocessing — once per classifier
+    G["Classifier output<br/>obitools / vsearch+SINTAX /<br/>vsearch --userout / Kraken2 /<br/>MURI / BLAST / etc."] --> H{Input shape?}
     H -->|SINTAX strings| I[parse_sintax]
+    H -->|"vsearch --userout"| I2[parse_vsearch_userout]
     H -->|NCBI taxIDs| J[resolve_taxids]
     H -->|"Mixed-rank names<br/>(BestTaxon)"| N1[resolve_names]
-    H -->|7 rank columns| K[no preprocessing needed]
-    I --> L[("Taxonomy table<br/>ASV + 7 ranks")]
-    J --> L
+    H -->|already 7 ranks| K[no preprocessing]
+    I  --> L[("Taxonomy table<br/>ASV_id + 7 ranks + pct_id")]
+    I2 --> L
+    J  --> L
     N1 --> L
-    K --> L
+    K  --> L
 
+    %% OPTIONAL: reconcile_global_local (dashed throughout)
+    L2["Second classifier output<br/>(same ASVs, second DB —<br/>e.g. vsearch + curated local DB)"] -.-> Q[reconcile_global_local]
+    L -.-> Q
+    Q -.-> R1[("$result + $tracking + $stats<br/>in reconcile_global_local_out/")]
+    R1 -.-> M
+
+    %% CORE: reconcile_checklist
     F --> M[reconcile_checklist]
-    L --> M
-    M --> N["corrected<br/>(input table with ranks rewritten)"]
-    M --> O["changes<br/>(per-ASV old vs. new)"]
-    M --> P["before<br/>(unmodified snapshot)"]
+    L ==> M
+    M --> M_out[("$result + $tracking + $stats<br/>in reconcile_checklist_out/<br/>(tracking + summary AUGMENTED<br/>if reconcile_global_local_out/ exists)")]
 
-    L2["Local-DB classifier output<br/>(vsearch + curated local DB)"] --> Q[reconcile_global_local]
-    L --> Q
-    Q --> R1[("$result<br/>ASV_id + 7 ranks ONLY<br/>(REGATTA exchange format)")]
-    Q --> R2[("$tracking<br/>best_ID_combined-style<br/>per-ASV audit")]
-    Q --> R3[("$stats<br/>step-level counts")]
-    R1 --> M
-    M --> M1[("$result<br/>ASV_id + 7 ranks ONLY")]
-    M --> M2[("$tracking<br/>before/after audit")]
-    M --> M3[("$stats")]
-
-    M1 --> S[summarize_regatta]
+    %% Cross-stage summary
+    M_out --> S[summarize_regatta]
     L --> S
-    L2 --> S
-    Q --> S
-    S --> T["21-row stats summary<br/>counts / specificity / diversity"]
+    L2 -.-> S
+    R1 -.-> S
+    S --> T["21-row stats summary<br/>(Ella's format)"]
+
+    %% Style optional path dashed
+    style L2 stroke-dasharray: 5 5
+    style Q  stroke-dasharray: 5 5
+    style R1 stroke-dasharray: 5 5
+    %% Style the core function bold
+    style M  stroke-width:4px
 ```
 
 ## Per-taxonomic-group separation
@@ -112,7 +127,7 @@ checklist instead of being flagged.
 | `GBIF_download()` | Pull a GBIF species list inside a WKT polygon for given high-level taxa | `rgbif`, `worrms`, `taxize` |
 | `OBIS_download()` | Pull an OBIS species list with optional marine/brackish/freshwater filters | `robis` |
 | `Local_csv_download()` | Read user-supplied checklist CSVs (Genus, Species columns) | none |
-| `build_regional_checklist()` | Merge the three source outputs into one deduplicated regional list (currently named `dataset_combine`; rename pending) | none |
+| `build_regional_checklist()` | Merge the three source outputs into one deduplicated regional list | none |
 | `parse_sintax()` | Convert vsearch SINTAX taxonomy strings to a full 7-rank taxonomy table | none |
 | `resolve_taxids()` | Convert NCBI taxIDs to a full 7-rank taxonomy table (e.g. obitools output) | `taxonomizr` |
 | `resolve_names()` | Convert mixed-rank scientific names (Kraken2 / BestTaxon style) to a full 7-rank taxonomy table; strips sp./spp./cf./aff./Gen./indet./quotes before lookup; synonym-aware (matches NCBI scientific names + recorded synonyms, excludes common names) | `taxonomizr`, `RSQLite` |
@@ -135,6 +150,7 @@ source("Local_csv_download.R")
 source("Build_regional_checklist.R")
 source("taxonomize_checklist.R")
 source("parse_sintax.R")
+source("parse_vsearch_userout.R")
 source("resolve_taxids.R")
 source("resolve_names.R")
 source("reconcile_checklist.R")
@@ -156,10 +172,10 @@ OBIS_download(obis_taxa = "Osteichthyes",
               marine = TRUE, terrestrial = FALSE)
 Local_csv_download(loc_csvs = "2016Aug24_Tirado-Sanchez_et_al_Galapagos_Pisces_Checklist.csv",
                    loc_outputname = "Local_galapagos_fish")
-dataset_combine(comb_inputnames = c("GBIF_galapagos_fish",
-                                    "OBIS_galapagos_fish",
-                                    "Local_galapagos_fish"),
-                comb_outputname = "comprehensive_galapagos_fish_list")
+build_regional_checklist(comb_inputnames = c("GBIF_galapagos_fish",
+                                             "OBIS_galapagos_fish",
+                                             "Local_galapagos_fish"),
+                         comb_outputname = "comprehensive_galapagos_fish_list")
 ```
 
 ### 2. Taxonomize the checklist (once per region per group)
@@ -185,7 +201,7 @@ also writes the augmented table to disk as
 `<output_prefix>_full_tax_table.csv` for downstream phyloseq / MetabaR
 use.
 
-For vsearch SINTAX output:
+For vsearch SINTAX output (LCA file — two columns: ID, sintax string):
 
 ```r
 vs <- readr::read_delim("lca_results.txt", col_names = c("ASV_id", "sintax"), delim = "\t")
@@ -193,6 +209,20 @@ taxonomy_table <- parse_sintax(
   input         = vs,
   sintax_col    = "sintax",
   output_prefix = "MiFish_vsearch"
+)
+```
+
+For vsearch `--userout` files (each ASV has multiple top-N hits with
+percent identity — needed if you want to feed vsearch output to
+`reconcile_global_local()` since that function compares percent
+identities). The helper reads the userout, takes the first hit per
+ASV (matching the original code's semantics), strips the sequence
+prefix, parses the SINTAX taxonomy, and returns a clean table with
+`ASV_id` + 7 ranks + `pct_id`:
+
+```r
+taxonomy_table <- parse_vsearch_userout(
+  "userout_results.txt"
 )
 ```
 
@@ -274,23 +304,31 @@ result$stats     # match-rank distribution + per-rank specificity counts
 > across the two stages. The `taxonomy_table.csv` is always the strict
 > 8-column post-LCA result regardless of augmentation.
 >
-> Two clean workflows:
+> Two clean workflows. Note that the single-DB and two-DB workflows take
+> the **same shape of taxonomy table** — a single classifier output with
+> `ASV_id` + 7 ranks + optional `pct_id`. The two-DB workflow just runs
+> two such tables through `reconcile_global_local()` first as an optional
+> preprocessing step before the core `reconcile_checklist()` call. In the
+> single-DB case below, `my_tax` could equally well be called `global_in`
+> or `local_in` — it is just one classifier's taxonomy table.
 >
 > ```r
-> # SINGLE-DB
+> # SINGLE-DB (core REGATTA — feeds one classifier output directly to
+> # the core reconcile_checklist())
 > post <- reconcile_checklist(my_tax, fish_checklist)
 > # Writes 3 CSVs to reconcile_checklist_out/
 > ```
 >
 > ```r
-> # TWO-DB
+> # TWO-DB (optional reconcile_global_local pre-step, then the core)
 > rec  <- reconcile_global_local(global_in, local_in)
 > # Writes 3 CSVs to reconcile_global_local_out/
 >
 > post <- reconcile_checklist(rec$result, fish_checklist)
+> # rec$result has the same ASV_id + 7 ranks shape as my_tax above.
 > # Auto-detects reconcile_global_local_out/, reads its tracking + summary,
-> # writes AUGMENTED tracking + summary plus the post-LCA taxonomy_table
-> # into reconcile_checklist_out/
+> # and writes AUGMENTED tracking + summary into reconcile_checklist_out/
+> # alongside the strict 8-column post-LCA taxonomy_table.
 > ```
 
 ### 5. (Optional) Reconcile global vs. local DB classifier outputs
@@ -369,7 +407,7 @@ with the same three top-level elements:
 | Element | Contents |
 |---|---|
 | `$result` | **The REGATTA exchange format: exactly 8 columns** — the ASV identifier plus the 7 lowercase rank columns (`domain`, `phylum`, `class`, `order`, `family`, `genus`, `species`). Nothing else. This is what you pipe into the next REGATTA function, into phyloseq's `tax_table()`, or into a MetabaR MOTU table. |
-| `$tracking` | Per-ASV decision record / audit table. Carries every input column plus REGATTA's bookkeeping (for `reconcile_global_local`: best_pctid winner, global_lca_to_local triggered, preferred lineage and database; for `regatta_checklist_lca`: before/after at each rank, regatta_match_rank, scientific_name). Use for spot-checks and supplementary tables. |
+| `$tracking` | Per-ASV decision record / audit table. Carries every input column plus REGATTA's bookkeeping (for `reconcile_global_local`: best_pctid winner, global_lca_to_local triggered, preferred lineage and database; for `reconcile_checklist`: before/after at each rank, regatta_match_rank, scientific_name). Use for spot-checks and supplementary tables. |
 | `$stats` | Step-level diagnostic counts. A small `(metric, count)` data.frame summarizing what the function did. |
 
 The `$result` shape is deliberately strict — 8 columns, never more —
@@ -395,7 +433,7 @@ different reasons a corrected output differs from its input:
    canonical (`name_match_type == "synonym"`).
 2. **Checklist downgrade** — the species/genus/family wasn't in the
    regional checklist; the LCA walk downgraded to a higher rank.
-   Visible in `regatta_checklist_lca()`'s `$tracking` element.
+   Visible in `reconcile_checklist()`'s `$tracking` element.
 3. **Global vs. local DB disagreement** — global-DB and local-DB
    classifier runs assigned different taxa to the same ASV. Surfaced
    by `reconcile_global_local()` via the `preferred_database` column
@@ -408,7 +446,7 @@ interpreting where taxonomic detail was lost or shifted.
 
 ## Accepted input shapes
 
-The taxonomy table you feed to `regatta_checklist_lca()` must be uniform
+The taxonomy table you feed to `reconcile_checklist()` must be uniform
 in shape — all rows in one of the forms below. Mixed shapes within one
 call are not supported (run each shape through its preprocessor
 separately and concatenate the resulting tables first).
