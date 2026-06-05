@@ -35,9 +35,12 @@ species-level NCBI taxonomy downstream.
 }
 \examples{
 \dontrun{
+# Whatever local checklists you have in datasets/ that carry Genus
+# and Species columns — fish, mammals, plants, microbes, whatever.
+# The loc_outputname is yours to pick:
 Local_csv_download(
-  loc_csvs       = c("local_sp_test.csv", "local_invert_test.csv"),
-  loc_outputname = "Local_OCNMS_fish_invert"
+  loc_csvs       = c("regional_checklist_A.csv", "regional_checklist_B.csv"),
+  loc_outputname = "Local_<my_region>_<my_group>"
 )
 }
 

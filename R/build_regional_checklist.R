@@ -33,11 +33,15 @@
 #'
 #' @examples
 #' \dontrun{
+#' # The names below are the basenames of files in datasets/ that
+#' # GBIF_download(), OBIS_download(), and Local_csv_download() wrote.
+#' # comb_outputname is yours to pick; suggested convention is
+#' # Comprehensive_<region>_<group>_list but it's not required.
 #' build_regional_checklist(
-#'   comb_inputnames = c("GBIF_OCNMS_fish",
-#'                       "OBIS_OCNMS_fish",
-#'                       "Local_OCNMS_fish"),
-#'   comb_outputname = "Comprehensive_OCNMS_fish_list"
+#'   comb_inputnames = c("GBIF_my_region_my_group",
+#'                       "OBIS_my_region_my_group",
+#'                       "Local_my_region_my_group"),
+#'   comb_outputname = "Comprehensive_my_region_my_group_list"
 #' )
 #' }
 #'

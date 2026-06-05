@@ -34,12 +34,20 @@
 #'
 #' @examples
 #' \dontrun{
+#' # Pick the gbif_outputname for your region + group; the convention
+#' # GBIF_<region>_<group> is a suggestion only.
+#' # Pacific NW (OCNMS) ray-finned fish + crustaceans:
 #' GBIF_download(
 #'   obis_taxa       = c("Osteichthyes", "Multicrustacea"),
 #'   worms_taxa      = c("Actinopterygii", "Multicrustacea"),
 #'   regional_poly   = "POLYGON ((-124.85 51.75, -129.20 51.15, -128.14 41.87, -122.34 42.00, -121.86 44.62, -122.70 46.59, -121.55 47.87, -124.85 51.75))",
 #'   gbif_outputname = "GBIF_OCNMS_fish_crust"
 #' )
+#'
+#' # The same function for any other group + region, e.g. mammals over
+#' # a Sonoran Desert polygon, freshwater insects over a German
+#' # river-basin polygon, soil microbiota over an Antarctic polygon —
+#' # just supply the class-or-broader taxon name(s) and the WKT.
 #' }
 #'
 #' @export

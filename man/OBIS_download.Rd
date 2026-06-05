@@ -54,10 +54,15 @@ as NA.
 }
 \examples{
 \dontrun{
+# Pacific NW (OCNMS) salmonids and copepods, intentionally allowing
+# salmon to slip through the habitat filter. The same pattern works
+# for any taxa over any WKT polygon — freshwater insects in
+# Germany, terrestrial mammals over a Sonoran Desert polygon, etc.
+# obis_outputname is yours to pick.
 OBIS_download(
   obis_taxa       = c("Salmonidae", "Copepoda"),
   regional_poly   = "POLYGON ((-124.85 51.75, -129.20 51.15, -128.14 41.87, -122.34 42.00, -121.86 44.62, -122.70 46.59, -121.55 47.87, -124.85 51.75))",
-  obis_outputname = "OBIS_OCNMS_fish",
+  obis_outputname = "OBIS_my_region_my_group",
   marine          = TRUE,
   freshwater      = NA,    # needed to keep salmon, which spans habitats
   terrestrial     = FALSE,

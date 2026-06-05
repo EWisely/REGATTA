@@ -53,6 +53,26 @@ nothing does.
   checklist forces them. No flat percent-identity cutoffs that throw
   away species-level information unnecessarily.
 
+### Works for any group, any region
+
+The examples in this README and the validated worked dataset
+(`stress_test_galapagos_crustaceans.R`, `end_to_end_raw_galapagos.R`)
+use marine fish and crustaceans in the Galapagos because that's what
+the package was developed against. **Nothing in the pipeline is
+fish-, marine-, or Galapagos-specific.** Use it for freshwater insects
+in Germany, terrestrial mammals in the Sonoran Desert, soil microbiota
+in Antarctica, or any other group × region combination. The only
+per-region work is building and taxonomizing the regional species
+checklist; every downstream function is taxonomy- and
+geography-agnostic, and the function defaults (output folder names,
+exchange-format columns, etc.) carry no group label so a user can run
+multiple groups side-by-side in the same project without renaming
+collisions.
+
+Treat the file-name pattern `comprehensive_<region>_<group>_list.txt`
+(and its `*_taxonomized.rds` companion) as a useful convention rather
+than a requirement — pick whatever names suit your project.
+
 ## Pipeline
 
 **Reading the diagram:** the **core REGATTA workflow** (solid arrows)
@@ -273,7 +293,7 @@ automatically. Outputs land under `<input>/regatta_out/` by default
 # Single-DB workflow (one classifier output, any tool)
 run_regatta(
   input     = "data/MiFish_obi.tab",                  # obitools .tab
-  checklist = "custom_db/galapagos_fish_checklist.rds"
+  checklist = "custom_db/my_regional_checklist.rds"   # pick any name
 )
 # → data/regatta_out/{reconcile_checklist/*, regatta_summary.csv, run_log.txt}
 ```
@@ -283,7 +303,7 @@ run_regatta(
 # vsearch input — LCA taxonomy + userout pct_id, joined by ASV id)
 run_regatta(
   input     = c("data/vs_lca.txt", "data/vs_userout.txt"),
-  checklist = "custom_db/galapagos_fish_checklist.rds"
+  checklist = "custom_db/my_regional_checklist.rds"   # pick any name
 )
 ```
 
@@ -297,7 +317,7 @@ run_regatta(
     global = "data/obi.tab",
     local  = c("data/vs_lca.txt", "data/vs_userout.txt")
   ),
-  checklist = "custom_db/galapagos_fish_checklist.rds"
+  checklist = "custom_db/my_regional_checklist.rds"   # pick any name
 )
 # → data/regatta_out/{
 #     reconcile_global_local/*,
@@ -311,7 +331,7 @@ run_regatta(
 # Folder convention. Drop your files into a folder and run:
 run_regatta(
   input     = "data/my_run/",
-  checklist = "custom_db/galapagos_fish_checklist.rds"
+  checklist = "custom_db/my_regional_checklist.rds"   # pick any name
 )
 # The folder may contain any of:
 #   - one classifier file                              → single-DB
@@ -324,6 +344,11 @@ scale overrides, etc.), the lower-level `reconcile_global_local()` /
 `reconcile_checklist()` / `summarize_regatta()` functions remain
 available and unchanged — `run_regatta()` is a thin orchestrator on top
 of them. The detailed steps below walk through that lower-level API.
+
+The four steps below walk through one concrete worked example — Galapagos
+ray-finned fish via OBIS + GBIF + a local checklist — to show the
+plumbing. Substitute your own region polygon, taxa, and CSV files; the
+function names and shapes don't change.
 
 ### 1. Build a regional species list (one taxonomic group)
 
@@ -348,11 +373,12 @@ build_regional_checklist(comb_inputnames = c("GBIF_galapagos_fish",
 ### 2. Taxonomize the checklist (once per region per group)
 
 ```r
-fish_checklist <- taxonomize_checklist(
-  input    = "custom_db/comprehensive_galapagos_fish_list.txt",
-  sql_path = "/path/to/accessionTaxa.sql"
-)
-saveRDS(fish_checklist, "custom_db/comprehensive_galapagos_fish_list_taxonomized.rds")
+my_checklist <- taxonomize_checklist(
+  input    = "custom_db/my_regional_list.txt",        # pick any name —
+  sql_path = "/path/to/accessionTaxa.sql"             # the convention
+)                                                     # `comprehensive_<region>_<group>_list.txt`
+saveRDS(my_checklist,                                 # is just a suggestion
+        "custom_db/my_regional_checklist_taxonomized.rds")
 ```
 
 `taxonomize_checklist()` builds the `accessionTaxa.sql` database the first
@@ -432,7 +458,7 @@ SINTAX string) are accepted and produce identical-shape output.
 ### 4. Run the LCA reconciliation
 
 ```r
-result <- reconcile_checklist(taxonomy_table, fish_checklist, id_col = "ASV_id")
+result <- reconcile_checklist(taxonomy_table, my_checklist, id_col = "ASV_id")
 
 result$result    # ASV_id + 7 ranks ONLY (drop-in for phyloseq tax_table)
 result$tracking  # per-ASV before/after with regatta_match_rank + scientific_name
@@ -482,7 +508,7 @@ result$stats     # match-rank distribution + per-rank specificity counts
 > ```r
 > # SINGLE-DB (core REGATTA — feeds one classifier output directly to
 > # the core reconcile_checklist())
-> post <- reconcile_checklist(my_tax, fish_checklist)
+> post <- reconcile_checklist(my_tax, my_checklist)
 > # Writes 3 CSVs to reconcile_checklist_out/
 > ```
 >
@@ -491,7 +517,7 @@ result$stats     # match-rank distribution + per-rank specificity counts
 > rec  <- reconcile_global_local(global_in, local_in)
 > # Writes 3 CSVs to reconcile_global_local_out/
 >
-> post <- reconcile_checklist(rec$result, fish_checklist)
+> post <- reconcile_checklist(rec$result, my_checklist)
 > # rec$result has the same ASV_id + 7 ranks shape as my_tax above.
 > # Auto-detects reconcile_global_local_out/, reads its tracking + summary,
 > # and writes AUGMENTED tracking + summary into reconcile_checklist_out/
@@ -543,7 +569,7 @@ Two reconciliation steps:
 Feed `rec$result` straight into the checklist step:
 
 ```r
-post <- reconcile_checklist(rec$result, fish_checklist, id_col = "ASV_id")
+post <- reconcile_checklist(rec$result, my_checklist, id_col = "ASV_id")
 post$result   # ASV_id + 7 ranks ONLY (same shape as rec$result)
 post$tracking # per-ASV before/after at each rank + regatta_match_rank
 post$stats    # match-rank distribution + per-rank specificity
