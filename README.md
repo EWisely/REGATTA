@@ -55,9 +55,8 @@ nothing does.
 
 ### Works for any group, any region
 
-The examples in this README and the validated worked dataset
-(`stress_test_galapagos_crustaceans.R`, `end_to_end_raw_galapagos.R`)
-use marine fish and crustaceans in the Galapagos because that's what
+The examples in this README and the package vignette (`vignette("REGATTA-tutorial")`)
+use marine fish in the Galapagos because that's what
 the package was developed against. **Nothing in the pipeline is
 fish-, marine-, or Galapagos-specific.** Use it for freshwater insects
 in Germany, terrestrial mammals in the Sonoran Desert, soil microbiota

@@ -17,7 +17,6 @@
 ^stress_crustaceans_out$
 ^Proposed REGATTA Report - Sheet1\.csv$
 ^custom_dbComprehensive_species_list\.txt$
-^inst/legacy$
 ^\.claude$
 ^jaguar_data_test\.R$
 ^cran-comments\.md$
