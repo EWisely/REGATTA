@@ -186,6 +186,65 @@ reuses the built DB. Point each function at the file via `sql_path`.
 
 ## Common troubleshooting
 
+**Check your group names with `resolve_taxa()` before a long download.**
+Both downloaders now route group names through [`resolve_taxa()`](#functions),
+which disambiguates them against WoRMS **by kingdom** and reports GBIF backbone
+coverage. Run it yourself first to see exactly what each name resolves to:
+
+```r
+resolve_taxa(c("Vertebrata", "Actinopteri", "Mammalia", "Lepidosauria"))
+#> Vertebrata    -> AphiaID 146419 (Subphylum, Animalia)  gbif_usable FALSE
+#> Actinopteri   -> AphiaID 843664                         gbif_usable FALSE
+#> Mammalia      -> AphiaID 1837                           gbif_usable TRUE
+#> Lepidosauria  -> aliased to Reptilia, AphiaID 1838      gbif_usable FALSE
+```
+
+Built-in shorthands expand to multiple taxa: **`"fish"`** → `Actinopterygii` +
+`Elasmobranchii` + `Myxini` + `Petromyzonti` (all ray-finned fishes, sharks &
+rays, hagfishes, and lampreys — the typical MiFish target), and
+**`"vertebrates"`** → `Vertebrata`. Extend or override the table with the
+`aliases =` argument.
+
+What this fixes:
+
+- **Ambiguous names resolve correctly, or error clearly.** `"Vertebrata"` is
+  both the vertebrate subphylum (Animalia, 146419) and a red-algae genus
+  (Plantae, 370321). Filtering by `kingdom = "Animalia"` (the default) keeps
+  only the subphylum, and `OBIS_download()` now queries OBIS **by AphiaID**, so
+  it returns vertebrates rather than the two seaweed species the old name-based
+  query produced. A name that is still ambiguous *within* the kingdom stops
+  with the candidate AphiaIDs listed (pass the AphiaID to disambiguate).
+- **Absent names are caught and aliased.** `"Lepidosauria"` isn't in WoRMS;
+  it's auto-aliased to `"Reptilia"`. Truly unknown names error with a clear
+  message instead of silently returning nothing.
+- **GBIF rank quirks are handled automatically.** GBIF's backbone skips the
+  class rank for ray-finned fish (bony fish hang under phylum Chordata with no
+  class node, and the `Actinopterygii` node is empty), so a class-level match
+  silently drops every fish. `GBIF_download()` therefore descends to the rank
+  GBIF *does* populate — **order** (`gbif_descend_to = "order"`, the default) —
+  and unions those keys with each taxon's direct backbone key, so **the same
+  name returns fish from GBIF and sharks/mammals/birds keep working**. You type
+  `"fish"` (or `Teleostei`, `Actinopteri`, …) and it just works. Order is the
+  default because it's fast (tens of keys — GBIF allows only a few concurrent
+  downloads and large key sets are slow to prepare) and reaches ~97% of fish
+  families: GBIF's backbone is older than WoRMS's, so modern fish orders
+  (Acanthuriformes, Carangiformes, …) have no GBIF key, but GBIF still files
+  those fish under its broad `Perciformes`, which *is* matched. Taxa GBIF
+  *does* have as a node (sharks/rays → class `Elasmobranchii`, hagfishes →
+  `Myxini`, lampreys → `Petromyzonti`, mammals, birds) collapse to a single key
+  each. **All keys go into one `occ_download` request** — the key count does
+  not cost extra downloads against GBIF's 3-concurrent limit — so completeness
+  is the default: `gbif_fill_families = TRUE` adds keys for the ~3% of families
+  GBIF files with no order, reaching ~98%. Set it `FALSE` to skip the family
+  walk for a faster, order-only (~97%) preparation. **OBIS remains the more
+  complete source for fish; GBIF is a supplement.**
+
+`resolve_taxa()`, `GBIF_download()`, and `OBIS_download()` all take a
+`kingdom =` argument (default `"Animalia"`; `NULL` disables the filter).
+`GBIF_download()` takes `gbif_descend_to =` (default `"order"`) and
+`gbif_fill_families =` (default `TRUE`; `FALSE` skips the family walk for
+faster, slightly-less-complete preparation).
+
 **GBIF downloads time out or fail to start.** Try, before calling
 `GBIF_download()`:
 
@@ -239,6 +298,7 @@ checklist instead of being flagged.
 
 | Function | Purpose | External dependencies |
 |---|---|---|
+| `resolve_taxa()` | Validate and disambiguate your query taxon names against WoRMS (by kingdom), returning unambiguous AphiaIDs plus a per-taxon GBIF-backbone coverage flag (`gbif_usable`). Called internally by both downloaders; run it standalone to pre-check names. Catches the *Vertebrata* red-algae ambiguity, aliases absent names (`Lepidosauria`→`Reptilia`), and flags the GBIF ray-finned-fish gap | `worrms`, `rgbif` |
 | `GBIF_download()` | Pull a GBIF species list inside a WKT polygon for given high-level taxa | `rgbif`, `worrms`, `taxize` |
 | `OBIS_download()` | Pull an OBIS species list with optional marine/brackish/freshwater filters | `robis` |
 | `Local_csv_download()` | Read user-supplied checklist CSVs (Genus, Species columns) | none |

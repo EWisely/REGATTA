@@ -8,10 +8,17 @@
 #' `datasets/<obis_outputname>.csv` and prints the file path.
 #'
 #' @param obis_taxa A character vector of taxon names at any level (OBIS
-#'   recognizes class, order, family, genus, species, etc.).
+#'   recognizes class, order, family, genus, species, etc.). Names are
+#'   validated and disambiguated by [resolve_taxa()] (kingdom-aware) and OBIS
+#'   is then queried **by AphiaID**, so ambiguous names resolve to the right
+#'   taxon — e.g. `"Vertebrata"` returns vertebrates, not the red-algae genus
+#'   of the same name. Any fish synonym (`Teleostei`, `Actinopteri`,
+#'   `Actinopterygii`, `Osteichthyes`) works.
 #' @param worms_taxa A character vector of substitute taxon names to use
 #'   instead of `obis_taxa` when looking up WoRMS IDs. NA reuses
-#'   `obis_taxa`.
+#'   `obis_taxa`. Rarely needed now that names route through [resolve_taxa()].
+#' @param kingdom Kingdom used by [resolve_taxa()] to disambiguate the query
+#'   taxa. Default `"Animalia"`; `NULL` disables the filter.
 #' @param regional_poly A WKT POLYGON string of the form
 #'   `"POLYGON ((long lat, long lat, ...))"`. Draw a region on
 #'   [wktmap.com](https://wktmap.com) and copy the generated polygon.
@@ -56,6 +63,7 @@ OBIS_download <- function(obis_taxa,
                           worms_taxa = NA,
                           regional_poly,
                           obis_outputname = "OBIS_Species",
+                          kingdom = "Animalia",
                           marine = NA,
                           freshwater = NA,
                           terrestrial = NA,
@@ -86,17 +94,24 @@ OBIS_download <- function(obis_taxa,
   }
   if(corrects == F) stop("regional_poly must be in POLYGON format: POLYGON ((longitude latitude, longitude latitude etc.))")
   
-  if(is.na(worms_taxa[1])) {
-    worms_taxa <- obis_taxa
-  } else {
-    print("Using worms_taxa")
-  }
-  
+  query_taxa <- if (is.na(worms_taxa[1])) obis_taxa else worms_taxa
+
+  # Validate + disambiguate the query taxa, then search OBIS by AphiaID rather
+  # than by name. Querying by name lets OBIS silently resolve an ambiguous
+  # name to the wrong taxon (e.g. "Vertebrata" -> the red-algae genus);
+  # AphiaIDs are unambiguous. resolve_taxa() errors on any unresolved name.
+  resolved <- resolve_taxa(query_taxa, kingdom = kingdom, check_gbif = FALSE)
+  message("OBIS query resolved to: ",
+          paste0(resolved$valid_name, " (AphiaID ", resolved$aphia_id, ")",
+                 collapse = "; "))
+
   #OBIS----
-  obis_sp_in <- checklist(obis_taxa, 
-                          geometry = regional_poly)
-  
-  print(paste("Searching for taxa:", obis_taxa, sep = " "))
+  # One checklist() call per resolved AphiaID. dplyr::bind_rows (not rbind)
+  # because robis::checklist returns a different column set per taxon.
+  obis_sp_in <- dplyr::bind_rows(lapply(resolved$aphia_id, function(id)
+    robis::checklist(taxonid = id, geometry = regional_poly)))
+
+  print(paste("Searching for taxa:", resolved$valid_name, sep = " "))
   
   #### Pull out only the marine species list for the regional database
   # This did successfully return all marine or brackish species and no freshwater or terrestrial

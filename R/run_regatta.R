@@ -118,10 +118,31 @@
 
 # ---- internal: preprocessor dispatch -----------------------------
 
+#' Collapse a long (per-sample) classifier table to one row per ASV (internal)
+#'
+#' BestTaxon-style outputs are often long: one row per (sample, ASV), so a
+#' single ASV's taxonomy is repeated across every sample it appears in (with
+#' per-sample columns like read counts varying). Taxonomy reconciliation is
+#' per-ASV, so we collapse to one row per `id_col`, keeping only the columns
+#' that are constant within each ASV (taxonomy, sequence length, etc.) and
+#' dropping the ones that vary across samples (Sample_name, nReads, ...).
+#' @keywords internal
+#' @noRd
+.regatta_dedupe_by_id <- function(df, id_col) {
+  if (!anyDuplicated(df[[id_col]])) return(df)   # already one row per ASV
+  keep <- vapply(names(df), function(cn) {
+    if (cn == id_col) return(TRUE)
+    # keep only columns functionally determined by id_col (constant per ASV)
+    !any(tapply(df[[cn]], df[[id_col]],
+                function(x) length(unique(x)) > 1L))
+  }, logical(1))
+  unique(df[, keep, drop = FALSE])
+}
+
 #' Read a classifier file or vsearch pair into a tax table (internal)
 #' @keywords internal
 #' @noRd
-.regatta_read_input <- function(paths, sql_path) {
+.regatta_read_input <- function(paths, sql_path, id_col = "ASV_id") {
   if (length(paths) == 1) {
     fmt <- .regatta_detect_format(paths)
     if (fmt == "obitools_tab") {
@@ -145,6 +166,18 @@
     }
     if (fmt == "besttaxon") {
       raw <- utils::read.csv(paths, stringsAsFactors = FALSE)
+      if (!id_col %in% names(raw)) {
+        stop("BestTaxon input has no '", id_col, "' column to use as the ",
+             "per-ASV identifier. Pass id_col= to run_regatta() naming the ",
+             "ASV id column in your file (e.g. id_col = \"Hash\"). ",
+             "Found columns: ", paste(names(raw), collapse = ", "))
+      }
+      n_in  <- nrow(raw)
+      raw   <- .regatta_dedupe_by_id(raw, id_col)
+      if (nrow(raw) < n_in) {
+        message("Collapsed long BestTaxon table from ", n_in, " rows to ",
+                nrow(raw), " unique ASVs (by ", id_col, ").")
+      }
       return(list(table = resolve_names(raw, name_col = "BestTaxon",
                                         sql_path = sql_path), format = fmt))
     }
@@ -192,6 +225,12 @@
 #'   is a file path. Created if missing.
 #' @param sql_path Path to the local `accessionTaxa.sql` taxonomizr DB
 #'   (used for obitools / BestTaxon input shapes).
+#' @param id_col Name of the per-ASV identifier column. Default
+#'   `"ASV_id"` (matches the obitools and vsearch preprocessors). For
+#'   BestTaxon/Kraken2-style CSVs whose identifier is named differently
+#'   (e.g. `"Hash"`), set this so the wrapper can find the id and, if the
+#'   table is long (one row per sample x ASV), collapse it to one row per
+#'   ASV before resolving.
 #' @param Local_advantage TRUE (default): local wins ties at the
 #'   `best_pctid` step in [reconcile_global_local()].
 #'
@@ -221,6 +260,7 @@ run_regatta <- function(input,
                         checklist,
                         out_dir         = NULL,
                         sql_path        = "accessionTaxa.sql",
+                        id_col          = "ASV_id",
                         Local_advantage = TRUE) {
   t_start <- Sys.time()
   norm <- .regatta_normalize_input(input)
@@ -249,21 +289,21 @@ run_regatta <- function(input,
   message("REGATTA: ", norm$role, " workflow -> ", normalizePath(out_dir))
 
   if (norm$role == "two-DB") {
-    g <- .regatta_read_input(norm$global, sql_path)
+    g <- .regatta_read_input(norm$global, sql_path, id_col = id_col)
     log_lines <- c(log_lines, paste0("global (", g$format, "): ",
                                      nrow(g$table), " ASVs"))
-    l <- .regatta_read_input(norm$local, sql_path)
+    l <- .regatta_read_input(norm$local, sql_path, id_col = id_col)
     log_lines <- c(log_lines, paste0("local  (", l$format, "): ",
                                      nrow(l$table), " ASVs"))
 
     rec <- reconcile_global_local(
-      g$table, l$table, Local_advantage = Local_advantage,
+      g$table, l$table, id_col = id_col, Local_advantage = Local_advantage,
       output_dir    = file.path(out_dir, "reconcile_global_local"),
       output_prefix = "reconcile_global_local")
     log_lines <- c(log_lines, "reconcile_global_local done")
 
     post <- reconcile_checklist(
-      rec$result, cl,
+      rec$result, cl, id_col = id_col,
       output_dir    = file.path(out_dir, "reconcile_checklist"),
       output_prefix = "reconcile_checklist",
       prior_dir     = file.path(out_dir, "reconcile_global_local"),
@@ -274,11 +314,11 @@ run_regatta <- function(input,
     result <- list(global_tax = g$table, local_tax = l$table,
                    reconciled = rec, post_checklist = post, summary = summ)
   } else {
-    c1 <- .regatta_read_input(norm$classifier[[1]], sql_path)
+    c1 <- .regatta_read_input(norm$classifier[[1]], sql_path, id_col = id_col)
     log_lines <- c(log_lines, paste0("classifier (", c1$format, "): ",
                                      nrow(c1$table), " ASVs"))
     post <- reconcile_checklist(
-      c1$table, cl,
+      c1$table, cl, id_col = id_col,
       output_dir    = file.path(out_dir, "reconcile_checklist"),
       output_prefix = "reconcile_checklist",
       prior_dir     = NULL)

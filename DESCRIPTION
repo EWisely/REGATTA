@@ -39,8 +39,11 @@ Suggests:
     tidyr,
     readr,
     here,
+    knitr,
+    rmarkdown,
     testthat (>= 3.0.0)
 URL: https://github.com/DolphinCoder/REGATTA_Package_Development
 BugReports: https://github.com/DolphinCoder/REGATTA_Package_Development/issues
+VignetteBuilder: knitr
 Config/testthat/edition: 3
 RoxygenNote: 7.3.1

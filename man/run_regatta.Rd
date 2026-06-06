@@ -9,6 +9,7 @@ run_regatta(
   checklist,
   out_dir = NULL,
   sql_path = "accessionTaxa.sql",
+  id_col = "ASV_id",
   Local_advantage = TRUE
 )
 }
@@ -31,6 +32,13 @@ is a file path. Created if missing.}
 
 \item{sql_path}{Path to the local `accessionTaxa.sql` taxonomizr DB
 (used for obitools / BestTaxon input shapes).}
+
+\item{id_col}{Name of the per-ASV identifier column. Default
+`"ASV_id"` (matches the obitools and vsearch preprocessors). For
+BestTaxon/Kraken2-style CSVs whose identifier is named differently
+(e.g. `"Hash"`), set this so the wrapper can find the id and, if the
+table is long (one row per sample x ASV), collapse it to one row per
+ASV before resolving.}
 
 \item{Local_advantage}{TRUE (default): local wins ties at the
 `best_pctid` step in [reconcile_global_local()].}

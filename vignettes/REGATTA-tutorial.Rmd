@@ -1,0 +1,264 @@
+---
+title: "REGATTA tutorial: correcting off-target eDNA assignments with a regional checklist"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{REGATTA tutorial}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+## What REGATTA does, and what you need
+
+Global reference databases (NCBI, EMBL, …) confidently assign eDNA reads to
+species that don't live in your study area, because the closest match in the
+database is a relative from somewhere else in the world. REGATTA corrects this
+**without hand-curating a local reference database and without throwing away
+taxonomic specificity**: it builds a regional species checklist from public
+biodiversity records, then walks each assignment up the taxonomic tree only as
+far as the regional checklist forces.
+
+To run the whole pipeline you supply **three things**:
+
+1. **The taxonomic group(s)** your primer targets, as taxon names.
+2. **A regional polygon** — a WKT `POLYGON((...))` string. Draw it at
+   [wktmap.com](https://wktmap.com) and copy the generated text.
+3. **A classifier results file** — whatever your metabarcoding taxonomy-
+   assignment step produced (obitools `.tab`, vsearch, etc.). REGATTA
+   auto-detects the format.
+
+This tutorial walks the full path on the package's worked example: **Galapagos
+reef fish from the MiFish primer, classified with obitools against the global
+NCBI database.** Substitute your own group, polygon, and results file — the
+function names and shapes don't change.
+
+> **The pipeline is not fish-, marine-, or Galapagos-specific.** The only
+> per-region work is building and taxonomizing the checklist; every downstream
+> step is taxonomy- and geography-agnostic.
+
+---
+
+## Naming your taxa (you don't need to know the rank quirks)
+
+MiFish is a fish/vertebrate primer; for it you want **ray-finned fishes plus
+elasmobranchs (sharks and rays)**. The historical headache is that the public
+databases disagree on names and ranks — WoRMS calls ray-finned fish
+`Actinopteri`, NCBI uses `Actinopterygii`, much of the literature says
+`Teleostei` or `Osteichthyes`, and GBIF's backbone skips the fish class
+entirely. REGATTA hides all of that behind `resolve_taxa()`. There's even a
+one-word shorthand — **`"fish"`** expands to ray-finned fishes + elasmobranchs:
+
+```{r resolve, eval = FALSE}
+library(REGATTA)
+
+resolve_taxa("fish")
+#> input  alias_used      aphia_id  valid_name      worms_status  gbif_usable
+#> fish   Actinopterygii  10194     Actinopterygii  ok            FALSE
+#> fish   Elasmobranchii  10193     Elasmobranchii  ok            TRUE
+#> fish   Myxini          10189     Myxini          ok            TRUE
+#> fish   Petromyzonti    843662    Petromyzonti    ok            TRUE
+```
+
+`resolve_taxa()` (1) disambiguates names against WoRMS *by kingdom* — so an
+ambiguous name like `"Vertebrata"` resolves to the vertebrate subphylum, not
+the red-algae genus of the same name — and (2) reports whether GBIF's backbone
+has a usable key. `gbif_usable = FALSE` for ray-finned fish is expected: GBIF
+has no class node for them, so `GBIF_download()` automatically descends to the
+**order** rank GBIF *does* populate (and unions with direct keys for
+sharks/mammals/birds). You never have to know that. `"fish"`, `Teleostei`,
+`Actinopteri`, `Actinopterygii`, and `Osteichthyes` all behave identically;
+built-in shorthands also include `"vertebrates"` (→ Vertebrata). (`"fish"`
+covers ray-finned fishes, sharks & rays, hagfishes, and lampreys. The whole
+GBIF search is a single `occ_download`, so by default it goes for completeness
+— ~98%; pass `gbif_fill_families = FALSE` to `GBIF_download()` for a faster,
+order-only ~97% preparation.)
+
+---
+
+## Step 1 — Build the regional checklist (once per region × group)
+
+Pull species lists from OBIS (primary) and GBIF (supplement) inside your
+polygon, then stack them. These calls need internet and a GBIF account (see the
+README "Setup" section), so they're shown but not run here.
+
+```{r build, eval = FALSE}
+poly <- "POLYGON ((-117.421875 31.952162, -91.933594 -6.315299, -81.386719 -6.315299, -76.113281 7.710992, -82.089844 8.581021, -87.011719 13.581921, -104.238281 20.303418, -112.5 32.249974, -117.421875 31.952162))"  # E. Tropical Pacific incl. Galapagos
+
+# OBIS — primary. Queries by AphiaID under the hood, so any fish synonym
+# works; "fish" expands to ray-finned fishes + elasmobranchs.
+OBIS_download(
+  obis_taxa       = "fish",
+  regional_poly   = poly,
+  obis_outputname = "OBIS_galapagos_fish"
+)
+
+# GBIF — supplement. One occ_download: order keys for ray-finned fish, plus a
+# single class key each for sharks/rays, hagfishes, and lampreys, plus
+# family gap-fill (default) for ~98% coverage.
+GBIF_download(
+  obis_taxa       = "fish",
+  regional_poly   = poly,
+  gbif_outputname = "GBIF_galapagos_fish"
+)
+
+# Optional: add a local checklist CSV (needs Genus + Species columns).
+Local_csv_download(
+  loc_csvs       = "2016Aug24_Tirado-Sanchez_et_al_Galapagos_Pisces_Checklist.csv",
+  loc_outputname = "Local_galapagos_fish"
+)
+
+# Stack + dedupe into one regional list.
+build_regional_checklist(
+  comb_inputnames = c("OBIS_galapagos_fish", "GBIF_galapagos_fish",
+                      "Local_galapagos_fish"),
+  comb_outputname = "comprehensive_galapagos_fish_list"
+)
+```
+
+## Step 2 — Taxonomize the checklist (once per region × group)
+
+Resolve every species name to a full 7-rank NCBI lineage. This builds (first
+time, ~15 min) or reuses a local `taxonomizr` database. The lookup is
+synonym-aware, so older names are updated to current canonical NCBI taxonomy
+automatically.
+
+```{r taxonomize, eval = FALSE}
+checklist <- taxonomize_checklist(
+  input    = "custom_db/comprehensive_galapagos_fish_list.txt",
+  sql_path = "/path/to/accessionTaxa.sql"
+)
+saveRDS(checklist, "custom_db/galapagos_fish_checklist.rds")
+```
+
+## Step 3 — Reconcile your obitools output (the one-call path)
+
+`run_regatta()` auto-detects the obitools `.tab` (it has a `TAXID` column),
+resolves the taxIDs to lineages, runs the checklist LCA, and writes the output
+bundle.
+
+```{r run, eval = FALSE}
+run_regatta(
+  input     = "script_03_inputs/MiFish_Menu_95_named.tab",   # obitools .tab
+  checklist = "custom_db/galapagos_fish_checklist.rds",
+  sql_path  = "/path/to/accessionTaxa.sql"
+)
+#> -> regatta_out/{ reconcile_checklist/*, regatta_summary.csv, run_log.txt }
+```
+
+On this dataset, of the 542 obitools-assigned ASVs (out of 1,438 total):
+
+| match rank | ASVs |
+|---|---|
+| species | 287 |
+| genus   | 229 |
+| family  | 16 |
+| order   | 1 |
+| class   | 9 |
+
+The 229 genus-level and 9 class-level results are the off-target calls REGATTA
+exists to catch — globally-confident species assignments to fish that don't
+occur in the Galapagos, walked up to the lowest rank the regional checklist
+supports.
+
+---
+
+## A runnable demonstration (no internet, no database)
+
+The core `reconcile_checklist()` step is pure base R. Here it runs live against
+the **real** Galapagos fish checklist bundled with the package, on a small
+illustrative table chosen to show each kind of downgrade — including the
+elasmobranch (shark) side of a MiFish run.
+
+```{r demo}
+library(REGATTA)
+
+checklist <- readRDS(system.file(
+  "extdata", "galapagos_fish_checklist.rds", package = "REGATTA"))
+
+# A small classifier-output table (ASV_id + the 7 lowercase rank columns).
+tax <- data.frame(
+  ASV_id  = paste0("ASV_", 1:6),
+  domain  = "Eukaryota",
+  phylum  = c("Chordata", "Chordata", "Chordata", "Chordata", "Chordata", "Echinodermata"),
+  class   = c("Actinopteri", "Actinopteri", "Actinopteri", "Actinopteri", "Elasmobranchii", "Echinoidea"),
+  order   = c("Perciformes", "Perciformes", "Scorpaeniformes", "Mulliformes", "Carcharhiniformes", "Camarodonta"),
+  family  = c("Lutjanidae", "Lutjanidae", "Sebastidae", "Mullidae", "Carcharhinidae", "Strongylocentrotidae"),
+  genus   = c("Lutjanus", "Lutjanus", "Sebastes", "Mulloidichthys", "Triaenodon", "Strongylocentrotus"),
+  species = c("Lutjanus argentiventris", "Lutjanus campechanus", "Sebastes goodei",
+              "Mulloidichthys dentatus", "Triaenodon obesus", "Strongylocentrotus purpuratus"),
+  stringsAsFactors = FALSE
+)
+
+res <- reconcile_checklist(tax, checklist, output_dir = NULL)
+```
+
+`$result` is the corrected taxonomy table — the strict 8-column REGATTA
+exchange format (id + 7 ranks), with ranks below each match set to `NA`:
+
+```{r demo-result}
+res$result
+```
+
+`$tracking` records *why* each row changed — the rank at which it matched the
+regional checklist:
+
+```{r demo-tracking}
+res$tracking[, c("ASV_id", "before_species", "regatta_match_rank",
+                 "after_genus", "after_class")]
+```
+
+Reading it row by row:
+
+* **Lutjanus argentiventris** (yellow snapper), **Mulloidichthys dentatus**
+  (Mexican goatfish), **Triaenodon obesus** (whitetip reef shark) — all on the
+  Galapagos checklist, kept at **species**. (The shark confirms the
+  elasmobranch side of a MiFish run is handled, not just bony fish.)
+* **Lutjanus campechanus** — the northern red snapper, an *Atlantic* species
+  that can't be in a Galapagos sample. The species isn't on the checklist but
+  the genus is, so it downgrades to genus ***Lutjanus*** instead of asserting a
+  wrong species.
+* **Sebastes goodei** — a temperate Pacific rockfish; the whole genus is absent
+  from the tropical Galapagos, so it walks up to class **Actinopteri**.
+* **Strongylocentrotus purpuratus** — a purple urchin (Echinodermata, an
+  off-target invertebrate amplification); nothing below *Eukaryota* is on a
+  fish checklist, so it walks all the way up to **domain**.
+
+`$stats` gives the match-rank distribution for the whole table:
+
+```{r demo-stats}
+res$stats
+```
+
+---
+
+## Interpreting the outputs
+
+Every REGATTA function that produces a taxonomy table returns the same three
+elements (and, when writing to disk, the same three CSVs per stage):
+
+| Element | Contents |
+|---|---|
+| `$result`   | The **exchange format**: exactly the id column + 7 lowercase ranks. Drop straight into a phyloseq `tax_table()` or a MetabaR MOTU table. |
+| `$tracking` | Per-ASV audit: before/after at each rank, `regatta_match_rank`, and your passthrough columns. |
+| `$stats`    | Step-level counts — the match-rank distribution above. |
+
+## Where to go next
+
+* **A different results format?** `run_regatta()` auto-detects vsearch (LCA +
+  `--userout`), and Kraken2/BestTaxon-style name tables. For a table whose
+  per-ASV id column isn't `ASV_id` (e.g. a sequence `Hash`), pass
+  `id_col = "Hash"`; a long per-sample table is collapsed to one row per ASV
+  automatically. See `?run_regatta`.
+* **Two reference databases?** If you classified the same ASVs against both a
+  global and a locally-curated database, pass
+  `input = list(global = ..., local = ...)` to compare them with
+  `reconcile_global_local()` before the checklist step. See
+  `?reconcile_global_local`.
+* **One pass per primer.** Run the pipeline once per taxonomic group your
+  primers target. Mixing groups into one megalist lets off-target
+  amplifications slip through.
+* **Pre-check your taxon names** with `resolve_taxa()` before a long download,
+  and see the README troubleshooting section for GBIF/OBIS specifics.

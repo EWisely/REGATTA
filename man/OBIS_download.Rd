@@ -9,6 +9,7 @@ OBIS_download(
   worms_taxa = NA,
   regional_poly,
   obis_outputname = "OBIS_Species",
+  kingdom = "Animalia",
   marine = NA,
   freshwater = NA,
   terrestrial = NA,
@@ -17,11 +18,16 @@ OBIS_download(
 }
 \arguments{
 \item{obis_taxa}{A character vector of taxon names at any level (OBIS
-recognizes class, order, family, genus, species, etc.).}
+recognizes class, order, family, genus, species, etc.). Names are
+validated and disambiguated by [resolve_taxa()] (kingdom-aware) and OBIS
+is then queried **by AphiaID**, so ambiguous names resolve to the right
+taxon — e.g. `"Vertebrata"` returns vertebrates, not the red-algae genus
+of the same name. Any fish synonym (`Teleostei`, `Actinopteri`,
+`Actinopterygii`, `Osteichthyes`) works.}
 
 \item{worms_taxa}{A character vector of substitute taxon names to use
 instead of `obis_taxa` when looking up WoRMS IDs. NA reuses
-`obis_taxa`.}
+`obis_taxa`. Rarely needed now that names route through [resolve_taxa()].}
 
 \item{regional_poly}{A WKT POLYGON string of the form
 `"POLYGON ((long lat, long lat, ...))"`. Draw a region on
@@ -31,6 +37,9 @@ instead of `obis_taxa` when looking up WoRMS IDs. NA reuses
 file under `datasets/`. Default `"OBIS_Species"`. Choose a short
 distinctive name — you will pass it into
 [build_regional_checklist()] later.}
+
+\item{kingdom}{Kingdom used by [resolve_taxa()] to disambiguate the query
+taxa. Default `"Animalia"`; `NULL` disables the filter.}
 
 \item{marine, freshwater, terrestrial, brackish}{Habitat filters. TRUE
 returns only species marked in that habitat; FALSE excludes them;
