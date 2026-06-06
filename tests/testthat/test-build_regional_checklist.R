@@ -39,25 +39,26 @@ test_that("CSV source splits genus-only from species, and names files from regio
 })
 
 test_that("a taxonomizr DB present triggers the background taxonomize", {
+  skip_on_cran()
+  sql <- Sys.getenv("REGATTA_TAXONOMIZR_SQL", "accessionTaxa.sql")
+  skip_if(!file.exists(sql), "taxonomizr DB not available")
+
   tmp <- tempfile(); dir.create(tmp)
   local_mocked_bindings(here = function(...) file.path(tmp, ...), .package = "here")
-  local_mocked_bindings(taxonomize_checklist = function(input, ...) {
-    out <- data.frame(input_name = "x", stringsAsFactors = FALSE)
-    out[ranks] <- NA
-    out
-  })
 
   csv <- file.path(tmp, "local.csv")
   utils::write.csv(data.frame(Genus = "Lutjanus", Species = "argentiventris"),
                    csv, row.names = FALSE)
-  fake_sql <- file.path(tmp, "accessionTaxa.sql"); file.create(fake_sql)
 
-  res <- build_regional_checklist(region = "r", label = "l",
-                                  OBIS = FALSE, CSV = csv, sql_path = fake_sql)
+  res <- suppressMessages(
+    build_regional_checklist(region = "r", label = "l",
+                             OBIS = FALSE, CSV = csv, sql_path = sql))
 
-  expect_false(is.null(res$rds_path))
   expect_match(res$rds_path, "_for_LCA_taxonomized\\.rds$")
   expect_true(file.exists(res$rds_path))
+  tx <- readRDS(res$rds_path)                       # real taxonomized output
+  expect_true(all(c("genus", "species") %in% names(tx)))
+  expect_equal(tx$genus[tx$input_name == "Lutjanus argentiventris"], "Lutjanus")
 })
 
 test_that("pre-made OBIS/GBIF source CSVs are fed in and stacked", {
@@ -105,13 +106,14 @@ test_that(".regatta_ensure_taxonomized passes a taxonomized checklist through un
 })
 
 test_that(".regatta_ensure_taxonomized warns and taxonomizes a raw checklist", {
-  local_mocked_bindings(taxonomize_checklist = function(input, ...) {
-    out <- data.frame(input_name = "x", stringsAsFactors = FALSE)
-    out[ranks] <- NA
-    out
-  })
-  raw <- data.frame(Species = "Aaa bbb", Source = "Local_csv")
-  expect_warning(out <- .regatta_ensure_taxonomized(raw, "ignored"),
+  skip_on_cran()
+  sql <- Sys.getenv("REGATTA_TAXONOMIZR_SQL", "accessionTaxa.sql")
+  skip_if(!file.exists(sql), "taxonomizr DB not available")
+
+  raw <- data.frame(Species = "Lutjanus argentiventris", Source = "Local_csv",
+                    stringsAsFactors = FALSE)
+  expect_warning(out <- suppressMessages(.regatta_ensure_taxonomized(raw, sql)),
                  "not pre-taxonomized")
   expect_true(all(ranks %in% names(out)))
+  expect_equal(out$genus[out$input_name == "Lutjanus argentiventris"], "Lutjanus")
 })
