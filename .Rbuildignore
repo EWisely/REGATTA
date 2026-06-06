@@ -11,7 +11,7 @@
 ^MiFish_output$
 ^script_03_inputs$
 ^checklist_sources$
-^checklist$
+^local_database_checklist$
 ^reconcile_global_local_out$
 ^reconcile_checklist_out$
 ^stress_

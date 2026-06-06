@@ -67,11 +67,11 @@ build_regional_checklist(
 
 cat("\n==== taxonomize_checklist ====\n")
 calcurrent_checklist <- taxonomize_checklist(
-  input    = "checklist/Comprehensive_CalCurrent_vertebrates_list.txt",
+  input    = "local_database_checklist/Comprehensive_CalCurrent_vertebrates_list.txt",
   sql_path = sql_path
 )
 saveRDS(calcurrent_checklist,
-        "checklist/Comprehensive_CalCurrent_vertebrates_list_taxonomized.rds")
+        "local_database_checklist/Comprehensive_CalCurrent_vertebrates_list_taxonomized.rds")
 cat("  Checklist rows:", nrow(calcurrent_checklist), "\n")
 cat("  Resolved:",       sum(calcurrent_checklist$resolution_status == "resolved"), "\n")
 cat("  Synonym matches:", sum(calcurrent_checklist$name_match_type == "synonym", na.rm = TRUE), "\n")

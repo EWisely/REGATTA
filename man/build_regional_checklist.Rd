@@ -17,13 +17,13 @@ matches the default output names of \code{\link[=GBIF_download]{GBIF_download()}
 \code{\link[=Local_csv_download]{Local_csv_download()}}, and \code{\link[=OBIS_download]{OBIS_download()}}.}
 
 \item{comb_outputname}{Basename (no \code{.txt} extension) of the
-combined output file under \verb{checklist/}. Default
+combined output file under \verb{local_database_checklist/}. Default
 \code{"Comprehensive_species_list"}. Choose something descriptive --
 you will pass this path into \code{\link[=taxonomize_checklist]{taxonomize_checklist()}} next.}
 }
 \value{
 Invisibly NULL. Writes
-\verb{checklist/<comb_outputname>.txt} as a side effect. The file is
+\verb{local_database_checklist/<comb_outputname>.txt} as a side effect. The file is
 tab-delimited with one species per row plus a \code{Source} column
 recording which input each species came from.
 }
@@ -31,7 +31,7 @@ recording which input each species came from.
 Reads the per-source CSVs written by \code{\link[=GBIF_download]{GBIF_download()}},
 \code{\link[=OBIS_download]{OBIS_download()}}, and \code{\link[=Local_csv_download]{Local_csv_download()}}, stacks them,
 deduplicates, drops any literal \code{"NA"} species rows, and writes the
-result as a tab-delimited \code{.txt} file under \verb{checklist/}. The
+result as a tab-delimited \code{.txt} file under \verb{local_database_checklist/}. The
 output is the input to \code{\link[=taxonomize_checklist]{taxonomize_checklist()}}.
 }
 \details{

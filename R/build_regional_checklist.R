@@ -8,7 +8,7 @@
 #' Reads the per-source CSVs written by [GBIF_download()],
 #' [OBIS_download()], and [Local_csv_download()], stacks them,
 #' deduplicates, drops any literal `"NA"` species rows, and writes the
-#' result as a tab-delimited `.txt` file under `checklist/`. The
+#' result as a tab-delimited `.txt` file under `local_database_checklist/`. The
 #' output is the input to [taxonomize_checklist()].
 #'
 #' Run this function **once per taxonomic group** (fish, crustaceans,
@@ -22,12 +22,12 @@
 #'   matches the default output names of [GBIF_download()],
 #'   [Local_csv_download()], and [OBIS_download()].
 #' @param comb_outputname Basename (no `.txt` extension) of the
-#'   combined output file under `checklist/`. Default
+#'   combined output file under `local_database_checklist/`. Default
 #'   `"Comprehensive_species_list"`. Choose something descriptive --
 #'   you will pass this path into [taxonomize_checklist()] next.
 #'
 #' @return Invisibly NULL. Writes
-#'   `checklist/<comb_outputname>.txt` as a side effect. The file is
+#'   `local_database_checklist/<comb_outputname>.txt` as a side effect. The file is
 #'   tab-delimited with one species per row plus a `Source` column
 #'   recording which input each species came from.
 #'
@@ -68,14 +68,14 @@ build_regional_checklist <- function(comb_inputnames = c("GBIF_Species",
 
   message(nrow(Species_local_comb), " unique species found")
 
-  dir.create(here::here("checklist"), recursive = TRUE, showWarnings = FALSE)
+  dir.create(here::here("local_database_checklist"), recursive = TRUE, showWarnings = FALSE)
   readr::write_delim(
     Species_local_comb,
-    paste(here::here("checklist"), sep = "", "/", comb_outputname, ".txt"),
+    paste(here::here("local_database_checklist"), sep = "", "/", comb_outputname, ".txt"),
     delim = "\t"
   )
 
   message("Wrote combined checklist to ",
-          paste(here::here("checklist"), sep = "", "/", comb_outputname, ".txt"))
+          paste(here::here("local_database_checklist"), sep = "", "/", comb_outputname, ".txt"))
   invisible(NULL)
 }

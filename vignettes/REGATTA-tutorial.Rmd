@@ -127,10 +127,10 @@ automatically.
 
 ```{r taxonomize, eval = FALSE}
 checklist <- taxonomize_checklist(
-  input    = "checklist/comprehensive_galapagos_fish_list.txt",
+  input    = "local_database_checklist/comprehensive_galapagos_fish_list.txt",
   sql_path = "/path/to/accessionTaxa.sql"
 )
-saveRDS(checklist, "checklist/galapagos_fish_checklist.rds")
+saveRDS(checklist, "local_database_checklist/galapagos_fish_checklist.rds")
 ```
 
 ## Step 3 — Reconcile your obitools output (the one-call path)
@@ -142,7 +142,7 @@ bundle.
 ```{r run, eval = FALSE}
 run_regatta(
   input     = "MiFish_obitools.tab",                   # obitools .tab (global DB)
-  checklist = "checklist/galapagos_fish_checklist.rds",
+  checklist = "local_database_checklist/galapagos_fish_checklist.rds",
   sql_path  = "/path/to/accessionTaxa.sql"
 )
 #> -> regatta_out/{ reconcile_checklist/*, regatta_summary.csv, run_log.txt }
