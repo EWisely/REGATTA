@@ -1,31 +1,26 @@
-# Offline tests for summarize_regatta(): the 21-row stats summary.
+# Tests for summarize_regatta() on real data: the bundled 12-ASV Galapagos
+# MiFish obitools slice run through reconcile_checklist against the bundled
+# taxonomized checklist. No synthetic taxa.
 
-mk_result <- function(species) {
-  n <- length(species)
-  data.frame(
-    ASV_id  = paste0("A", seq_len(n)),
-    domain  = "Eukaryota", phylum = "Chordata", class = "Actinopterygii",
-    order   = "Scorpaeniformes", family = "Sebastidae", genus = "Sebastes",
-    species = species,
-    stringsAsFactors = FALSE
-  )
-}
+global    <- read.csv(system.file("extdata", "mifish_obitools_example.csv", package = "REGATTA"),
+                      stringsAsFactors = FALSE)
+checklist <- readRDS(system.file("extdata", "galapagos_fish_checklist.rds", package = "REGATTA"))
+post      <- suppressMessages(reconcile_checklist(global, checklist, output_dir = NULL))
 
-test_that("summarize_regatta returns 21 rows with a column per supplied stage", {
-  res <- mk_result(c("Sebastes mystinus", NA, NA))   # 1 to species, 2 to genus-only
-  s <- summarize_regatta(post_checklist = list(result = res))
+test_that("summarize_regatta produces the 21-row table with real counts", {
+  s <- summarize_regatta(post_checklist = post)
+  val <- function(label) s$regatta[s$row_names == label]
 
   expect_equal(nrow(s), 21L)
   expect_true(all(c("row_names", "regatta") %in% names(s)))
-  expect_equal(s$regatta[s$row_names == "total ASVs"], 3)
-  expect_equal(s$regatta[s$row_names == "assigned ASVs"], 3)
-  expect_equal(s$regatta[s$row_names == "ID'ed to species"], 1)
-  expect_equal(s$regatta[s$row_names == "ID'ed to genus only"], 2)
+  expect_equal(val("total ASVs"), 12)
+  expect_equal(val("assigned ASVs"), 12)
+  expect_equal(val("ID'ed to species"), 6)        # 6 of the 12 stay at species
+  expect_equal(val("ID'ed to genus only"), 4)
 })
 
 test_that("each supplied input becomes its own stage column", {
-  res <- mk_result("Sebastes mystinus")
-  s <- summarize_regatta(global_input = res, post_checklist = list(result = res))
+  s <- summarize_regatta(global_input = global, post_checklist = post)
   expect_true(all(c("global", "regatta") %in% names(s)))
 })
 
