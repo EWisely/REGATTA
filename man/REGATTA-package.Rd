@@ -11,8 +11,8 @@ Correct off-target species assignments in eDNA metabarcoding results by reconcil
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://github.com/DolphinCoder/REGATTA_Package_Development}
-  \item Report bugs at \url{https://github.com/DolphinCoder/REGATTA_Package_Development/issues}
+  \item \url{https://github.com/EWisely/REGATTA}
+  \item Report bugs at \url{https://github.com/EWisely/REGATTA/issues}
 }
 
 }

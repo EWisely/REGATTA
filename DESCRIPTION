@@ -40,8 +40,8 @@ Suggests:
     knitr,
     rmarkdown,
     testthat (>= 3.0.0)
-URL: https://github.com/DolphinCoder/REGATTA_Package_Development
-BugReports: https://github.com/DolphinCoder/REGATTA_Package_Development/issues
+URL: https://github.com/EWisely/REGATTA
+BugReports: https://github.com/EWisely/REGATTA/issues
 VignetteBuilder: knitr
 Config/testthat/edition: 3
 Roxygen: list(markdown = TRUE)
