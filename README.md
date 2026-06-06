@@ -4,7 +4,7 @@
 [![R-CMD-check](https://github.com/EWisely/REGATTA/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/EWisely/REGATTA/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
-**Reconciling eDNA-Geographic Assignments via Taxon-Table Adjustment**
+**Reconciling eDNA Geographic Assignments via Taxonomy Table Adjustment**
 
 An R package for correcting off-target species assignments in eDNA
 metabarcoding results using a regional species checklist — without manual

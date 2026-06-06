@@ -44,12 +44,6 @@ parse_vsearch_results <- function(lca_path,
   if (!file.exists(userout_path)) {
     stop("vsearch userout file not found at ", userout_path)
   }
-  if (!exists("parse_sintax", mode = "function")) {
-    # When sourced rather than installed as a package
-    sintax_file <- "parse_sintax.R"
-    if (file.exists(sintax_file)) source(sintax_file)
-    else if (file.exists(file.path("R", sintax_file))) source(file.path("R", sintax_file))
-  }
 
   lca <- utils::read.delim(lca_path, header = FALSE, sep = "\t",
                            stringsAsFactors = FALSE,

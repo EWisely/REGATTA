@@ -76,10 +76,6 @@ resolve_names <- function(input,
     stop("SQL DB not found at ", sql_path,
          ". Build it with taxonomizr::prepareDatabase() or pass a path to an existing DB.")
   }
-  # Synonym-aware lookup lives in regatta_helpers.R. Source if not yet loaded.
-  if (!exists("name_to_taxid", mode = "function")) {
-    source("regatta_helpers.R")
-  }
 
   ranks <- c("domain", "phylum", "class", "order", "family", "genus", "species")
 

@@ -46,10 +46,6 @@ taxonomize_checklist <- function(input,
   if (!requireNamespace("taxonomizr", quietly = TRUE)) {
     stop("Package 'taxonomizr' is required.")
   }
-  # Synonym-aware lookup lives in regatta_helpers.R. Source if not yet loaded.
-  if (!exists("name_to_taxid", mode = "function")) {
-    source("regatta_helpers.R")
-  }
 
   # Normalize input to a character vector of names
   names_in <- if (is.character(input) && length(input) == 1 && file.exists(input)) {
