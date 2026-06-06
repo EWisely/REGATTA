@@ -98,27 +98,24 @@ rec$tracking[, c("ASV_id", "species_global", "pct_id_global",
                  "preferred_scientific_name")]
 ```
 
-Reading the rows, three outcomes appear:
+`reconcile_global_local()` has **four** per-ASV outcomes, two genera each here:
 
-* **Global only** — *Abudefduf saxatilis* / *taurus*, *Lutjanus
-  argentimaculatus*, *Caranx crysos*, *Prionurus laticlavius* / *biafraensis*,
-  *Archosargus rhomboidalis*: the local database made no call, so the global
-  assignment is kept (`preferred_database = global`).
-* **Both agree** — *Mugil thoburni*, *Lutjanus kasmira*, *Caranx melampygus*:
-  the two databases name the same species; with `Local_advantage = TRUE` (the
-  default) the tie goes to local. The species is kept.
-* **They disagree** — *Epinephelus bontoides* (global) vs. *Epinephelus merra*
-  (local), and *Mugil curema* (global) vs. *Mugil thoburni* (local): the global
-  call has the higher %ID, but because the two databases conflict at species,
-  REGATTA downgrades to the lowest common ancestor — genus ***Epinephelus*** and
-  genus ***Mugil*** (`preferred_database = global_lca_to_local`).
-
-That *Mugil curema* row (`MiFish_0000222`) is the payoff. In the main tutorial's
-single-classifier run, obitools' *Mugil curema* **stayed at species** because
-*M. curema* is on the Galapagos checklist. Here the local database's competing
-*Mugil thoburni* reveals the species-level call is not trustworthy, and the
-two-database step conservatively reports genus *Mugil* instead — a downgrade the
-single classifier had no way to make.
+* **Global only** (the local database made no call → keep global): the six
+  checklist-demo genera from the main tutorial — *Abudefduf saxatilis* /
+  *taurus*, *Prionurus laticlavius* / *biafraensis*, *Archosargus rhomboidalis*,
+  *Conodon nobilis*. With nothing to reconcile, they pass through unchanged.
+* **Both agree → kept** — *Lutjanus kasmira* and *Caranx melampygus*: both
+  databases name the same species (with `Local_advantage = TRUE`, the default,
+  the tie goes to local). The species is kept.
+* **Disagree, global %ID wins → LCA downgrade** (`global_lca_to_local`) —
+  *Epinephelus bontoides* (global) vs. *E. merra* (local), and *Mugil curema*
+  (global) vs. *M. thoburni* (local): the global call has the higher identity,
+  but because the two conflict at species, REGATTA reports the lowest common
+  ancestor — genus ***Epinephelus*** and genus ***Mugil***.
+* **Disagree, local %ID wins → local kept** — *Etrumeus teres* (local, 99.4%)
+  over *E. micropus* (global, 98.9%), and *Cubiceps pauciradiatus* (local) over
+  *C. squamiceps* (global): here the locally-curated database has the better
+  match, so its call is trusted outright.
 
 Feed the reconciled result straight into the checklist step, exactly as in the
 single-classifier workflow:
@@ -127,8 +124,42 @@ single-classifier workflow:
 checklist <- readRDS(system.file("extdata", "galapagos_fish_checklist.rds",
                                  package = "REGATTA"))
 post <- reconcile_checklist(rec$result, checklist, output_dir = NULL)
-post$tracking[, c("ASV_id", "before_species", "regatta_match_rank", "after_genus")]
 ```
+
+## Same 12 ASVs, both methods, side by side
+
+The point of two databases is what changes versus the single-classifier run.
+Run the main-tutorial method (obitools straight to the checklist) on the same
+inputs and compare the final call:
+
+```{r compare}
+single <- reconcile_checklist(global, checklist, output_dir = NULL)
+
+lowest <- function(r) {            # the most specific non-NA rank per ASV
+  ranks <- c("domain","phylum","class","order","family","genus","species")
+  apply(r$result[, ranks], 1, function(x) {nz <- which(!is.na(x)); if (length(nz)) x[max(nz)] else NA})
+}
+data.frame(
+  obitools_call = global$species,
+  single_db     = lowest(single),
+  two_db        = lowest(post)
+)
+```
+
+Nine of the twelve land in the same place — but **three change**, and each in a
+different, instructive way:
+
+* **Mugil curema** — single-DB keeps the species (*M. curema* is on the
+  checklist); two-DB drops to genus ***Mugil*** because the local database's
+  *M. thoburni* contradicts it. Two databases caught a conflict one couldn't.
+* **Etrumeus micropus** — single-DB keeps the global species; two-DB replaces it
+  with ***Etrumeus teres***, the local database's higher-identity (and
+  regionally-curated) call.
+* **Cubiceps squamiceps** — single-DB has to downgrade to genus *Cubiceps*
+  (*squamiceps* isn't on the checklist); two-DB keeps the **species**
+  ***Cubiceps pauciradiatus***, because the local database's call *is* on the
+  checklist. Here the second database makes the result **more** specific, not
+  less.
 
 ## Inspecting and tuning
 
