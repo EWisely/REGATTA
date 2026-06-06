@@ -104,18 +104,18 @@ GBIF_download(
   gbif_outputname = "GBIF_galapagos_fish"
 )
 
-# Optional: add a local checklist CSV (needs Genus + Species columns).
-Local_csv_download(
-  loc_csvs       = "2016Aug24_Tirado-Sanchez_et_al_Galapagos_Pisces_Checklist.csv",
-  loc_outputname = "Local_galapagos_fish"
-)
-
-# Stack + dedupe into one regional list.
+# Stack + dedupe GBIF and OBIS into one regional list, optionally folding in
+# a local checklist CSV (needs Genus + Species columns) from anywhere on
+# disk -- no need to copy it into the project first.
 build_regional_checklist(
-  comb_inputnames = c("OBIS_galapagos_fish", "GBIF_galapagos_fish",
-                      "Local_galapagos_fish"),
-  comb_outputname = "comprehensive_galapagos_fish_list"
+  region          = "galapagos",
+  taxa            = "fish",
+  comb_inputnames = c("OBIS_galapagos_fish", "GBIF_galapagos_fish"),
+  local_csvs      = "2016Aug24_Tirado-Sanchez_et_al_Galapagos_Pisces_Checklist.csv"
 )
+# Writes two files under local_database_checklist/:
+#   comprehensive_galapagos_fish_list_for_making_localdb.txt  (species only)
+#   comprehensive_galapagos_fish_list_for_LCA.txt             (+ retained genera)
 ```
 
 ## Step 2 — Taxonomize the checklist (once per region × group)
@@ -127,7 +127,7 @@ automatically.
 
 ```{r taxonomize, eval = FALSE}
 checklist <- taxonomize_checklist(
-  input    = "local_database_checklist/comprehensive_galapagos_fish_list.txt",
+  input    = "local_database_checklist/comprehensive_galapagos_fish_list_for_LCA.txt",
   sql_path = "/path/to/accessionTaxa.sql"
 )
 saveRDS(checklist, "local_database_checklist/galapagos_fish_checklist.rds")

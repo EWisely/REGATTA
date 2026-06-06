@@ -60,18 +60,19 @@ GBIF_download(
 # ---- Step 3: build_regional_checklist + taxonomize_checklist ----------
 cat("\n==== build_regional_checklist ====\n")
 build_regional_checklist(
+  region          = "CalCurrent",
+  taxa            = "vertebrates",
   comb_inputnames = c("OBIS_CalCurrent_vertebrates",
-                      "GBIF_CalCurrent_vertebrates"),
-  comb_outputname = "Comprehensive_CalCurrent_vertebrates_list"
+                      "GBIF_CalCurrent_vertebrates")
 )
 
 cat("\n==== taxonomize_checklist ====\n")
 calcurrent_checklist <- taxonomize_checklist(
-  input    = "local_database_checklist/Comprehensive_CalCurrent_vertebrates_list.txt",
+  input    = "local_database_checklist/comprehensive_CalCurrent_vertebrates_list_for_LCA.txt",
   sql_path = sql_path
 )
 saveRDS(calcurrent_checklist,
-        "local_database_checklist/Comprehensive_CalCurrent_vertebrates_list_taxonomized.rds")
+        "local_database_checklist/comprehensive_CalCurrent_vertebrates_list_taxonomized.rds")
 cat("  Checklist rows:", nrow(calcurrent_checklist), "\n")
 cat("  Resolved:",       sum(calcurrent_checklist$resolution_status == "resolved"), "\n")
 cat("  Synonym matches:", sum(calcurrent_checklist$name_match_type == "synonym", na.rm = TRUE), "\n")

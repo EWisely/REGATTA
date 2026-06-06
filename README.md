@@ -78,7 +78,7 @@ locally-curated DB); its `$result` slots in as a preprocessing step before
 flowchart TD
     A[GBIF_download] --> D[build_regional_checklist]
     B[OBIS_download] --> D
-    C[Local_csv_download] --> D
+    C["local CSV(s)<br/>Genus + Species"] --> D
     D --> E[taxonomize_checklist]
     E --> F[("Regional checklist<br/>7 ranks, taxonomized")]
 
@@ -152,12 +152,13 @@ available; `run_regatta()` is a thin orchestrator on top of them.
 
 Building your own regional checklist needs two things in your project.
 
-**Folders.** In your project working directory, the source downloaders write
-to `checklist_sources/` (the per-source GBIF/OBIS/local species lists; put
-any local checklist CSVs here too, each with `Genus` and `Species`
-columns), and `build_regional_checklist()` / `taxonomize_checklist()` write
-the combined, taxonomized list to `local_database_checklist/`. Both folders
-are created automatically if missing.
+**Folders.** In your project working directory, the GBIF/OBIS downloaders
+write their per-source species lists to `checklist_sources/`, and
+`build_regional_checklist()` / `taxonomize_checklist()` write the combined,
+taxonomized list to `local_database_checklist/`. Both folders are created
+automatically if missing. Local checklist CSVs (each with `Genus` and
+`Species` columns) can live anywhere — you pass their paths straight to
+`build_regional_checklist(local_csvs = ...)`, no copying required.
 
 **Credentials & taxonomy DB.** `GBIF_download()` uses your GBIF login; add
 `GBIF_USER` / `GBIF_PWD` / `GBIF_EMAIL` to your `.Renviron`
@@ -188,17 +189,18 @@ GBIF_download(obis_taxa = "fish", regional_poly = poly,
 OBIS_download(obis_taxa = "fish", regional_poly = poly,
               obis_outputname = "OBIS_galapagos_fish",
               marine = TRUE, terrestrial = FALSE)
-Local_csv_download(loc_csvs = "Tirado-Sanchez_Galapagos_Pisces.csv",
-                   loc_outputname = "Local_galapagos_fish")
 
 build_regional_checklist(
-  comb_inputnames = c("GBIF_galapagos_fish", "OBIS_galapagos_fish",
-                      "Local_galapagos_fish"),
-  comb_outputname = "comprehensive_galapagos_fish_list"
+  region          = "galapagos",
+  taxa            = "fish",
+  comb_inputnames = c("GBIF_galapagos_fish", "OBIS_galapagos_fish"),
+  local_csvs      = "~/other_project/Tirado-Sanchez_Galapagos_Pisces.csv"
 )
+# Writes comprehensive_galapagos_fish_list_{for_making_localdb,for_LCA}.txt
 
+# Taxonomize the _for_LCA list (it keeps genus-level entries) for the LCA step.
 my_checklist <- taxonomize_checklist(
-  input    = "local_database_checklist/comprehensive_galapagos_fish_list.txt",
+  input    = "local_database_checklist/comprehensive_galapagos_fish_list_for_LCA.txt",
   sql_path = "/path/to/accessionTaxa.sql"
 )
 saveRDS(my_checklist,
@@ -228,8 +230,7 @@ groups side-by-side in one project without naming collisions.
 | `resolve_taxa()` | Validate & disambiguate query taxon names against WoRMS (by kingdom); report GBIF backbone coverage. Run standalone to pre-check names. |
 | `GBIF_download()` | Pull a GBIF species list inside a WKT polygon for given taxa. |
 | `OBIS_download()` | Pull an OBIS species list, with optional marine/brackish/freshwater filters. |
-| `Local_csv_download()` | Read user-supplied checklist CSVs (`Genus`, `Species` columns). |
-| `build_regional_checklist()` | Merge the source outputs into one deduplicated regional list. |
+| `build_regional_checklist()` | Merge the GBIF/OBIS outputs and any local `Genus`+`Species` CSVs into a deduplicated regional list. Writes two files named from `region`+`taxa`: a species-only list for building the reference DB, and a `_for_LCA` list that also keeps genus-level entries. |
 | `taxonomize_checklist()` | Resolve a regional list to a 7-rank NCBI taxonomy table (synonym-aware). |
 | `parse_sintax()` | Convert vsearch SINTAX taxonomy strings to 7 rank columns. |
 | `parse_vsearch_results()` | Canonical vsearch preprocessor: join a vsearch `lca` (taxonomy) + `--userout` (pct_id) by ASV id. |
