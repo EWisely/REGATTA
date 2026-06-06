@@ -12,7 +12,6 @@
 ^local_database_checklist$
 ^reconcile_global_local_out$
 ^reconcile_checklist_out$
-^stress_
 ^REGATTA_.*\.txt$
 ^LICENSE\.md$
 ^Proposed REGATTA Report - Sheet1\.csv$
