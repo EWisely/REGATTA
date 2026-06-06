@@ -1,0 +1,20 @@
+"metric","count"
+"total ASVs",3948
+"assigned before checklist-LCA",3665
+"assigned after checklist-LCA",3665
+"change in number of ASVs assigned",0
+"matched at species",1598
+"matched at genus",682
+"matched at family",310
+"matched at order",45
+"matched at class",292
+"matched at phylum",58
+"matched at domain",680
+"not matched (off-target)",283
+"ID'ed to kingdom only",680
+"ID'ed to phylum only",58
+"ID'ed to class only",292
+"ID'ed to order only",45
+"ID'ed to family only",310
+"ID'ed to genus only",682
+"ID'ed to species",1598
