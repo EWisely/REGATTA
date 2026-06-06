@@ -274,7 +274,7 @@ the first stable release.
 ## Authors
 
 Eldridge Wisely (Scripps Institution of Oceanography, UC San Diego),
-maintainer, with contributions from Ella Crotty (summary-table format).
+developer and maintainer, with contributions from Ella Crotty (OBIS and GBIF generalizations and summary output format).
 
 ## License
 
