@@ -1,0 +1,13 @@
+"ASV_id","domain","phylum","class","order","family","genus","species","pct_id"
+"MiFish_0000150","Eukaryota","Chordata","Actinopteri",NA,"Pomacentridae","Abudefduf","Abudefduf saxatilis",100
+"MiFish_0000572","Eukaryota","Chordata","Actinopteri",NA,"Pomacentridae","Abudefduf","Abudefduf taurus",100
+"MiFish_0000621","Eukaryota","Chordata","Actinopteri","Acanthuriformes","Acanthuridae","Prionurus","Prionurus laticlavius",100
+"MiFish_0000952","Eukaryota","Chordata","Actinopteri","Acanthuriformes","Acanthuridae","Prionurus","Prionurus biafraensis",98.8
+"MiFish_0000058","Eukaryota","Chordata","Actinopteri","Spariformes","Sparidae","Archosargus","Archosargus rhomboidalis",97.1
+"MiFish_0000249","Eukaryota","Chordata","Actinopteri","Lutjaniformes","Haemulidae","Conodon","Conodon nobilis",95.3
+"MiFish_0000856","Eukaryota","Chordata","Actinopteri","Lutjaniformes","Lutjanidae","Lutjanus","Lutjanus kasmira",100
+"MiFish_0001127","Eukaryota","Chordata","Actinopteri","Carangiformes","Carangidae","Caranx","Caranx melampygus",100
+"MiFish_0000222","Eukaryota","Chordata","Actinopteri","Mugiliformes","Mugilidae","Mugil","Mugil curema",100
+"MiFish_0000221","Eukaryota","Chordata","Actinopteri","Perciformes","Serranidae","Epinephelus","Epinephelus bontoides",97
+"MiFish_0001362","Eukaryota","Chordata","Actinopteri","Clupeiformes","Dussumieriidae","Etrumeus","Etrumeus micropus",98.9
+"MiFish_0001145","Eukaryota","Chordata","Actinopteri","Scombriformes","Nomeidae","Cubiceps","Cubiceps squamiceps",100

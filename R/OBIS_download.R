@@ -8,16 +8,23 @@
 #' `datasets/<obis_outputname>.csv` and prints the file path.
 #'
 #' @param obis_taxa A character vector of taxon names at any level (OBIS
-#'   recognizes class, order, family, genus, species, etc.).
+#'   recognizes class, order, family, genus, species, etc.). Names are
+#'   validated and disambiguated by [resolve_taxa()] (kingdom-aware) and OBIS
+#'   is then queried **by AphiaID**, so ambiguous names resolve to the right
+#'   taxon -- e.g. `"Vertebrata"` returns vertebrates, not the red-algae genus
+#'   of the same name. Any fish synonym (`Teleostei`, `Actinopteri`,
+#'   `Actinopterygii`, `Osteichthyes`) works.
 #' @param worms_taxa A character vector of substitute taxon names to use
 #'   instead of `obis_taxa` when looking up WoRMS IDs. NA reuses
-#'   `obis_taxa`.
+#'   `obis_taxa`. Rarely needed now that names route through [resolve_taxa()].
+#' @param kingdom Kingdom used by [resolve_taxa()] to disambiguate the query
+#'   taxa. Default `"Animalia"`; `NULL` disables the filter.
 #' @param regional_poly A WKT POLYGON string of the form
 #'   `"POLYGON ((long lat, long lat, ...))"`. Draw a region on
 #'   [wktmap.com](https://wktmap.com) and copy the generated polygon.
 #' @param obis_outputname Basename (no `.csv` extension) for the output
 #'   file under `datasets/`. Default `"OBIS_Species"`. Choose a short
-#'   distinctive name — you will pass it into
+#'   distinctive name -- you will pass it into
 #'   [build_regional_checklist()] later.
 #' @param marine,freshwater,terrestrial,brackish Habitat filters. TRUE
 #'   returns only species marked in that habitat; FALSE excludes them;
@@ -37,12 +44,12 @@
 #' \dontrun{
 #' # Pacific NW (OCNMS) salmonids and copepods, intentionally allowing
 #' # salmon to slip through the habitat filter. The same pattern works
-#' # for any taxa over any WKT polygon — freshwater insects in
+#' # for any taxa over any WKT polygon -- freshwater insects in
 #' # Germany, terrestrial mammals over a Sonoran Desert polygon, etc.
 #' # obis_outputname is yours to pick.
 #' OBIS_download(
 #'   obis_taxa       = c("Salmonidae", "Copepoda"),
-#'   regional_poly   = "POLYGON ((-124.85 51.75, -129.20 51.15, -128.14 41.87, -122.34 42.00, -121.86 44.62, -122.70 46.59, -121.55 47.87, -124.85 51.75))",
+#'   regional_poly   = "POLYGON ((-129 52, -122 52, -122 41, -129 41, -129 52))",
 #'   obis_outputname = "OBIS_my_region_my_group",
 #'   marine          = TRUE,
 #'   freshwater      = NA,    # needed to keep salmon, which spans habitats
@@ -56,26 +63,17 @@ OBIS_download <- function(obis_taxa,
                           worms_taxa = NA,
                           regional_poly,
                           obis_outputname = "OBIS_Species",
+                          kingdom = "Animalia",
                           marine = NA,
                           freshwater = NA,
                           terrestrial = NA,
                           brackish = NA) {
-  library(usethis)
-  library(rgbif)
-  library(rfishbase)
-  library(dplyr)
-  library(readr)  
-  library(worrms)
-  library(taxize)
-  library(robis)
-  library(tidyverse)
-  library(taxonomizr)
-  library(readr)
-  library(here)
-  
-  print("WARNING: Check the documentation for setup 
-        steps before running this function!")
-  
+  if (!requireNamespace("robis", quietly = TRUE)) {
+    stop("OBIS_download() needs the 'robis' package. Install it with ",
+         'install.packages("robis").')
+  }
+  message("Check the documentation for setup steps before running this function.")
+
   # throw an error if polygon is incorrect
   if(grepl("POLYGON \\(\\([-. |[[:digit:]]|,]*\\)\\)", # finds POLYGON (( [-, space, period, 
            # comma or any number] continue for any length, ))
@@ -86,17 +84,24 @@ OBIS_download <- function(obis_taxa,
   }
   if(corrects == F) stop("regional_poly must be in POLYGON format: POLYGON ((longitude latitude, longitude latitude etc.))")
   
-  if(is.na(worms_taxa[1])) {
-    worms_taxa <- obis_taxa
-  } else {
-    print("Using worms_taxa")
-  }
-  
+  query_taxa <- if (is.na(worms_taxa[1])) obis_taxa else worms_taxa
+
+  # Validate + disambiguate the query taxa, then search OBIS by AphiaID rather
+  # than by name. Querying by name lets OBIS silently resolve an ambiguous
+  # name to the wrong taxon (e.g. "Vertebrata" -> the red-algae genus);
+  # AphiaIDs are unambiguous. resolve_taxa() errors on any unresolved name.
+  resolved <- resolve_taxa(query_taxa, kingdom = kingdom, check_gbif = FALSE)
+  message("OBIS query resolved to: ",
+          paste0(resolved$valid_name, " (AphiaID ", resolved$aphia_id, ")",
+                 collapse = "; "))
+
   #OBIS----
-  obis_sp_in <- checklist(obis_taxa, 
-                          geometry = regional_poly)
-  
-  print(paste("Searching for taxa:", obis_taxa, sep = " "))
+  # One checklist() call per resolved AphiaID. dplyr::bind_rows (not rbind)
+  # because robis::checklist returns a different column set per taxon.
+  obis_sp_in <- dplyr::bind_rows(lapply(resolved$aphia_id, function(id)
+    robis::checklist(taxonid = id, geometry = regional_poly)))
+
+  print(paste("Searching for taxa:", resolved$valid_name, sep = " "))
   
   #### Pull out only the marine species list for the regional database
   # This did successfully return all marine or brackish species and no freshwater or terrestrial
@@ -139,10 +144,10 @@ OBIS_download <- function(obis_taxa,
     )
   
   print("First few rows of output: ")
-  print(head(obis_sp))
-  write.csv(obis_sp, paste(here("datasets"), sep = "", "/", obis_outputname, ".csv"), row.names = F)
-  
+  print(utils::head(obis_sp))
+  utils::write.csv(obis_sp, paste(here::here("datasets"), sep = "", "/", obis_outputname, ".csv"), row.names = FALSE)
+
   print("OBIS download complete.  Check your datasets folder for the output.")
-  print(paste("Find your output at:", paste(here("datasets"), sep = "", "/", obis_outputname, ".csv")), sep = " ")
+  print(paste("Find your output at:", paste(here::here("datasets"), sep = "", "/", obis_outputname, ".csv")), sep = " ")
 }
 

@@ -5,7 +5,7 @@
 # taxonomizr's local NCBI taxonomy SQL DB. Cleans common junk strings
 # (Gen., indet., sp., cf., quotes) before lookup. Returns one row per
 # unique input name with `input_name`, `resolution_status`, and the 7
-# lowercase rank columns (domain → species). Unresolved names stay in
+# lowercase rank columns (domain -> species). Unresolved names stay in
 # the output with NA ranks and resolution_status = "unresolved".
 
 # Name lookup is synonym-aware: matches against NCBI scientific names
@@ -90,10 +90,10 @@ taxonomize_checklist <- function(input,
   if (prepare_db) {
     if (file.exists(sql_path)) {
       message("`prepare_db = TRUE` but ", sql_path,
-              " already exists — skipping rebuild.")
+              " already exists -- skipping rebuild.")
     } else {
       message("Building taxonomizr SQL DB at ", sql_path,
-              " — this takes ~15 min and downloads several GB.")
+              " -- this takes ~15 min and downloads several GB.")
       taxonomizr::prepareDatabase(sql_path)
     }
   } else if (!file.exists(sql_path)) {
@@ -104,7 +104,7 @@ taxonomize_checklist <- function(input,
   ranks <- c("domain", "phylum", "class", "order", "family", "genus", "species")
 
   lookup <- name_to_taxid(cleaned, sql_path, accept_types = accept_types)
-  # Request domain explicitly — getTaxonomy's default asks for "superkingdom",
+  # Request domain explicitly -- getTaxonomy's default asks for "superkingdom",
   # which is NA in current NCBI dumps where the top rank is named "domain".
   taxa_mat <- taxonomizr::getTaxonomy(lookup$taxID, sql_path, desiredTaxa = ranks)
   taxa_df <- as.data.frame(taxa_mat, stringsAsFactors = FALSE)
@@ -127,7 +127,7 @@ taxonomize_checklist <- function(input,
   n_unresolved <- sum(out$resolution_status == "unresolved")
   if (n_unresolved > 0) {
     message(n_unresolved, " of ", nrow(out),
-            " name(s) did not resolve — see resolution_status column.")
+            " name(s) did not resolve -- see resolution_status column.")
   }
   n_syn <- sum(out$name_match_type == "synonym", na.rm = TRUE)
   if (n_syn > 0) {

@@ -55,9 +55,10 @@ nothing does.
 
 ### Works for any group, any region
 
-The examples in this README and the validated worked dataset
-(`stress_test_galapagos_crustaceans.R`, `end_to_end_raw_galapagos.R`)
-use marine fish and crustaceans in the Galapagos because that's what
+The examples in this README and the package vignettes (`vignette("REGATTA-tutorial")`
+for the single-classifier workflow, `vignette("REGATTA-two-database")` for the
+optional global-vs-local reconciliation)
+use marine fish in the Galapagos because that's what
 the package was developed against. **Nothing in the pipeline is
 fish-, marine-, or Galapagos-specific.** Use it for freshwater insects
 in Germany, terrestrial mammals in the Sonoran Desert, soil microbiota
@@ -186,6 +187,65 @@ reuses the built DB. Point each function at the file via `sql_path`.
 
 ## Common troubleshooting
 
+**Check your group names with `resolve_taxa()` before a long download.**
+Both downloaders now route group names through [`resolve_taxa()`](#functions),
+which disambiguates them against WoRMS **by kingdom** and reports GBIF backbone
+coverage. Run it yourself first to see exactly what each name resolves to:
+
+```r
+resolve_taxa(c("Vertebrata", "Actinopteri", "Mammalia", "Lepidosauria"))
+#> Vertebrata    -> AphiaID 146419 (Subphylum, Animalia)  gbif_usable FALSE
+#> Actinopteri   -> AphiaID 843664                         gbif_usable FALSE
+#> Mammalia      -> AphiaID 1837                           gbif_usable TRUE
+#> Lepidosauria  -> aliased to Reptilia, AphiaID 1838      gbif_usable FALSE
+```
+
+Built-in shorthands expand to multiple taxa: **`"fish"`** → `Actinopterygii` +
+`Elasmobranchii` + `Myxini` + `Petromyzonti` (all ray-finned fishes, sharks &
+rays, hagfishes, and lampreys — the typical MiFish target), and
+**`"vertebrates"`** → `Vertebrata`. Extend or override the table with the
+`aliases =` argument.
+
+What this fixes:
+
+- **Ambiguous names resolve correctly, or error clearly.** `"Vertebrata"` is
+  both the vertebrate subphylum (Animalia, 146419) and a red-algae genus
+  (Plantae, 370321). Filtering by `kingdom = "Animalia"` (the default) keeps
+  only the subphylum, and `OBIS_download()` now queries OBIS **by AphiaID**, so
+  it returns vertebrates rather than the two seaweed species the old name-based
+  query produced. A name that is still ambiguous *within* the kingdom stops
+  with the candidate AphiaIDs listed (pass the AphiaID to disambiguate).
+- **Absent names are caught and aliased.** `"Lepidosauria"` isn't in WoRMS;
+  it's auto-aliased to `"Reptilia"`. Truly unknown names error with a clear
+  message instead of silently returning nothing.
+- **GBIF rank quirks are handled automatically.** GBIF's backbone skips the
+  class rank for ray-finned fish (bony fish hang under phylum Chordata with no
+  class node, and the `Actinopterygii` node is empty), so a class-level match
+  silently drops every fish. `GBIF_download()` therefore descends to the rank
+  GBIF *does* populate — **order** (`gbif_descend_to = "order"`, the default) —
+  and unions those keys with each taxon's direct backbone key, so **the same
+  name returns fish from GBIF and sharks/mammals/birds keep working**. You type
+  `"fish"` (or `Teleostei`, `Actinopteri`, …) and it just works. Order is the
+  default because it's fast (tens of keys — GBIF allows only a few concurrent
+  downloads and large key sets are slow to prepare) and reaches ~97% of fish
+  families: GBIF's backbone is older than WoRMS's, so modern fish orders
+  (Acanthuriformes, Carangiformes, …) have no GBIF key, but GBIF still files
+  those fish under its broad `Perciformes`, which *is* matched. Taxa GBIF
+  *does* have as a node (sharks/rays → class `Elasmobranchii`, hagfishes →
+  `Myxini`, lampreys → `Petromyzonti`, mammals, birds) collapse to a single key
+  each. **All keys go into one `occ_download` request** — the key count does
+  not cost extra downloads against GBIF's 3-concurrent limit — so completeness
+  is the default: `gbif_fill_families = TRUE` adds keys for the ~3% of families
+  GBIF files with no order, reaching ~98%. Set it `FALSE` to skip the family
+  walk for a faster, order-only (~97%) preparation. **OBIS remains the more
+  complete source for fish; GBIF is a supplement.**
+
+`resolve_taxa()`, `GBIF_download()`, and `OBIS_download()` all take a
+`kingdom =` argument (default `"Animalia"`; `NULL` disables the filter).
+`GBIF_download()` takes `gbif_descend_to =` (default `"order"`) and
+`gbif_fill_families =` (default `TRUE`; `FALSE` skips the family walk for
+faster, slightly-less-complete preparation).
+
 **GBIF downloads time out or fail to start.** Try, before calling
 `GBIF_download()`:
 
@@ -217,14 +277,10 @@ download. `GBIF_download()` prints the class names it requested and
 the backbone usageKeys it actually got, so you can see how much
 shrinkage there was.
 
-**Missing package dependencies.** Some of the upstream taxonomy
-helpers pull in packages that are not on CRAN. If `OBIS_download()`
-or `GBIF_download()` fail to load dependencies, try:
-
-```r
-devtools::install_github('james-thorson/FishLife')
-devtools::install_github('cfree14/freeR')
-```
+**Missing package dependencies.** All of REGATTA's dependencies are on
+CRAN and install automatically with the package (see Installation). If you
+installed without `dependencies = TRUE`, reinstall, or add any missing
+package with `install.packages()`.
 
 ## Per-taxonomic-group separation
 
@@ -239,6 +295,7 @@ checklist instead of being flagged.
 
 | Function | Purpose | External dependencies |
 |---|---|---|
+| `resolve_taxa()` | Validate and disambiguate your query taxon names against WoRMS (by kingdom), returning unambiguous AphiaIDs plus a per-taxon GBIF-backbone coverage flag (`gbif_usable`). Called internally by both downloaders; run it standalone to pre-check names. Catches the *Vertebrata* red-algae ambiguity, aliases absent names (`Lepidosauria`→`Reptilia`), and flags the GBIF ray-finned-fish gap | `worrms`, `rgbif` |
 | `GBIF_download()` | Pull a GBIF species list inside a WKT polygon for given high-level taxa | `rgbif`, `worrms`, `taxize` |
 | `OBIS_download()` | Pull an OBIS species list with optional marine/brackish/freshwater filters | `robis` |
 | `Local_csv_download()` | Read user-supplied checklist CSVs (Genus, Species columns) | none |
@@ -255,27 +312,36 @@ checklist instead of being flagged.
 | `reconcile_global_local()` | Optional reconciliation of two classifier outputs on the same ASVs — one against a global reference DB (NCBI/EMBL), one against a local curated DB. Two descriptive steps: **best_pctid** (per-ASV winner by percent identity) and **global_lca_to_local** (when global won best_pctid AND local also assigned, downgrade to LCA of both). Returns `$result` (same 8-column shape), `$tracking` (best_ID_combined-style per-ASV audit), and `$stats`. pct_id scale handling: user specifies the pct_id column per input and the function auto-rescales 0-1 → 0-100 as needed. Writes 3 CSVs (`<prefix>_taxonomy_table.csv`, `<prefix>_tracking.csv`, `<prefix>_summary.csv`) — defaults: `output_dir = "reconcile_global_local_out"`, `output_prefix = "reconcile_global_local"`. Pass `output_dir = NULL` to disable file writing. | none (base R) |
 | `summarize_regatta()` | The 21-row per-stage stats summary. Compares inputs (`global_input`, `local_input`) against outputs (`reconciled`, `post_checklist`) and produces Ella's format. Source-breakdown rows populate when `reconciled` is supplied; row 8 populates when both `global_input` and `reconciled` are supplied | none (base R) |
 
-## Quick-start
+## Installation
 
-The package is currently a collection of R scripts in this repository; it
-is not yet installable via `install.packages()`. Source the functions
-directly:
+REGATTA is an R package. Install it from GitHub with `devtools` (or
+`remotes`); all dependencies are on CRAN and install automatically:
 
 ```r
-source("GBIF_download.R")
-source("OBIS_download.R")
-source("Local_csv_download.R")
-source("Build_regional_checklist.R")
-source("taxonomize_checklist.R")
-source("parse_sintax.R")
-source("parse_vsearch_results.R")
-source("parse_vsearch_userout.R")
-source("run_regatta.R")
-source("resolve_taxids.R")
-source("resolve_names.R")
-source("reconcile_checklist.R")
-source("reconcile_global_local.R")
-source("summarize_regatta.R")
+# install.packages("devtools")
+devtools::install_github("DolphinCoder/REGATTA_Package_Development",
+                         build_vignettes = TRUE)
+library(REGATTA)
+```
+
+Then read the worked examples:
+
+```r
+vignette("REGATTA-tutorial")       # single-classifier workflow
+vignette("REGATTA-two-database")   # optional global-vs-local reconciliation
+```
+
+Building the vignettes needs `pandoc`, which RStudio bundles; if you install
+from a plain R session without pandoc, drop `build_vignettes = TRUE`.
+
+The checklist-building steps additionally need a local NCBI taxonomy database
+built by `taxonomizr` (see "NCBI taxonomy DB" above); the core reconciliation
+functions and the runnable vignette demos do not.
+
+## Quick-start
+
+```r
+library(REGATTA)
 ```
 
 ### The one-call path: `run_regatta()`

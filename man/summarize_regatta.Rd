@@ -12,9 +12,9 @@ summarize_regatta(
 )
 }
 \arguments{
-\item{reconciled}{Output list of [reconcile_global_local()].}
+\item{reconciled}{Output list of \code{\link[=reconcile_global_local]{reconcile_global_local()}}.}
 
-\item{post_checklist}{Output list of [reconcile_checklist()].}
+\item{post_checklist}{Output list of \code{\link[=reconcile_checklist]{reconcile_checklist()}}.}
 
 \item{global_input}{Raw global-DB classifier output taxonomy table.}
 
@@ -27,5 +27,5 @@ A 21-row data.frame with one column per supplied stage.
 Compares inputs and outputs across stages and produces Ella's 21-row
 summary: counts, source breakdown, ID'ed-to-rank specificity, and
 diversity. Each supplied input becomes its own column in the output.
-Stage columns are fixed: `global`, `local`, `reconciled`, `regatta`.
+Stage columns are fixed: \code{global}, \code{local}, \code{reconciled}, \code{regatta}.
 }

@@ -12,7 +12,7 @@
 #' output is the input to [taxonomize_checklist()].
 #'
 #' Run this function **once per taxonomic group** (fish, crustaceans,
-#' marine mammals, ...). Don't mix groups in one call — the
+#' marine mammals, ...). Don't mix groups in one call -- the
 #' off-target check downstream is per-group, and a fish-plus-crustacean
 #' megalist defeats the filter.
 #'
@@ -23,7 +23,7 @@
 #'   [Local_csv_download()], and [OBIS_download()].
 #' @param comb_outputname Basename (no `.txt` extension) of the
 #'   combined output file under `custom_db/`. Default
-#'   `"Comprehensive_species_list"`. Choose something descriptive —
+#'   `"Comprehensive_species_list"`. Choose something descriptive --
 #'   you will pass this path into [taxonomize_checklist()] next.
 #'
 #' @return Invisibly NULL. Writes

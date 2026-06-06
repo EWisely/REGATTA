@@ -1,0 +1,13 @@
+"ASV_id","domain","phylum","class","order","family","genus","species","pct_id"
+"MiFish_0000150",NA,NA,NA,NA,NA,NA,NA,NA
+"MiFish_0000572",NA,NA,NA,NA,NA,NA,NA,NA
+"MiFish_0000621",NA,NA,NA,NA,NA,NA,NA,NA
+"MiFish_0000952",NA,NA,NA,NA,NA,NA,NA,NA
+"MiFish_0000058",NA,NA,NA,NA,NA,NA,NA,NA
+"MiFish_0000249",NA,NA,NA,NA,NA,NA,NA,NA
+"MiFish_0000856","Eukaryota","Chordata","Actinopteri","Lutjaniformes","Lutjanidae","Lutjanus","Lutjanus kasmira",100
+"MiFish_0001127","Eukaryota","Chordata","Actinopteri","Carangiformes","Carangidae","Caranx","Caranx melampygus",100
+"MiFish_0000222","Eukaryota","Chordata","Actinopteri","Mugiliformes","Mugilidae","Mugil","Mugil thoburni",98.8
+"MiFish_0000221","Eukaryota","Chordata","Actinopteri","Perciformes","Serranidae","Epinephelus","Epinephelus merra",95.9
+"MiFish_0001362","Eukaryota","Chordata","Actinopteri","Clupeiformes","Dussumieriidae","Etrumeus","Etrumeus teres",99.4
+"MiFish_0001145","Eukaryota","Chordata","Actinopteri","Scombriformes","Nomeidae","Cubiceps","Cubiceps pauciradiatus",100

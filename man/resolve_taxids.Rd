@@ -15,20 +15,20 @@ resolve_taxids(
 \arguments{
 \item{input}{A numeric/character vector of taxIDs, or a data.frame.}
 
-\item{taxid_col}{Required when `input` is a data.frame.}
+\item{taxid_col}{Required when \code{input} is a data.frame.}
 
-\item{sql_path}{Path to the local `accessionTaxa.sql` taxonomizr DB.}
+\item{sql_path}{Path to the local \code{accessionTaxa.sql} taxonomizr DB.}
 
 \item{output_prefix}{If non-NULL, writes a CSV with this prefix.}
 
 \item{output_dir}{Directory to write the CSV into.}
 }
 \value{
-A data.frame with `domain`-through-`species` columns.
+A data.frame with \code{domain}-through-\code{species} columns.
 }
 \description{
 Resolves a column of NCBI taxIDs into a full 7-rank lineage using
-`taxonomizr`. Accepts either a vector or a data.frame plus `taxid_col`.
+\code{taxonomizr}. Accepts either a vector or a data.frame plus \code{taxid_col}.
 NA taxIDs become all-NA rows. Optionally writes the augmented table to
-disk as `<output_prefix>_full_tax_table.csv`.
+disk as \verb{<output_prefix>_full_tax_table.csv}.
 }

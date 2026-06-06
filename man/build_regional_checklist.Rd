@@ -10,32 +10,32 @@ build_regional_checklist(
 )
 }
 \arguments{
-\item{comb_inputnames}{A character vector of basenames (no `.csv`
-extension) of the per-source CSVs in `datasets/`. Each entry is
+\item{comb_inputnames}{A character vector of basenames (no \code{.csv}
+extension) of the per-source CSVs in \verb{datasets/}. Each entry is
 optional: you can supply just one source or all three. Default
-matches the default output names of [GBIF_download()],
-[Local_csv_download()], and [OBIS_download()].}
+matches the default output names of \code{\link[=GBIF_download]{GBIF_download()}},
+\code{\link[=Local_csv_download]{Local_csv_download()}}, and \code{\link[=OBIS_download]{OBIS_download()}}.}
 
-\item{comb_outputname}{Basename (no `.txt` extension) of the
-combined output file under `custom_db/`. Default
-`"Comprehensive_species_list"`. Choose something descriptive —
-you will pass this path into [taxonomize_checklist()] next.}
+\item{comb_outputname}{Basename (no \code{.txt} extension) of the
+combined output file under \verb{custom_db/}. Default
+\code{"Comprehensive_species_list"}. Choose something descriptive —
+you will pass this path into \code{\link[=taxonomize_checklist]{taxonomize_checklist()}} next.}
 }
 \value{
 Invisibly NULL. Writes
-  `custom_db/<comb_outputname>.txt` as a side effect. The file is
-  tab-delimited with one species per row plus a `Source` column
-  recording which input each species came from.
+\verb{custom_db/<comb_outputname>.txt} as a side effect. The file is
+tab-delimited with one species per row plus a \code{Source} column
+recording which input each species came from.
 }
 \description{
-Reads the per-source CSVs written by [GBIF_download()],
-[OBIS_download()], and [Local_csv_download()], stacks them,
-deduplicates, drops any literal `"NA"` species rows, and writes the
-result as a tab-delimited `.txt` file under `custom_db/`. The
-output is the input to [taxonomize_checklist()].
+Reads the per-source CSVs written by \code{\link[=GBIF_download]{GBIF_download()}},
+\code{\link[=OBIS_download]{OBIS_download()}}, and \code{\link[=Local_csv_download]{Local_csv_download()}}, stacks them,
+deduplicates, drops any literal \code{"NA"} species rows, and writes the
+result as a tab-delimited \code{.txt} file under \verb{custom_db/}. The
+output is the input to \code{\link[=taxonomize_checklist]{taxonomize_checklist()}}.
 }
 \details{
-Run this function **once per taxonomic group** (fish, crustaceans,
+Run this function \strong{once per taxonomic group} (fish, crustaceans,
 marine mammals, ...). Don't mix groups in one call — the
 off-target check downstream is per-group, and a fish-plus-crustacean
 megalist defeats the filter.

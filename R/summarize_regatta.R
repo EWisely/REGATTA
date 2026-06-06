@@ -4,18 +4,18 @@
 # Summary-table layout designed by Ella Crotty.
 
 # Compare the input(s) and output(s) of a REGATTA run and produce
-# Ella's 21-row stats summary — one column per stage, capturing how
+# Ella's 21-row stats summary -- one column per stage, capturing how
 # taxonomic specificity and diversity shifted as the data flowed
 # through reconciliation and the regional checklist filter.
 #
 # Inputs are optional and combinable. The function fills whatever
 # rows it can from what you supply:
 #
-#   reconciled     The output list from reconcile_global_local() —
+#   reconciled     The output list from reconcile_global_local() --
 #                  uses $result for the "reconciled" stage column and
 #                  $tracking for the source-breakdown rows 4-7
 #                  (count of local/global assignment preferred).
-#   post_checklist The output list from reconcile_checklist() — uses
+#   post_checklist The output list from reconcile_checklist() -- uses
 #                  $result for the "regatta" stage column and the
 #                  before/after change-in-assignment count for row 8.
 #   global_input   The raw global-DB classifier output taxonomy table
@@ -31,7 +31,7 @@
 # Row groups (the 21 rows are Ella's layout):
 #   1-3   counts (total, assigned, % assigned)
 #   4-7   source breakdown (local-preferred and global-preferred from
-#         the best_pctid step — only populated when `reconciled` is
+#         the best_pctid step -- only populated when `reconciled` is
 #         supplied)
 #   8     change in number of ASVs assigned through the checklist
 #         step (only populated when `post_checklist` is supplied)

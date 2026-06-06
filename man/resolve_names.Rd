@@ -17,9 +17,9 @@ resolve_names(
 \arguments{
 \item{input}{A character vector or a data.frame.}
 
-\item{name_col}{Required when `input` is a data.frame.}
+\item{name_col}{Required when \code{input} is a data.frame.}
 
-\item{sql_path}{Path to the local `accessionTaxa.sql` taxonomizr DB.}
+\item{sql_path}{Path to the local \code{accessionTaxa.sql} taxonomizr DB.}
 
 \item{output_prefix}{If non-NULL, writes a CSV with this prefix.}
 
@@ -32,13 +32,13 @@ name plus recorded synonyms.}
 }
 \value{
 The input augmented with the 7 rank columns + an
-  `name_match_type` column (`"scientific name"` / `"synonym"` / NA).
+\code{name_match_type} column (\code{"scientific name"} / \code{"synonym"} / NA).
 }
 \description{
 Resolves a column of scientific names (e.g. Kraken2 / BestTaxon-style
 outputs where the rank varies row-to-row) into a full 7-rank lineage.
-Strips common abbreviations (`sp.`, `spp.`, `cf.`, `aff.`, `Gen.`,
-`indet.`, quotes) before NCBI lookup. Synonym-aware: matches the NCBI
-`scientific name` and `synonym` types by default so older nomenclature
+Strips common abbreviations (\code{sp.}, \code{spp.}, \code{cf.}, \code{aff.}, \code{Gen.},
+\code{indet.}, quotes) before NCBI lookup. Synonym-aware: matches the NCBI
+\verb{scientific name} and \code{synonym} types by default so older nomenclature
 is normalized to the current canonical name.
 }

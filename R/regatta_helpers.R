@@ -8,20 +8,20 @@
 # using the local taxonomizr SQL DB. Unlike taxonomizr::getId(), which
 # matches only the canonical scientific name when onlyScientific = TRUE
 # and ALL name categories when FALSE, this helper restricts matching to
-# a configurable set of name types — by default the canonical scientific
+# a configurable set of name types -- by default the canonical scientific
 # name plus recorded synonyms. Common names, BLAST names, acronyms, and
 # similar categories are excluded to keep the lookup explicit and
 # defensible for downstream methods reporting.
 
 # Returns a data.frame aligned to the input with columns:
-#   taxID      — integer NCBI taxID, NA for unmatched names
-#   match_type — the NCBI name type that matched ("scientific name",
+#   taxID      -- integer NCBI taxID, NA for unmatched names
+#   match_type -- the NCBI name type that matched ("scientific name",
 #                "synonym", or whatever else is in accept_types). NA
 #                for unmatched names.
 # Surfacing match_type lets downstream code distinguish "this name
 # resolved via a synonym (the assignment got normalized to current
 # canonical NCBI taxonomy)" from "this name is the current canonical
-# name" — both for reporting (which the summary table will use to
+# name" -- both for reporting (which the summary table will use to
 # label the change category) and for filtering.
 
 # When a name maps to taxIDs across multiple types (e.g. it is both a
@@ -52,7 +52,7 @@ name_to_taxid <- function(taxa,
     return(na_result)
   }
 
-  # ATTACH a temp DB with the query names — same pattern taxonomizr uses
+  # ATTACH a temp DB with the query names -- same pattern taxonomizr uses
   # internally. Scales to thousands of names without hitting SQLite's
   # IN-clause length limit.
   tmp <- tempfile()

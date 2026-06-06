@@ -9,6 +9,7 @@ OBIS_download(
   worms_taxa = NA,
   regional_poly,
   obis_outputname = "OBIS_Species",
+  kingdom = "Animalia",
   marine = NA,
   freshwater = NA,
   terrestrial = NA,
@@ -17,20 +18,28 @@ OBIS_download(
 }
 \arguments{
 \item{obis_taxa}{A character vector of taxon names at any level (OBIS
-recognizes class, order, family, genus, species, etc.).}
+recognizes class, order, family, genus, species, etc.). Names are
+validated and disambiguated by \code{\link[=resolve_taxa]{resolve_taxa()}} (kingdom-aware) and OBIS
+is then queried \strong{by AphiaID}, so ambiguous names resolve to the right
+taxon -- e.g. \code{"Vertebrata"} returns vertebrates, not the red-algae genus
+of the same name. Any fish synonym (\code{Teleostei}, \code{Actinopteri},
+\code{Actinopterygii}, \code{Osteichthyes}) works.}
 
 \item{worms_taxa}{A character vector of substitute taxon names to use
-instead of `obis_taxa` when looking up WoRMS IDs. NA reuses
-`obis_taxa`.}
+instead of \code{obis_taxa} when looking up WoRMS IDs. NA reuses
+\code{obis_taxa}. Rarely needed now that names route through \code{\link[=resolve_taxa]{resolve_taxa()}}.}
 
 \item{regional_poly}{A WKT POLYGON string of the form
-`"POLYGON ((long lat, long lat, ...))"`. Draw a region on
-[wktmap.com](https://wktmap.com) and copy the generated polygon.}
+\code{"POLYGON ((long lat, long lat, ...))"}. Draw a region on
+\href{https://wktmap.com}{wktmap.com} and copy the generated polygon.}
 
-\item{obis_outputname}{Basename (no `.csv` extension) for the output
-file under `datasets/`. Default `"OBIS_Species"`. Choose a short
-distinctive name — you will pass it into
-[build_regional_checklist()] later.}
+\item{obis_outputname}{Basename (no \code{.csv} extension) for the output
+file under \verb{datasets/}. Default \code{"OBIS_Species"}. Choose a short
+distinctive name -- you will pass it into
+\code{\link[=build_regional_checklist]{build_regional_checklist()}} later.}
+
+\item{kingdom}{Kingdom used by \code{\link[=resolve_taxa]{resolve_taxa()}} to disambiguate the query
+taxa. Default \code{"Animalia"}; \code{NULL} disables the filter.}
 
 \item{marine, freshwater, terrestrial, brackish}{Habitat filters. TRUE
 returns only species marked in that habitat; FALSE excludes them;
@@ -38,30 +47,30 @@ NA (default) means no filter.}
 }
 \value{
 Invisibly NULL. Writes
-  `datasets/<obis_outputname>.csv` as a side effect.
+\verb{datasets/<obis_outputname>.csv} as a side effect.
 }
 \description{
 Pulls an OBIS checklist for the given taxa within a regional WKT
 polygon, with optional habitat filters. Writes the result to
-`datasets/<obis_outputname>.csv` and prints the file path.
+\verb{datasets/<obis_outputname>.csv} and prints the file path.
 }
 \details{
-The four habitat filters **stack as intersections, not unions**. So
-`marine = TRUE, freshwater = TRUE` returns only species marked both
+The four habitat filters \strong{stack as intersections, not unions}. So
+\verb{marine = TRUE, freshwater = TRUE} returns only species marked both
 marine and freshwater (i.e. anadromous). To get marine OR
-freshwater, set `terrestrial = FALSE` and leave marine/freshwater
+freshwater, set \code{terrestrial = FALSE} and leave marine/freshwater
 as NA.
 }
 \examples{
 \dontrun{
 # Pacific NW (OCNMS) salmonids and copepods, intentionally allowing
 # salmon to slip through the habitat filter. The same pattern works
-# for any taxa over any WKT polygon — freshwater insects in
+# for any taxa over any WKT polygon -- freshwater insects in
 # Germany, terrestrial mammals over a Sonoran Desert polygon, etc.
 # obis_outputname is yours to pick.
 OBIS_download(
   obis_taxa       = c("Salmonidae", "Copepoda"),
-  regional_poly   = "POLYGON ((-124.85 51.75, -129.20 51.15, -128.14 41.87, -122.34 42.00, -121.86 44.62, -122.70 46.59, -121.55 47.87, -124.85 51.75))",
+  regional_poly   = "POLYGON ((-129 52, -122 52, -122 41, -129 41, -129 52))",
   obis_outputname = "OBIS_my_region_my_group",
   marine          = TRUE,
   freshwater      = NA,    # needed to keep salmon, which spans habitats

@@ -2,7 +2,7 @@
 % Please edit documentation in R/parse_vsearch_userout.R
 \name{parse_vsearch_userout}
 \alias{parse_vsearch_userout}
-\title{Parse a vsearch `--userout` file into a REGATTA taxonomy table}
+\title{Parse a vsearch \code{--userout} file into a REGATTA taxonomy table}
 \usage{
 parse_vsearch_userout(path, id_col = "ASV_id", first_hit_only = TRUE)
 }
@@ -15,18 +15,18 @@ parse_vsearch_userout(path, id_col = "ASV_id", first_hit_only = TRUE)
 ASV. If FALSE, returns every hit.}
 }
 \value{
-A data.frame: `id_col` + 7 rank columns + `pct_id`.
+A data.frame: \code{id_col} + 7 rank columns + \code{pct_id}.
 }
 \description{
-Reads a vsearch `--userout` file, takes the first hit per ASV,
+Reads a vsearch \code{--userout} file, takes the first hit per ASV,
 strips the sequence prefix off column 2, parses the SINTAX taxonomy
-via [parse_sintax()], and returns a clean table with `ASV_id` + the
-7 rank columns + `pct_id`.
+via \code{\link[=parse_sintax]{parse_sintax()}}, and returns a clean table with \code{ASV_id} + the
+7 rank columns + \code{pct_id}.
 }
 \details{
-**Use [parse_vsearch_results()] in preference to this function**
+\strong{Use \code{\link[=parse_vsearch_results]{parse_vsearch_results()}} in preference to this function}
 when you also have the vsearch LCA file. The userout column-2
-taxonomy is the *best hit's* taxonomy per ASV — which can be
+taxonomy is the \emph{best hit's} taxonomy per ASV — which can be
 species-level even when vsearch's top-N hits disagree at species.
 The LCA file carries the more conservative consensus across the
 top-N. This function exists for the rarer case where only the

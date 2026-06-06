@@ -20,7 +20,7 @@ reconcile_global_local(
 }
 \arguments{
 \item{global_table}{Taxonomy table from the global-DB classifier:
-`id_col` + 7 lowercase rank columns + a percent-identity column.}
+\code{id_col} + 7 lowercase rank columns + a percent-identity column.}
 
 \item{local_table}{Taxonomy table from the local-DB classifier: same shape.}
 
@@ -29,43 +29,45 @@ reconcile_global_local(
 \item{global_pct_id_col, local_pct_id_col}{Percent-identity column name
 in each input.}
 
-\item{global_pct_id_scale, local_pct_id_scale}{One of `"auto"` (default),
-`"0-1"`, or `"0-100"`. `"auto"` detects 0-1 scale by checking if the
-input max is <= 1 and rescales to 0-100 with `signif(x, 3) * 100`.}
+\item{global_pct_id_scale, local_pct_id_scale}{One of \code{"auto"} (default),
+\code{"0-1"}, or \code{"0-100"}. \code{"auto"} detects 0-1 scale by checking if the
+input max is <= 1 and rescales to 0-100 with \code{signif(x, 3) * 100}.}
 
 \item{Local_advantage}{TRUE (default): local wins ties at the
-`best_pctid` step. FALSE: global wins ties.}
+\code{best_pctid} step. FALSE: global wins ties.}
 
-\item{output_dir}{Directory path; defaults to `"reconcile_global_local_out"`.
-When non-NULL, writes `<output_prefix>_taxonomy_table.csv`,
-`<output_prefix>_tracking.csv`, and `<output_prefix>_summary.csv`.
+\item{output_dir}{Directory path; defaults to \code{"reconcile_global_local_out"}.
+When non-NULL, writes \verb{<output_prefix>_taxonomy_table.csv},
+\verb{<output_prefix>_tracking.csv}, and \verb{<output_prefix>_summary.csv}.
 Pass NULL to disable file writing.}
 
 \item{output_prefix}{Filename prefix for the 3 CSVs. Default
-`"reconcile_global_local"`.}
+\code{"reconcile_global_local"}.}
 
 \item{tracking_drop_pattern}{Regex matched against input column names;
-matching columns are dropped before they enter `$tracking`. Default
+matching columns are dropped before they enter \verb{$tracking}. Default
 strips obitools per-sample matrices and internal bookkeeping but
-preserves `BEST_MATCH_*`, `COUNT`, `TAXID`, `BEST_IDENTITY`,
-`NUC_SEQ`, and `SCIENTIFIC_NAME`.}
+preserves \verb{BEST_MATCH_*}, \code{COUNT}, \code{TAXID}, \code{BEST_IDENTITY},
+\code{NUC_SEQ}, and \code{SCIENTIFIC_NAME}.}
 }
 \value{
 A list with three elements:
-  * `result`: data.frame with `id_col` + 7 rank columns (strict 8-col
-    REGATTA exchange format).
-  * `tracking`: per-ASV decision record (both inputs preserved with
-    `_global` / `_local` suffixes plus REGATTA bookkeeping).
-  * `stats`: (metric, count) data.frame.
+\itemize{
+\item \code{result}: data.frame with \code{id_col} + 7 rank columns (strict 8-col
+REGATTA exchange format).
+\item \code{tracking}: per-ASV decision record (both inputs preserved with
+\verb{_global} / \verb{_local} suffixes plus REGATTA bookkeeping).
+\item \code{stats}: (metric, count) data.frame.
+}
 }
 \description{
 Given two taxonomy tables for the same set of ASVs — one from a global
 reference database (e.g. obitools + NCBI/EMBL) and one from a local
 curated database (e.g. vsearch + a regional reference) — pick a per-ASV
 preferred lineage. The function compares percent identity across the two
-databases (the `best_pctid` step) and, when global wins but local also
+databases (the \code{best_pctid} step) and, when global wins but local also
 has an assignment, downgrades the preferred lineage to the LCA of the
-two (the `global_lca_to_local` step). Returns a strict 8-column
-`$result` (REGATTA exchange format), a per-ASV `$tracking` audit, and a
-step-level `$stats` summary; optionally writes those as three CSVs.
+two (the \code{global_lca_to_local} step). Returns a strict 8-column
+\verb{$result} (REGATTA exchange format), a per-ASV \verb{$tracking} audit, and a
+step-level \verb{$stats} summary; optionally writes those as three CSVs.
 }
