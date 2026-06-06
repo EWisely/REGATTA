@@ -55,7 +55,9 @@ nothing does.
 
 ### Works for any group, any region
 
-The examples in this README and the package vignette (`vignette("REGATTA-tutorial")`)
+The examples in this README and the package vignettes (`vignette("REGATTA-tutorial")`
+for the single-classifier workflow, `vignette("REGATTA-two-database")` for the
+optional global-vs-local reconciliation)
 use marine fish in the Galapagos because that's what
 the package was developed against. **Nothing in the pipeline is
 fish-, marine-, or Galapagos-specific.** Use it for freshwater insects

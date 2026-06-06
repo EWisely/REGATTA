@@ -28,16 +28,12 @@ To run the whole pipeline you supply **three things**:
    [wktmap.com](https://wktmap.com) and copy the generated text.
 3. **A classifier results file** — whatever your metabarcoding taxonomy-
    assignment step produced (obitools `.tab`, vsearch, etc.). REGATTA
-   auto-detects the format. If you classified the same ASVs against **two**
-   databases (a global reference DB and a locally-curated one), you can supply
-   both and REGATTA will reconcile them first.
+   auto-detects the format.
 
 This tutorial walks the full path on the package's worked example: **Galapagos
-reef fish from the MiFish primer, classified two ways** — with obitools against
-the global NCBI database *and* with vsearch+SINTAX against a locally-curated
-reference DB. REGATTA reconciles the two classifier runs against each other,
-then against the regional checklist. Substitute your own group, polygon, and
-results file(s) — the function names and shapes don't change.
+reef fish from the MiFish primer, classified with obitools against the global
+NCBI database.** Substitute your own group, polygon, and results file — the
+function names and shapes don't change.
 
 > **The pipeline is not fish-, marine-, or Galapagos-specific.** The only
 > per-region work is building and taxonomizing the checklist; every downstream
@@ -137,70 +133,49 @@ checklist <- taxonomize_checklist(
 saveRDS(checklist, "custom_db/galapagos_fish_checklist.rds")
 ```
 
-## Step 3 — Reconcile two classifier runs, then the checklist
+## Step 3 — Reconcile your obitools output (the one-call path)
 
-Here the same 1,438 MiFish ASVs were classified twice: with **obitools against
-the global NCBI database** (a `.tab` file with a `TAXID` column) and with
-**vsearch+SINTAX against a locally-curated reference DB** (a `lca` taxonomy
-file plus a `--userout` file carrying percent identities). Give both to
-`run_regatta()` as a named `list(global=, local=)` and it does two things in
-one call: reconciles the two classifier runs against each other
-([reconcile_global_local()]), then reconciles the result against the regional
-checklist ([reconcile_checklist()]). Formats are auto-detected.
+`run_regatta()` auto-detects the obitools `.tab` (it has a `TAXID` column),
+resolves the taxIDs to lineages, runs the checklist LCA, and writes the output
+bundle.
 
 ```{r run, eval = FALSE}
 run_regatta(
-  input = list(
-    global = "MiFish_obitools.tab",                       # obitools (global DB)
-    local  = c("MiFish_vsearch_lca.txt",                  # vsearch LCA taxonomy
-               "MiFish_vsearch_userout.txt")              # vsearch %ID
-  ),
+  input     = "MiFish_obitools.tab",                   # obitools .tab (global DB)
   checklist = "custom_db/galapagos_fish_checklist.rds",
   sql_path  = "/path/to/accessionTaxa.sql"
 )
-#> -> regatta_out/{ reconcile_global_local/*, reconcile_checklist/*,
-#>                  regatta_summary.csv, run_log.txt }
+#> -> regatta_out/{ reconcile_checklist/*, regatta_summary.csv, run_log.txt }
 ```
 
-**Stage 1 — global vs. local (`reconcile_global_local`).** Of 1,438 ASVs, 892
-were unassigned by both classifiers; 546 were assigned by at least one. Per
-ASV, the database with the higher percent identity wins, and when global wins
-but local also has a call, the row is downgraded to the LCA of the two:
-
-| | ASVs |
-|---|---|
-| best %ID: global won | 403 |
-| best %ID: local won | 143 |
-| global downgraded to global∩local LCA | 45 |
-
-**Stage 2 — reconcile against the checklist (`reconcile_checklist`).** The 546
-reconciled assignments are then walked against the Galapagos fish checklist:
+On this dataset, of the 542 obitools-assigned ASVs (out of 1,438 total):
 
 | match rank | ASVs |
 |---|---|
-| species | 295 |
-| genus   | 231 |
-| family  | 19 |
+| species | 287 |
+| genus   | 229 |
+| family  | 16 |
 | order   | 1 |
-| off-target (no match) | 892 |
+| class   | 9 |
 
-The 231 genus-level and 19 family-level results are the off-target calls
-REGATTA exists to catch — confident species assignments to fish that don't
+The 229 genus-level and 9 class-level results are the off-target calls REGATTA
+exists to catch — globally-confident species assignments to fish that don't
 occur in the Galapagos, walked up to the lowest rank the regional checklist
 supports.
 
-> **Only have one classifier run?** Pass a single file (or a single vsearch
-> `lca` + `userout` pair) as `input` instead of the `list(global=, local=)`;
-> `run_regatta()` skips Stage 1 and goes straight to the checklist step.
+> **Classified the same ASVs against a second, locally-curated database too?**
+> REGATTA can reconcile the two classifier runs against each other before the
+> checklist step — see `vignette("REGATTA-two-database")`.
 
 ---
 
 ## A runnable demonstration (no internet, no database)
 
-The core `reconcile_checklist()` step is pure base R. Here it runs live against
-the **real** Galapagos fish checklist bundled with the package, on a small
-illustrative table chosen to show each kind of downgrade — including the
-elasmobranch (shark) side of a MiFish run.
+The core `reconcile_checklist()` step is pure base R. It runs live here against
+two files bundled with the package — both **real slices of the Galapagos MiFish
+dataset**: the taxonomized regional checklist, and a handful of real obitools
+assignments chosen to show each kind of outcome (you would normally pass the
+*whole* classifier table, not a hand-picked slice).
 
 ```{r demo}
 library(REGATTA)
@@ -208,19 +183,10 @@ library(REGATTA)
 checklist <- readRDS(system.file(
   "extdata", "galapagos_fish_checklist.rds", package = "REGATTA"))
 
-# A small classifier-output table (ASV_id + the 7 lowercase rank columns).
-tax <- data.frame(
-  ASV_id  = paste0("ASV_", 1:6),
-  domain  = "Eukaryota",
-  phylum  = c("Chordata", "Chordata", "Chordata", "Chordata", "Chordata", "Echinodermata"),
-  class   = c("Actinopteri", "Actinopteri", "Actinopteri", "Actinopteri", "Elasmobranchii", "Echinoidea"),
-  order   = c("Perciformes", "Perciformes", "Scorpaeniformes", "Mulliformes", "Carcharhiniformes", "Camarodonta"),
-  family  = c("Lutjanidae", "Lutjanidae", "Sebastidae", "Mullidae", "Carcharhinidae", "Strongylocentrotidae"),
-  genus   = c("Lutjanus", "Lutjanus", "Sebastes", "Mulloidichthys", "Triaenodon", "Strongylocentrotus"),
-  species = c("Lutjanus argentiventris", "Lutjanus campechanus", "Sebastes goodei",
-              "Mulloidichthys dentatus", "Triaenodon obesus", "Strongylocentrotus purpuratus"),
-  stringsAsFactors = FALSE
-)
+# 7 real obitools-assigned ASVs from the worked dataset (ASV_id + 7 ranks + pct_id).
+tax <- read.csv(system.file(
+  "extdata", "mifish_obitools_example.csv", package = "REGATTA"),
+  stringsAsFactors = FALSE)
 
 res <- reconcile_checklist(tax, checklist, output_dir = NULL)
 ```
@@ -237,26 +203,25 @@ regional checklist:
 
 ```{r demo-tracking}
 res$tracking[, c("ASV_id", "before_species", "regatta_match_rank",
-                 "after_genus", "after_class")]
+                 "after_genus", "after_family")]
 ```
 
 Reading it row by row:
 
-* **Lutjanus argentiventris** (yellow snapper), **Mulloidichthys dentatus**
-  (Mexican goatfish), **Triaenodon obesus** (whitetip reef shark) — all on the
-  Galapagos checklist, kept at **species**. (The shark confirms the
-  elasmobranch side of a MiFish run is handled, not just bony fish.)
-* **Lutjanus campechanus** — the northern red snapper, an *Atlantic* species
-  that can't be in a Galapagos sample. The species isn't on the checklist but
-  the genus is, so it downgrades to genus ***Lutjanus*** instead of asserting a
-  wrong species.
-* **Sebastes goodei** — a temperate Pacific rockfish; the whole genus is absent
-  from the tropical Galapagos, so it walks up to class **Actinopteri**.
-* **Strongylocentrotus purpuratus** — a purple urchin (Echinodermata, an
-  off-target invertebrate amplification); nothing below *Eukaryota* is on a
-  fish checklist, so it walks all the way up to **domain**.
+* **Johnrandallia nigrirostris** (barberfish) and **Stegastes arcifrons**
+  (a Galapagos damselfish) — on the regional checklist, kept at **species**.
+* **Mugil curema** — obitools' global call. It *is* on the Galapagos checklist,
+  so on this single classifier it stays at **species**. (Hold that thought —
+  `vignette("REGATTA-two-database")` revisits this exact ASV, where a second,
+  locally-curated classifier disagrees and the call gets downgraded.)
+* **Lutjanus argentimaculatus** and **Epinephelus bontoides** — the species
+  aren't on the Galapagos checklist but the genera are, so they downgrade to
+  genus ***Lutjanus*** / ***Epinephelus*** instead of asserting a wrong species.
+* **Archosargus rhomboidalis** — an Atlantic/Caribbean sea bream; neither the
+  species nor the genus is in the Galapagos, so it walks up to family
+  **Sparidae** (some porgies do occur there).
 
-`$stats` gives the match-rank distribution for the whole table:
+`$stats` gives the match-rank distribution for this slice:
 
 ```{r demo-stats}
 res$stats
@@ -282,11 +247,10 @@ elements (and, when writing to disk, the same three CSVs per stage):
   per-ASV id column isn't `ASV_id` (e.g. a sequence `Hash`), pass
   `id_col = "Hash"`; a long per-sample table is collapsed to one row per ASV
   automatically. See `?run_regatta`.
-* **Inspect the global-vs-local decisions.** The Stage 1 output
-  (`reconcile_global_local/`) carries a per-ASV audit — `preferred_database`
-  (`global` / `local` / `global_lca_to_local`), `preferred_pctid`, and both
-  classifiers' lineages side by side — so you can see exactly why each ASV got
-  the call it did. See `?reconcile_global_local`.
+* **Two reference databases?** If you classified the same ASVs against both a
+  global and a locally-curated database, REGATTA can reconcile the two
+  classifier runs against each other before the checklist step. See
+  `vignette("REGATTA-two-database")` and `?reconcile_global_local`.
 * **One pass per primer.** Run the pipeline once per taxonomic group your
   primers target. Mixing groups into one megalist lets off-target
   amplifications slip through.
