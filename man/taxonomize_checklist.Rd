@@ -13,10 +13,10 @@ taxonomize_checklist(
 }
 \arguments{
 \item{input}{A path to a checklist file (one-column or with a
-`Species` column), a character vector of names, or a data.frame
-with a `Species` / `scientific_name` column.}
+\code{Species} column), a character vector of names, or a data.frame
+with a \code{Species} / \code{scientific_name} column.}
 
-\item{sql_path}{Path to the local `accessionTaxa.sql` taxonomizr DB.}
+\item{sql_path}{Path to the local \code{accessionTaxa.sql} taxonomizr DB.}
 
 \item{prepare_db}{Build the SQL DB if missing.}
 
@@ -25,13 +25,13 @@ name plus recorded synonyms.}
 }
 \value{
 A data.frame with the 7 rank columns plus per-row resolution
-  bookkeeping.
+bookkeeping.
 }
 \description{
-Cleans junk strings (`sp.`, `spp.`, `cf.`, etc.), looks each name up
-via `taxonomizr` (synonym-aware), and returns a one-row-per-species
-table with the 7 lowercase rank columns plus `input_name`,
-`resolution_status`, `name_match_type`, and `taxID`. Run once per
-region per taxonomic group; the result is the `checklist` input to
-[reconcile_checklist()].
+Cleans junk strings (\code{sp.}, \code{spp.}, \code{cf.}, etc.), looks each name up
+via \code{taxonomizr} (synonym-aware), and returns a one-row-per-species
+table with the 7 lowercase rank columns plus \code{input_name},
+\code{resolution_status}, \code{name_match_type}, and \code{taxID}. Run once per
+region per taxonomic group; the result is the \code{checklist} input to
+\code{\link[=reconcile_checklist]{reconcile_checklist()}}.
 }

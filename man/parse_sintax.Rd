@@ -9,7 +9,7 @@ parse_sintax(input, sintax_col = NULL, output_prefix = NULL, output_dir = ".")
 \arguments{
 \item{input}{A character vector or a data.frame.}
 
-\item{sintax_col}{Required when `input` is a data.frame.}
+\item{sintax_col}{Required when \code{input} is a data.frame.}
 
 \item{output_prefix}{If non-NULL, writes a CSV with this prefix.}
 
@@ -20,9 +20,9 @@ The input augmented with the 7 rank columns.
 }
 \description{
 Splits SINTAX taxonomy strings (e.g.
-`d:Eukaryota,p:Chordata,...,s:Foo_bar`) into the 7 lowercase rank
+\verb{d:Eukaryota,p:Chordata,...,s:Foo_bar}) into the 7 lowercase rank
 columns. Accepts either a character vector or a data.frame plus
-`sintax_col`. Truncated strings (e.g. only down to genus) are
+\code{sintax_col}. Truncated strings (e.g. only down to genus) are
 accepted; missing ranks come back as NA. Species values have
 underscores converted to spaces.
 }

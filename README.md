@@ -277,14 +277,10 @@ download. `GBIF_download()` prints the class names it requested and
 the backbone usageKeys it actually got, so you can see how much
 shrinkage there was.
 
-**Missing package dependencies.** Some of the upstream taxonomy
-helpers pull in packages that are not on CRAN. If `OBIS_download()`
-or `GBIF_download()` fail to load dependencies, try:
-
-```r
-devtools::install_github('james-thorson/FishLife')
-devtools::install_github('cfree14/freeR')
-```
+**Missing package dependencies.** All of REGATTA's dependencies are on
+CRAN and install automatically with the package (see Installation). If you
+installed without `dependencies = TRUE`, reinstall, or add any missing
+package with `install.packages()`.
 
 ## Per-taxonomic-group separation
 
@@ -316,27 +312,36 @@ checklist instead of being flagged.
 | `reconcile_global_local()` | Optional reconciliation of two classifier outputs on the same ASVs — one against a global reference DB (NCBI/EMBL), one against a local curated DB. Two descriptive steps: **best_pctid** (per-ASV winner by percent identity) and **global_lca_to_local** (when global won best_pctid AND local also assigned, downgrade to LCA of both). Returns `$result` (same 8-column shape), `$tracking` (best_ID_combined-style per-ASV audit), and `$stats`. pct_id scale handling: user specifies the pct_id column per input and the function auto-rescales 0-1 → 0-100 as needed. Writes 3 CSVs (`<prefix>_taxonomy_table.csv`, `<prefix>_tracking.csv`, `<prefix>_summary.csv`) — defaults: `output_dir = "reconcile_global_local_out"`, `output_prefix = "reconcile_global_local"`. Pass `output_dir = NULL` to disable file writing. | none (base R) |
 | `summarize_regatta()` | The 21-row per-stage stats summary. Compares inputs (`global_input`, `local_input`) against outputs (`reconciled`, `post_checklist`) and produces Ella's format. Source-breakdown rows populate when `reconciled` is supplied; row 8 populates when both `global_input` and `reconciled` are supplied | none (base R) |
 
-## Quick-start
+## Installation
 
-The package is currently a collection of R scripts in this repository; it
-is not yet installable via `install.packages()`. Source the functions
-directly:
+REGATTA is an R package. Install it from GitHub with `devtools` (or
+`remotes`); all dependencies are on CRAN and install automatically:
 
 ```r
-source("GBIF_download.R")
-source("OBIS_download.R")
-source("Local_csv_download.R")
-source("Build_regional_checklist.R")
-source("taxonomize_checklist.R")
-source("parse_sintax.R")
-source("parse_vsearch_results.R")
-source("parse_vsearch_userout.R")
-source("run_regatta.R")
-source("resolve_taxids.R")
-source("resolve_names.R")
-source("reconcile_checklist.R")
-source("reconcile_global_local.R")
-source("summarize_regatta.R")
+# install.packages("devtools")
+devtools::install_github("DolphinCoder/REGATTA_Package_Development",
+                         build_vignettes = TRUE)
+library(REGATTA)
+```
+
+Then read the worked examples:
+
+```r
+vignette("REGATTA-tutorial")       # single-classifier workflow
+vignette("REGATTA-two-database")   # optional global-vs-local reconciliation
+```
+
+Building the vignettes needs `pandoc`, which RStudio bundles; if you install
+from a plain R session without pandoc, drop `build_vignettes = TRUE`.
+
+The checklist-building steps additionally need a local NCBI taxonomy database
+built by `taxonomizr` (see "NCBI taxonomy DB" above); the core reconciliation
+functions and the runnable vignette demos do not.
+
+## Quick-start
+
+```r
+library(REGATTA)
 ```
 
 ### The one-call path: `run_regatta()`

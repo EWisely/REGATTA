@@ -15,61 +15,63 @@ run_regatta(
 }
 \arguments{
 \item{input}{One of:
-* a single file path (single-DB workflow);
-* a length-2 character vector of vsearch `lca` + `userout` paths
-  (single-DB workflow using the LCA-correct taxonomy);
-* a folder path (the function scans the folder — see Details for the
-  convention);
-* `list(global = ..., local = ...)` for an explicit two-DB workflow
-  where each entry is a single path or a length-2 vsearch pair.}
+\itemize{
+\item a single file path (single-DB workflow);
+\item a length-2 character vector of vsearch \code{lca} + \code{userout} paths
+(single-DB workflow using the LCA-correct taxonomy);
+\item a folder path (the function scans the folder — see Details for the
+convention);
+\item \code{list(global = ..., local = ...)} for an explicit two-DB workflow
+where each entry is a single path or a length-2 vsearch pair.
+}}
 
-\item{checklist}{Path to a taxonomized regional checklist (`.rds` or
-`.csv`), or a data.frame with the 7 rank columns.}
+\item{checklist}{Path to a taxonomized regional checklist (\code{.rds} or
+\code{.csv}), or a data.frame with the 7 rank columns.}
 
-\item{out_dir}{Output directory. Defaults to `<input>/regatta_out`
-when `input` is a folder, or `dirname(input)/regatta_out` when it
+\item{out_dir}{Output directory. Defaults to \verb{<input>/regatta_out}
+when \code{input} is a folder, or \code{dirname(input)/regatta_out} when it
 is a file path. Created if missing.}
 
-\item{sql_path}{Path to the local `accessionTaxa.sql` taxonomizr DB
+\item{sql_path}{Path to the local \code{accessionTaxa.sql} taxonomizr DB
 (used for obitools / BestTaxon input shapes).}
 
 \item{id_col}{Name of the per-ASV identifier column. Default
-`"ASV_id"` (matches the obitools and vsearch preprocessors). For
+\code{"ASV_id"} (matches the obitools and vsearch preprocessors). For
 BestTaxon/Kraken2-style CSVs whose identifier is named differently
-(e.g. `"Hash"`), set this so the wrapper can find the id and, if the
+(e.g. \code{"Hash"}), set this so the wrapper can find the id and, if the
 table is long (one row per sample x ASV), collapse it to one row per
 ASV before resolving.}
 
 \item{Local_advantage}{TRUE (default): local wins ties at the
-`best_pctid` step in [reconcile_global_local()].}
+\code{best_pctid} step in \code{\link[=reconcile_global_local]{reconcile_global_local()}}.}
 }
 \value{
 Invisibly a list with the final tables and the
-  [summarize_regatta()] data.frame. Writes CSV outputs and
-  `run_log.txt` under `out_dir`.
+\code{\link[=summarize_regatta]{summarize_regatta()}} data.frame. Writes CSV outputs and
+\code{run_log.txt} under \code{out_dir}.
 }
 \description{
-One-call wrapper around [reconcile_global_local()], [reconcile_checklist()],
-and [summarize_regatta()]. Accepts file paths or a folder, auto-detects
-classifier format (obitools `.tab`, vsearch userout, vsearch LCA + userout,
-BestTaxon `.csv`), dispatches to the right preprocessor, runs the
+One-call wrapper around \code{\link[=reconcile_global_local]{reconcile_global_local()}}, \code{\link[=reconcile_checklist]{reconcile_checklist()}},
+and \code{\link[=summarize_regatta]{summarize_regatta()}}. Accepts file paths or a folder, auto-detects
+classifier format (obitools \code{.tab}, vsearch userout, vsearch LCA + userout,
+BestTaxon \code{.csv}), dispatches to the right preprocessor, runs the
 appropriate reconcile* steps, and writes the standard 3-CSVs-per-stage
-output triples plus a top-level 21-row summary and a `run_log.txt`
+output triples plus a top-level 21-row summary and a \code{run_log.txt}
 describing what was detected.
 }
 \details{
-**Role is always declared, never inferred from filenames.** Single-input
+\strong{Role is always declared, never inferred from filenames.} Single-input
 calls don't need a role. Two-input workflows must use either a named
-list or a folder whose files start with `global.` and `local.`. The
+list or a folder whose files start with \code{global.} and \code{local.}. The
 wrapper never guesses based on contains-"obi" / contains-"vs" heuristics.
 
-**Folder convention:**
+\strong{Folder convention:}
 \itemize{
-  \item One classifier file in the folder → single-DB workflow.
-  \item Two vsearch files (LCA + userout) in the folder → single-DB
-    workflow using the joined LCA taxonomy + userout pct_id.
-  \item Files starting with `global.*` and `local.*` → two-DB workflow.
-    Either side may itself be a vsearch LCA + userout pair (matching
-    `global_lca*` + `global_userout*` etc.).
+\item One classifier file in the folder → single-DB workflow.
+\item Two vsearch files (LCA + userout) in the folder → single-DB
+workflow using the joined LCA taxonomy + userout pct_id.
+\item Files starting with \verb{global.*} and \verb{local.*} → two-DB workflow.
+Either side may itself be a vsearch LCA + userout pair (matching
+\verb{global_lca*} + \verb{global_userout*} etc.).
 }
 }

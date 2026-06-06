@@ -15,65 +15,64 @@ GBIF_download(
 )
 }
 \arguments{
-\item{obis_taxa}{A character vector of taxon names at **class level or
-broader** (GBIF won't accept order/family/genus/species here). List the
-specific classes you want — **avoid broad ambiguous names**. For example
-`"Vertebrata"` is ambiguous in WoRMS (the vertebrate subphylum *and* a
+\item{obis_taxa}{A character vector of taxon names at \strong{class level or
+broader} (GBIF won't accept order/family/genus/species here). List the
+specific classes you want — \strong{avoid broad ambiguous names}. For example
+\code{"Vertebrata"} is ambiguous in WoRMS (the vertebrate subphylum \emph{and} a
 red-algae genus) and errors here; pass the classes instead
-(e.g. `c("Actinopterygii", "Chondrichthyes", "Mammalia", "Aves",
-"Reptilia")`). Names are validated and disambiguated by [resolve_taxa()]
-(kingdom-aware), so you can type any common synonym — e.g. `Teleostei`,
-`Actinopteri`, `Actinopterygii`, or `Osteichthyes` all work for
+(e.g. \code{c("Actinopterygii", "Chondrichthyes", "Mammalia", "Aves", "Reptilia")}). Names are validated and disambiguated by \code{\link[=resolve_taxa]{resolve_taxa()}}
+(kingdom-aware), so you can type any common synonym — e.g. \code{Teleostei},
+\code{Actinopteri}, \code{Actinopterygii}, or \code{Osteichthyes} all work for
 ray-finned fish.}
 
 \item{worms_taxa}{A character vector of substitute taxon names to use
-instead of `obis_taxa` when looking up WoRMS IDs. NA reuses
-`obis_taxa`. Rarely needed now that names route through [resolve_taxa()].}
+instead of \code{obis_taxa} when looking up WoRMS IDs. NA reuses
+\code{obis_taxa}. Rarely needed now that names route through \code{\link[=resolve_taxa]{resolve_taxa()}}.}
 
 \item{regional_poly}{A WKT POLYGON string of the form
-`"POLYGON ((long lat, long lat, ...))"`. Draw a region on
-[wktmap.com](https://wktmap.com) and copy the generated polygon.}
+\code{"POLYGON ((long lat, long lat, ...))"}. Draw a region on
+\href{https://wktmap.com}{wktmap.com} and copy the generated polygon.}
 
-\item{gbif_outputname}{Basename (no `.csv` extension) for the output
-file under `datasets/`. Default `"GBIF_Species"`.}
+\item{gbif_outputname}{Basename (no \code{.csv} extension) for the output
+file under \verb{datasets/}. Default \code{"GBIF_Species"}.}
 
-\item{kingdom}{Kingdom used by [resolve_taxa()] to disambiguate the query
-taxa. Default `"Animalia"`; `NULL` disables the filter.}
+\item{kingdom}{Kingdom used by \code{\link[=resolve_taxa]{resolve_taxa()}} to disambiguate the query
+taxa. Default \code{"Animalia"}; \code{NULL} disables the filter.}
 
 \item{gbif_descend_to}{WoRMS rank to walk each query taxon down to before
-matching the GBIF backbone. Default `"order"`. This is what makes
+matching the GBIF backbone. Default \code{"order"}. This is what makes
 ray-finned fish work: GBIF's backbone has no usable class node for them
 (bony fish hang under phylum Chordata with no class), so a class-level
-match drops every fish; descending to **order** hits a rank GBIF
+match drops every fish; descending to \strong{order} hits a rank GBIF
 populates. The resulting keys are unioned with each taxon's direct
 backbone key, so sharks/mammals/birds keep working too. Order is the
-default because it is **fast** (tens of keys, not hundreds — GBIF limits
+default because it is \strong{fast} (tens of keys, not hundreds — GBIF limits
 concurrent downloads and large key sets are slow to prepare) and reaches
-~97% of fish families: WoRMS splits the old `Perciformes` into modern
-orders GBIF lacks, but GBIF still files those fish under `Perciformes`,
-which IS matched. The remaining ~3% are picked up by `gbif_fill_families`.}
+~97\% of fish families: WoRMS splits the old \code{Perciformes} into modern
+orders GBIF lacks, but GBIF still files those fish under \code{Perciformes},
+which IS matched. The remaining ~3\% are picked up by \code{gbif_fill_families}.}
 
-\item{gbif_fill_families}{If TRUE (default) and `gbif_descend_to` is above
-family, additionally add GBIF keys for the *individual families* whose
+\item{gbif_fill_families}{If TRUE (default) and \code{gbif_descend_to} is above
+family, additionally add GBIF keys for the \emph{individual families} whose
 GBIF parent at the primary rank is not in the matched set (e.g. families
-GBIF files with no order), lifting coverage from ~97% to ~98%. Because the
-whole search is a single `occ_download` (all keys in one request — the key
+GBIF files with no order), lifting coverage from ~97\% to ~98\%. Because the
+whole search is a single \code{occ_download} (all keys in one request — the key
 count does not cost extra downloads against GBIF's concurrent-download
 limit), completeness is the sensible default. The only cost is a second
 WoRMS family walk during preparation. A phylum guard prevents stray
 family-name collisions from adding off-target taxa. Set FALSE to skip the
-family walk for a faster, order-only (~97%) preparation.}
+family walk for a faster, order-only (~97\%) preparation.}
 }
 \value{
 Invisibly NULL. Writes
-  `datasets/<gbif_outputname>.csv` as a side effect.
+\verb{datasets/<gbif_outputname>.csv} as a side effect.
 }
 \description{
 Resolves the given high-level taxa via WoRMS, finds GBIF backbone
 keys for the resulting classes, and submits a GBIF occurrence
 download restricted to the polygon. Writes the result to
-`datasets/<gbif_outputname>.csv` and prints the file path. GBIF
-login credentials must already be set in `~/.Renviron`; see the
+\verb{datasets/<gbif_outputname>.csv} and prints the file path. GBIF
+login credentials must already be set in \verb{~/.Renviron}; see the
 Setup section of the README.
 }
 \details{

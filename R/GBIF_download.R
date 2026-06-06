@@ -90,19 +90,6 @@ GBIF_download <- function(obis_taxa,
                           gbif_descend_to = "order",
                           gbif_fill_families = TRUE
     ) {
-  library(usethis)
-  library(rgbif)
-  library(rfishbase)
-  library(dplyr)
-  library(readr)  
-  library(worrms)
-  library(taxize)
-  library(robis)
-  library(tidyverse)
-  library(taxonomizr)
-  library(readr)
-  library(here)
-  
   query_taxa <- if (is.na(worms_taxa[1])) obis_taxa else worms_taxa
 
   # throw an error if polygon is incorrect
@@ -181,7 +168,7 @@ GBIF_download <- function(obis_taxa,
   primary_keys  <- integer(0)
   valid_phyla   <- character(0)
   if (length(primary_names) > 0) {
-    bbp          <- name_backbone_checklist(primary_names)
+    bbp          <- rgbif::name_backbone_checklist(primary_names)
     keep         <- bbp$matchType != "NONE"
     primary_keys <- bbp$usageKey[keep]
     if ("phylum" %in% names(bbp)) valid_phyla <- unique(stats::na.omit(bbp$phylum[keep]))
@@ -195,7 +182,7 @@ GBIF_download <- function(obis_taxa,
   if (isTRUE(gbif_fill_families) && gbif_descend_to != "family") {
     fam_names <- .walk("family")
     if (length(fam_names) > 0) {
-      bbf        <- name_backbone_checklist(fam_names)
+      bbf        <- rgbif::name_backbone_checklist(fam_names)
       bbf        <- bbf[bbf$matchType != "NONE", , drop = FALSE]
       parent_col <- paste0(gbif_descend_to, "Key")
       covered    <- if (parent_col %in% names(bbf)) bbf[[parent_col]] %in% primary_keys else FALSE
@@ -225,19 +212,19 @@ GBIF_download <- function(obis_taxa,
 
   print("Downloading Database from GBIF")
   #### Download Checklist from GBIF ####
-  download <- occ_download(
-    pred_within(regional_poly),
-    pred_in("taxonKey", backbone_keys), # important to use pred_in
-    pred("hasCoordinate", TRUE),
-    pred("hasGeospatialIssue", FALSE),
+  download <- rgbif::occ_download(
+    rgbif::pred_within(regional_poly),
+    rgbif::pred_in("taxonKey", backbone_keys), # important to use pred_in
+    rgbif::pred("hasCoordinate", TRUE),
+    rgbif::pred("hasGeospatialIssue", FALSE),
     format = "SPECIES_LIST"
   )
-  
+
   # Get download ID
-  download_output <- capture.output(download)
+  download_output <- utils::capture.output(download)
   print(download_output)
-  download_id <- str_sub(download_output[15], start = 17, end = 41)
-  print(download_id) 
+  download_id <- substr(download_output[15], 17, 41)
+  print(download_id)
   
   # Source - https://stackoverflow.com/a/55851721
   # Posted by sckott
@@ -245,10 +232,10 @@ GBIF_download <- function(obis_taxa,
   # Theoretically pauses the code here until the download is done but it is not working
   still_running <- TRUE
   status_ping <- 9
-  print(occ_download_meta(key = download_id)) # print info about download
-  
+  print(rgbif::occ_download_meta(key = download_id)) # print info about download
+
   while (still_running) { # starts true
-    meta <- occ_download_meta(key = download_id) # get metadata about download
+    meta <- rgbif::occ_download_meta(key = download_id) # get metadata about download
     print(meta$status) # print just the status, the rest of it won't have changed since previous print 
     status <- meta$status 
     still_running <- !(status %in% c("SUCCEEDED", "KILLED")) # SUCCEEDED or KILLED are end states so they stop the loop
@@ -257,8 +244,8 @@ GBIF_download <- function(obis_taxa,
   
   ##### Import and get the species list ####
   
-  GBIF_list <- occ_download_get(download_id) %>%
-    occ_download_import()
+  GBIF_list <- rgbif::occ_download_get(download_id) %>%
+    rgbif::occ_download_import()
   
   print("Download Complete")
   
@@ -312,10 +299,10 @@ GBIF_download <- function(obis_taxa,
   print("First few lines of higher taxonomic levels:")
   print(head(GBIF_taxa))
   
-  write.csv(GBIF_species, paste(here("datasets"), sep = "", "/", gbif_outputname, ".csv"), row.names = F)
-  
+  utils::write.csv(GBIF_species, paste(here::here("datasets"), sep = "", "/", gbif_outputname, ".csv"), row.names = FALSE)
+
   print("GBIF Download & Export Complete. Check your datasets folder for the output.")
-  print(paste("Output at:", sep = " ", paste(here("datasets"), sep = "", "/", gbif_outputname, ".csv")))
+  print(paste("Output at:", sep = " ", paste(here::here("datasets"), sep = "", "/", gbif_outputname, ".csv")))
   print(paste(backbonekeyno, sep = " ", "backbone keys found out of", classnameno, "classes in list"))
 }
 

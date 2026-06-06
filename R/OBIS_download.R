@@ -68,22 +68,12 @@ OBIS_download <- function(obis_taxa,
                           freshwater = NA,
                           terrestrial = NA,
                           brackish = NA) {
-  library(usethis)
-  library(rgbif)
-  library(rfishbase)
-  library(dplyr)
-  library(readr)  
-  library(worrms)
-  library(taxize)
-  library(robis)
-  library(tidyverse)
-  library(taxonomizr)
-  library(readr)
-  library(here)
-  
-  print("WARNING: Check the documentation for setup 
-        steps before running this function!")
-  
+  if (!requireNamespace("robis", quietly = TRUE)) {
+    stop("OBIS_download() needs the 'robis' package. Install it with ",
+         'install.packages("robis").')
+  }
+  message("Check the documentation for setup steps before running this function.")
+
   # throw an error if polygon is incorrect
   if(grepl("POLYGON \\(\\([-. |[[:digit:]]|,]*\\)\\)", # finds POLYGON (( [-, space, period, 
            # comma or any number] continue for any length, ))
@@ -154,10 +144,10 @@ OBIS_download <- function(obis_taxa,
     )
   
   print("First few rows of output: ")
-  print(head(obis_sp))
-  write.csv(obis_sp, paste(here("datasets"), sep = "", "/", obis_outputname, ".csv"), row.names = F)
-  
+  print(utils::head(obis_sp))
+  utils::write.csv(obis_sp, paste(here::here("datasets"), sep = "", "/", obis_outputname, ".csv"), row.names = FALSE)
+
   print("OBIS download complete.  Check your datasets folder for the output.")
-  print(paste("Find your output at:", paste(here("datasets"), sep = "", "/", obis_outputname, ".csv")), sep = " ")
+  print(paste("Find your output at:", paste(here::here("datasets"), sep = "", "/", obis_outputname, ".csv")), sep = " ")
 }
 

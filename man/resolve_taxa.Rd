@@ -18,41 +18,40 @@ treated as an explicit WoRMS AphiaID (the escape hatch for a genuinely
 ambiguous name — look it up once, then pass the id).}
 
 \item{kingdom}{Target kingdom used to disambiguate WoRMS matches. Default
-`"Animalia"`. Pass `NULL` to disable kingdom filtering.}
+\code{"Animalia"}. Pass \code{NULL} to disable kingdom filtering.}
 
-\item{check_gbif}{If TRUE (default when `rgbif` is installed), add the GBIF
+\item{check_gbif}{If TRUE (default when \code{rgbif} is installed), add the GBIF
 backbone diagnostic columns.}
 
 \item{on_ambiguous}{What to do when a name is ambiguous, not found, or has
-no accepted match in `kingdom`: `"error"` (default) stops with a report
-listing the offending names and their candidate AphiaIDs; `"warn"` keeps
-going with those rows left unresolved; `"first"` takes the first candidate
+no accepted match in \code{kingdom}: \code{"error"} (default) stops with a report
+listing the offending names and their candidate AphiaIDs; \code{"warn"} keeps
+going with those rows left unresolved; \code{"first"} takes the first candidate
 and warns.}
 
 \item{aliases}{A named list (or named character vector) mapping (lower-cased)
 input names to one or more substitute names for the WoRMS lookup. Defaults
 to REGATTA's curated table, which includes one-to-many shorthands:
-`"fish"` -> `c("Actinopterygii", "Elasmobranchii", "Myxini",
-"Petromyzonti")` (ray-finned fish + sharks/rays + hagfishes + lampreys),
-`"vertebrates"` -> `"Vertebrata"`, `"lepidosauria"` ->
-`"Reptilia"`, `"osteichthyes"` -> `"Actinopteri"`. Pass your own to extend
+\code{"fish"} -> \code{c("Actinopterygii", "Elasmobranchii", "Myxini", "Petromyzonti")} (ray-finned fish + sharks/rays + hagfishes + lampreys),
+\code{"vertebrates"} -> \code{"Vertebrata"}, \code{"lepidosauria"} ->
+\code{"Reptilia"}, \code{"osteichthyes"} -> \code{"Actinopteri"}. Pass your own to extend
 or override. A multi-name alias expands into one result row per taxon.}
 }
 \value{
-A data.frame with one row per resolved taxon: `input` (the original
-  name you passed — repeated when an alias expanded to several taxa),
-  `alias_used`, `aphia_id`, `valid_name`, `rank`, `kingdom`, `worms_status`
-  (`ok`/`ambiguous`/`wrong_kingdom`/`not_found`), `n_candidates`,
-  and (when `check_gbif`) `gbif_key`, `gbif_usable`, plus a human-readable
-  `note`.
+A data.frame with one row per resolved taxon: \code{input} (the original
+name you passed — repeated when an alias expanded to several taxa),
+\code{alias_used}, \code{aphia_id}, \code{valid_name}, \code{rank}, \code{kingdom}, \code{worms_status}
+(\code{ok}/\code{ambiguous}/\code{wrong_kingdom}/\code{not_found}), \code{n_candidates},
+and (when \code{check_gbif}) \code{gbif_key}, \code{gbif_usable}, plus a human-readable
+\code{note}.
 }
 \description{
 Resolves a vector of high-level taxon names to unambiguous WoRMS AphiaIDs,
-filtering by `kingdom` so homonyms across kingdoms (e.g. *Vertebrata* the
-vertebrate subphylum vs. *Vertebrata* the red-algae genus) collapse to the
+filtering by \code{kingdom} so homonyms across kingdoms (e.g. \emph{Vertebrata} the
+vertebrate subphylum vs. \emph{Vertebrata} the red-algae genus) collapse to the
 intended taxon. Reports, per taxon, whether GBIF's backbone has a usable
 key, so the well-known GBIF gap for ray-finned fish is explicit rather than
-a silent dropout. [GBIF_download()] and [OBIS_download()] call this
+a silent dropout. \code{\link[=GBIF_download]{GBIF_download()}} and \code{\link[=OBIS_download]{OBIS_download()}} call this
 internally; you can also call it directly to sanity-check your group names
 before launching a long download.
 }

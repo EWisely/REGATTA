@@ -13,24 +13,24 @@ parse_vsearch_results(lca_path, userout_path, id_col = "ASV_id")
 sequence;tax, pct_id, alnlen, mism, opens).}
 
 \item{id_col}{Column name to use for the ASV identifier in the
-output (default `"ASV_id"`).}
+output (default \code{"ASV_id"}).}
 }
 \value{
-A data.frame with `id_col` + 7 rank columns + `pct_id`.
-  ASVs in the LCA file with no userout hit get `pct_id = NA`.
+A data.frame with \code{id_col} + 7 rank columns + \code{pct_id}.
+ASVs in the LCA file with no userout hit get \code{pct_id = NA}.
 }
 \description{
-Joins the conservative LCA call from vsearch's `--lcaout` file with
-the percent identity from vsearch's `--userout` file (first hit per
-ASV) and returns a clean per-ASV table: `ASV_id` + 7 lowercase rank
-columns + `pct_id`. Drop-in as `global_table` or `local_table` for
-[reconcile_global_local()] or as the input to [reconcile_checklist()].
+Joins the conservative LCA call from vsearch's \code{--lcaout} file with
+the percent identity from vsearch's \code{--userout} file (first hit per
+ASV) and returns a clean per-ASV table: \code{ASV_id} + 7 lowercase rank
+columns + \code{pct_id}. Drop-in as \code{global_table} or \code{local_table} for
+\code{\link[=reconcile_global_local]{reconcile_global_local()}} or as the input to \code{\link[=reconcile_checklist]{reconcile_checklist()}}.
 }
 \details{
-Use this in preference to [parse_vsearch_userout()] when you have
-both files. The userout's column 2 carries the *best hit's* taxonomy
+Use this in preference to \code{\link[=parse_vsearch_userout]{parse_vsearch_userout()}} when you have
+both files. The userout's column 2 carries the \emph{best hit's} taxonomy
 (potentially species-level even when the top-N hits disagree); the
-LCA file carries the *consensus* across the top-N (often more
+LCA file carries the \emph{consensus} across the top-N (often more
 conservative). Calling reconciliation on the LCA taxonomy matches
 the original code semantics and is methodologically more honest.
 }
