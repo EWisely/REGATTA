@@ -298,6 +298,7 @@ GBIF_download <- function(obis_taxa,
   print("First few lines of higher taxonomic levels:")
   print(head(GBIF_taxa))
   
+  dir.create(here::here("datasets"), recursive = TRUE, showWarnings = FALSE)
   utils::write.csv(GBIF_species, paste(here::here("datasets"), sep = "", "/", gbif_outputname, ".csv"), row.names = FALSE)
 
   print("GBIF Download & Export Complete. Check your datasets folder for the output.")

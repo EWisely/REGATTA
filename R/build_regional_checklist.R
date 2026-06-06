@@ -68,6 +68,7 @@ build_regional_checklist <- function(comb_inputnames = c("GBIF_Species",
 
   message(nrow(Species_local_comb), " unique species found")
 
+  dir.create(here::here("custom_db"), recursive = TRUE, showWarnings = FALSE)
   readr::write_delim(
     Species_local_comb,
     paste(here::here("custom_db"), sep = "", "/", comb_outputname, ".txt"),

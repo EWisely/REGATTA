@@ -68,6 +68,7 @@ Local_csv_download <- function(loc_csvs,
   }
 
   Local_species <- unique(Local_species)
+  dir.create(here::here("datasets"), recursive = TRUE, showWarnings = FALSE)
   out_path <- file.path(here::here("datasets"), paste0(loc_outputname, ".csv"))
   utils::write.csv(Local_species, out_path, row.names = FALSE)
   message("Local species CSV written to ", out_path)

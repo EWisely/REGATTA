@@ -145,6 +145,7 @@ OBIS_download <- function(obis_taxa,
   
   print("First few rows of output: ")
   print(utils::head(obis_sp))
+  dir.create(here::here("datasets"), recursive = TRUE, showWarnings = FALSE)
   utils::write.csv(obis_sp, paste(here::here("datasets"), sep = "", "/", obis_outputname, ".csv"), row.names = FALSE)
 
   print("OBIS download complete.  Check your datasets folder for the output.")
