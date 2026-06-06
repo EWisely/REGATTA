@@ -2,19 +2,30 @@
 % Please edit documentation in R/build_regional_checklist.R
 \name{build_regional_checklist}
 \alias{build_regional_checklist}
-\title{Build a regional species checklist from GBIF, OBIS, and Local sources}
+\title{Build a regional species checklist from GBIF, OBIS, and local sources}
 \usage{
 build_regional_checklist(
-  comb_inputnames = c("GBIF_Species", "Local_Species", "OBIS_Species"),
+  comb_inputnames = c("GBIF_Species", "OBIS_Species"),
+  local_csvs = NULL,
   comb_outputname = "Comprehensive_species_list"
 )
 }
 \arguments{
 \item{comb_inputnames}{A character vector of basenames (no \code{.csv}
-extension) of the per-source CSVs in \verb{checklist_sources/}. Each entry is
-optional: you can supply just one source or all three. Default
-matches the default output names of \code{\link[=GBIF_download]{GBIF_download()}},
-\code{\link[=Local_csv_download]{Local_csv_download()}}, and \code{\link[=OBIS_download]{OBIS_download()}}.}
+extension) of the per-source CSVs in \verb{checklist_sources/} -- i.e. the
+outputs of \code{\link[=GBIF_download]{GBIF_download()}} and \code{\link[=OBIS_download]{OBIS_download()}}. Each entry is
+optional; supply whichever of the two web sources you have. Default
+matches the default output names of \code{\link[=GBIF_download]{GBIF_download()}} and
+\code{\link[=OBIS_download]{OBIS_download()}}.}
+
+\item{local_csvs}{Optional character vector of local checklist CSVs to
+fold in. Each entry may be a path (absolute, or relative to your
+working directory) to a file anywhere on disk, \strong{or} a bare filename
+for a CSV in \verb{checklist_sources/}. Each must have columns named exactly
+\code{Genus} and \code{Species}; rows are normalized to \code{"Genus species"} and
+tagged \code{Source = "Local_csv"}, and rows with \code{Species == "sp."} are
+dropped. Point this straight at a checklist kept in another project --
+nothing is copied.}
 
 \item{comb_outputname}{Basename (no \code{.txt} extension) of the
 combined output file under \verb{local_database_checklist/}. Default
@@ -23,16 +34,17 @@ you will pass this path into \code{\link[=taxonomize_checklist]{taxonomize_check
 }
 \value{
 Invisibly NULL. Writes
-\verb{local_database_checklist/<comb_outputname>.txt} as a side effect. The file is
-tab-delimited with one species per row plus a \code{Source} column
+\verb{local_database_checklist/<comb_outputname>.txt} as a side effect. The
+file is tab-delimited with one species per row plus a \code{Source} column
 recording which input each species came from.
 }
 \description{
-Reads the per-source CSVs written by \code{\link[=GBIF_download]{GBIF_download()}},
-\code{\link[=OBIS_download]{OBIS_download()}}, and \code{\link[=Local_csv_download]{Local_csv_download()}}, stacks them,
-deduplicates, drops any literal \code{"NA"} species rows, and writes the
-result as a tab-delimited \code{.txt} file under \verb{local_database_checklist/}. The
-output is the input to \code{\link[=taxonomize_checklist]{taxonomize_checklist()}}.
+Reads the per-source CSVs written by \code{\link[=GBIF_download]{GBIF_download()}} and
+\code{\link[=OBIS_download]{OBIS_download()}}, plus any local species CSVs you supply directly,
+stacks them, deduplicates, drops any literal \code{"NA"} species rows, and
+writes the result as a tab-delimited \code{.txt} file under
+\verb{local_database_checklist/}. The output is the input to
+\code{\link[=taxonomize_checklist]{taxonomize_checklist()}}.
 }
 \details{
 Run this function \strong{once per taxonomic group} (fish, crustaceans,
@@ -42,14 +54,13 @@ megalist defeats the filter.
 }
 \examples{
 \dontrun{
-# The names below are the basenames of files in checklist_sources/ that
-# GBIF_download(), OBIS_download(), and Local_csv_download() wrote.
-# comb_outputname is yours to pick; suggested convention is
-# Comprehensive_<region>_<group>_list but it's not required.
+# GBIF/OBIS basenames are files in checklist_sources/ that the two
+# downloaders wrote; local_csvs are raw Genus+Species CSVs anywhere on
+# disk (no copying). comb_outputname is yours to pick.
 build_regional_checklist(
   comb_inputnames = c("GBIF_my_region_my_group",
-                      "OBIS_my_region_my_group",
-                      "Local_my_region_my_group"),
+                      "OBIS_my_region_my_group"),
+  local_csvs      = "~/other_project/data/my_local_checklist.csv",
   comb_outputname = "Comprehensive_my_region_my_group_list"
 )
 }

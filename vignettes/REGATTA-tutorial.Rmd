@@ -104,16 +104,12 @@ GBIF_download(
   gbif_outputname = "GBIF_galapagos_fish"
 )
 
-# Optional: add a local checklist CSV (needs Genus + Species columns).
-Local_csv_download(
-  loc_csvs       = "2016Aug24_Tirado-Sanchez_et_al_Galapagos_Pisces_Checklist.csv",
-  loc_outputname = "Local_galapagos_fish"
-)
-
-# Stack + dedupe into one regional list.
+# Stack + dedupe GBIF and OBIS into one regional list, optionally folding in
+# a local checklist CSV (needs Genus + Species columns) from anywhere on
+# disk -- no need to copy it into the project first.
 build_regional_checklist(
-  comb_inputnames = c("OBIS_galapagos_fish", "GBIF_galapagos_fish",
-                      "Local_galapagos_fish"),
+  comb_inputnames = c("OBIS_galapagos_fish", "GBIF_galapagos_fish"),
+  local_csvs      = "2016Aug24_Tirado-Sanchez_et_al_Galapagos_Pisces_Checklist.csv",
   comb_outputname = "comprehensive_galapagos_fish_list"
 )
 ```
