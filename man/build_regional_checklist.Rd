@@ -23,9 +23,10 @@ fold in. Each entry may be a path (absolute, or relative to your
 working directory) to a file anywhere on disk, \strong{or} a bare filename
 for a CSV in \verb{checklist_sources/}. Each must have columns named exactly
 \code{Genus} and \code{Species}; rows are normalized to \code{"Genus species"} and
-tagged \code{Source = "Local_csv"}, and rows with \code{Species == "sp."} are
-dropped. Point this straight at a checklist kept in another project --
-nothing is copied.}
+tagged \code{Source = "Local_csv"}. A \code{Species} value of \code{"sp."} keeps the
+genus alone (no epithet), so the genus still enters the checklist.
+Point this straight at a checklist kept in another project -- nothing
+is copied.}
 
 \item{comb_outputname}{Basename (no \code{.txt} extension) of the
 combined output file under \verb{local_database_checklist/}. Default

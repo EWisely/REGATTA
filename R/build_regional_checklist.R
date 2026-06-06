@@ -28,9 +28,10 @@
 #'   working directory) to a file anywhere on disk, **or** a bare filename
 #'   for a CSV in `checklist_sources/`. Each must have columns named exactly
 #'   `Genus` and `Species`; rows are normalized to `"Genus species"` and
-#'   tagged `Source = "Local_csv"`, and rows with `Species == "sp."` are
-#'   dropped. Point this straight at a checklist kept in another project --
-#'   nothing is copied.
+#'   tagged `Source = "Local_csv"`. A `Species` value of `"sp."` keeps the
+#'   genus alone (no epithet), so the genus still enters the checklist.
+#'   Point this straight at a checklist kept in another project -- nothing
+#'   is copied.
 #' @param comb_outputname Basename (no `.txt` extension) of the
 #'   combined output file under `local_database_checklist/`. Default
 #'   `"Comprehensive_species_list"`. Choose something descriptive --
@@ -87,9 +88,13 @@ build_regional_checklist <- function(comb_inputnames = c("GBIF_Species",
       stop('Local CSV "', lc, '" needs a column named exactly "Genus".')
     if (!"Species" %in% colnames(db))
       stop('Local CSV "', lc, '" needs a column named exactly "Species".')
-    keep <- db[db$Species != "sp.", , drop = FALSE]
+    # "Genus sp." keeps the genus alone (no epithet) rather than being
+    # dropped, so the genus still enters the regional checklist and a
+    # classifier call can legitimately downgrade to it.
+    is_sp <- trimws(db$Species) == "sp."
     sp <- data.frame(
-      Species = trimws(paste(keep$Genus, keep$Species)),
+      Species = ifelse(is_sp, trimws(db$Genus),
+                       trimws(paste(db$Genus, db$Species))),
       Source  = "Local_csv",
       stringsAsFactors = FALSE
     )
