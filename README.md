@@ -138,11 +138,11 @@ flowchart TD
 
 Create an R project. In its working directory, make two folders:
 
-- `datasets/` — holds the per-source species lists written by
+- `checklist_sources/` — holds the per-source species lists written by
   `GBIF_download()`, `OBIS_download()`, and `Local_csv_download()`.
   Any local checklist CSVs you supply also live here (each must have
   `Genus` and `Species` columns, exact capitalization).
-- `custom_db/` — holds the combined regional checklist
+- `checklist/` — holds the combined regional checklist
   `build_regional_checklist()` writes, the taxonomized `.rds` /
   `.csv` outputs of `taxonomize_checklist()`, and the per-region
   `accessionTaxa.sql` taxonomizr DB if you store it project-local.
@@ -359,7 +359,7 @@ automatically. Outputs land under `<input>/regatta_out/` by default
 # Single-DB workflow (one classifier output, any tool)
 run_regatta(
   input     = "data/MiFish_obi.tab",                  # obitools .tab
-  checklist = "custom_db/my_regional_checklist.rds"   # pick any name
+  checklist = "checklist/my_regional_checklist.rds"   # pick any name
 )
 # → data/regatta_out/{reconcile_checklist/*, regatta_summary.csv, run_log.txt}
 ```
@@ -369,7 +369,7 @@ run_regatta(
 # vsearch input — LCA taxonomy + userout pct_id, joined by ASV id)
 run_regatta(
   input     = c("data/vs_lca.txt", "data/vs_userout.txt"),
-  checklist = "custom_db/my_regional_checklist.rds"   # pick any name
+  checklist = "checklist/my_regional_checklist.rds"   # pick any name
 )
 ```
 
@@ -383,7 +383,7 @@ run_regatta(
     global = "data/obi.tab",
     local  = c("data/vs_lca.txt", "data/vs_userout.txt")
   ),
-  checklist = "custom_db/my_regional_checklist.rds"   # pick any name
+  checklist = "checklist/my_regional_checklist.rds"   # pick any name
 )
 # → data/regatta_out/{
 #     reconcile_global_local/*,
@@ -397,7 +397,7 @@ run_regatta(
 # Folder convention. Drop your files into a folder and run:
 run_regatta(
   input     = "data/my_run/",
-  checklist = "custom_db/my_regional_checklist.rds"   # pick any name
+  checklist = "checklist/my_regional_checklist.rds"   # pick any name
 )
 # The folder may contain any of:
 #   - one classifier file                              → single-DB
@@ -440,11 +440,11 @@ build_regional_checklist(comb_inputnames = c("GBIF_galapagos_fish",
 
 ```r
 my_checklist <- taxonomize_checklist(
-  input    = "custom_db/my_regional_list.txt",        # pick any name —
+  input    = "checklist/my_regional_list.txt",        # pick any name —
   sql_path = "/path/to/accessionTaxa.sql"             # the convention
 )                                                     # `comprehensive_<region>_<group>_list.txt`
 saveRDS(my_checklist,                                 # is just a suggestion
-        "custom_db/my_regional_checklist_taxonomized.rds")
+        "checklist/my_regional_checklist_taxonomized.rds")
 ```
 
 `taxonomize_checklist()` builds the `accessionTaxa.sql` database the first

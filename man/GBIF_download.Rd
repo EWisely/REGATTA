@@ -34,7 +34,7 @@ instead of \code{obis_taxa} when looking up WoRMS IDs. NA reuses
 \href{https://wktmap.com}{wktmap.com} and copy the generated polygon.}
 
 \item{gbif_outputname}{Basename (no \code{.csv} extension) for the output
-file under \verb{datasets/}. Default \code{"GBIF_Species"}.}
+file under \verb{checklist_sources/}. Default \code{"GBIF_Species"}.}
 
 \item{kingdom}{Kingdom used by \code{\link[=resolve_taxa]{resolve_taxa()}} to disambiguate the query
 taxa. Default \code{"Animalia"}; \code{NULL} disables the filter.}
@@ -65,13 +65,13 @@ family walk for a faster, order-only (~97\%) preparation.}
 }
 \value{
 Invisibly NULL. Writes
-\verb{datasets/<gbif_outputname>.csv} as a side effect.
+\verb{checklist_sources/<gbif_outputname>.csv} as a side effect.
 }
 \description{
 Resolves the given high-level taxa via WoRMS, finds GBIF backbone
 keys for the resulting classes, and submits a GBIF occurrence
 download restricted to the polygon. Writes the result to
-\verb{datasets/<gbif_outputname>.csv} and prints the file path. GBIF
+\verb{checklist_sources/<gbif_outputname>.csv} and prints the file path. GBIF
 login credentials must already be set in \verb{~/.Renviron}; see the
 Setup section of the README.
 }

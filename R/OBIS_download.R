@@ -5,7 +5,7 @@
 #'
 #' Pulls an OBIS checklist for the given taxa within a regional WKT
 #' polygon, with optional habitat filters. Writes the result to
-#' `datasets/<obis_outputname>.csv` and prints the file path.
+#' `checklist_sources/<obis_outputname>.csv` and prints the file path.
 #'
 #' @param obis_taxa A character vector of taxon names at any level (OBIS
 #'   recognizes class, order, family, genus, species, etc.). Names are
@@ -23,7 +23,7 @@
 #'   `"POLYGON ((long lat, long lat, ...))"`. Draw a region on
 #'   [wktmap.com](https://wktmap.com) and copy the generated polygon.
 #' @param obis_outputname Basename (no `.csv` extension) for the output
-#'   file under `datasets/`. Default `"OBIS_Species"`. Choose a short
+#'   file under `checklist_sources/`. Default `"OBIS_Species"`. Choose a short
 #'   distinctive name -- you will pass it into
 #'   [build_regional_checklist()] later.
 #' @param marine,freshwater,terrestrial,brackish Habitat filters. TRUE
@@ -38,7 +38,7 @@
 #' as NA.
 #'
 #' @return Invisibly NULL. Writes
-#'   `datasets/<obis_outputname>.csv` as a side effect.
+#'   `checklist_sources/<obis_outputname>.csv` as a side effect.
 #'
 #' @examples
 #' \dontrun{
@@ -145,10 +145,10 @@ OBIS_download <- function(obis_taxa,
   
   print("First few rows of output: ")
   print(utils::head(obis_sp))
-  dir.create(here::here("datasets"), recursive = TRUE, showWarnings = FALSE)
-  utils::write.csv(obis_sp, paste(here::here("datasets"), sep = "", "/", obis_outputname, ".csv"), row.names = FALSE)
+  dir.create(here::here("checklist_sources"), recursive = TRUE, showWarnings = FALSE)
+  utils::write.csv(obis_sp, paste(here::here("checklist_sources"), sep = "", "/", obis_outputname, ".csv"), row.names = FALSE)
 
-  print("OBIS download complete.  Check your datasets folder for the output.")
-  print(paste("Find your output at:", paste(here::here("datasets"), sep = "", "/", obis_outputname, ".csv")), sep = " ")
+  print("OBIS download complete.  Check your checklist_sources folder for the output.")
+  print(paste("Find your output at:", paste(here::here("checklist_sources"), sep = "", "/", obis_outputname, ".csv")), sep = " ")
 }
 

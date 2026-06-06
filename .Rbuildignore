@@ -10,8 +10,8 @@
 ^06_local_vs_global_results$
 ^MiFish_output$
 ^script_03_inputs$
-^datasets$
-^custom_db$
+^checklist_sources$
+^checklist$
 ^reconcile_global_local_out$
 ^reconcile_checklist_out$
 ^stress_

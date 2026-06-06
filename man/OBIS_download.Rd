@@ -34,7 +34,7 @@ instead of \code{obis_taxa} when looking up WoRMS IDs. NA reuses
 \href{https://wktmap.com}{wktmap.com} and copy the generated polygon.}
 
 \item{obis_outputname}{Basename (no \code{.csv} extension) for the output
-file under \verb{datasets/}. Default \code{"OBIS_Species"}. Choose a short
+file under \verb{checklist_sources/}. Default \code{"OBIS_Species"}. Choose a short
 distinctive name -- you will pass it into
 \code{\link[=build_regional_checklist]{build_regional_checklist()}} later.}
 
@@ -47,12 +47,12 @@ NA (default) means no filter.}
 }
 \value{
 Invisibly NULL. Writes
-\verb{datasets/<obis_outputname>.csv} as a side effect.
+\verb{checklist_sources/<obis_outputname>.csv} as a side effect.
 }
 \description{
 Pulls an OBIS checklist for the given taxa within a regional WKT
 polygon, with optional habitat filters. Writes the result to
-\verb{datasets/<obis_outputname>.csv} and prints the file path.
+\verb{checklist_sources/<obis_outputname>.csv} and prints the file path.
 }
 \details{
 The four habitat filters \strong{stack as intersections, not unions}. So

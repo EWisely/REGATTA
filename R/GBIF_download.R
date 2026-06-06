@@ -6,7 +6,7 @@
 #' Resolves the given high-level taxa via WoRMS, finds GBIF backbone
 #' keys for the resulting classes, and submits a GBIF occurrence
 #' download restricted to the polygon. Writes the result to
-#' `datasets/<gbif_outputname>.csv` and prints the file path. GBIF
+#' `checklist_sources/<gbif_outputname>.csv` and prints the file path. GBIF
 #' login credentials must already be set in `~/.Renviron`; see the
 #' Setup section of the README.
 #'
@@ -27,7 +27,7 @@
 #'   `"POLYGON ((long lat, long lat, ...))"`. Draw a region on
 #'   [wktmap.com](https://wktmap.com) and copy the generated polygon.
 #' @param gbif_outputname Basename (no `.csv` extension) for the output
-#'   file under `datasets/`. Default `"GBIF_Species"`.
+#'   file under `checklist_sources/`. Default `"GBIF_Species"`.
 #' @param kingdom Kingdom used by [resolve_taxa()] to disambiguate the query
 #'   taxa. Default `"Animalia"`; `NULL` disables the filter.
 #' @param gbif_descend_to WoRMS rank to walk each query taxon down to before
@@ -61,7 +61,7 @@
 #' (Osteichthyes not recognized, occasional timeouts, etc.).
 #'
 #' @return Invisibly NULL. Writes
-#'   `datasets/<gbif_outputname>.csv` as a side effect.
+#'   `checklist_sources/<gbif_outputname>.csv` as a side effect.
 #'
 #' @examples
 #' \dontrun{
@@ -298,11 +298,11 @@ GBIF_download <- function(obis_taxa,
   print("First few lines of higher taxonomic levels:")
   print(head(GBIF_taxa))
   
-  dir.create(here::here("datasets"), recursive = TRUE, showWarnings = FALSE)
-  utils::write.csv(GBIF_species, paste(here::here("datasets"), sep = "", "/", gbif_outputname, ".csv"), row.names = FALSE)
+  dir.create(here::here("checklist_sources"), recursive = TRUE, showWarnings = FALSE)
+  utils::write.csv(GBIF_species, paste(here::here("checklist_sources"), sep = "", "/", gbif_outputname, ".csv"), row.names = FALSE)
 
-  print("GBIF Download & Export Complete. Check your datasets folder for the output.")
-  print(paste("Output at:", sep = " ", paste(here::here("datasets"), sep = "", "/", gbif_outputname, ".csv")))
+  print("GBIF Download & Export Complete. Check your checklist_sources folder for the output.")
+  print(paste("Output at:", sep = " ", paste(here::here("checklist_sources"), sep = "", "/", gbif_outputname, ".csv")))
   print(paste(backbonekeyno, sep = " ", "backbone keys found out of", classnameno, "classes in list"))
 }
 

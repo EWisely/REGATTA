@@ -8,33 +8,33 @@ Local_csv_download(loc_csvs, loc_outputname = "Local_Species")
 }
 \arguments{
 \item{loc_csvs}{Character vector of CSV file names (\strong{including} the
-\code{.csv} extension) inside the \verb{datasets/} folder. Each CSV must have
+\code{.csv} extension) inside the \verb{checklist_sources/} folder. Each CSV must have
 columns named exactly \code{Genus} and \code{Species} (capitalization matters).}
 
 \item{loc_outputname}{Basename (no \code{.csv} extension) for the output
-file under \verb{datasets/}. Default \code{"Local_Species"}. Choose a
+file under \verb{checklist_sources/}. Default \code{"Local_Species"}. Choose a
 distinctive name -- you will pass it into
 \code{\link[=build_regional_checklist]{build_regional_checklist()}} later.}
 }
 \value{
 Invisibly NULL. Writes
-\verb{datasets/<loc_outputname>.csv} as a side effect.
+\verb{checklist_sources/<loc_outputname>.csv} as a side effect.
 }
 \description{
 Reads one or more CSV files of locally-known species, drops rows
 where \code{Species} is \code{"sp."}, unites \code{Genus} and \code{Species} into a
 single \code{Genus_species} column, and writes the deduplicated result
-to \verb{datasets/<loc_outputname>.csv} along with a \code{Source} column
+to \verb{checklist_sources/<loc_outputname>.csv} along with a \code{Source} column
 marking each row as \code{"Local_csv"}.
 }
 \details{
-Input CSVs live in \verb{datasets/} (alongside the outputs of
+Input CSVs live in \verb{checklist_sources/} (alongside the outputs of
 \code{\link[=GBIF_download]{GBIF_download()}} and \code{\link[=OBIS_download]{OBIS_download()}}). Rows with \code{Species == "sp."} are dropped because they cannot be matched against
 species-level NCBI taxonomy downstream.
 }
 \examples{
 \dontrun{
-# Whatever local checklists you have in datasets/ that carry Genus
+# Whatever local checklists you have in checklist_sources/ that carry Genus
 # and Species columns -- fish, mammals, plants, microbes, whatever.
 # The loc_outputname is yours to pick:
 Local_csv_download(
