@@ -35,7 +35,7 @@
 #   id_col      Column name to use for the ASV identifier in the
 #               output (default "ASV_id").
 #   first_hit_only
-#               TRUE (default) — take only the first row per ASV.
+#               TRUE (default) -- take only the first row per ASV.
 #               FALSE returns every hit, suffixed with `_hit_rank`
 #               for the row's position within the per-ASV block.
 
@@ -48,7 +48,7 @@
 #'
 #' **Use [parse_vsearch_results()] in preference to this function**
 #' when you also have the vsearch LCA file. The userout column-2
-#' taxonomy is the *best hit's* taxonomy per ASV — which can be
+#' taxonomy is the *best hit's* taxonomy per ASV -- which can be
 #' species-level even when vsearch's top-N hits disagree at species.
 #' The LCA file carries the more conservative consensus across the
 #' top-N. This function exists for the rarer case where only the

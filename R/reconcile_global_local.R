@@ -70,7 +70,7 @@
 #
 #   $result    The reconciled per-ASV taxonomy table. EXACTLY 8
 #              columns: id_col + the 7 lowercase rank columns. This
-#              is the REGATTA exchange format — drop-in to any
+#              is the REGATTA exchange format -- drop-in to any
 #              downstream REGATTA function (regatta_checklist_lca),
 #              into phyloseq tax_table(), or into a MetabaR MOTU
 #              table after joining read counts back. No bookkeeping
@@ -90,9 +90,9 @@
 
 #' Reconcile global-DB vs. local-DB classifier outputs
 #'
-#' Given two taxonomy tables for the same set of ASVs — one from a global
+#' Given two taxonomy tables for the same set of ASVs -- one from a global
 #' reference database (e.g. obitools + NCBI/EMBL) and one from a local
-#' curated database (e.g. vsearch + a regional reference) — pick a per-ASV
+#' curated database (e.g. vsearch + a regional reference) -- pick a per-ASV
 #' preferred lineage. The function compares percent identity across the two
 #' databases (the `best_pctid` step) and, when global wins but local also
 #' has an assignment, downgrades the preferred lineage to the LCA of the
@@ -152,7 +152,7 @@ reconcile_global_local <- function(global_table,
   # decision REGATTA records, and they balloon the tracking CSV to
   # hundreds of irrelevant columns. BEST_MATCH_IDS / BEST_MATCH_TAXIDS
   # are NOT dropped by default because they record the obitools
-  # winning accession and taxID — useful audit information. Pass
+  # winning accession and taxID -- useful audit information. Pass
   # tracking_drop_pattern = NULL (or "") to keep everything.
 
   ranks <- c("domain", "phylum", "class", "order", "family", "genus", "species")
@@ -211,7 +211,7 @@ reconcile_global_local <- function(global_table,
   l_rank_cols <- paste0(ranks, sfx[2])
 
   # The two pct_id columns may have collided into <pct_id>_global /
-  # <pct_id>_local if they share a name (the usual case) — or if they
+  # <pct_id>_local if they share a name (the usual case) -- or if they
   # have distinct names, may not be suffixed at all. Resolve both.
   g_pct_col <- if (paste0(global_pct_id_col, sfx[1]) %in% names(joined)) {
     paste0(global_pct_id_col, sfx[1])
@@ -248,7 +248,7 @@ reconcile_global_local <- function(global_table,
   preferred_pctid <- ifelse(local_wins, l_pct, g_pct)
   database <- best_pctid_winner
 
-  # Step: global_lca_to_local — fires where global won best_pctid AND
+  # Step: global_lca_to_local -- fires where global won best_pctid AND
   # local has any assignment to LCA against.
   global_won            <- database == "global"
   global_lca_to_local_triggered <- global_won & l_has_any

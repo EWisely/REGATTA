@@ -164,7 +164,7 @@
 #'
 #' @param taxa Character vector of taxon names. A purely numeric element is
 #'   treated as an explicit WoRMS AphiaID (the escape hatch for a genuinely
-#'   ambiguous name — look it up once, then pass the id).
+#'   ambiguous name -- look it up once, then pass the id).
 #' @param kingdom Target kingdom used to disambiguate WoRMS matches. Default
 #'   `"Animalia"`. Pass `NULL` to disable kingdom filtering.
 #' @param check_gbif If TRUE (default when `rgbif` is installed), add the GBIF
@@ -184,7 +184,7 @@
 #'   or override. A multi-name alias expands into one result row per taxon.
 #'
 #' @return A data.frame with one row per resolved taxon: `input` (the original
-#'   name you passed — repeated when an alias expanded to several taxa),
+#'   name you passed -- repeated when an alias expanded to several taxa),
 #'   `alias_used`, `aphia_id`, `valid_name`, `rank`, `kingdom`, `worms_status`
 #'   (`ok`/`ambiguous`/`wrong_kingdom`/`not_found`), `n_candidates`,
 #'   and (when `check_gbif`) `gbif_key`, `gbif_usable`, plus a human-readable
@@ -259,7 +259,7 @@ resolve_taxa <- function(taxa,
       not_found     = if (!is.na(alias))
                         paste0("not found in WoRMS (alias '", alias, "' also failed)")
                       else "not found in WoRMS",
-      lookup_error  = paste0("WoRMS lookup failed (transient — retry): ",
+      lookup_error  = paste0("WoRMS lookup failed (transient -- retry): ",
                              paste(w$others, collapse = " "))
     )
 

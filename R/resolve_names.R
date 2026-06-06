@@ -107,7 +107,7 @@ resolve_names <- function(input,
   taxa_df  <- as.data.frame(taxa_mat, stringsAsFactors = FALSE)
   rownames(taxa_df) <- NULL
 
-  # Don't clobber existing rank columns silently — if any are already
+  # Don't clobber existing rank columns silently -- if any are already
   # present, append with a "resolved_" prefix so the user can compare.
   rank_collisions <- intersect(ranks, names(df))
   if (length(rank_collisions) > 0) {
@@ -127,7 +127,7 @@ resolve_names <- function(input,
   n_unres <- sum(is.na(lookup$taxID))
   if (n_unres > 0) {
     message(n_unres, " of ", length(lookup$taxID),
-            " name(s) did not resolve in NCBI — see NA rows.")
+            " name(s) did not resolve in NCBI -- see NA rows.")
   }
   n_syn <- sum(lookup$match_type == "synonym", na.rm = TRUE)
   if (n_syn > 0) {

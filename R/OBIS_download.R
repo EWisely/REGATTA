@@ -11,7 +11,7 @@
 #'   recognizes class, order, family, genus, species, etc.). Names are
 #'   validated and disambiguated by [resolve_taxa()] (kingdom-aware) and OBIS
 #'   is then queried **by AphiaID**, so ambiguous names resolve to the right
-#'   taxon — e.g. `"Vertebrata"` returns vertebrates, not the red-algae genus
+#'   taxon -- e.g. `"Vertebrata"` returns vertebrates, not the red-algae genus
 #'   of the same name. Any fish synonym (`Teleostei`, `Actinopteri`,
 #'   `Actinopterygii`, `Osteichthyes`) works.
 #' @param worms_taxa A character vector of substitute taxon names to use
@@ -24,7 +24,7 @@
 #'   [wktmap.com](https://wktmap.com) and copy the generated polygon.
 #' @param obis_outputname Basename (no `.csv` extension) for the output
 #'   file under `datasets/`. Default `"OBIS_Species"`. Choose a short
-#'   distinctive name — you will pass it into
+#'   distinctive name -- you will pass it into
 #'   [build_regional_checklist()] later.
 #' @param marine,freshwater,terrestrial,brackish Habitat filters. TRUE
 #'   returns only species marked in that habitat; FALSE excludes them;
@@ -44,7 +44,7 @@
 #' \dontrun{
 #' # Pacific NW (OCNMS) salmonids and copepods, intentionally allowing
 #' # salmon to slip through the habitat filter. The same pattern works
-#' # for any taxa over any WKT polygon — freshwater insects in
+#' # for any taxa over any WKT polygon -- freshwater insects in
 #' # Germany, terrestrial mammals over a Sonoran Desert polygon, etc.
 #' # obis_outputname is yours to pick.
 #' OBIS_download(

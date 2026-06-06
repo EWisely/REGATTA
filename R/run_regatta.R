@@ -29,7 +29,7 @@
     if ("TAXID" %in% headers && "BEST_IDENTITY" %in% headers) {
       return("obitools_tab")
     }
-    # Scan a window of lines to find the first non-empty col 2 — the
+    # Scan a window of lines to find the first non-empty col 2 -- the
     # LCA file has many rows where unassigned ASVs leave col 2 blank.
     lines <- readLines(path, n = 30)
     for (ln in lines) {
@@ -214,7 +214,7 @@
 #'   * a single file path (single-DB workflow);
 #'   * a length-2 character vector of vsearch `lca` + `userout` paths
 #'     (single-DB workflow using the LCA-correct taxonomy);
-#'   * a folder path (the function scans the folder — see Details for the
+#'   * a folder path (the function scans the folder -- see Details for the
 #'     convention);
 #'   * `list(global = ..., local = ...)` for an explicit two-DB workflow
 #'     where each entry is a single path or a length-2 vsearch pair.
@@ -242,10 +242,10 @@
 #'
 #' **Folder convention:**
 #' \itemize{
-#'   \item One classifier file in the folder → single-DB workflow.
-#'   \item Two vsearch files (LCA + userout) in the folder → single-DB
+#'   \item One classifier file in the folder -> single-DB workflow.
+#'   \item Two vsearch files (LCA + userout) in the folder -> single-DB
 #'     workflow using the joined LCA taxonomy + userout pct_id.
-#'   \item Files starting with `global.*` and `local.*` → two-DB workflow.
+#'   \item Files starting with `global.*` and `local.*` -> two-DB workflow.
 #'     Either side may itself be a vsearch LCA + userout pair (matching
 #'     `global_lca*` + `global_userout*` etc.).
 #' }

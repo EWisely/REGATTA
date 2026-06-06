@@ -6,7 +6,7 @@
 # toward domain, finding the lowest rank present in the checklist,
 # and NA-ing every rank below that match. This is the REGATTA
 # "off-target downgrade" step (originally Pass 3 in
-# Validate_local_assignments.R) — it preserves specificity where the
+# Validate_local_assignments.R) -- it preserves specificity where the
 # regional checklist supports it and downgrades where it doesn't,
 # without using percent-identity heuristics.
 #
@@ -36,7 +36,7 @@
 #     id_col + 7 ranks), or
 #   - a standalone classifier output table from resolve_names,
 #     resolve_taxids, or parse_sintax (ASV_id + 7 ranks + optional
-#     extras — extras are ignored for the LCA itself).
+#     extras -- extras are ignored for the LCA itself).
 #
 # Output: a list with three elements.
 #
@@ -76,7 +76,7 @@
 #'   columns. Additional metadata columns are passed through to `$tracking`
 #'   unless they match `tracking_drop_pattern`.
 #' @param checklist A taxonomized regional checklist (output of
-#'   [taxonomize_checklist()]) — a data.frame with the 7 rank columns.
+#'   [taxonomize_checklist()]) -- a data.frame with the 7 rank columns.
 #' @param id_col ASV identifier column name.
 #' @param output_dir Directory path; defaults to `"reconcile_checklist_out"`.
 #'   Pass NULL to disable file writing.
@@ -138,7 +138,7 @@ reconcile_checklist <- function(taxonomy_table,
     }
   }
 
-  checklist_sets <- lapply(ranks, function(r) unique(na.omit(checklist[[r]])))
+  checklist_sets <- lapply(ranks, function(r) unique(stats::na.omit(checklist[[r]])))
   names(checklist_sets) <- ranks
 
   before    <- taxonomy_table

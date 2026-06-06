@@ -12,12 +12,12 @@
 #'
 #' @param obis_taxa A character vector of taxon names at **class level or
 #'   broader** (GBIF won't accept order/family/genus/species here). List the
-#'   specific classes you want — **avoid broad ambiguous names**. For example
+#'   specific classes you want -- **avoid broad ambiguous names**. For example
 #'   `"Vertebrata"` is ambiguous in WoRMS (the vertebrate subphylum *and* a
 #'   red-algae genus) and errors here; pass the classes instead
 #'   (e.g. `c("Actinopterygii", "Chondrichthyes", "Mammalia", "Aves",
 #'   "Reptilia")`). Names are validated and disambiguated by [resolve_taxa()]
-#'   (kingdom-aware), so you can type any common synonym — e.g. `Teleostei`,
+#'   (kingdom-aware), so you can type any common synonym -- e.g. `Teleostei`,
 #'   `Actinopteri`, `Actinopterygii`, or `Osteichthyes` all work for
 #'   ray-finned fish.
 #' @param worms_taxa A character vector of substitute taxon names to use
@@ -37,7 +37,7 @@
 #'   match drops every fish; descending to **order** hits a rank GBIF
 #'   populates. The resulting keys are unioned with each taxon's direct
 #'   backbone key, so sharks/mammals/birds keep working too. Order is the
-#'   default because it is **fast** (tens of keys, not hundreds — GBIF limits
+#'   default because it is **fast** (tens of keys, not hundreds -- GBIF limits
 #'   concurrent downloads and large key sets are slow to prepare) and reaches
 #'   ~97% of fish families: WoRMS splits the old `Perciformes` into modern
 #'   orders GBIF lacks, but GBIF still files those fish under `Perciformes`,
@@ -46,7 +46,7 @@
 #'   family, additionally add GBIF keys for the *individual families* whose
 #'   GBIF parent at the primary rank is not in the matched set (e.g. families
 #'   GBIF files with no order), lifting coverage from ~97% to ~98%. Because the
-#'   whole search is a single `occ_download` (all keys in one request — the key
+#'   whole search is a single `occ_download` (all keys in one request -- the key
 #'   count does not cost extra downloads against GBIF's concurrent-download
 #'   limit), completeness is the sensible default. The only cost is a second
 #'   WoRMS family walk during preparation. A phylum guard prevents stray
@@ -56,7 +56,7 @@
 #' @details
 #' Takes ~15 minutes to run end to end. The function prints status
 #' ("PREPARING" / "RUNNING") in the console while polling the GBIF
-#' download API; this is normal. GBIF coverage is uneven — see the
+#' download API; this is normal. GBIF coverage is uneven -- see the
 #' Common troubleshooting section of the README for known issues
 #' (Osteichthyes not recognized, occasional timeouts, etc.).
 #'
@@ -77,7 +77,7 @@
 #'
 #' # The same function for any other group + region, e.g. mammals over
 #' # a Sonoran Desert polygon, freshwater insects over a German
-#' # river-basin polygon, soil microbiota over an Antarctic polygon —
+#' # river-basin polygon, soil microbiota over an Antarctic polygon --
 #' # just supply the class-or-broader taxon name(s) and the WKT.
 #' }
 #'
@@ -120,11 +120,11 @@ GBIF_download <- function(obis_taxa,
   # GBIF backbone keys are assembled from up to three sources, kept small and
   # fast while still complete:
   #  (1) DIRECT: each resolved taxon's own backbone key (resolve_taxa's
-  #      gbif_key) — reliable for taxa GBIF has as nodes (Mammalia, Aves,
+  #      gbif_key) -- reliable for taxa GBIF has as nodes (Mammalia, Aves,
   #      Elasmobranchii).
   #  (2) PRIMARY descent (default `gbif_descend_to = "order"`): keys for the
   #      taxon's descendants at that rank. This is the fix for ray-finned fish
-  #      — GBIF's backbone skips the class rank for them (bony fish hang under
+  #      -- GBIF's backbone skips the class rank for them (bony fish hang under
   #      phylum Chordata with NO class node), so a class-level match drops every
   #      fish; descending to ORDER hits a rank GBIF populates. Order is fast
   #      (tens of keys) and reaches ~97% of fish families, because GBIF files
@@ -132,14 +132,14 @@ GBIF_download <- function(obis_taxa,
   #  (3) GAP-FILL families (`gbif_fill_families = TRUE`): for the ~3% of fish
   #      families whose GBIF parent order is NOT in the matched primary set
   #      (GBIF gives them no order, etc.), add just those family keys. This
-  #      lifts coverage to ~98% while adding only a handful of keys — far
+  #      lifts coverage to ~98% while adding only a handful of keys -- far
   #      cheaper than descending everything to family (~10x the keys, a much
   #      slower download, and GBIF throttles concurrent downloads).
   direct_keys <- resolved$gbif_key[!is.na(resolved$gbif_key)]
 
   # Only taxa WITHOUT a usable direct GBIF key need descending. A taxon GBIF
-  # has as a node — sharks/rays under class Elasmobranchii (key 121), Mammalia
-  # (359), Aves (212) — is fully covered by that ONE key, so we skip the
+  # has as a node -- sharks/rays under class Elasmobranchii (key 121), Mammalia
+  # (359), Aves (212) -- is fully covered by that ONE key, so we skip the
   # redundant order/family walk for it. Bony fish have no usable class node, so
   # they fall through to the order descent below.
   descend_ids <- resolved$aphia_id[is.na(resolved$gbif_key)]
@@ -249,10 +249,9 @@ GBIF_download <- function(obis_taxa,
   
   print("Download Complete")
   
-  # Reprint all previous output because the download status stuff clogged the console
-  print("Full class list:")
-  print(class_names)
-  print("Getting backbone keys")
+  # Reprint key info because the download status messages clogged the console
+  print("Taxa walked downstream:")
+  print(primary_names)
   print("GBIF backbone keys:")
   print(backbone_keys)
   

@@ -69,7 +69,7 @@ parse_sintax <- function(input,
   }
 
   taxa_df <- data.frame(
-    setNames(lapply(prefixes, extract_rank, s = sintax), ranks),
+    stats::setNames(lapply(prefixes, extract_rank, s = sintax), ranks),
     stringsAsFactors = FALSE
   )
   for (r in ranks) {

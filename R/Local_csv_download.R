@@ -14,7 +14,7 @@
 #'   columns named exactly `Genus` and `Species` (capitalization matters).
 #' @param loc_outputname Basename (no `.csv` extension) for the output
 #'   file under `datasets/`. Default `"Local_Species"`. Choose a
-#'   distinctive name — you will pass it into
+#'   distinctive name -- you will pass it into
 #'   [build_regional_checklist()] later.
 #'
 #' @details
@@ -29,7 +29,7 @@
 #' @examples
 #' \dontrun{
 #' # Whatever local checklists you have in datasets/ that carry Genus
-#' # and Species columns — fish, mammals, plants, microbes, whatever.
+#' # and Species columns -- fish, mammals, plants, microbes, whatever.
 #' # The loc_outputname is yours to pick:
 #' Local_csv_download(
 #'   loc_csvs       = c("regional_checklist_A.csv", "regional_checklist_B.csv"),
