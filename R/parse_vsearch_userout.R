@@ -74,9 +74,6 @@ parse_vsearch_userout <- function(path,
   if (!file.exists(path)) {
     stop("vsearch userout file not found at ", path)
   }
-  if (!exists("parse_sintax", mode = "function")) {
-    source("parse_sintax.R")
-  }
 
   raw <- utils::read.delim(path, header = FALSE, sep = "\t",
                            stringsAsFactors = FALSE,
