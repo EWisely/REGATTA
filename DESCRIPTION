@@ -1,6 +1,6 @@
 Package: REGATTA
 Type: Package
-Title: Reproducible Eco-Geographic Assignment Through Taxonomic Adjustment
+Title: Reconciling eDNA-Geographic Assignments via Taxon-Table Adjustment
 Version: 0.1.0
 Authors@R: c(
     person("Eldridge", "Wisely", email = "ewisely@ucsd.edu",
