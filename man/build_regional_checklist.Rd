@@ -18,7 +18,7 @@ matches the default output names of \code{\link[=GBIF_download]{GBIF_download()}
 
 \item{comb_outputname}{Basename (no \code{.txt} extension) of the
 combined output file under \verb{custom_db/}. Default
-\code{"Comprehensive_species_list"}. Choose something descriptive —
+\code{"Comprehensive_species_list"}. Choose something descriptive --
 you will pass this path into \code{\link[=taxonomize_checklist]{taxonomize_checklist()}} next.}
 }
 \value{
@@ -36,7 +36,7 @@ output is the input to \code{\link[=taxonomize_checklist]{taxonomize_checklist()
 }
 \details{
 Run this function \strong{once per taxonomic group} (fish, crustaceans,
-marine mammals, ...). Don't mix groups in one call — the
+marine mammals, ...). Don't mix groups in one call -- the
 off-target check downstream is per-group, and a fish-plus-crustacean
 megalist defeats the filter.
 }

@@ -21,7 +21,7 @@ columns. Additional metadata columns are passed through to \verb{$tracking}
 unless they match \code{tracking_drop_pattern}.}
 
 \item{checklist}{A taxonomized regional checklist (output of
-\code{\link[=taxonomize_checklist]{taxonomize_checklist()}}) — a data.frame with the 7 rank columns.}
+\code{\link[=taxonomize_checklist]{taxonomize_checklist()}}) -- a data.frame with the 7 rank columns.}
 
 \item{id_col}{ASV identifier column name.}
 

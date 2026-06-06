@@ -19,7 +19,7 @@ run_regatta(
 \item a single file path (single-DB workflow);
 \item a length-2 character vector of vsearch \code{lca} + \code{userout} paths
 (single-DB workflow using the LCA-correct taxonomy);
-\item a folder path (the function scans the folder — see Details for the
+\item a folder path (the function scans the folder -- see Details for the
 convention);
 \item \code{list(global = ..., local = ...)} for an explicit two-DB workflow
 where each entry is a single path or a length-2 vsearch pair.
@@ -40,7 +40,11 @@ is a file path. Created if missing.}
 BestTaxon/Kraken2-style CSVs whose identifier is named differently
 (e.g. \code{"Hash"}), set this so the wrapper can find the id and, if the
 table is long (one row per sample x ASV), collapse it to one row per
-ASV before resolving.}
+ASV before resolving. If a classifier output has \strong{no} id column at
+all and you name none, the wrapper synthesizes one from the resolved
+NCBI taxID (\verb{taxID_<id>}, or \verb{row_<n>} where unresolved), so the
+pipeline still runs -- though naming a real id column is preferable
+when one exists, since only that path collapses long tables.}
 
 \item{Local_advantage}{TRUE (default): local wins ties at the
 \code{best_pctid} step in \code{\link[=reconcile_global_local]{reconcile_global_local()}}.}
@@ -67,10 +71,10 @@ wrapper never guesses based on contains-"obi" / contains-"vs" heuristics.
 
 \strong{Folder convention:}
 \itemize{
-\item One classifier file in the folder → single-DB workflow.
-\item Two vsearch files (LCA + userout) in the folder → single-DB
+\item One classifier file in the folder -> single-DB workflow.
+\item Two vsearch files (LCA + userout) in the folder -> single-DB
 workflow using the joined LCA taxonomy + userout pct_id.
-\item Files starting with \verb{global.*} and \verb{local.*} → two-DB workflow.
+\item Files starting with \verb{global.*} and \verb{local.*} -> two-DB workflow.
 Either side may itself be a vsearch LCA + userout pair (matching
 \verb{global_lca*} + \verb{global_userout*} etc.).
 }

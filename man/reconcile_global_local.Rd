@@ -61,9 +61,9 @@ REGATTA exchange format).
 }
 }
 \description{
-Given two taxonomy tables for the same set of ASVs — one from a global
+Given two taxonomy tables for the same set of ASVs -- one from a global
 reference database (e.g. obitools + NCBI/EMBL) and one from a local
-curated database (e.g. vsearch + a regional reference) — pick a per-ASV
+curated database (e.g. vsearch + a regional reference) -- pick a per-ASV
 preferred lineage. The function compares percent identity across the two
 databases (the \code{best_pctid} step) and, when global wins but local also
 has an assignment, downgrades the preferred lineage to the LCA of the

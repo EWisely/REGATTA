@@ -13,7 +13,7 @@ columns named exactly \code{Genus} and \code{Species} (capitalization matters).}
 
 \item{loc_outputname}{Basename (no \code{.csv} extension) for the output
 file under \verb{datasets/}. Default \code{"Local_Species"}. Choose a
-distinctive name — you will pass it into
+distinctive name -- you will pass it into
 \code{\link[=build_regional_checklist]{build_regional_checklist()}} later.}
 }
 \value{
@@ -35,7 +35,7 @@ species-level NCBI taxonomy downstream.
 \examples{
 \dontrun{
 # Whatever local checklists you have in datasets/ that carry Genus
-# and Species columns — fish, mammals, plants, microbes, whatever.
+# and Species columns -- fish, mammals, plants, microbes, whatever.
 # The loc_outputname is yours to pick:
 Local_csv_download(
   loc_csvs       = c("regional_checklist_A.csv", "regional_checklist_B.csv"),

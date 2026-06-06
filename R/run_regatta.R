@@ -139,6 +139,27 @@
   unique(df[, keep, drop = FALSE])
 }
 
+#' Ensure a per-ASV id column exists (internal)
+#'
+#' Fallback for classifier outputs that carry no `id_col` and where the user
+#' did not name one: synthesize an id from the NCBI taxID that resolve_names /
+#' resolve_taxids attach (`taxID_<id>`), falling back to a row index
+#' (`row_<n>`) only where the taxID is NA (unresolved). When `id_col` already
+#' exists (the common case -- obitools `ID`, vsearch `ASV_id`, or a user
+#' `Hash`), the table is returned unchanged.
+#' @keywords internal
+#' @noRd
+.regatta_ensure_id_col <- function(tax, id_col = "ASV_id") {
+  if (id_col %in% names(tax)) return(tax)
+  new_id <- if ("taxID" %in% names(tax)) {
+    ifelse(is.na(tax$taxID), paste0("row_", seq_len(nrow(tax))),
+           paste0("taxID_", tax$taxID))
+  } else {
+    paste0("row_", seq_len(nrow(tax)))
+  }
+  cbind(stats::setNames(list(new_id), id_col), tax, stringsAsFactors = FALSE)
+}
+
 #' Read a classifier file or vsearch pair into a tax table (internal)
 #' @keywords internal
 #' @noRd
@@ -151,10 +172,12 @@
       tax <- resolve_taxids(raw, taxid_col = "TAXID", sql_path = sql_path)
       tax$pct_id <- suppressWarnings(as.numeric(raw$BEST_IDENTITY))
       names(tax)[names(tax) == "ID"] <- "ASV_id"
-      return(list(table = tax, format = "obitools_tab"))
+      return(list(table = .regatta_ensure_id_col(tax, id_col),
+                  format = "obitools_tab"))
     }
     if (fmt == "vsearch_userout") {
-      return(list(table = parse_vsearch_userout(paths), format = fmt))
+      return(list(table = .regatta_ensure_id_col(parse_vsearch_userout(paths), id_col),
+                  format = fmt))
     }
     if (fmt == "vsearch_lca") {
       lca <- utils::read.delim(paths, sep = "\t", header = FALSE,
@@ -162,24 +185,24 @@
                                col.names = c("ASV_id", "sintax"))
       tax <- parse_sintax(lca, sintax_col = "sintax")
       tax$pct_id <- NA_real_
-      return(list(table = tax, format = fmt))
+      return(list(table = .regatta_ensure_id_col(tax, id_col), format = fmt))
     }
     if (fmt == "besttaxon") {
       raw <- utils::read.csv(paths, stringsAsFactors = FALSE)
-      if (!id_col %in% names(raw)) {
-        stop("BestTaxon input has no '", id_col, "' column to use as the ",
-             "per-ASV identifier. Pass id_col= to run_regatta() naming the ",
-             "ASV id column in your file (e.g. id_col = \"Hash\"). ",
-             "Found columns: ", paste(names(raw), collapse = ", "))
+      # If the file carries the id column (e.g. a sequence Hash), collapse a
+      # long sample x ASV table to one row per ASV before resolving. If it
+      # carries no id column, skip dedupe and let .regatta_ensure_id_col()
+      # synthesize one from the resolved taxID after lookup.
+      if (id_col %in% names(raw)) {
+        n_in <- nrow(raw)
+        raw  <- .regatta_dedupe_by_id(raw, id_col)
+        if (nrow(raw) < n_in) {
+          message("Collapsed long BestTaxon table from ", n_in, " rows to ",
+                  nrow(raw), " unique ASVs (by ", id_col, ").")
+        }
       }
-      n_in  <- nrow(raw)
-      raw   <- .regatta_dedupe_by_id(raw, id_col)
-      if (nrow(raw) < n_in) {
-        message("Collapsed long BestTaxon table from ", n_in, " rows to ",
-                nrow(raw), " unique ASVs (by ", id_col, ").")
-      }
-      return(list(table = resolve_names(raw, name_col = "BestTaxon",
-                                        sql_path = sql_path), format = fmt))
+      tax <- resolve_names(raw, name_col = "BestTaxon", sql_path = sql_path)
+      return(list(table = .regatta_ensure_id_col(tax, id_col), format = fmt))
     }
     stop("Could not detect format of input file: ", paths)
   }
@@ -188,8 +211,9 @@
     if (all(fmts %in% c("vsearch_lca", "vsearch_userout"))) {
       lca     <- paths[fmts == "vsearch_lca"][1]
       userout <- paths[fmts == "vsearch_userout"][1]
-      return(list(table = parse_vsearch_results(lca_path = lca,
-                                                userout_path = userout),
+      return(list(table = .regatta_ensure_id_col(
+                            parse_vsearch_results(lca_path = lca,
+                                                  userout_path = userout), id_col),
                   format = "vsearch_pair"))
     }
     stop("Two-path input must be a vsearch LCA + userout pair (got ",
@@ -230,7 +254,11 @@
 #'   BestTaxon/Kraken2-style CSVs whose identifier is named differently
 #'   (e.g. `"Hash"`), set this so the wrapper can find the id and, if the
 #'   table is long (one row per sample x ASV), collapse it to one row per
-#'   ASV before resolving.
+#'   ASV before resolving. If a classifier output has **no** id column at
+#'   all and you name none, the wrapper synthesizes one from the resolved
+#'   NCBI taxID (`taxID_<id>`, or `row_<n>` where unresolved), so the
+#'   pipeline still runs -- though naming a real id column is preferable
+#'   when one exists, since only that path collapses long tables.
 #' @param Local_advantage TRUE (default): local wins ties at the
 #'   `best_pctid` step in [reconcile_global_local()].
 #'

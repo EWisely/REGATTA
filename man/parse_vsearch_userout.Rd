@@ -26,7 +26,7 @@ via \code{\link[=parse_sintax]{parse_sintax()}}, and returns a clean table with 
 \details{
 \strong{Use \code{\link[=parse_vsearch_results]{parse_vsearch_results()}} in preference to this function}
 when you also have the vsearch LCA file. The userout column-2
-taxonomy is the \emph{best hit's} taxonomy per ASV — which can be
+taxonomy is the \emph{best hit's} taxonomy per ASV -- which can be
 species-level even when vsearch's top-N hits disagree at species.
 The LCA file carries the more conservative consensus across the
 top-N. This function exists for the rarer case where only the

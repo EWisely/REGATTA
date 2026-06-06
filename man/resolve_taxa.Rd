@@ -15,7 +15,7 @@ resolve_taxa(
 \arguments{
 \item{taxa}{Character vector of taxon names. A purely numeric element is
 treated as an explicit WoRMS AphiaID (the escape hatch for a genuinely
-ambiguous name — look it up once, then pass the id).}
+ambiguous name -- look it up once, then pass the id).}
 
 \item{kingdom}{Target kingdom used to disambiguate WoRMS matches. Default
 \code{"Animalia"}. Pass \code{NULL} to disable kingdom filtering.}
@@ -39,7 +39,7 @@ or override. A multi-name alias expands into one result row per taxon.}
 }
 \value{
 A data.frame with one row per resolved taxon: \code{input} (the original
-name you passed — repeated when an alias expanded to several taxa),
+name you passed -- repeated when an alias expanded to several taxa),
 \code{alias_used}, \code{aphia_id}, \code{valid_name}, \code{rank}, \code{kingdom}, \code{worms_status}
 (\code{ok}/\code{ambiguous}/\code{wrong_kingdom}/\code{not_found}), \code{n_candidates},
 and (when \code{check_gbif}) \code{gbif_key}, \code{gbif_usable}, plus a human-readable
