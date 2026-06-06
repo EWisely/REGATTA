@@ -21,7 +21,7 @@ OBIS_download(
 recognizes class, order, family, genus, species, etc.). Names are
 validated and disambiguated by \code{\link[=resolve_taxa]{resolve_taxa()}} (kingdom-aware) and OBIS
 is then queried \strong{by AphiaID}, so ambiguous names resolve to the right
-taxon — e.g. \code{"Vertebrata"} returns vertebrates, not the red-algae genus
+taxon -- e.g. \code{"Vertebrata"} returns vertebrates, not the red-algae genus
 of the same name. Any fish synonym (\code{Teleostei}, \code{Actinopteri},
 \code{Actinopterygii}, \code{Osteichthyes}) works.}
 
@@ -35,7 +35,7 @@ instead of \code{obis_taxa} when looking up WoRMS IDs. NA reuses
 
 \item{obis_outputname}{Basename (no \code{.csv} extension) for the output
 file under \verb{datasets/}. Default \code{"OBIS_Species"}. Choose a short
-distinctive name — you will pass it into
+distinctive name -- you will pass it into
 \code{\link[=build_regional_checklist]{build_regional_checklist()}} later.}
 
 \item{kingdom}{Kingdom used by \code{\link[=resolve_taxa]{resolve_taxa()}} to disambiguate the query
@@ -65,12 +65,12 @@ as NA.
 \dontrun{
 # Pacific NW (OCNMS) salmonids and copepods, intentionally allowing
 # salmon to slip through the habitat filter. The same pattern works
-# for any taxa over any WKT polygon — freshwater insects in
+# for any taxa over any WKT polygon -- freshwater insects in
 # Germany, terrestrial mammals over a Sonoran Desert polygon, etc.
 # obis_outputname is yours to pick.
 OBIS_download(
   obis_taxa       = c("Salmonidae", "Copepoda"),
-  regional_poly   = "POLYGON ((-124.85 51.75, -129.20 51.15, -128.14 41.87, -122.34 42.00, -121.86 44.62, -122.70 46.59, -121.55 47.87, -124.85 51.75))",
+  regional_poly   = "POLYGON ((-129 52, -122 52, -122 41, -129 41, -129 52))",
   obis_outputname = "OBIS_my_region_my_group",
   marine          = TRUE,
   freshwater      = NA,    # needed to keep salmon, which spans habitats

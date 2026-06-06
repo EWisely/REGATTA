@@ -5,7 +5,7 @@
 ^\.gitattributes$
 ^\.DS_Store$
 ^.*\.zip$
-^Icon$
+^Icon
 ^README\.Rmd$
 ^06_local_vs_global_results$
 ^MiFish_output$
@@ -14,7 +14,9 @@
 ^custom_db$
 ^reconcile_global_local_out$
 ^reconcile_checklist_out$
-^stress_crustaceans_out$
+^stress_
+^REGATTA_.*\.txt$
+^LICENSE\.md$
 ^Proposed REGATTA Report - Sheet1\.csv$
 ^custom_dbComprehensive_species_list\.txt$
 ^\.claude$

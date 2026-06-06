@@ -71,7 +71,7 @@
 #' GBIF_download(
 #'   obis_taxa       = c("Osteichthyes", "Multicrustacea"),
 #'   worms_taxa      = c("Actinopterygii", "Multicrustacea"),
-#'   regional_poly   = "POLYGON ((-124.85 51.75, -129.20 51.15, -128.14 41.87, -122.34 42.00, -121.86 44.62, -122.70 46.59, -121.55 47.87, -124.85 51.75))",
+#'   regional_poly   = "POLYGON ((-129 52, -122 52, -122 41, -129 41, -129 52))",
 #'   gbif_outputname = "GBIF_OCNMS_fish_crust"
 #' )
 #'

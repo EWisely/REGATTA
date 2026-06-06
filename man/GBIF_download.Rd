@@ -17,11 +17,11 @@ GBIF_download(
 \arguments{
 \item{obis_taxa}{A character vector of taxon names at \strong{class level or
 broader} (GBIF won't accept order/family/genus/species here). List the
-specific classes you want — \strong{avoid broad ambiguous names}. For example
+specific classes you want -- \strong{avoid broad ambiguous names}. For example
 \code{"Vertebrata"} is ambiguous in WoRMS (the vertebrate subphylum \emph{and} a
 red-algae genus) and errors here; pass the classes instead
 (e.g. \code{c("Actinopterygii", "Chondrichthyes", "Mammalia", "Aves", "Reptilia")}). Names are validated and disambiguated by \code{\link[=resolve_taxa]{resolve_taxa()}}
-(kingdom-aware), so you can type any common synonym — e.g. \code{Teleostei},
+(kingdom-aware), so you can type any common synonym -- e.g. \code{Teleostei},
 \code{Actinopteri}, \code{Actinopterygii}, or \code{Osteichthyes} all work for
 ray-finned fish.}
 
@@ -46,7 +46,7 @@ ray-finned fish work: GBIF's backbone has no usable class node for them
 match drops every fish; descending to \strong{order} hits a rank GBIF
 populates. The resulting keys are unioned with each taxon's direct
 backbone key, so sharks/mammals/birds keep working too. Order is the
-default because it is \strong{fast} (tens of keys, not hundreds — GBIF limits
+default because it is \strong{fast} (tens of keys, not hundreds -- GBIF limits
 concurrent downloads and large key sets are slow to prepare) and reaches
 ~97\% of fish families: WoRMS splits the old \code{Perciformes} into modern
 orders GBIF lacks, but GBIF still files those fish under \code{Perciformes},
@@ -56,7 +56,7 @@ which IS matched. The remaining ~3\% are picked up by \code{gbif_fill_families}.
 family, additionally add GBIF keys for the \emph{individual families} whose
 GBIF parent at the primary rank is not in the matched set (e.g. families
 GBIF files with no order), lifting coverage from ~97\% to ~98\%. Because the
-whole search is a single \code{occ_download} (all keys in one request — the key
+whole search is a single \code{occ_download} (all keys in one request -- the key
 count does not cost extra downloads against GBIF's concurrent-download
 limit), completeness is the sensible default. The only cost is a second
 WoRMS family walk during preparation. A phylum guard prevents stray
@@ -78,7 +78,7 @@ Setup section of the README.
 \details{
 Takes ~15 minutes to run end to end. The function prints status
 ("PREPARING" / "RUNNING") in the console while polling the GBIF
-download API; this is normal. GBIF coverage is uneven — see the
+download API; this is normal. GBIF coverage is uneven -- see the
 Common troubleshooting section of the README for known issues
 (Osteichthyes not recognized, occasional timeouts, etc.).
 }
@@ -90,13 +90,13 @@ Common troubleshooting section of the README for known issues
 GBIF_download(
   obis_taxa       = c("Osteichthyes", "Multicrustacea"),
   worms_taxa      = c("Actinopterygii", "Multicrustacea"),
-  regional_poly   = "POLYGON ((-124.85 51.75, -129.20 51.15, -128.14 41.87, -122.34 42.00, -121.86 44.62, -122.70 46.59, -121.55 47.87, -124.85 51.75))",
+  regional_poly   = "POLYGON ((-129 52, -122 52, -122 41, -129 41, -129 52))",
   gbif_outputname = "GBIF_OCNMS_fish_crust"
 )
 
 # The same function for any other group + region, e.g. mammals over
 # a Sonoran Desert polygon, freshwater insects over a German
-# river-basin polygon, soil microbiota over an Antarctic polygon —
+# river-basin polygon, soil microbiota over an Antarctic polygon --
 # just supply the class-or-broader taxon name(s) and the WKT.
 }
 
