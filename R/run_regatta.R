@@ -308,6 +308,9 @@ run_regatta <- function(input,
   } else {
     stop("checklist must be a path to .rds/.csv or a data.frame.")
   }
+  # If a raw (un-taxonomized) checklist was supplied, taxonomize it now with a
+  # warning; a pre-taxonomized checklist passes through unchanged.
+  cl <- .regatta_ensure_taxonomized(cl, sql_path)
 
   log_lines <- c(
     paste0("REGATTA run started: ", format(t_start)),

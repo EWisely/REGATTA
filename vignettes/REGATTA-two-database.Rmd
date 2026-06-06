@@ -60,7 +60,7 @@ run_regatta(
     local  = c("MiFish_vsearch_lca.txt",            # vsearch LCA taxonomy
                "MiFish_vsearch_userout.txt")        # vsearch %ID
   ),
-  checklist = "local_database_checklist/galapagos_fish_checklist.rds",
+  checklist = "local_database_checklist/comprehensive_galapagos_fish_list_for_LCA_taxonomized.rds",
   sql_path  = "/path/to/accessionTaxa.sql"
 )
 #> -> regatta_out/{ reconcile_global_local/*, reconcile_checklist/*,

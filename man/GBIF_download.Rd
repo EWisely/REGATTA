@@ -5,13 +5,14 @@
 \title{Download a GBIF species list inside a WKT polygon}
 \usage{
 GBIF_download(
-  obis_taxa,
+  obis_taxa = NULL,
   worms_taxa = NA,
-  regional_poly,
+  regional_poly = NULL,
   gbif_outputname = "GBIF_Species",
   kingdom = "Animalia",
   gbif_descend_to = "order",
-  gbif_fill_families = TRUE
+  gbif_fill_families = TRUE,
+  existing_download = NULL
 )
 }
 \arguments{
@@ -62,6 +63,12 @@ limit), completeness is the sensible default. The only cost is a second
 WoRMS family walk during preparation. A phylum guard prevents stray
 family-name collisions from adding off-target taxa. Set FALSE to skip the
 family walk for a faster, order-only (~97\%) preparation.}
+
+\item{existing_download}{Reuse an already-finished GBIF download instead of
+submitting a new one: a GBIF download \strong{key} string (e.g.
+\code{"0012345-230101000000000"}) or an \code{occ_download} \strong{object}. When set,
+the function skips taxon resolution and submission and just imports that
+download, so \code{obis_taxa} / \code{regional_poly} are not needed. Default \code{NULL}.}
 }
 \value{
 Invisibly NULL. Writes

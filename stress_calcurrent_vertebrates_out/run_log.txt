@@ -1,7 +1,0 @@
-REGATTA run started: 2026-06-05 11:35:03
-Workflow: single
-Output dir: /Users/Eldridge/ClaudeCode/research/REGATTA/stress_calcurrent_vertebrates_out
-classifier (besttaxon): 3948 ASVs
-reconcile_checklist done
-regatta_summary.csv written
-Total elapsed: 1.016571 secs

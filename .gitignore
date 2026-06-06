@@ -2,6 +2,7 @@
 .Rhistory
 .RData
 .Ruserdata
+.DS_Store
 
 # Claude Code
 CLAUDE.local.md
@@ -9,4 +10,3 @@ CLAUDE.local.md
 .claude/projects/
 
 ..Rcheck/
-jaguar_data_test.R

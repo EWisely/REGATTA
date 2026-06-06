@@ -8,6 +8,7 @@ reconcile_checklist(
   taxonomy_table,
   checklist,
   id_col = "ASV_id",
+  sql_path = "accessionTaxa.sql",
   output_dir = "reconcile_checklist_out",
   output_prefix = "reconcile_checklist",
   prior_dir = "reconcile_global_local_out",
@@ -21,9 +22,15 @@ columns. Additional metadata columns are passed through to \verb{$tracking}
 unless they match \code{tracking_drop_pattern}.}
 
 \item{checklist}{A taxonomized regional checklist (output of
-\code{\link[=taxonomize_checklist]{taxonomize_checklist()}}) -- a data.frame with the 7 rank columns.}
+\code{\link[=taxonomize_checklist]{taxonomize_checklist()}}) -- a data.frame with the 7 rank columns. A
+not-yet-taxonomized checklist (a names-only data.frame, a character
+vector, or a path) is accepted too: it is taxonomized on the fly with a
+warning, using \code{sql_path}.}
 
 \item{id_col}{ASV identifier column name.}
+
+\item{sql_path}{Path to the local \code{accessionTaxa.sql} taxonomizr DB, used
+only if \code{checklist} still needs taxonomizing.}
 
 \item{output_dir}{Directory path; defaults to \code{"reconcile_checklist_out"}.
 Pass NULL to disable file writing.}

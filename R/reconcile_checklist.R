@@ -76,8 +76,13 @@
 #'   columns. Additional metadata columns are passed through to `$tracking`
 #'   unless they match `tracking_drop_pattern`.
 #' @param checklist A taxonomized regional checklist (output of
-#'   [taxonomize_checklist()]) -- a data.frame with the 7 rank columns.
+#'   [taxonomize_checklist()]) -- a data.frame with the 7 rank columns. A
+#'   not-yet-taxonomized checklist (a names-only data.frame, a character
+#'   vector, or a path) is accepted too: it is taxonomized on the fly with a
+#'   warning, using `sql_path`.
 #' @param id_col ASV identifier column name.
+#' @param sql_path Path to the local `accessionTaxa.sql` taxonomizr DB, used
+#'   only if `checklist` still needs taxonomizing.
 #' @param output_dir Directory path; defaults to `"reconcile_checklist_out"`.
 #'   Pass NULL to disable file writing.
 #' @param output_prefix Filename prefix for the 3 CSVs. Default
@@ -96,6 +101,7 @@
 reconcile_checklist <- function(taxonomy_table,
                                 checklist,
                                 id_col        = "ASV_id",
+                                sql_path      = "accessionTaxa.sql",
                                 output_dir    = "reconcile_checklist_out",
                                 output_prefix = "reconcile_checklist",
                                 prior_dir     = "reconcile_global_local_out",
@@ -120,9 +126,12 @@ reconcile_checklist <- function(taxonomy_table,
     stop("taxonomy_table is missing required columns: ",
          paste(missing_t, collapse = ", "))
   }
+  # Accept a not-yet-taxonomized checklist: taxonomize on the fly (with a
+  # warning) so the LCA still runs. A pre-taxonomized checklist is unchanged.
+  checklist <- .regatta_ensure_taxonomized(checklist, sql_path)
   missing_c <- setdiff(ranks, names(checklist))
   if (length(missing_c) > 0) {
-    stop("checklist is missing required rank columns: ",
+    stop("checklist is missing required rank columns after taxonomizing: ",
          paste(missing_c, collapse = ", "))
   }
 

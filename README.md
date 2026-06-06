@@ -4,7 +4,7 @@
 [![R-CMD-check](https://github.com/EWisely/REGATTA/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/EWisely/REGATTA/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
-**Reproducible Eco-Geographic Assignment Through Taxonomic Adjustment**
+**Reconciling eDNA-Geographic Assignments via Taxon-Table Adjustment**
 
 An R package for correcting off-target species assignments in eDNA
 metabarcoding results using a regional species checklist — without manual
@@ -184,27 +184,24 @@ argument.
 ```r
 poly <- "POLYGON ((-117.4 32.0, -91.9 -6.3, -81.4 -6.3, -76.1 7.7, -82.1 8.6, -104.2 20.3, -112.5 32.2, -117.4 32.0))"
 
-GBIF_download(obis_taxa = "fish", regional_poly = poly,
-              gbif_outputname = "GBIF_galapagos_fish")
-OBIS_download(obis_taxa = "fish", regional_poly = poly,
-              obis_outputname = "OBIS_galapagos_fish",
-              marine = TRUE, terrestrial = FALSE)
-
+# One call: downloads OBIS (default on) and/or GBIF (default off), folds in
+# any local CSV, writes the two regional lists, and taxonomizes the _for_LCA
+# list in the background -> ..._for_LCA_taxonomized.rds, ready for the LCA.
 build_regional_checklist(
-  region          = "galapagos",
-  taxa            = "fish",
-  comb_inputnames = c("GBIF_galapagos_fish", "OBIS_galapagos_fish"),
-  local_csvs      = "~/other_project/Tirado-Sanchez_Galapagos_Pisces.csv"
+  region        = "galapagos",   # names the output files
+  label         = "fish",        # short filename label (kept separate from taxa)
+  taxa          = "fish",        # the query passed to the downloaders
+  regional_poly = poly,
+  OBIS          = TRUE,          # primary source (default)
+  GBIF          = FALSE,         # off by default; TRUE = fresh download, or a key/object to reuse one
+  CSV           = "~/other_project/Tirado-Sanchez_Galapagos_Pisces.csv",
+  marine        = TRUE, terrestrial = FALSE,
+  sql_path      = "/path/to/accessionTaxa.sql"
 )
-# Writes comprehensive_galapagos_fish_list_{for_making_localdb,for_LCA}.txt
-
-# Taxonomize the _for_LCA list (it keeps genus-level entries) for the LCA step.
-my_checklist <- taxonomize_checklist(
-  input    = "local_database_checklist/comprehensive_galapagos_fish_list_for_LCA.txt",
-  sql_path = "/path/to/accessionTaxa.sql"
-)
-saveRDS(my_checklist,
-        "local_database_checklist/galapagos_fish_checklist.rds")
+# Writes, under local_database_checklist/:
+#   comprehensive_galapagos_fish_list_for_making_localdb.txt   (species only -> CRABS etc.)
+#   comprehensive_galapagos_fish_list_for_LCA.txt              (+ retained genera)
+#   comprehensive_galapagos_fish_list_for_LCA_taxonomized.rds  (ready for run_regatta)
 ```
 
 ## Per-taxonomic-group separation
@@ -230,8 +227,8 @@ groups side-by-side in one project without naming collisions.
 | `resolve_taxa()` | Validate & disambiguate query taxon names against WoRMS (by kingdom); report GBIF backbone coverage. Run standalone to pre-check names. |
 | `GBIF_download()` | Pull a GBIF species list inside a WKT polygon for given taxa. |
 | `OBIS_download()` | Pull an OBIS species list, with optional marine/brackish/freshwater filters. |
-| `build_regional_checklist()` | Merge the GBIF/OBIS outputs and any local `Genus`+`Species` CSVs into a deduplicated regional list. Writes two files named from `region`+`taxa`: a species-only list for building the reference DB, and a `_for_LCA` list that also keeps genus-level entries. |
-| `taxonomize_checklist()` | Resolve a regional list to a 7-rank NCBI taxonomy table (synonym-aware). |
+| `build_regional_checklist()` | **Checklist-building entry point.** Runs OBIS (default) and/or GBIF (off by default; `TRUE` for a fresh download or a key/object to reuse one), folds in any local `Genus`+`Species` CSVs, and writes two lists named from `region`+`label`: a species-only `_for_making_localdb` list (for a reference-DB builder) and a `_for_LCA` list that also keeps genus-level entries. Then taxonomizes the LCA list in the background. |
+| `taxonomize_checklist()` | Resolve a regional list to a 7-rank NCBI taxonomy table (synonym-aware). Runs **in the background** from `build_regional_checklist()`; `reconcile_checklist()`/`run_regatta()` also taxonomize on the fly (with a warning) if handed a raw checklist. Call directly only for inspection/caching. |
 | `parse_sintax()` | Convert vsearch SINTAX taxonomy strings to 7 rank columns. |
 | `parse_vsearch_results()` | Canonical vsearch preprocessor: join a vsearch `lca` (taxonomy) + `--userout` (pct_id) by ASV id. |
 | `parse_vsearch_userout()` | Fallback parser when only a vsearch `--userout` file is available (best-hit taxonomy + pct_id). |
