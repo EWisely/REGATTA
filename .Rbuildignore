@@ -15,7 +15,6 @@
 ^REGATTA_.*\.txt$
 ^LICENSE\.md$
 ^Proposed REGATTA Report - Sheet1\.csv$
-^custom_dbComprehensive_species_list\.txt$
 ^\.claude$
 ^jaguar_data_test\.R$
 ^cran-comments\.md$
