@@ -16,7 +16,6 @@
 ^LICENSE\.md$
 ^Proposed REGATTA Report - Sheet1\.csv$
 ^\.claude$
-^jaguar_data_test\.R$
 ^cran-comments\.md$
 ^doc$
 ^Meta$
