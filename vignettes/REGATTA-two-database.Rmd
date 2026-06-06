@@ -73,7 +73,7 @@ and Stage 2 (checklist) then gave 295 species / 231 genus / 19 family / 1 order
 ## A runnable demonstration (no internet, no database)
 
 `reconcile_global_local()` is pure base R. It runs live here on **real slices
-of the Galapagos MiFish dataset** bundled with the package — 7 real ASVs
+of the Galapagos MiFish dataset** bundled with the package — 12 real ASVs
 classified both ways, chosen to show each decision (you would normally pass the
 whole tables).
 
@@ -98,24 +98,27 @@ rec$tracking[, c("ASV_id", "species_global", "pct_id_global",
                  "preferred_scientific_name")]
 ```
 
-Reading the rows:
+Reading the rows, three outcomes appear:
 
-* **Stegastes arcifrons**, **Lutjanus argentimaculatus**, **Archosargus
-  rhomboidalis**, **Johnrandallia nigrirostris** — the local database made no
-  call, so the global assignment is kept (`preferred_database = global`).
-* **Mugil thoburni** — both databases agree; with `Local_advantage = TRUE`
-  (the default) the tie goes to local.
-* **Epinephelus bontoides** (global) vs. **Epinephelus merra** (local) — global
-  has the higher %ID, but the two disagree at species, so the call is
-  downgraded to the LCA, genus ***Epinephelus*** (`global_lca_to_local`).
-* **Mugil curema** (global) vs. **Mugil thoburni** (local) — same story:
-  downgraded to genus ***Mugil***.
+* **Global only** — *Abudefduf saxatilis* / *taurus*, *Lutjanus
+  argentimaculatus*, *Caranx crysos*, *Prionurus laticlavius* / *biafraensis*,
+  *Archosargus rhomboidalis*: the local database made no call, so the global
+  assignment is kept (`preferred_database = global`).
+* **Both agree** — *Mugil thoburni*, *Lutjanus kasmira*, *Caranx melampygus*:
+  the two databases name the same species; with `Local_advantage = TRUE` (the
+  default) the tie goes to local. The species is kept.
+* **They disagree** — *Epinephelus bontoides* (global) vs. *Epinephelus merra*
+  (local), and *Mugil curema* (global) vs. *Mugil thoburni* (local): the global
+  call has the higher %ID, but because the two databases conflict at species,
+  REGATTA downgrades to the lowest common ancestor — genus ***Epinephelus*** and
+  genus ***Mugil*** (`preferred_database = global_lca_to_local`).
 
-That last ASV (`MiFish_0000222`) is the payoff. In the main tutorial's
+That *Mugil curema* row (`MiFish_0000222`) is the payoff. In the main tutorial's
 single-classifier run, obitools' *Mugil curema* **stayed at species** because
 *M. curema* is on the Galapagos checklist. Here the local database's competing
 *Mugil thoburni* reveals the species-level call is not trustworthy, and the
-two-database step conservatively reports genus *Mugil* instead.
+two-database step conservatively reports genus *Mugil* instead — a downgrade the
+single classifier had no way to make.
 
 Feed the reconciled result straight into the checklist step, exactly as in the
 single-classifier workflow:

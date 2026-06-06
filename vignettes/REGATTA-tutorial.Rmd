@@ -173,9 +173,9 @@ supports.
 
 The core `reconcile_checklist()` step is pure base R. It runs live here against
 two files bundled with the package — both **real slices of the Galapagos MiFish
-dataset**: the taxonomized regional checklist, and a handful of real obitools
-assignments chosen to show each kind of outcome (you would normally pass the
-*whole* classifier table, not a hand-picked slice).
+dataset**: the taxonomized regional checklist, and 12 real obitools assignments
+(across seven genera) chosen to show each kind of outcome. You would normally
+pass the *whole* classifier table, not a hand-picked slice.
 
 ```{r demo}
 library(REGATTA)
@@ -183,7 +183,7 @@ library(REGATTA)
 checklist <- readRDS(system.file(
   "extdata", "galapagos_fish_checklist.rds", package = "REGATTA"))
 
-# 7 real obitools-assigned ASVs from the worked dataset (ASV_id + 7 ranks + pct_id).
+# 12 real obitools-assigned ASVs from the worked dataset (ASV_id + 7 ranks + pct_id).
 tax <- read.csv(system.file(
   "extdata", "mifish_obitools_example.csv", package = "REGATTA"),
   stringsAsFactors = FALSE)
@@ -198,28 +198,46 @@ exchange format (id + 7 ranks), with ranks below each match set to `NA`:
 res$result
 ```
 
-`$tracking` records *why* each row changed — the rank at which it matched the
-regional checklist:
+`$tracking` records *why* each row changed — the input species, the percent
+identity, and the rank at which it matched the regional checklist:
 
 ```{r demo-tracking}
-res$tracking[, c("ASV_id", "before_species", "regatta_match_rank",
+res$tracking[, c("before_species", "pct_id", "regatta_match_rank",
                  "after_genus", "after_family")]
 ```
 
-Reading it row by row:
+**The headline pattern — *within-genus splits.*** Four genera each appear
+twice, once with a species the Galapagos checklist has and once with a congener
+it doesn't, and the two go separate ways *regardless of percent identity*:
 
-* **Johnrandallia nigrirostris** (barberfish) and **Stegastes arcifrons**
-  (a Galapagos damselfish) — on the regional checklist, kept at **species**.
-* **Mugil curema** — obitools' global call. It *is* on the Galapagos checklist,
-  so on this single classifier it stays at **species**. (Hold that thought —
-  `vignette("REGATTA-two-database")` revisits this exact ASV, where a second,
-  locally-curated classifier disagrees and the call gets downgraded.)
-* **Lutjanus argentimaculatus** and **Epinephelus bontoides** — the species
-  aren't on the Galapagos checklist but the genera are, so they downgrade to
-  genus ***Lutjanus*** / ***Epinephelus*** instead of asserting a wrong species.
-* **Archosargus rhomboidalis** — an Atlantic/Caribbean sea bream; neither the
-  species nor the genus is in the Galapagos, so it walks up to family
+| Genus | kept at species (on checklist) | downgraded to genus (off checklist) |
+|---|---|---|
+| *Abudefduf* (sergeant-majors) | *A. saxatilis* — 100% | *A. taurus* — **100%** |
+| *Lutjanus* (snappers) | *L. kasmira* — 100% | *L. argentimaculatus* — 97.6% |
+| *Caranx* (jacks) | *C. melampygus* — 100% | *C. crysos* — 98.8% |
+| *Prionurus* (sawtail surgeonfishes) | *P. laticlavius* — 100% | *P. biafraensis* — 98.8% |
+
+This is the whole point of REGATTA. *Abudefduf taurus* and *A. saxatilis* both
+matched the global database at **100% identity** — a percent-identity cutoff
+would keep both — yet only *A. saxatilis* occurs in the Galapagos, so only the
+regional checklist can tell them apart. The most striking case is *Prionurus
+biafraensis*, a **West African** surgeonfish confidently called at 98.8%:
+clearly not in a Galapagos sample, and pulled back to genus *Prionurus* (the
+local *P. laticlavius* is what's really there). The global database simply has
+no reference for some Galapagos species, so it names the nearest relative it
+*does* have; REGATTA keeps the reliable genus and drops the unreliable species.
+
+The remaining rows show the other outcomes:
+
+* **Epinephelus bontoides** (97.0%) — species not on the checklist, genus is →
+  genus ***Epinephelus***.
+* **Archosargus rhomboidalis** (97.1%) — an Atlantic/Caribbean sea bream;
+  neither species nor genus is in the Galapagos, so it walks up to family
   **Sparidae** (some porgies do occur there).
+* **Mugil curema** (100%) and **Mugil thoburni** (100%) — both on the checklist,
+  kept at **species**. (Hold that thought — `vignette("REGATTA-two-database")`
+  revisits *M. curema*, where a second, locally-curated classifier disagrees
+  and the call gets downgraded.)
 
 `$stats` gives the match-rank distribution for this slice:
 
