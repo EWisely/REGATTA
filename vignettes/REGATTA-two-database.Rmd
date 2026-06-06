@@ -18,6 +18,12 @@ single-classifier workflow; here we cover the extra step for when you have
 
 ## When you'd use this
 
+**Why this matters:** a second, locally-curated database earns its keep two
+ways — it catches species-level conflicts the global database would hide, and
+it recovers regional species the global database has no reference for. But you
+only get those gains if the two classifications are reconciled *honestly*
+before the checklist step, rather than silently trusting whichever ran last.
+
 A common eDNA setup classifies each ASV twice:
 
 - against a **global** reference database (e.g. obitools + NCBI/EMBL), which has
@@ -25,21 +31,25 @@ A common eDNA setup classifies each ASV twice:
 - against a **locally-curated** database (e.g. vsearch+SINTAX + a regional
   reference), which is sparser but regionally trustworthy.
 
-`reconcile_global_local()` reconciles the two **before** the checklist step:
-per ASV it keeps the call with the higher percent identity, and when the global
+`reconcile_global_local()` combines the two **before** the checklist step: per
+ASV it keeps the call with the higher percent identity, and when the global
 call wins but the local database disagrees, it downgrades to the lowest common
 ancestor of the two — so a species-level conflict becomes an honest
-genus-level call instead of silently trusting the global database.
+genus-level call instead of a silent guess.
 
 It's the **same Galapagos MiFish dataset** as the main tutorial: the identical
 1,438 ASVs, now classified a second way.
 
-## The one-call path
+## `run_regatta()`
 
-Pass both results to `run_regatta()` as a named `list(global =, local =)`. It
-runs `reconcile_global_local()`, then `reconcile_checklist()`, in one call;
-formats are auto-detected (here the local side is a vsearch `lca` taxonomy file
-plus a `--userout` file carrying percent identities).
+**Why this matters:** adding a second database doesn't mean running a second
+pipeline. `run_regatta()` runs `reconcile_global_local()` and then
+`reconcile_checklist()` for you, in one call — so the two-database workflow is
+still a single line.
+
+**How:** pass both results as a named `list(global =, local =)`. Formats are
+auto-detected (here the local side is a vsearch `lca` taxonomy file plus a
+`--userout` file carrying the percent identities).
 
 ```{r run, eval = FALSE}
 library(REGATTA)
@@ -67,15 +77,21 @@ classifiers and 546 were assigned by at least one. Stage 1 resolved those:
 | global downgraded to global∩local LCA | 45 |
 
 and Stage 2 (checklist) then gave 295 species / 231 genus / 19 family / 1 order
-/ 892 off-target — compare the main tutorial's single-classifier obitools run
-(287 species), the difference being the local database's contribution.
+/ 892 off-target — versus the main tutorial's single-classifier obitools run
+(287 species). Those extra species-level calls are the local database's
+contribution.
 
-## A runnable demonstration (no internet, no database)
+## `reconcile_global_local()`
 
-`reconcile_global_local()` is pure base R. It runs live here on **real slices
-of the Galapagos MiFish dataset** bundled with the package — 12 real ASVs
-classified both ways, chosen to show each decision (you would normally pass the
-whole tables).
+**Why this matters:** `run_regatta()` calls this for you, but running it
+directly shows exactly how each ASV's two calls were reconciled — which won on
+percent identity, and what REGATTA preferred. It runs live here, with no
+internet and no database.
+
+**How:** pass the two classifier tables. The demo uses **real slices of the
+Galapagos MiFish dataset** bundled with the package — 12 real ASVs classified
+both ways, chosen to show each decision (you would normally pass the whole
+tables).
 
 ```{r demo}
 library(REGATTA)
@@ -98,7 +114,7 @@ rec$tracking[, c("ASV_id", "species_global", "pct_id_global",
                  "preferred_scientific_name")]
 ```
 
-`reconcile_global_local()` has **four** per-ASV outcomes, two genera each here:
+There are **four** per-ASV outcomes, two genera each here:
 
 * **Global only** (the local database made no call → keep global): the six
   checklist-demo genera from the main tutorial — *Abudefduf saxatilis* /
@@ -128,9 +144,13 @@ post <- reconcile_checklist(rec$result, checklist, output_dir = NULL)
 
 ## Same 12 ASVs, both methods, side by side
 
-The point of two databases is what changes versus the single-classifier run.
-Run the main-tutorial method (obitools straight to the checklist) on the same
-inputs and compare the final call:
+**Why this matters:** whether a second database is worth it comes down to what
+actually changes versus the single-classifier run — and the changes go both
+ways: some calls become *less* specific (a conflict caught), some become *more*
+specific (a regional species recovered).
+
+**How:** run the main-tutorial method (obitools straight to the checklist) on
+the same inputs and compare the final call:
 
 ```{r compare}
 single <- reconcile_checklist(global, checklist, output_dir = NULL)
@@ -162,6 +182,12 @@ different, instructive way:
   less.
 
 ## Inspecting and tuning
+
+**Why this matters:** the reconciliation is fully auditable and adjustable — you
+can see why each ASV got its call, and change how ties and percent-identity
+scales are handled to fit your databases.
+
+**How:**
 
 - The full Stage 1 audit (`reconcile_global_local/` on disk, or `rec$tracking`)
   carries every input column from both classifiers suffixed `_global` /
