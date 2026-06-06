@@ -191,13 +191,16 @@ OBIS_download(obis_taxa = "fish", regional_poly = poly,
               marine = TRUE, terrestrial = FALSE)
 
 build_regional_checklist(
+  region          = "galapagos",
+  taxa            = "fish",
   comb_inputnames = c("GBIF_galapagos_fish", "OBIS_galapagos_fish"),
-  local_csvs      = "~/other_project/Tirado-Sanchez_Galapagos_Pisces.csv",
-  comb_outputname = "comprehensive_galapagos_fish_list"
+  local_csvs      = "~/other_project/Tirado-Sanchez_Galapagos_Pisces.csv"
 )
+# Writes comprehensive_galapagos_fish_list_{for_making_localdb,for_LCA}.txt
 
+# Taxonomize the _for_LCA list (it keeps genus-level entries) for the LCA step.
 my_checklist <- taxonomize_checklist(
-  input    = "local_database_checklist/comprehensive_galapagos_fish_list.txt",
+  input    = "local_database_checklist/comprehensive_galapagos_fish_list_for_LCA.txt",
   sql_path = "/path/to/accessionTaxa.sql"
 )
 saveRDS(my_checklist,
@@ -227,7 +230,7 @@ groups side-by-side in one project without naming collisions.
 | `resolve_taxa()` | Validate & disambiguate query taxon names against WoRMS (by kingdom); report GBIF backbone coverage. Run standalone to pre-check names. |
 | `GBIF_download()` | Pull a GBIF species list inside a WKT polygon for given taxa. |
 | `OBIS_download()` | Pull an OBIS species list, with optional marine/brackish/freshwater filters. |
-| `build_regional_checklist()` | Merge the GBIF/OBIS outputs and any local `Genus`+`Species` CSVs into one deduplicated regional list. |
+| `build_regional_checklist()` | Merge the GBIF/OBIS outputs and any local `Genus`+`Species` CSVs into a deduplicated regional list. Writes two files named from `region`+`taxa`: a species-only list for building the reference DB, and a `_for_LCA` list that also keeps genus-level entries. |
 | `taxonomize_checklist()` | Resolve a regional list to a 7-rank NCBI taxonomy table (synonym-aware). |
 | `parse_sintax()` | Convert vsearch SINTAX taxonomy strings to 7 rank columns. |
 | `parse_vsearch_results()` | Canonical vsearch preprocessor: join a vsearch `lca` (taxonomy) + `--userout` (pct_id) by ASV id. |

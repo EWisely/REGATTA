@@ -5,12 +5,19 @@
 \title{Build a regional species checklist from GBIF, OBIS, and local sources}
 \usage{
 build_regional_checklist(
+  region,
+  taxa,
   comb_inputnames = c("GBIF_Species", "OBIS_Species"),
-  local_csvs = NULL,
-  comb_outputname = "Comprehensive_species_list"
+  local_csvs = NULL
 )
 }
 \arguments{
+\item{region}{Short region label for the output filenames, e.g.
+\code{"galapagos"}, \code{"california_current"}. Required.}
+
+\item{taxa}{Short taxon-group label for the output filenames, e.g.
+\code{"fish"}, \code{"vertebrates"}, \code{"crustaceans"}. Required.}
+
 \item{comb_inputnames}{A character vector of basenames (no \code{.csv}
 extension) of the per-source CSVs in \verb{checklist_sources/} -- i.e. the
 outputs of \code{\link[=GBIF_download]{GBIF_download()}} and \code{\link[=OBIS_download]{OBIS_download()}}. Each entry is
@@ -24,30 +31,40 @@ working directory) to a file anywhere on disk, \strong{or} a bare filename
 for a CSV in \verb{checklist_sources/}. Each must have columns named exactly
 \code{Genus} and \code{Species}; rows are normalized to \code{"Genus species"} and
 tagged \code{Source = "Local_csv"}. A \code{Species} value of \code{"sp."} keeps the
-genus alone (no epithet), so the genus still enters the checklist.
-Point this straight at a checklist kept in another project -- nothing
-is copied.}
-
-\item{comb_outputname}{Basename (no \code{.txt} extension) of the
-combined output file under \verb{local_database_checklist/}. Default
-\code{"Comprehensive_species_list"}. Choose something descriptive --
-you will pass this path into \code{\link[=taxonomize_checklist]{taxonomize_checklist()}} next.}
+genus alone (no epithet); that genus-level entry goes into the \verb{_for_LCA}
+file only, never the \verb{_for_making_localdb} file. Point this straight at a
+checklist kept in another project -- nothing is copied.}
 }
 \value{
 Invisibly NULL. Writes
-\verb{local_database_checklist/<comb_outputname>.txt} as a side effect. The
-file is tab-delimited with one species per row plus a \code{Source} column
-recording which input each species came from.
+\verb{local_database_checklist/comprehensive_<region>_<taxa>_list_for_making_localdb.txt}
+(species binomials only) and
+\verb{local_database_checklist/comprehensive_<region>_<taxa>_list_for_LCA.txt}
+(binomials plus retained genus-level entries) as a side effect. Each is
+tab-delimited with a \code{Species} and a \code{Source} column.
 }
 \description{
 Reads the per-source CSVs written by \code{\link[=GBIF_download]{GBIF_download()}} and
 \code{\link[=OBIS_download]{OBIS_download()}}, plus any local species CSVs you supply directly,
 stacks them, deduplicates, drops any literal \code{"NA"} species rows, and
-writes the result as a tab-delimited \code{.txt} file under
-\verb{local_database_checklist/}. The output is the input to
-\code{\link[=taxonomize_checklist]{taxonomize_checklist()}}.
+writes \strong{two} tab-delimited \code{.txt} files under
+\verb{local_database_checklist/}, both named from your \code{region} and \code{taxa}:
+\itemize{
+\item \verb{comprehensive_<region>_<taxa>_list_for_making_localdb.txt} --
+species binomials only, for building a regional reference sequence
+database.
+\item \verb{comprehensive_<region>_<taxa>_list_for_LCA.txt} -- the same
+binomials \strong{plus} any retained genus-level entries, for
+\code{\link[=taxonomize_checklist]{taxonomize_checklist()}} -> \code{\link[=reconcile_checklist]{reconcile_checklist()}}.
+}
 }
 \details{
+Genus-level entries (from local \code{Genus / sp.} rows) belong in the LCA
+checklist -- they let a classifier call downgrade to a genus the region
+actually has -- but \strong{not} in the reference-DB list, where a bare genus
+would pull in every species of that genus worldwide and break the
+regional scope. That is why the two files differ by exactly those rows.
+
 Run this function \strong{once per taxonomic group} (fish, crustaceans,
 marine mammals, ...). Don't mix groups in one call -- the
 off-target check downstream is per-group, and a fish-plus-crustacean
@@ -57,13 +74,14 @@ megalist defeats the filter.
 \dontrun{
 # GBIF/OBIS basenames are files in checklist_sources/ that the two
 # downloaders wrote; local_csvs are raw Genus+Species CSVs anywhere on
-# disk (no copying). comb_outputname is yours to pick.
+# disk (no copying). region + taxa name the two output files.
 build_regional_checklist(
-  comb_inputnames = c("GBIF_my_region_my_group",
-                      "OBIS_my_region_my_group"),
-  local_csvs      = "~/other_project/data/my_local_checklist.csv",
-  comb_outputname = "Comprehensive_my_region_my_group_list"
+  region          = "galapagos",
+  taxa            = "fish",
+  comb_inputnames = c("GBIF_galapagos_fish", "OBIS_galapagos_fish"),
+  local_csvs      = "~/other_project/data/my_local_checklist.csv"
 )
+# -> taxonomize the _for_LCA.txt file for reconcile_checklist().
 }
 
 }
