@@ -52,6 +52,11 @@
 #'   WoRMS family walk during preparation. A phylum guard prevents stray
 #'   family-name collisions from adding off-target taxa. Set FALSE to skip the
 #'   family walk for a faster, order-only (~97%) preparation.
+#' @param existing_download Reuse an already-finished GBIF download instead of
+#'   submitting a new one: a GBIF download **key** string (e.g.
+#'   `"0012345-230101000000000"`) or an `occ_download` **object**. When set,
+#'   the function skips taxon resolution and submission and just imports that
+#'   download, so `obis_taxa` / `regional_poly` are not needed. Default `NULL`.
 #'
 #' @details
 #' Takes ~15 minutes to run end to end. The function prints status
@@ -82,14 +87,20 @@
 #' }
 #'
 #' @export
-GBIF_download <- function(obis_taxa,
+GBIF_download <- function(obis_taxa = NULL,
                           worms_taxa = NA,
-                          regional_poly,
+                          regional_poly = NULL,
                           gbif_outputname = "GBIF_Species",
                           kingdom = "Animalia",
                           gbif_descend_to = "order",
-                          gbif_fill_families = TRUE
+                          gbif_fill_families = TRUE,
+                          existing_download = NULL
     ) {
+ if (is.null(existing_download)) {
+  if (is.null(obis_taxa) || is.null(regional_poly))
+    stop("GBIF_download() needs `obis_taxa` and `regional_poly` to submit a ",
+         "new download. To reuse a finished one, pass `existing_download` ",
+         "(a GBIF download key or occ_download object) instead.")
   query_taxa <- if (is.na(worms_taxa[1])) obis_taxa else worms_taxa
 
   # throw an error if polygon is incorrect
@@ -254,6 +265,11 @@ GBIF_download <- function(obis_taxa,
   print(primary_names)
   print("GBIF backbone keys:")
   print(backbone_keys)
+ } else {
+   message("Reusing existing GBIF occ_download (no new request submitted).")
+   GBIF_list <- rgbif::occ_download_get(existing_download) %>%
+     rgbif::occ_download_import()
+ }
   
   
   GBIF_species <- GBIF_list %>% 
