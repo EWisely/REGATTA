@@ -7,9 +7,6 @@
 ^.*\.zip$
 ^Icon
 ^README\.Rmd$
-^06_local_vs_global_results$
-^MiFish_output$
-^script_03_inputs$
 ^checklist_sources$
 ^local_database_checklist$
 ^reconcile_global_local_out$
