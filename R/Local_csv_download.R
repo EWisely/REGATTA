@@ -9,18 +9,22 @@
 #' to `checklist_sources/<loc_outputname>.csv` along with a `Source` column
 #' marking each row as `"Local_csv"`.
 #'
-#' @param loc_csvs Character vector of CSV file names (**including** the
-#'   `.csv` extension) inside the `checklist_sources/` folder. Each CSV must have
-#'   columns named exactly `Genus` and `Species` (capitalization matters).
+#' @param loc_csvs Character vector of CSV files. Each entry may be a path
+#'   (absolute, or relative to your working directory) to a file anywhere on
+#'   disk, **or** a bare filename (including the `.csv` extension) for a CSV
+#'   in the `checklist_sources/` folder. Each CSV must have columns named
+#'   exactly `Genus` and `Species` (capitalization matters).
 #' @param loc_outputname Basename (no `.csv` extension) for the output
 #'   file under `checklist_sources/`. Default `"Local_Species"`. Choose a
 #'   distinctive name -- you will pass it into
 #'   [build_regional_checklist()] later.
 #'
 #' @details
-#' Input CSVs live in `checklist_sources/` (alongside the outputs of
-#' [GBIF_download()] and [OBIS_download()]). Rows with `Species ==
-#' "sp."` are dropped because they cannot be matched against
+#' Each CSV is read from the path you give if that file exists, otherwise
+#' from `checklist_sources/<name>` (alongside the outputs of
+#' [GBIF_download()] and [OBIS_download()]) -- so you can point at a
+#' checklist kept in another project without copying it first. Rows with
+#' `Species == "sp."` are dropped because they cannot be matched against
 #' species-level NCBI taxonomy downstream.
 #'
 #' @return Invisibly NULL. Writes
@@ -40,16 +44,23 @@
 #' @export
 Local_csv_download <- function(loc_csvs,
                                loc_outputname = "Local_Species") {
-  message("Make sure your CSV(s) of local species are in the checklist_sources/ folder ",
-          "of your working directory before running this function.")
+  message("Pass either a path to each CSV (absolute or relative to your ",
+          "working directory), or a bare filename for a CSV kept in the ",
+          "checklist_sources/ folder of your working directory.")
 
   Local_species <- data.frame()
 
   for (i in loc_csvs) {
-    message("Processing ", i)
+    # Use the path as given if it points at an existing file (absolute or
+    # relative to the working directory); otherwise treat it as a bare
+    # filename in checklist_sources/.
+    path <- if (file.exists(i)) i else here::here("checklist_sources", i)
+    if (!file.exists(path))
+      stop("Cannot find local CSV '", i, "'. Give a path to an existing ",
+           "file, or place the file in checklist_sources/ and pass its name.")
+    message("Processing ", path)
 
-    db <- utils::read.csv(here::here("checklist_sources", i),
-                          fileEncoding = "latin1", check.names = FALSE)
+    db <- utils::read.csv(path, fileEncoding = "latin1", check.names = FALSE)
 
     if (!"Genus" %in% colnames(db))
       stop('"Genus" column must exist and be named exactly that')

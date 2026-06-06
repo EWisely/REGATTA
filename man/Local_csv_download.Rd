@@ -7,9 +7,11 @@
 Local_csv_download(loc_csvs, loc_outputname = "Local_Species")
 }
 \arguments{
-\item{loc_csvs}{Character vector of CSV file names (\strong{including} the
-\code{.csv} extension) inside the \verb{checklist_sources/} folder. Each CSV must have
-columns named exactly \code{Genus} and \code{Species} (capitalization matters).}
+\item{loc_csvs}{Character vector of CSV files. Each entry may be a path
+(absolute, or relative to your working directory) to a file anywhere on
+disk, \strong{or} a bare filename (including the \code{.csv} extension) for a CSV
+in the \verb{checklist_sources/} folder. Each CSV must have columns named
+exactly \code{Genus} and \code{Species} (capitalization matters).}
 
 \item{loc_outputname}{Basename (no \code{.csv} extension) for the output
 file under \verb{checklist_sources/}. Default \code{"Local_Species"}. Choose a
@@ -28,8 +30,11 @@ to \verb{checklist_sources/<loc_outputname>.csv} along with a \code{Source} colu
 marking each row as \code{"Local_csv"}.
 }
 \details{
-Input CSVs live in \verb{checklist_sources/} (alongside the outputs of
-\code{\link[=GBIF_download]{GBIF_download()}} and \code{\link[=OBIS_download]{OBIS_download()}}). Rows with \code{Species == "sp."} are dropped because they cannot be matched against
+Each CSV is read from the path you give if that file exists, otherwise
+from \verb{checklist_sources/<name>} (alongside the outputs of
+\code{\link[=GBIF_download]{GBIF_download()}} and \code{\link[=OBIS_download]{OBIS_download()}}) -- so you can point at a
+checklist kept in another project without copying it first. Rows with
+\code{Species == "sp."} are dropped because they cannot be matched against
 species-level NCBI taxonomy downstream.
 }
 \examples{
