@@ -17,7 +17,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Eldridge Wisely \email{ewisely@ucsd.edu}
+\strong{Maintainer}: Eldridge Wisely \email{eldridge.wisely@gmail.com}
 
 Other contributors:
 \itemize{

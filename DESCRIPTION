@@ -3,14 +3,14 @@ Type: Package
 Title: Reconciling eDNA Geographic Assignments via Taxonomy Table Adjustment
 Version: 0.1.0
 Authors@R: c(
-    person("Eldridge", "Wisely", email = "ewisely@ucsd.edu",
+    person("Eldridge", "Wisely", email = "eldridge.wisely@gmail.com",
            role = c("aut", "cre")),
     person("Ella", "Crotty", role = "ctb",
            comment = "Summary-table format designed by Ella Crotty.")
     )
 Author: Eldridge Wisely [aut, cre],
     Ella Crotty [ctb] (Summary-table format designed by Ella Crotty.)
-Maintainer: Eldridge Wisely <ewisely@ucsd.edu>
+Maintainer: Eldridge Wisely <eldridge.wisely@gmail.com>
 Description: Correct off-target species assignments in eDNA metabarcoding
     results by reconciling classifier output against a regional species
     checklist, without manual curation and while preserving as much
