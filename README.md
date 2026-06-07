@@ -158,23 +158,35 @@ available; `run_regatta()` is a thin orchestrator on top of them.
 
 A few things to set up before building your own regional checklist.
 
-**Output locations.** REGATTA functions **return** their results and write
-nothing to disk by default — pass an `output_dir` (downloaders / build) or
-`out_dir` (`run_regatta()`) to also save files in a directory you choose.
-Local checklist CSVs (each with `Genus` and `Species` columns) can live
-anywhere; pass their paths to `build_regional_checklist(CSV = ...)`, no
-copying required.
+**Output locations.** Most REGATTA functions **return** their results and write
+nothing to disk by default — pass an `output_dir` / `out_dir` to also save
+files in a directory you choose. The exception is `build_regional_checklist()`,
+where `output_dir` is **required**: its outputs (taxonomized checklist, source
+lists, methods/provenance) are expensive to regenerate, so they are always
+persisted to the directory you name. Local checklist CSVs (each with `Genus`
+and `Species` columns) can live anywhere; pass their paths to
+`build_regional_checklist(CSV = ...)`, no copying required.
 
-**Credentials & taxonomy DB.** `GBIF_download()` (and `build_regional_checklist(GBIF = TRUE)`)
+**GBIF credentials.** `GBIF_download()` (and `build_regional_checklist(GBIF = TRUE)`)
 needs a free [GBIF account](https://www.gbif.org/user/profile) and authenticates
 with your account credentials — there is no separate "API key". Add
 `GBIF_USER` / `GBIF_PWD` / `GBIF_EMAIL` to your `.Renviron`
 (`usethis::edit_r_environ()`, then restart R). A fresh GBIF download is an
 asynchronous `occ_download` that **takes several minutes** while GBIF assembles
-it server-side. `taxonomize_checklist()`, `resolve_names()`,
-and `resolve_taxids()` need a local NCBI snapshot built by `taxonomizr`; the
-first `taxonomize_checklist()` run builds `accessionTaxa.sql` (~15 min,
-several GB) and reuses it after. Point each function at it via `sql_path`.
+it server-side.
+
+**Taxonomy database.** Taxonomizing needs a local NCBI snapshot built by
+`taxonomizr`. `build_regional_checklist()` keeps one in a **persistent per-user
+cache** (`tools::R_user_dir("REGATTA","cache")`) by default, shared across
+projects/sessions, and builds only the lightweight names+nodes (~a few hundred
+MB, a few minutes — not the multi-GB accession data). On first use it prompts to
+build it (interactively) or, in a script, errors with the one-line build command
+unless `overwrite_taxonomy_files = TRUE`. The cache is a **snapshot** of NCBI
+taxonomy and is never rebuilt silently (for reproducibility) — its build date is
+reported and recorded in `cl$methods`; pass `overwrite_taxonomy_files = TRUE` to
+refresh it in place. Point `sql_path` at your own DB to use it instead.
+(Accession-based input to `run_regatta()` is the only path that needs the full
+`taxonomizr::prepareDatabase()` build with `accession2taxid`.)
 
 **Draw your polygon** at [wktmap.com](https://wktmap.com) and copy the WKT
 `POLYGON ((long lat, long lat, ...))` string for the `regional_poly`
@@ -196,10 +208,10 @@ argument.
 poly <- "POLYGON ((-117.4 32.0, -91.9 -6.3, -81.4 -6.3, -76.1 7.7, -82.1 8.6, -104.2 20.3, -112.5 32.2, -117.4 32.0))"
 
 # One call: downloads OBIS (default on) and/or GBIF (default off), folds in
-# any local CSV, and taxonomizes the LCA list. It RETURNS everything; assign
-# it. (Add output_dir = "some/dir" to also write the files there.)
+# any local CSV, and taxonomizes the LCA list. It RETURNS everything AND writes
+# it to the required output_dir.
 cl <- build_regional_checklist(
-  region        = "galapagos",   # names the output files (if written)
+  region        = "galapagos",   # names the output files
   label         = "fish",        # short filename label (kept separate from taxa)
   taxa          = "fish",        # the query passed to the downloaders
   regional_poly = poly,
@@ -207,7 +219,9 @@ cl <- build_regional_checklist(
   GBIF          = FALSE,         # off by default; TRUE = fresh download, or a key/object to reuse one
   CSV           = "checklist_sources/2016Aug24_Tirado-Sanchez_et_al_Galapagos_Pisces_Checklist.csv",
   marine        = TRUE, terrestrial = FALSE,
-  sql_path      = "/path/to/accessionTaxa.sql"
+  output_dir    = "my_checklists"   # REQUIRED: outputs are written here
+  # sql_path defaults to a persistent per-user cache, built on first use;
+  # overwrite_taxonomy_files = TRUE to refresh it; sql_path = NULL to skip it.
 )
 # cl$for_making_localdb     bare vector of unique species names; write one-per-line
 #                           for a reference-DB builder like CRABS:
@@ -255,7 +269,7 @@ groups side-by-side in one project without naming collisions.
 | `resolve_taxa()` | Validate & disambiguate query taxon names against WoRMS (by kingdom); report GBIF backbone coverage. Run standalone to pre-check names. |
 | `GBIF_download()` | Pull a GBIF species list inside a WKT polygon for given taxa. |
 | `OBIS_download()` | Pull an OBIS species list, with optional marine/brackish/freshwater filters. |
-| `build_regional_checklist()` | **Checklist-building entry point.** Runs OBIS (default) and/or GBIF (off by default; `TRUE` for a fresh download or a key/object to reuse one), folds in any local `Genus`+`Species` CSVs, taxonomizes the LCA list, and **returns** `for_making_localdb` (a bare vector of unique species names, for a reference-DB builder), `checklist_summary` (the full taxonomized table with per-name resolution status), and `for_LCA` (`taxID` + the 7 ranks, ready for the LCA step). Writes them (named from `region`+`label`) only when given `output_dir`. A fresh `GBIF = TRUE` download takes several minutes and needs GBIF account credentials in `~/.Renviron`. |
+| `build_regional_checklist()` | **Checklist-building entry point.** Runs OBIS (default) and/or GBIF (off by default; `TRUE` for a fresh download or a key/object to reuse one), folds in any local `Genus`+`Species` CSVs, taxonomizes the LCA list, and **returns** `for_making_localdb` (a bare vector of unique species names, for a reference-DB builder), `checklist_summary` (the full taxonomized table with per-name resolution status), and `for_LCA` (`taxID` + the 7 ranks, ready for the LCA step), plus `methods` and (when `GBIF = TRUE`) `GBIF_download_citation`. **`output_dir` is required** — outputs (named from `region`+`label`) are always written there. The taxonomy DB defaults to a persistent per-user cache, built on first use; `overwrite_taxonomy_files = TRUE` refreshes a stale snapshot. A fresh `GBIF = TRUE` download takes several minutes and needs GBIF account credentials in `~/.Renviron`. |
 | `taxonomize_checklist()` | Resolve a regional list to a 7-rank NCBI taxonomy table (synonym-aware). Runs **in the background** from `build_regional_checklist()`; `reconcile_checklist()`/`run_regatta()` also taxonomize on the fly (with a warning) if handed a raw checklist. Call directly only for inspection/caching. |
 | `parse_sintax()` | Convert vsearch SINTAX taxonomy strings to 7 rank columns. |
 | `parse_vsearch_results()` | Canonical vsearch preprocessor: join a vsearch `lca` (taxonomy) + `--userout` (pct_id) by ASV id. |

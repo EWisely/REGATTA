@@ -33,8 +33,8 @@
 #'     `NULL` otherwise. Keep it for your paper and to reuse the download via
 #'     `GBIF = <download_key>`.
 #' }
-#' Nothing is written to disk unless you pass `output_dir`; then the outputs are
-#' saved there, named from `region` and `label`.
+#' The outputs are always written to the required `output_dir` (named from
+#' `region` and `label`) and also returned, so the expensive artifacts persist.
 #'
 #' [OBIS_download()], [GBIF_download()], and [taxonomize_checklist()] remain
 #' exported for direct/advanced use, but the typical user only calls this
@@ -64,14 +64,27 @@
 #' @param marine,freshwater,terrestrial,brackish OBIS habitat filters, passed
 #'   to [OBIS_download()]. Defaults keep marine plus anadromous/catadromous
 #'   species and drop only land contaminants.
-#' @param sql_path Path to the local `accessionTaxa.sql` taxonomizr DB used to
-#'   taxonomize the LCA list. If absent, the LCA list is returned
-#'   un-taxonomized and taxonomizing is deferred to the reconcile step.
-#' @param output_dir Optional directory to write outputs into. Default `NULL`
-#'   writes nothing (everything is returned); supply a directory to also save
+#' @param output_dir **Required.** Directory to write the outputs into. The
+#'   expensive artifacts are always saved (so you don't rebuild them):
 #'   `comprehensive_<region>_<label>_list_for_making_localdb.txt` (one name per
-#'   line), `..._checklist_summary.csv`, and `..._for_LCA.rds` (or `.txt` when
-#'   no database was available).
+#'   line), `..._checklist_summary.csv`, `..._for_LCA.rds` (or `.txt` when not
+#'   taxonomized), `..._methods.txt`, and `..._GBIF_download_info.txt` (when a
+#'   GBIF download ran). The same objects are also returned.
+#' @param sql_path Path to the local `accessionTaxa.sql` taxonomizr DB used to
+#'   taxonomize the LCA list. Defaults to a persistent per-user cache
+#'   (`tools::R_user_dir("REGATTA", "cache")`), shared across projects and
+#'   sessions. If the DB is missing, REGATTA prompts to build it (interactive)
+#'   or errors with the one-line build command (non-interactive) unless
+#'   `overwrite_taxonomy_files = TRUE`. Set `sql_path = NULL` to skip
+#'   taxonomization entirely and defer it to the reconcile step. Only
+#'   names+nodes are needed here, so the build uses
+#'   `taxonomizr::prepareDatabase(getAccessions = FALSE)` (a few hundred MB).
+#' @param overwrite_taxonomy_files If `TRUE`, (re)build the taxonomy DB at
+#'   `sql_path` even if one exists -- the way to refresh a stale cached snapshot
+#'   in place without hunting for the file. Default `FALSE` reuses an existing
+#'   DB (reporting its build date and soft-warning if it is old). The DB is a
+#'   snapshot of NCBI taxonomy and is never rebuilt silently, to keep results
+#'   reproducible.
 #' @param kingdom Kingdom used by [resolve_taxa()] to disambiguate query
 #'   taxa in the downloaders. Default `"Animalia"`.
 #' @param gbif_fill_families Passed to [GBIF_download()] for a fresh GBIF run.
@@ -87,21 +100,27 @@
 #'
 #' @examples
 #' \dontrun{
-#' # OBIS (default) + a local checklist, no GBIF, no taxonomizr DB needed yet.
+#' # OBIS (default) + a local checklist. output_dir is required; the default
+#' # cached taxonomy DB is built on first use (prompted) or reused after.
 #' cl <- build_regional_checklist(
 #'   region        = "galapagos",
 #'   label         = "fish",
 #'   taxa          = "fish",
 #'   regional_poly = "POLYGON ((-92 2, -89 2, -89 -2, -92 -2, -92 2))",
-#'   CSV           = "~/other_project/galapagos_fish_checklist.csv"
+#'   CSV           = "~/other_project/galapagos_fish_checklist.csv",
+#'   output_dir    = "my_checklists"
 #' )
-#' run_regatta(input = "MiFish_obitools.tab", checklist = cl$for_LCA,
-#'             sql_path = "/path/to/accessionTaxa.sql")
+#' run_regatta(input = "MiFish_obitools.tab", checklist = cl$for_LCA)
 #'
-#' # Persist the lists to a directory of your choosing:
+#' # Refresh a stale cached taxonomy snapshot in place:
 #' build_regional_checklist(region = "galapagos", label = "fish", taxa = "fish",
 #'   regional_poly = "POLYGON ((-92 2, -89 2, -89 -2, -92 -2, -92 2))",
-#'   sql_path = "/path/to/accessionTaxa.sql", output_dir = "my_checklists")
+#'   output_dir = "my_checklists", overwrite_taxonomy_files = TRUE)
+#'
+#' # Skip taxonomization now and defer it to the reconcile step:
+#' build_regional_checklist(region = "galapagos", label = "fish", taxa = "fish",
+#'   regional_poly = "POLYGON ((-92 2, -89 2, -89 -2, -92 -2, -92 2))",
+#'   output_dir = "my_checklists", sql_path = NULL)
 #' }
 #'
 #' @importFrom utils read.csv
@@ -117,8 +136,11 @@ build_regional_checklist <- function(region,
                                      freshwater = NA,
                                      terrestrial = FALSE,
                                      brackish = NA,
-                                     sql_path = "accessionTaxa.sql",
-                                     output_dir = NULL,
+                                     output_dir,
+                                     sql_path = file.path(
+                                       tools::R_user_dir("REGATTA", "cache"),
+                                       "accessionTaxa.sql"),
+                                     overwrite_taxonomy_files = FALSE,
                                      kingdom = "Animalia",
                                      gbif_fill_families = TRUE) {
   if (!requireNamespace("dplyr", quietly = TRUE)) stop("`dplyr` is required.")
@@ -129,6 +151,12 @@ build_regional_checklist <- function(region,
       !nzchar(trimws(region)) || !nzchar(trimws(label)))
     stop("Provide a non-empty `region` and `label` -- they name the output ",
          'files, e.g. region = "galapagos", label = "fish".')
+  if (missing(output_dir) || is.null(output_dir) || !is.character(output_dir) ||
+      length(output_dir) != 1 || !nzchar(trimws(output_dir)))
+    stop("`output_dir` is required: give a directory to write the checklist ",
+         'outputs into, e.g. output_dir = "my_checklists". The expensive ',
+         "artifacts (taxonomized checklist, source lists) are always saved so ",
+         "you don't have to rebuild them.")
 
   needs_dl <- isTRUE(OBIS) || isTRUE(GBIF)
   if (needs_dl && (is.null(taxa) || is.null(regional_poly)))
@@ -220,26 +248,32 @@ build_regional_checklist <- function(region,
   ranks <- c("domain", "phylum", "class", "order", "family", "genus", "species")
   for_making_localdb <- sort(unique(species_rows$Species))
 
+  # Ensure (or deliberately skip) the taxonomy DB. sql_path = NULL skips
+  # taxonomization entirely and defers it to the reconcile step.
   checklist_summary <- NULL
-  if (file.exists(sql_path)) {
+  db_date <- NA_character_
+  have_db <- !is.null(sql_path) &&
+    .regatta_ensure_taxonomy_db(sql_path, overwrite_taxonomy_files)
+  if (have_db) {
     message("Taxonomizing the LCA checklist ...")
     checklist_summary <- taxonomize_checklist(lca_rows, sql_path = sql_path)
     resolved_rows <- !is.na(checklist_summary$taxID)
     for_LCA <- checklist_summary[resolved_rows, c("taxID", ranks), drop = FALSE]
     rownames(for_LCA) <- NULL
+    db_date <- .regatta_taxonomy_db_date(sql_path)$date
   } else {
-    message("No taxonomizr DB at '", sql_path, "' -- for_LCA is returned as a ",
-            "name list and checklist_summary is NULL; reconcile_checklist()/",
-            "run_regatta() will taxonomize it (with a warning) at the LCA step.")
+    message("for_LCA is returned as a name list and checklist_summary is NULL; ",
+            "reconcile_checklist()/run_regatta() will taxonomize it (with a ",
+            "warning) at the LCA step.")
     for_LCA <- lca_rows
   }
   lca_taxonomized <- all(ranks %in% names(for_LCA))
 
   # --- Methods sentence (real citations only -- pulled live, never invented) -
-  methods <- .regatta_methods(sources_used, regional_poly, gbif_citation)
+  methods <- .regatta_methods(sources_used, regional_poly, gbif_citation, db_date)
 
-  # --- Write only when an output directory is given -----------------------
-  if (!is.null(output_dir)) {
+  # --- Write the outputs (output_dir is required) -------------------------
+  {
     dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
     stem <- paste0("comprehensive_", trimws(region), "_", trimws(label), "_list")
     # CRABS input: one scientific name per line, no header, no columns.
@@ -283,7 +317,8 @@ build_regional_checklist <- function(region,
 # and nothing is hardcoded as a fabricated author/year/DOI. Where a citation
 # cannot be pulled (package not installed, OBIS has no machine citation) the
 # string says so and points the user to the canonical source to fill in.
-.regatta_methods <- function(sources_used, regional_poly, gbif_citation) {
+.regatta_methods <- function(sources_used, regional_poly, gbif_citation,
+                             db_date = NA_character_) {
   today <- as.character(Sys.Date())
   src   <- if (length(sources_used)) paste(sources_used, collapse = ", ") else "the supplied sources"
 
@@ -314,11 +349,96 @@ build_regional_checklist <- function(region,
   else
     paste0("The region was defined by the WKT polygon encompassing ", regional_poly, ".")
 
+  tax_phrase <- if (!is.na(db_date))
+    paste0(" Taxonomy was resolved against an NCBI taxonomy snapshot built ",
+           db_date, " (via the taxonomizr R package).")
+  else ""
+
   paste0(
     "The regional species checklist was built from ", src, " on ", today,
-    " using the R package REGATTA. ", poly_phrase,
+    " using the R package REGATTA. ", poly_phrase, tax_phrase,
     " Please cite the following (verify against your reference manager): ",
     paste(refs, collapse = " | "))
+}
+
+# --- Taxonomy-DB lifecycle helpers --------------------------------------
+# REGATTA caches a persistent taxonomizr DB (default under R_user_dir). The DB
+# is a SNAPSHOT of NCBI taxonomy and goes stale as NCBI changes; we never
+# rebuild it silently (that would make results irreproducible). Instead we
+# report its build date, soft-warn when it is old, and rebuild only on
+# explicit request (overwrite_taxonomy_files = TRUE) or interactive consent.
+
+.regatta_db_build_cmd <- function(sql_path)
+  paste0('taxonomizr::prepareDatabase("', sql_path, '", getAccessions = FALSE)')
+
+# Build/refresh the names+nodes-only DB at sql_path and stamp its build date.
+.regatta_build_taxonomy_db <- function(sql_path) {
+  if (!requireNamespace("taxonomizr", quietly = TRUE))
+    stop("Building the taxonomy DB needs the 'taxonomizr' package. Install it ",
+         'with install.packages("taxonomizr").')
+  dir.create(dirname(sql_path), recursive = TRUE, showWarnings = FALSE)
+  message("Building the NCBI taxonomy DB (names/nodes only) at ", sql_path,
+          " -- this downloads ~hundreds of MB and takes a few minutes ...")
+  taxonomizr::prepareDatabase(sql_path, getAccessions = FALSE)
+  writeLines(as.character(Sys.Date()), paste0(sql_path, ".built_on"))
+  message("Taxonomy DB ready.")
+  invisible(TRUE)
+}
+
+# Build date + its provenance: the sidecar we write when WE build the DB, else
+# the .sql file's modification date (approximate).
+.regatta_taxonomy_db_date <- function(sql_path) {
+  side <- paste0(sql_path, ".built_on")
+  if (file.exists(side)) {
+    d <- tryCatch(trimws(readLines(side, n = 1)), error = function(e) NA_character_)
+    return(list(date = d, source = "REGATTA build"))
+  }
+  if (file.exists(sql_path))
+    return(list(date = as.character(as.Date(file.info(sql_path)$mtime)),
+                source = "file date (approx)"))
+  list(date = NA_character_, source = NA_character_)
+}
+
+# Make sure a usable taxonomy DB is present at sql_path. Returns TRUE if one is
+# available afterward, FALSE if the user (interactively) declined to build one
+# -- in which case taxonomization is deferred to the reconcile step.
+.regatta_ensure_taxonomy_db <- function(sql_path, overwrite_taxonomy_files,
+                                        stale_days = 180L) {
+  if (isTRUE(overwrite_taxonomy_files)) {
+    if (file.exists(sql_path)) {
+      message("overwrite_taxonomy_files = TRUE: replacing the taxonomy DB at ", sql_path)
+      unlink(c(sql_path, paste0(sql_path, ".built_on")))
+    }
+    return(.regatta_build_taxonomy_db(sql_path))
+  }
+  if (file.exists(sql_path)) {
+    info <- .regatta_taxonomy_db_date(sql_path)
+    message("Using NCBI taxonomy snapshot built ", info$date, " (", info$source,
+            "). Pass overwrite_taxonomy_files = TRUE to refresh it.")
+    bd <- suppressWarnings(as.Date(info$date))
+    if (!is.na(bd) && as.numeric(Sys.Date() - bd) > stale_days)
+      warning("This taxonomy snapshot is ", as.numeric(Sys.Date() - bd),
+              " days old; NCBI taxonomy has likely changed since. For a current ",
+              "analysis, rebuild it with overwrite_taxonomy_files = TRUE.",
+              call. = FALSE)
+    return(TRUE)
+  }
+  # DB missing, no overwrite flag.
+  if (interactive()) {
+    ans <- readline(paste0(
+      "No taxonomy DB at '", sql_path, "'. Build one now? ",
+      "(~hundreds of MB, a few minutes) [y/N]: "))
+    if (tolower(trimws(ans)) %in% c("y", "yes"))
+      return(.regatta_build_taxonomy_db(sql_path))
+    message("Skipping the taxonomy-DB build at your request.")
+    return(FALSE)
+  }
+  stop("No taxonomy DB at '", sql_path, "'. In a non-interactive session, ",
+       "build it once with:\n  ", .regatta_db_build_cmd(sql_path),
+       "\nor call build_regional_checklist(..., overwrite_taxonomy_files = TRUE) ",
+       "to build it here, or point sql_path at an existing DB (or sql_path = ",
+       "NULL to skip taxonomization and defer it to the reconcile step).",
+       call. = FALSE)
 }
 
 # FALSE / NULL / NA all mean "this source is off". A non-FALSE value (TRUE, a

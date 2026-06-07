@@ -101,14 +101,14 @@ mistaken for geographically spurious calls and downgraded downstream (and the sa
 your reference database).
 
 **How:** one call pulls the records, merges them, taxonomizes the LCA list, and
-**returns** everything — assign the result. OBIS runs by default (the more
-complete marine source); GBIF is **off by default** because its `occ_download`
-is slow and asynchronous — switch it on with `GBIF = TRUE` for a fresh download,
-or hand it a finished download's key/object to reuse one. Fold in any local
-checklist with `CSV =` (a path anywhere on disk). `region` and `label` name the
-output files *if* you write them; `taxa` is the query. This needs internet (and
-a GBIF account if `GBIF` is on, and a `taxonomizr` database for the background
-taxonomize), so it's shown, not run.
+**returns** everything — and also writes it to the **required** `output_dir`, so
+the expensive artifacts persist (you don't rebuild them). OBIS runs by default
+(the more complete marine source); GBIF is **off by default** because its
+`occ_download` is slow and asynchronous — switch it on with `GBIF = TRUE` for a
+fresh download, or hand it a finished download's key/object to reuse one. Fold
+in any local checklist with `CSV =` (a path anywhere on disk). `region` and
+`label` name the output files; `taxa` is the query. This needs internet (and a
+GBIF account if `GBIF` is on), so it's shown, not run.
 
 > **Turning on GBIF (`GBIF = TRUE`).** A fresh GBIF run submits an
 > `occ_download` job and waits for GBIF to assemble it server-side — this
@@ -152,7 +152,7 @@ saveRDS(cl$GBIF_download_citation, "gbif_provenance.rds")
 poly <- "POLYGON ((-117.421875 31.952162, -91.933594 -6.315299, -81.386719 -6.315299, -76.113281 7.710992, -82.089844 8.581021, -87.011719 13.581921, -104.238281 20.303418, -112.5 32.249974, -117.421875 31.952162))"  # E. Tropical Pacific incl. Galapagos
 
 cl <- build_regional_checklist(
-  region        = "galapagos",   # names the output files (if written)
+  region        = "galapagos",   # names the output files
   label         = "fish",        # ...short, even if `taxa` is a long name list
   taxa          = "fish",        # query: "fish" = ray-finned + sharks/rays/hagfish/lampreys
   regional_poly = poly,
@@ -160,13 +160,29 @@ cl <- build_regional_checklist(
   GBIF          = FALSE,         # off by default; TRUE = fresh download, or a key/object to reuse one
   CSV           = "2016Aug24_Tirado-Sanchez_et_al_Galapagos_Pisces_Checklist.csv",
   marine        = TRUE, terrestrial = FALSE,   # keep marine + diadromous fish, drop land contaminants
-  sql_path      = "/path/to/accessionTaxa.sql"
-  # output_dir  = "my_checklists"              # uncomment to also write the files
+  output_dir    = "my_checklists"              # REQUIRED: where the outputs are written
+  # sql_path defaults to a persistent per-user cache; built on first use.
+  # overwrite_taxonomy_files = TRUE            # rebuild a stale cached snapshot
+  # sql_path = NULL                            # skip taxonomy; defer to reconcile
 )
 ```
 
-`build_regional_checklist()` **returns** a list, writing nothing unless you
-pass `output_dir`:
+> **The taxonomy database (`sql_path`).** Taxonomizing the checklist needs a
+> local NCBI snapshot. By default REGATTA keeps one in a **persistent per-user
+> cache** (`tools::R_user_dir("REGATTA","cache")`), shared across your projects
+> and sessions, and only the lightweight names+nodes are built (a few hundred
+> MB, a few minutes) — not the multi-GB accession data. On first use it prompts
+> to build it (interactive) or, in a script, errors with the one-line build
+> command. The cached DB is a **snapshot** of NCBI taxonomy: REGATTA never
+> rebuilds it silently (that would make results irreproducible) — it reports the
+> snapshot's build date and records it in `cl$methods`. When you want fresh
+> taxonomy for a new analysis, pass `overwrite_taxonomy_files = TRUE` to rebuild
+> it in place (no need to hunt down the cache file). Point `sql_path` at your
+> own DB to use it instead, or set `sql_path = NULL` to skip taxonomization and
+> defer it to the reconcile step.
+
+`build_regional_checklist()` **returns** a list (and writes the same outputs to
+`output_dir`):
 
 * `cl$for_making_localdb` — a bare character vector of the unique species
   binomials (no columns). This is the input for FASTA-building tools like
@@ -183,11 +199,11 @@ pass `output_dir`:
 * `cl$for_LCA` — the `taxID` column plus the 7 taxonomic ranks, cleaned and
   ready to hand straight to `run_regatta(checklist = cl$for_LCA)`.
 * `cl$methods` — a ready-to-adapt **methods/provenance sentence**: which sources
-  were used, the date, the WKT polygon, and the citations to include (REGATTA,
-  the OBIS/GBIF R clients, the OBIS/GBIF databases). The R-package citations are
-  pulled live from `citation()` and the GBIF line uses your download's own DOI —
-  nothing is invented, but **verify each reference against your own reference
-  manager** before submission.
+  were used, the date, the WKT polygon, the **NCBI taxonomy snapshot date**, and
+  the citations to include (REGATTA, the OBIS/GBIF R clients, the OBIS/GBIF
+  databases). The R-package citations are pulled live from `citation()` and the
+  GBIF line uses your download's own DOI — nothing is invented, but **verify
+  each reference against your own reference manager** before submission.
 * `cl$GBIF_download_citation` — present **only when `GBIF = TRUE`** (a fresh
   download): the **download key** (reuse with `GBIF = cl$GBIF_download_citation$download_key`)
   and the **GBIF citation/DOI** you must cite. Keep this — see above.
