@@ -14,16 +14,24 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 ## What REGATTA does, and what you give it
 
 Your classifier confidently assigns eDNA reads to species that don't live in
-your study area, because the closest match in a global reference database is
-often a relative from the other side of the world. The DNA isn't wrong — the
-reference database is geographically and genetically incomplete and carries
-outdated names, which together produce geographically spurious species-level
-calls. REGATTA reconciles those calls against a regional species checklist,
+your study area — within the group your primer targets (e.g. a freshwater fish
+called from marine MiFish data). The DNA isn't wrong; the species-level *name*
+is geographically implausible. This happens when the true local species is
+**absent from the reference database**, so the read matches its nearest
+sequenced relative (often from the other side of the world) at the amplified
+region — and it can also reflect lab contamination or degraded input DNA. Such
+a call is **not** off-target amplification (it's still a fish); it is a
+geographically spurious species-level assignment.
+
+REGATTA reconciles those calls against a regional species checklist,
 downgrading the taxonomic specificity of any assignment to a taxon with no
 regional record — with **no hand-curated reference database** and **no blanket
 percent-identity cutoff** that would
 throw away good species-level calls. It walks each assignment up the taxonomic
-tree only as far as the regional checklist forces, and no further.
+tree only as far as the regional checklist forces, and no further. (A genuinely
+*off-target* amplification — a non-target group, such as an invertebrate picked
+up by a fish primer — is a separate phenomenon; running one checklist per
+target group, below, keeps those visible too.)
 
 You give REGATTA three things:
 
@@ -349,7 +357,8 @@ CSVs per stage):
   classifier runs against each other before the checklist step. See
   `vignette("REGATTA-two-database")` and `?reconcile_global_local`.
 * **One pass per primer.** Run the pipeline once per taxonomic group your
-  primers target. Mixing groups into one megalist lets a primer's incidental
-  amplification of another group slip through unflagged.
+  primers target. This also keeps genuine off-target amplifications (a
+  non-target group, e.g. an invertebrate picked up by a fish primer) visible;
+  mixing groups into one megalist lets them pass unflagged.
 * **Pre-check your taxon names** with `resolve_taxa()` before a long download,
   and see the README troubleshooting section for GBIF/OBIS specifics.

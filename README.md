@@ -15,11 +15,15 @@ specificity as the regional evidence supports.
 ## The problem
 
 Global reference databases (NCBI, EMBL, etc.) confidently assign eDNA reads
-to species that don't actually live in your study area, because the closest
-match in the database is a relative from somewhere else in the world. The
-usual fixes — hand-curating a local reference database, or applying a flat
-percent-identity cutoff — are either non-reproducible or sacrifice
-specificity unnecessarily.
+to species that don't actually live in your study area — within the group
+your primer targets (e.g. a freshwater fish called from marine fish-primer
+data). This is **not** off-target amplification: the read is still a fish, but
+the species-level *name* is geographically implausible. It typically happens
+because the true local species is absent from the database, so the read
+matches its nearest sequenced relative at the amplified region; lab
+contamination or degraded input DNA can contribute too. The usual fixes —
+hand-curating a local reference database, or applying a flat percent-identity
+cutoff — are either non-reproducible or sacrifice specificity unnecessarily.
 
 ## The fix
 
@@ -230,9 +234,11 @@ cl <- build_regional_checklist(
 
 Run the pipeline **once per taxonomic group** your primer targets — one pass
 for fish (with a fish-only checklist), a separate pass for crustaceans, and
-so on. Mixing groups into one megalist defeats the per-group reconciliation:
-a MiFish primer that incidentally amplifies a crustacean would pass through a
-fish+crustacean checklist instead of being flagged.
+so on. This also keeps genuine *off-target amplifications* visible — a
+non-target group (e.g. a crustacean picked up by a fish-targeting MiFish
+primer). Mixing groups into one megalist hides them: that crustacean would
+pass through a fish+crustacean checklist instead of standing out against a
+fish-only one.
 
 Nothing in the pipeline is fish-, marine-, or Galapagos-specific — the
 examples use Galapagos fish only because that's what the package was
