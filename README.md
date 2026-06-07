@@ -241,8 +241,8 @@ cl <- build_regional_checklist(
 #                           writeLines(cl$for_making_localdb, "fish_for_crabs.txt")
 # cl$checklist_summary      full taxonomized table with per-name resolution status (audit)
 # cl$for_LCA                taxID + the 7 ranks, ready for run_regatta(checklist = cl$for_LCA)
-# cl$methods                methods/provenance sentence with live citations (verify them)
-# cl$GBIF_download_citation only when GBIF = TRUE: the download key + GBIF citation
+# cl$methods                methods/provenance sentence with live citations,
+#                           incl. any GBIF download key + DOI + citation (verify them)
 ```
 
 > **GBIF (`GBIF = TRUE`) takes several minutes** — it submits an `occ_download`
@@ -252,10 +252,11 @@ cl <- build_regional_checklist(
 > and `GBIF_EMAIL` to your `~/.Renviron` (`usethis::edit_r_environ()`, then restart
 > R). Reuse a finished download by passing its key/object to `GBIF =`.
 >
-> A fresh `GBIF = TRUE` download returns its **citation + DOI** on
-> `cl$GBIF_download_citation` (cite it in your paper). `cl$methods` gives a
-> ready-to-adapt methods sentence with all the source citations pulled live —
-> always verify them against your reference manager.
+> Whenever GBIF is used (a fresh download **or** a reused key), its download
+> **key + DOI + citation** are folded into `cl$methods` — the DOI is fetched
+> from the key via `rgbif::occ_download_meta()`, so it's recorded for reused
+> downloads too. `cl$methods` is the single provenance home; always verify the
+> citations against your reference manager.
 
 ## Per-taxonomic-group separation
 
@@ -282,7 +283,7 @@ groups side-by-side in one project without naming collisions.
 | `resolve_taxa()` | Validate & disambiguate query taxon names against WoRMS (by kingdom); report GBIF backbone coverage. Run standalone to pre-check names. |
 | `GBIF_download()` | Pull a GBIF species list inside a WKT polygon for given taxa. |
 | `OBIS_download()` | Pull an OBIS species list, with optional marine/brackish/freshwater filters. |
-| `build_regional_checklist()` | **Checklist-building entry point.** Runs OBIS (default) and/or GBIF (off by default; `TRUE` for a fresh download or a key/object to reuse one), folds in any local `Genus`+`Species` CSVs (optional, default `NULL`; prefer a citable list), optionally taxonomizes the LCA list, and **returns** `for_making_localdb` (a bare vector of unique species names, for a reference-DB builder), `checklist_summary` (the full taxonomized table with per-name resolution status), and `for_LCA` (`taxID` + the 7 ranks, ready for the LCA step), plus `methods` and (when `GBIF = TRUE`) `GBIF_download_citation`. **`output_dir` is required** — outputs go in a dated `<region>_<label>_<date>` subfolder. `sql_path` defaults to a persistent per-user cache (built on first use, overridable with an existing DB path); `sql_path = NULL` skips taxonomizing here. A fresh `GBIF = TRUE` download takes several minutes and needs GBIF account credentials in `~/.Renviron`. |
+| `build_regional_checklist()` | **Checklist-building entry point.** Runs OBIS (default) and/or GBIF (off by default; `TRUE` for a fresh download or a key/object to reuse one), folds in any local `Genus`+`Species` CSVs (optional, default `NULL`; prefer a citable list), optionally taxonomizes the LCA list, and **returns** `for_making_localdb` (a bare vector of unique species names, for a reference-DB builder), `checklist_summary` (the full taxonomized table with per-name resolution status), and `for_LCA` (`taxID` + the 7 ranks, ready for the LCA step), plus `methods` (the provenance sentence, which also carries any GBIF download key/DOI/citation). **`output_dir` is required** — outputs go in a dated `<region>_<label>_<date>` subfolder. `sql_path` defaults to a persistent per-user cache (built on first use, overridable with an existing DB path); `sql_path = NULL` skips taxonomizing here. A fresh `GBIF = TRUE` download takes several minutes and needs GBIF account credentials in `~/.Renviron`. |
 | `taxonomize_checklist()` | Resolve a regional list to a 7-rank NCBI taxonomy table (synonym-aware). Runs **in the background** from `build_regional_checklist()`; `reconcile_checklist()`/`run_regatta()` also taxonomize on the fly (with a warning) if handed a raw checklist. Call directly only for inspection/caching. |
 | `parse_sintax()` | Convert vsearch SINTAX taxonomy strings to 7 rank columns. |
 | `parse_vsearch_results()` | Canonical vsearch preprocessor: join a vsearch `lca` (taxonomy) + `--userout` (pct_id) by ASV id. |

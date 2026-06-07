@@ -65,9 +65,8 @@ successive runs don't pile up loose files (the GBIF \code{.zip}, when a download
 runs, is kept there too). The expensive artifacts are always saved (so you
 don't rebuild them): \verb{<region>_<label>_list_for_making_localdb.txt}
 (one name per line), \code{..._checklist_summary.csv}, \code{..._for_LCA.rds} (or
-\code{.txt} when not taxonomized), \code{..._methods.txt}, and
-\code{..._GBIF_download_info.txt} (when a GBIF download ran). The same objects
-are also returned.}
+\code{.txt} when not taxonomized), and \code{..._methods.txt} (which carries any GBIF
+download key/DOI/citation). The same objects are also returned.}
 
 \item{sql_path}{Path to the local \code{accessionTaxa.sql} taxonomizr DB used to
 taxonomize the LCA list. Defaults to a persistent per-user cache
@@ -98,10 +97,9 @@ Invisibly, a list with \code{for_making_localdb} (a bare character vector
 of unique species binomials, for a reference-database builder),
 \code{checklist_summary} (the full taxonomized table with per-name resolution
 status, or \code{NULL} if no DB was available), \code{for_LCA} (\code{taxID} + the 7
-ranks, ready for the LCA step), \code{methods} (a citations-included provenance
-sentence), and \code{GBIF_download_citation} (the GBIF download key + citation,
-only when \code{GBIF = TRUE}, else \code{NULL}). Pass \code{for_LCA} straight to
-\code{\link[=run_regatta]{run_regatta()}} / \code{\link[=reconcile_checklist]{reconcile_checklist()}}.
+ranks, ready for the LCA step), and \code{methods} (a citations-included
+provenance sentence -- the home for any GBIF download key/DOI/citation).
+Pass \code{for_LCA} straight to \code{\link[=run_regatta]{run_regatta()}} / \code{\link[=reconcile_checklist]{reconcile_checklist()}}.
 }
 \description{
 The basic entry point for the checklist-building stage. Pulls regional
@@ -121,14 +119,13 @@ genus-level entries retained), cleaned and ready to hand straight to
 \code{\link[=run_regatta]{run_regatta()}} / \code{\link[=reconcile_checklist]{reconcile_checklist()}}. When no database is available
 this is the un-taxonomized name list, deferred to the reconcile step.
 \item \code{methods} -- a ready-to-adapt methods/provenance sentence naming the
-sources used, the date, the polygon, and the citations to include.
-Package citations are pulled live from \code{\link[utils:citation]{utils::citation()}} and the GBIF
-line uses the download's own DOI -- nothing is invented; verify against
-your reference manager.
-\item \code{GBIF_download_citation} -- \strong{only when \code{GBIF = TRUE}} (a fresh
-download): the download key + GBIF citation (one-row data.frame).
-\code{NULL} otherwise. Keep it for your paper and to reuse the download via
-\verb{GBIF = <download_key>}.
+region/label (and the queried taxa when they differ from the label), the
+sources used, the date, the polygon, the NCBI taxonomy snapshot date, and
+the citations to include. \strong{When GBIF is used (fresh or a reused download)
+this is where its download key, DOI, and citation live} -- there is no
+separate GBIF section. Package citations are pulled live from
+\code{\link[utils:citation]{utils::citation()}} and the GBIF line uses the download's own DOI --
+nothing is invented; verify against your reference manager.
 }
 The outputs are always written to the required \code{output_dir} (named from
 \code{region} and \code{label}) and also returned, so the expensive artifacts persist.

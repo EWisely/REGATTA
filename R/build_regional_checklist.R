@@ -24,14 +24,13 @@
 #'     [run_regatta()] / [reconcile_checklist()]. When no database is available
 #'     this is the un-taxonomized name list, deferred to the reconcile step.
 #'   \item `methods` -- a ready-to-adapt methods/provenance sentence naming the
-#'     sources used, the date, the polygon, and the citations to include.
-#'     Package citations are pulled live from [utils::citation()] and the GBIF
-#'     line uses the download's own DOI -- nothing is invented; verify against
-#'     your reference manager.
-#'   \item `GBIF_download_citation` -- **only when `GBIF = TRUE`** (a fresh
-#'     download): the download key + GBIF citation (one-row data.frame).
-#'     `NULL` otherwise. Keep it for your paper and to reuse the download via
-#'     `GBIF = <download_key>`.
+#'     region/label (and the queried taxa when they differ from the label), the
+#'     sources used, the date, the polygon, the NCBI taxonomy snapshot date, and
+#'     the citations to include. **When GBIF is used (fresh or a reused download)
+#'     this is where its download key, DOI, and citation live** -- there is no
+#'     separate GBIF section. Package citations are pulled live from
+#'     [utils::citation()] and the GBIF line uses the download's own DOI --
+#'     nothing is invented; verify against your reference manager.
 #' }
 #' The outputs are always written to the required `output_dir` (named from
 #' `region` and `label`) and also returned, so the expensive artifacts persist.
@@ -73,9 +72,8 @@
 #'   runs, is kept there too). The expensive artifacts are always saved (so you
 #'   don't rebuild them): `<region>_<label>_list_for_making_localdb.txt`
 #'   (one name per line), `..._checklist_summary.csv`, `..._for_LCA.rds` (or
-#'   `.txt` when not taxonomized), `..._methods.txt`, and
-#'   `..._GBIF_download_info.txt` (when a GBIF download ran). The same objects
-#'   are also returned.
+#'   `.txt` when not taxonomized), and `..._methods.txt` (which carries any GBIF
+#'   download key/DOI/citation). The same objects are also returned.
 #' @param sql_path Path to the local `accessionTaxa.sql` taxonomizr DB used to
 #'   taxonomize the LCA list. Defaults to a persistent per-user cache
 #'   (`tools::R_user_dir("REGATTA", "cache")`), shared across projects and
@@ -101,10 +99,9 @@
 #'   of unique species binomials, for a reference-database builder),
 #'   `checklist_summary` (the full taxonomized table with per-name resolution
 #'   status, or `NULL` if no DB was available), `for_LCA` (`taxID` + the 7
-#'   ranks, ready for the LCA step), `methods` (a citations-included provenance
-#'   sentence), and `GBIF_download_citation` (the GBIF download key + citation,
-#'   only when `GBIF = TRUE`, else `NULL`). Pass `for_LCA` straight to
-#'   [run_regatta()] / [reconcile_checklist()].
+#'   ranks, ready for the LCA step), and `methods` (a citations-included
+#'   provenance sentence -- the home for any GBIF download key/DOI/citation).
+#'   Pass `for_LCA` straight to [run_regatta()] / [reconcile_checklist()].
 #'
 #' @examples
 #' \dontrun{
@@ -175,7 +172,7 @@ build_regional_checklist <- function(region,
                              stringsAsFactors = FALSE)
   species_rows <- empty   # binomials: OBIS/GBIF + local non-"sp." rows
   genus_rows   <- empty   # genus-only: local "Genus / sp." rows
-  gbif_citation <- NULL   # set ONLY for a fresh GBIF = TRUE download
+  gbif_citation <- NULL   # download key + DOI + citation, for the methods sentence
   sources_used  <- character(0)  # which sources actually contributed, for cl$methods
 
   # Per-run output directory, so successive runs land in their own dated folder
@@ -204,14 +201,17 @@ build_regional_checklist <- function(region,
                               output_dir = NULL, kingdom = kingdom,
                               gbif_fill_families = gbif_fill_families,
                               download_dir = run_dir)
-      # The citation/key is surfaced only for a fresh download (GBIF = TRUE).
-      gbif_citation <- attr(gbif_df, "gbif_download")
     } else if (is.character(GBIF) && length(GBIF) == 1 &&
                (grepl("\\.csv$", GBIF, ignore.case = TRUE) || file.exists(GBIF))) {
       gbif_df <- .regatta_read_source_csv(GBIF, "GBIF")          # pre-made CSV
     } else {
-      gbif_df <- GBIF_download(existing_download = GBIF, output_dir = NULL)
+      gbif_df <- GBIF_download(existing_download = GBIF, output_dir = NULL,
+                               download_dir = run_dir)            # reuse a key/object
     }
+    # Capture the download key + DOI + citation for the methods sentence -- for
+    # both a fresh download and a reused one (occ_download_meta() yields the DOI
+    # for any key). NULL only for a pre-made CSV, which carries no download.
+    gbif_citation <- attr(gbif_df, "gbif_download")
     species_rows <- unique(rbind(species_rows, gbif_df[, cols, drop = FALSE]))
     sources_used <- c(sources_used, "GBIF")
   }
@@ -283,7 +283,8 @@ build_regional_checklist <- function(region,
   lca_taxonomized <- all(ranks %in% names(for_LCA))
 
   # --- Methods sentence (real citations only -- pulled live, never invented) -
-  methods <- .regatta_methods(region, label, sources_used, regional_poly,
+  # The GBIF download key + DOI + citation live here, not in a separate section.
+  methods <- .regatta_methods(region, label, taxa, sources_used, regional_poly,
                               gbif_citation, db_date)
 
   # --- Write the outputs into this run's dated directory ------------------
@@ -302,26 +303,16 @@ build_regional_checklist <- function(region,
       readr::write_delim(for_LCA,
                          file.path(run_dir, paste0(stem, "_for_LCA.txt")),
                          delim = "\t")
+    # The GBIF download key/DOI/citation are part of the methods file now, not a
+    # separate GBIF section.
     writeLines(methods, file.path(run_dir, paste0(stem, "_methods.txt")))
-    if (!is.null(gbif_citation))
-      writeLines(c(
-        "GBIF download -- cite this in your paper.",
-        "GBIF citation guidelines: https://www.gbif.org/citation-guidelines",
-        "",
-        paste0("Download key: ", gbif_citation$download_key),
-        paste0("DOI: ",          gbif_citation$doi),
-        paste0("Created: ",      gbif_citation$created),
-        "Citation:",
-        gbif_citation$citation),
-        file.path(run_dir, paste0(stem, "_GBIF_download_info.txt")))
     message("Wrote checklist files to ", run_dir)
   }
 
-  invisible(list(for_making_localdb     = for_making_localdb,
-                 checklist_summary      = checklist_summary,
-                 for_LCA                = for_LCA,
-                 methods                = methods,
-                 GBIF_download_citation = gbif_citation))
+  invisible(list(for_making_localdb = for_making_localdb,
+                 checklist_summary  = checklist_summary,
+                 for_LCA            = for_LCA,
+                 methods            = methods))
 }
 
 # Assemble the methods/provenance sentence. CITATIONS ARE REAL: R-package
@@ -330,10 +321,21 @@ build_regional_checklist <- function(region,
 # and nothing is hardcoded as a fabricated author/year/DOI. Where a citation
 # cannot be pulled (package not installed, OBIS has no machine citation) the
 # string says so and points the user to the canonical source to fill in.
-.regatta_methods <- function(region, label, sources_used, regional_poly,
-                             gbif_citation, db_date = NA_character_) {
+.regatta_methods <- function(region, label, taxa = NULL, sources_used,
+                             regional_poly, gbif_citation,
+                             db_date = NA_character_) {
   today <- as.character(Sys.Date())
   src   <- if (length(sources_used)) paste(sources_used, collapse = ", ") else "the supplied sources"
+
+  # Wrap region + label in parentheses; add the queried taxa when they differ
+  # from the label (e.g. label "vertebrates" but taxa = c("Mammalia","Aves")).
+  taxa_differs <- !is.null(taxa) &&
+    !(length(taxa) == 1 && identical(trimws(taxa), trimws(label)))
+  rl_phrase <- if (taxa_differs)
+    paste0("(", trimws(region), ", ", trimws(label),
+           "; taxa: ", paste(taxa, collapse = ", "), ")")
+  else
+    paste0("(", trimws(region), ", ", trimws(label), ")")
 
   cite_pkg <- function(p) tryCatch(
     trimws(gsub("\\s+", " ",
@@ -349,12 +351,17 @@ build_regional_checklist <- function(region,
   }
   if ("GBIF" %in% sources_used) {
     refs <- c(refs, paste0("rgbif (GBIF R client): ", cite_pkg("rgbif")))
-    gbif_ref <- if (!is.null(gbif_citation) && !is.na(gbif_citation$citation))
-      gbif_citation$citation
-    else
-      paste0("GBIF download: cite the download DOI per ",
+    gbif_ref <- if (!is.null(gbif_citation)) {
+      key <- gbif_citation$download_key
+      doi <- if (!is.na(gbif_citation$doi)) gbif_citation$doi else "(pending)"
+      cit <- if (!is.na(gbif_citation$citation)) gbif_citation$citation else
+        paste0("https://www.gbif.org/occurrence/download/", key)
+      paste0("GBIF occurrence download (key ", key, ", DOI ", doi, "): ", cit)
+    } else {
+      paste0("GBIF occurrence download: cite the download DOI per ",
              "https://www.gbif.org/citation-guidelines, accessed ", today)
-    refs <- c(refs, paste0("GBIF database download: ", gbif_ref))
+    }
+    refs <- c(refs, gbif_ref)
   }
 
   poly_phrase <- if (is.null(regional_poly))
@@ -368,8 +375,8 @@ build_regional_checklist <- function(region,
   else ""
 
   paste0(
-    "The regional species checklist for ", trimws(region), " (", trimws(label),
-    ") was built from ", src, " on ", today,
+    "The regional species checklist for ", rl_phrase,
+    " was built from ", src, " on ", today,
     " using the R package REGATTA. ", poly_phrase, tax_phrase,
     " Please cite the following (verify against your reference manager): ",
     paste(refs, collapse = " | "))

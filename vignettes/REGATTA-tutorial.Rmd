@@ -131,24 +131,16 @@ so it's shown, not run.
 > the variables load. Once a download finishes you can reuse it instead of
 > re-running: pass its key string or the `occ_download` object to `GBIF =`.
 >
-> **Keep the GBIF citation — it's part of your pipeline's reproducibility.**
-> When (and only when) you run a fresh `GBIF = TRUE` download, GBIF mints a
-> citation (with a DOI) that it asks you to include in any publication using the
-> data. REGATTA returns it on `cl$GBIF_download_citation` (a one-row table with
-> the `download_key`, `doi`, and full `citation` string) and prints it to the
-> console; it does **not** silently write it to disk. Save it yourself — e.g.
-> `saveRDS(cl$GBIF_download_citation, "gbif_provenance.rds")` or paste the
-> `citation` into your methods — or pass `output_dir` to
-> `build_regional_checklist()` to have it written to `..._GBIF_download_info.txt`
-> automatically. The same `download_key` lets you (or a reviewer) reproduce the
-> exact download later via `GBIF = "0042681-260519110011954"`.
-
-```{r gbif-citation, eval = FALSE}
-# After a fresh GBIF = TRUE run, preserve the key + citation:
-cl$GBIF_download_citation$download_key   # reuse: build_regional_checklist(..., GBIF = <key>)
-cl$GBIF_download_citation$citation       # paste this into your paper's methods
-saveRDS(cl$GBIF_download_citation, "gbif_provenance.rds")
-```
+> **The GBIF citation is part of your pipeline's reproducibility.** Whenever
+> GBIF is used — a fresh `GBIF = TRUE` download **or** a reused download key —
+> GBIF mints a citation (with a DOI) you must include in any publication using
+> the data. REGATTA folds the download **key**, **DOI**, and full **citation**
+> into `cl$methods` (and the written `..._methods.txt`), so the GBIF provenance
+> travels with the rest of your methods rather than as a separate file. The DOI
+> is fetched from the download key via `rgbif::occ_download_meta()`, so it is
+> recorded even when you reuse an existing download. The key in `cl$methods`
+> also lets you (or a reviewer) reproduce the exact download later via
+> `GBIF = "<download_key>"`.
 
 ```{r build, eval = FALSE}
 poly <- "POLYGON ((-117.421875 31.952162, -91.933594 -6.315299, -81.386719 -6.315299, -76.113281 7.710992, -82.089844 8.581021, -87.011719 13.581921, -104.238281 20.303418, -112.5 32.249974, -117.421875 31.952162))"  # E. Tropical Pacific incl. Galapagos
@@ -204,15 +196,15 @@ don't pile up — the GBIF `.zip` is kept there too):
   checklist; `NULL` if no `taxonomizr` database was available.
 * `cl$for_LCA` — the `taxID` column plus the 7 taxonomic ranks, cleaned and
   ready to hand straight to `run_regatta(checklist = cl$for_LCA)`.
-* `cl$methods` — a ready-to-adapt **methods/provenance sentence**: which sources
+* `cl$methods` — a ready-to-adapt **methods/provenance sentence**: the region
+  and label (and the queried taxa if they differ from the label), which sources
   were used, the date, the WKT polygon, the **NCBI taxonomy snapshot date**, and
   the citations to include (REGATTA, the OBIS/GBIF R clients, the OBIS/GBIF
-  databases). The R-package citations are pulled live from `citation()` and the
-  GBIF line uses your download's own DOI — nothing is invented, but **verify
-  each reference against your own reference manager** before submission.
-* `cl$GBIF_download_citation` — present **only when `GBIF = TRUE`** (a fresh
-  download): the **download key** (reuse with `GBIF = cl$GBIF_download_citation$download_key`)
-  and the **GBIF citation/DOI** you must cite. Keep this — see above.
+  databases). **Any GBIF download key, DOI, and citation live here too** — there
+  is no separate GBIF element. The R-package citations are pulled live from
+  `citation()` and the GBIF line uses your download's own DOI — nothing is
+  invented, but **verify each reference against your own reference manager**
+  before submission.
 
 ---
 
