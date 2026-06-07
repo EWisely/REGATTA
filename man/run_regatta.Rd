@@ -28,9 +28,10 @@ where each entry is a single path or a length-2 vsearch pair.
 \item{checklist}{Path to a taxonomized regional checklist (\code{.rds} or
 \code{.csv}), or a data.frame with the 7 rank columns.}
 
-\item{out_dir}{Output directory. Defaults to \verb{<input>/regatta_out}
-when \code{input} is a folder, or \code{dirname(input)/regatta_out} when it
-is a file path. Created if missing.}
+\item{out_dir}{Output directory. Default \code{NULL} returns the results
+without writing anything; supply a directory to also write the per-stage
+CSV triples, the 21-row summary, and \code{run_log.txt} there (created if
+missing).}
 
 \item{sql_path}{Path to the local \code{accessionTaxa.sql} taxonomizr DB
 (used for obitools / BestTaxon input shapes).}
@@ -51,8 +52,8 @@ when one exists, since only that path collapses long tables.}
 }
 \value{
 Invisibly a list with the final tables and the
-\code{\link[=summarize_regatta]{summarize_regatta()}} data.frame. Writes CSV outputs and
-\code{run_log.txt} under \code{out_dir}.
+\code{\link[=summarize_regatta]{summarize_regatta()}} data.frame. Writes CSV outputs and \code{run_log.txt}
+under \code{out_dir} only when \code{out_dir} is supplied.
 }
 \description{
 One-call wrapper around \code{\link[=reconcile_global_local]{reconcile_global_local()}}, \code{\link[=reconcile_checklist]{reconcile_checklist()}},

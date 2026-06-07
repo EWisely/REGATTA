@@ -244,9 +244,10 @@
 #'     where each entry is a single path or a length-2 vsearch pair.
 #' @param checklist Path to a taxonomized regional checklist (`.rds` or
 #'   `.csv`), or a data.frame with the 7 rank columns.
-#' @param out_dir Output directory. Defaults to `<input>/regatta_out`
-#'   when `input` is a folder, or `dirname(input)/regatta_out` when it
-#'   is a file path. Created if missing.
+#' @param out_dir Output directory. Default `NULL` returns the results
+#'   without writing anything; supply a directory to also write the per-stage
+#'   CSV triples, the 21-row summary, and `run_log.txt` there (created if
+#'   missing).
 #' @param sql_path Path to the local `accessionTaxa.sql` taxonomizr DB
 #'   (used for obitools / BestTaxon input shapes).
 #' @param id_col Name of the per-ASV identifier column. Default
@@ -279,8 +280,8 @@
 #' }
 #'
 #' @return Invisibly a list with the final tables and the
-#'   [summarize_regatta()] data.frame. Writes CSV outputs and
-#'   `run_log.txt` under `out_dir`.
+#'   [summarize_regatta()] data.frame. Writes CSV outputs and `run_log.txt`
+#'   under `out_dir` only when `out_dir` is supplied.
 #'
 #' @importFrom utils read.csv read.delim write.csv
 #' @export
@@ -293,12 +294,10 @@ run_regatta <- function(input,
   t_start <- Sys.time()
   norm <- .regatta_normalize_input(input)
 
-  if (is.null(out_dir)) {
-    src <- if (norm$role == "single") norm$classifier[[1]][1] else norm$global[1]
-    out_dir <- if (dir.exists(src)) file.path(src, "regatta_out")
-               else                 file.path(dirname(src), "regatta_out")
-  }
-  dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
+  # out_dir = NULL: return results only, write nothing. Supply a directory to
+  # also persist the per-stage CSV triples + summary + run_log there.
+  if (!is.null(out_dir)) dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
+  .sub <- function(name) if (is.null(out_dir)) NULL else file.path(out_dir, name)
 
   if (is.character(checklist) && length(checklist) == 1) {
     cl <- if (grepl("\\.rds$", checklist, ignore.case = TRUE)) readRDS(checklist)
@@ -312,12 +311,13 @@ run_regatta <- function(input,
   # warning; a pre-taxonomized checklist passes through unchanged.
   cl <- .regatta_ensure_taxonomized(cl, sql_path)
 
+  dest <- if (is.null(out_dir)) "(return only; no files written)" else normalizePath(out_dir)
   log_lines <- c(
     paste0("REGATTA run started: ", format(t_start)),
     paste0("Workflow: ", norm$role),
-    paste0("Output dir: ", normalizePath(out_dir))
+    paste0("Output dir: ", dest)
   )
-  message("REGATTA: ", norm$role, " workflow -> ", normalizePath(out_dir))
+  message("REGATTA: ", norm$role, " workflow -> ", dest)
 
   if (norm$role == "two-DB") {
     g <- .regatta_read_input(norm$global, sql_path, id_col = id_col)
@@ -329,15 +329,15 @@ run_regatta <- function(input,
 
     rec <- reconcile_global_local(
       g$table, l$table, id_col = id_col, Local_advantage = Local_advantage,
-      output_dir    = file.path(out_dir, "reconcile_global_local"),
+      output_dir    = .sub("reconcile_global_local"),
       output_prefix = "reconcile_global_local")
     log_lines <- c(log_lines, "reconcile_global_local done")
 
     post <- reconcile_checklist(
       rec$result, cl, id_col = id_col,
-      output_dir    = file.path(out_dir, "reconcile_checklist"),
+      output_dir    = .sub("reconcile_checklist"),
       output_prefix = "reconcile_checklist",
-      prior_dir     = file.path(out_dir, "reconcile_global_local"),
+      prior_dir     = .sub("reconcile_global_local"),
       prior_prefix  = "reconcile_global_local")
     log_lines <- c(log_lines, "reconcile_checklist done")
 
@@ -350,7 +350,7 @@ run_regatta <- function(input,
                                      nrow(c1$table), " ASVs"))
     post <- reconcile_checklist(
       c1$table, cl, id_col = id_col,
-      output_dir    = file.path(out_dir, "reconcile_checklist"),
+      output_dir    = .sub("reconcile_checklist"),
       output_prefix = "reconcile_checklist",
       prior_dir     = NULL)
     log_lines <- c(log_lines, "reconcile_checklist done")
@@ -359,13 +359,14 @@ run_regatta <- function(input,
     result <- list(input_tax = c1$table, post_checklist = post, summary = summ)
   }
 
-  utils::write.csv(summ, file.path(out_dir, "regatta_summary.csv"),
-                   row.names = FALSE)
   log_lines <- c(log_lines,
-                 paste0("regatta_summary.csv written"),
                  paste0("Total elapsed: ", format(Sys.time() - t_start)))
-  writeLines(log_lines, file.path(out_dir, "run_log.txt"))
-  message("Wrote ", normalizePath(file.path(out_dir, "regatta_summary.csv")))
+  if (!is.null(out_dir)) {
+    utils::write.csv(summ, file.path(out_dir, "regatta_summary.csv"),
+                     row.names = FALSE)
+    writeLines(log_lines, file.path(out_dir, "run_log.txt"))
+    message("Wrote ", normalizePath(file.path(out_dir, "regatta_summary.csv")))
+  }
 
   invisible(result)
 }

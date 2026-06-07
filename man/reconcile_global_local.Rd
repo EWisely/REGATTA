@@ -13,7 +13,7 @@ reconcile_global_local(
   global_pct_id_scale = c("auto", "0-1", "0-100"),
   local_pct_id_scale = c("auto", "0-1", "0-100"),
   Local_advantage = TRUE,
-  output_dir = "reconcile_global_local_out",
+  output_dir = NULL,
   output_prefix = "reconcile_global_local",
   tracking_drop_pattern = "^(MERGED_sample:|obiclean_|seq_rank|ID_STATUS|DEFINITION)"
 )
@@ -36,10 +36,10 @@ input max is <= 1 and rescales to 0-100 with \code{signif(x, 3) * 100}.}
 \item{Local_advantage}{TRUE (default): local wins ties at the
 \code{best_pctid} step. FALSE: global wins ties.}
 
-\item{output_dir}{Directory path; defaults to \code{"reconcile_global_local_out"}.
-When non-NULL, writes \verb{<output_prefix>_taxonomy_table.csv},
-\verb{<output_prefix>_tracking.csv}, and \verb{<output_prefix>_summary.csv}.
-Pass NULL to disable file writing.}
+\item{output_dir}{Directory path; default \code{NULL} writes nothing (the
+\code{result}/\code{tracking}/\code{stats} list is returned). Supply a directory to also
+write \verb{<output_prefix>_taxonomy_table.csv}, \verb{<output_prefix>_tracking.csv},
+and \verb{<output_prefix>_summary.csv} there.}
 
 \item{output_prefix}{Filename prefix for the 3 CSVs. Default
 \code{"reconcile_global_local"}.}

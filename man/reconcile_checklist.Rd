@@ -9,9 +9,9 @@ reconcile_checklist(
   checklist,
   id_col = "ASV_id",
   sql_path = "accessionTaxa.sql",
-  output_dir = "reconcile_checklist_out",
+  output_dir = NULL,
   output_prefix = "reconcile_checklist",
-  prior_dir = "reconcile_global_local_out",
+  prior_dir = NULL,
   prior_prefix = "reconcile_global_local",
   tracking_drop_pattern = "^(MERGED_sample:|obiclean_|seq_rank|ID_STATUS|DEFINITION)"
 )
@@ -32,16 +32,17 @@ warning, using \code{sql_path}.}
 \item{sql_path}{Path to the local \code{accessionTaxa.sql} taxonomizr DB, used
 only if \code{checklist} still needs taxonomizing.}
 
-\item{output_dir}{Directory path; defaults to \code{"reconcile_checklist_out"}.
-Pass NULL to disable file writing.}
+\item{output_dir}{Directory path; default \code{NULL} writes nothing (the
+\code{result}/\code{tracking}/\code{stats} list is returned). Supply a directory to also
+write the 3 CSVs there.}
 
 \item{output_prefix}{Filename prefix for the 3 CSVs. Default
 \code{"reconcile_checklist"}.}
 
-\item{prior_dir, prior_prefix}{Where to look for a prior
-\code{\link[=reconcile_global_local]{reconcile_global_local()}} output folder. When found, the tracking
-and summary CSVs written into \code{output_dir} are augmented with the
-prior stage's columns/rows. Pass \code{prior_dir = NULL} to disable.}
+\item{prior_dir, prior_prefix}{Optional directory of a prior
+\code{\link[=reconcile_global_local]{reconcile_global_local()}} output to augment the tracking/summary CSVs
+with. Default \code{prior_dir = NULL} (no augmentation); supply the directory
+to enable it (only relevant when \code{output_dir} is also set).}
 
 \item{tracking_drop_pattern}{Regex matched against input column names;
 matching columns are dropped before they enter \verb{$tracking}.}

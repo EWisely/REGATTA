@@ -12,6 +12,7 @@ GBIF_download(
   kingdom = "Animalia",
   gbif_descend_to = "order",
   gbif_fill_families = TRUE,
+  output_dir = NULL,
   existing_download = NULL
 )
 }
@@ -34,8 +35,8 @@ instead of \code{obis_taxa} when looking up WoRMS IDs. NA reuses
 \code{"POLYGON ((long lat, long lat, ...))"}. Draw a region on
 \href{https://wktmap.com}{wktmap.com} and copy the generated polygon.}
 
-\item{gbif_outputname}{Basename (no \code{.csv} extension) for the output
-file under \verb{checklist_sources/}. Default \code{"GBIF_Species"}.}
+\item{gbif_outputname}{Basename (no \code{.csv} extension) for the output file,
+used only when \code{output_dir} is supplied. Default \code{"GBIF_Species"}.}
 
 \item{kingdom}{Kingdom used by \code{\link[=resolve_taxa]{resolve_taxa()}} to disambiguate the query
 taxa. Default \code{"Animalia"}; \code{NULL} disables the filter.}
@@ -64,6 +65,10 @@ WoRMS family walk during preparation. A phylum guard prevents stray
 family-name collisions from adding off-target taxa. Set FALSE to skip the
 family walk for a faster, order-only (~97\%) preparation.}
 
+\item{output_dir}{Optional directory to write the result into. Default
+\code{NULL} writes nothing (the function just returns the data); supply a
+directory to also save \verb{<output_dir>/<gbif_outputname>.csv}.}
+
 \item{existing_download}{Reuse an already-finished GBIF download instead of
 submitting a new one: a GBIF download \strong{key} string (e.g.
 \code{"0012345-230101000000000"}) or an \code{occ_download} \strong{object}. When set,
@@ -71,16 +76,16 @@ the function skips taxon resolution and submission and just imports that
 download, so \code{obis_taxa} / \code{regional_poly} are not needed. Default \code{NULL}.}
 }
 \value{
-Invisibly NULL. Writes
-\verb{checklist_sources/<gbif_outputname>.csv} as a side effect.
+Invisibly, a data.frame with \code{Species} and \code{Source} columns.
+Writes \verb{<output_dir>/<gbif_outputname>.csv} only when \code{output_dir} is
+supplied.
 }
 \description{
 Resolves the given high-level taxa via WoRMS, finds GBIF backbone
 keys for the resulting classes, and submits a GBIF occurrence
-download restricted to the polygon. Writes the result to
-\verb{checklist_sources/<gbif_outputname>.csv} and prints the file path. GBIF
-login credentials must already be set in \verb{~/.Renviron}; see the
-Setup section of the README.
+download restricted to the polygon. \strong{Returns} the species data frame;
+writes it to disk only if you supply \code{output_dir}. GBIF login credentials
+must already be set in \verb{~/.Renviron}; see the Setup section of the README.
 }
 \details{
 Takes ~15 minutes to run end to end. The function prints status

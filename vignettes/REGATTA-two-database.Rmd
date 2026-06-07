@@ -54,17 +54,19 @@ auto-detected (here the local side is a vsearch `lca` taxonomy file plus a
 ```{r run, eval = FALSE}
 library(REGATTA)
 
-run_regatta(
+res <- run_regatta(
   input = list(
     global = "MiFish_obitools.tab",                 # obitools (global NCBI DB)
     local  = c("MiFish_vsearch_lca.txt",            # vsearch LCA taxonomy
                "MiFish_vsearch_userout.txt")        # vsearch %ID
   ),
-  checklist = "local_database_checklist/comprehensive_galapagos_fish_list_for_LCA_taxonomized.rds",
+  checklist = cl$checklist,                          # from build_regional_checklist()
   sql_path  = "/path/to/accessionTaxa.sql"
+  # out_dir = "regatta_out"                          # uncomment to also write the bundle
 )
-#> -> regatta_out/{ reconcile_global_local/*, reconcile_checklist/*,
-#>                  regatta_summary.csv, run_log.txt }
+#> returns res$reconciled, res$post_checklist, res$summary.
+#> with out_dir set, also writes reconcile_global_local/*, reconcile_checklist/*,
+#> regatta_summary.csv, run_log.txt
 ```
 
 On the full dataset, of the 1,438 ASVs, 892 were unassigned by both

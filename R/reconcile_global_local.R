@@ -111,10 +111,10 @@
 #'   input max is <= 1 and rescales to 0-100 with `signif(x, 3) * 100`.
 #' @param Local_advantage TRUE (default): local wins ties at the
 #'   `best_pctid` step. FALSE: global wins ties.
-#' @param output_dir Directory path; defaults to `"reconcile_global_local_out"`.
-#'   When non-NULL, writes `<output_prefix>_taxonomy_table.csv`,
-#'   `<output_prefix>_tracking.csv`, and `<output_prefix>_summary.csv`.
-#'   Pass NULL to disable file writing.
+#' @param output_dir Directory path; default `NULL` writes nothing (the
+#'   `result`/`tracking`/`stats` list is returned). Supply a directory to also
+#'   write `<output_prefix>_taxonomy_table.csv`, `<output_prefix>_tracking.csv`,
+#'   and `<output_prefix>_summary.csv` there.
 #' @param output_prefix Filename prefix for the 3 CSVs. Default
 #'   `"reconcile_global_local"`.
 #' @param tracking_drop_pattern Regex matched against input column names;
@@ -140,7 +140,7 @@ reconcile_global_local <- function(global_table,
                                    global_pct_id_scale = c("auto", "0-1", "0-100"),
                                    local_pct_id_scale  = c("auto", "0-1", "0-100"),
                                    Local_advantage     = TRUE,
-                                   output_dir          = "reconcile_global_local_out",
+                                   output_dir          = NULL,
                                    output_prefix       = "reconcile_global_local",
                                    tracking_drop_pattern =
                                      "^(MERGED_sample:|obiclean_|seq_rank|ID_STATUS|DEFINITION)") {

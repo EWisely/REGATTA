@@ -116,9 +116,9 @@ For most users the whole pipeline collapses to a single `run_regatta()`
 call once you have a taxonomized regional checklist. It accepts file paths,
 a vsearch `lca + userout` pair, a folder of inputs, or an explicit
 `list(global =, local =)` for the two-DB workflow; file formats are
-auto-detected and the right preprocessor is dispatched. Outputs land under
-`<input>/regatta_out/` by default, with a `run_log.txt` recording what was
-detected and run.
+auto-detected and the right preprocessor is dispatched. It **returns** the
+results; pass `out_dir` to also write the per-stage CSV triples, the 21-row
+summary, and a `run_log.txt` recording what was detected and run.
 
 ```r
 # Single-DB workflow (one classifier output, any tool)
@@ -150,15 +150,14 @@ available; `run_regatta()` is a thin orchestrator on top of them.
 
 ## Setup
 
-Building your own regional checklist needs two things in your project.
+A few things to set up before building your own regional checklist.
 
-**Folders.** In your project working directory, the GBIF/OBIS downloaders
-write their per-source species lists to `checklist_sources/`, and
-`build_regional_checklist()` / `taxonomize_checklist()` write the combined,
-taxonomized list to `local_database_checklist/`. Both folders are created
-automatically if missing. Local checklist CSVs (each with `Genus` and
-`Species` columns) can live anywhere — you pass their paths straight to
-`build_regional_checklist(local_csvs = ...)`, no copying required.
+**Output locations.** REGATTA functions **return** their results and write
+nothing to disk by default — pass an `output_dir` (downloaders / build) or
+`out_dir` (`run_regatta()`) to also save files in a directory you choose.
+Local checklist CSVs (each with `Genus` and `Species` columns) can live
+anywhere; pass their paths to `build_regional_checklist(CSV = ...)`, no
+copying required.
 
 **Credentials & taxonomy DB.** `GBIF_download()` uses your GBIF login; add
 `GBIF_USER` / `GBIF_PWD` / `GBIF_EMAIL` to your `.Renviron`
@@ -185,10 +184,10 @@ argument.
 poly <- "POLYGON ((-117.4 32.0, -91.9 -6.3, -81.4 -6.3, -76.1 7.7, -82.1 8.6, -104.2 20.3, -112.5 32.2, -117.4 32.0))"
 
 # One call: downloads OBIS (default on) and/or GBIF (default off), folds in
-# any local CSV, writes the two regional lists, and taxonomizes the _for_LCA
-# list in the background -> ..._for_LCA_taxonomized.rds, ready for the LCA.
-build_regional_checklist(
-  region        = "galapagos",   # names the output files
+# any local CSV, and taxonomizes the LCA list. It RETURNS everything; assign
+# it. (Add output_dir = "some/dir" to also write the files there.)
+cl <- build_regional_checklist(
+  region        = "galapagos",   # names the output files (if written)
   label         = "fish",        # short filename label (kept separate from taxa)
   taxa          = "fish",        # the query passed to the downloaders
   regional_poly = poly,
@@ -198,10 +197,9 @@ build_regional_checklist(
   marine        = TRUE, terrestrial = FALSE,
   sql_path      = "/path/to/accessionTaxa.sql"
 )
-# Writes, under local_database_checklist/:
-#   comprehensive_galapagos_fish_list_for_making_localdb.txt   (species only -> CRABS etc.)
-#   comprehensive_galapagos_fish_list_for_LCA.txt              (+ retained genera)
-#   comprehensive_galapagos_fish_list_for_LCA_taxonomized.rds  (ready for run_regatta)
+# cl$for_making_localdb  species-only list (-> a reference-DB builder like CRABS)
+# cl$for_LCA             + retained genus-level entries
+# cl$checklist           taxonomized, ready for run_regatta(checklist = cl$checklist)
 ```
 
 ## Per-taxonomic-group separation
@@ -223,11 +221,11 @@ groups side-by-side in one project without naming collisions.
 
 | Function | Purpose |
 |---|---|
-| `run_regatta()` | **High-level wrapper / recommended entry point.** Auto-detects classifier format, dispatches the right preprocessor, runs the reconcile steps, and writes the standard output triples + a 21-row summary + `run_log.txt`. |
+| `run_regatta()` | **High-level wrapper / recommended entry point.** Auto-detects classifier format, dispatches the right preprocessor, runs the reconcile steps, and **returns** the corrected tables + a 21-row summary; writes the output triples + `run_log.txt` only when given `out_dir`. |
 | `resolve_taxa()` | Validate & disambiguate query taxon names against WoRMS (by kingdom); report GBIF backbone coverage. Run standalone to pre-check names. |
 | `GBIF_download()` | Pull a GBIF species list inside a WKT polygon for given taxa. |
 | `OBIS_download()` | Pull an OBIS species list, with optional marine/brackish/freshwater filters. |
-| `build_regional_checklist()` | **Checklist-building entry point.** Runs OBIS (default) and/or GBIF (off by default; `TRUE` for a fresh download or a key/object to reuse one), folds in any local `Genus`+`Species` CSVs, and writes two lists named from `region`+`label`: a species-only `_for_making_localdb` list (for a reference-DB builder) and a `_for_LCA` list that also keeps genus-level entries. Then taxonomizes the LCA list in the background. |
+| `build_regional_checklist()` | **Checklist-building entry point.** Runs OBIS (default) and/or GBIF (off by default; `TRUE` for a fresh download or a key/object to reuse one), folds in any local `Genus`+`Species` CSVs, taxonomizes the LCA list, and **returns** `for_making_localdb` (species-only, for a reference-DB builder), `for_LCA` (keeps genus-level entries), and the taxonomized `checklist`. Writes them (named from `region`+`label`) only when given `output_dir`. |
 | `taxonomize_checklist()` | Resolve a regional list to a 7-rank NCBI taxonomy table (synonym-aware). Runs **in the background** from `build_regional_checklist()`; `reconcile_checklist()`/`run_regatta()` also taxonomize on the fly (with a warning) if handed a raw checklist. Call directly only for inspection/caching. |
 | `parse_sintax()` | Convert vsearch SINTAX taxonomy strings to 7 rank columns. |
 | `parse_vsearch_results()` | Canonical vsearch preprocessor: join a vsearch `lca` (taxonomy) + `--userout` (pct_id) by ASV id. |
@@ -241,7 +239,7 @@ groups side-by-side in one project without naming collisions.
 ## Output
 
 `reconcile_checklist()` and `reconcile_global_local()` each return a list of
-three data frames and, unless `output_dir = NULL`, write them as three CSVs:
+three data frames, and write them as three CSVs only when given an `output_dir`:
 
 | Element | Contents |
 |---|---|
@@ -249,8 +247,9 @@ three data frames and, unless `output_dir = NULL`, write them as three CSVs:
 | `$tracking` | Per-ASV before/after audit trail (and, after `reconcile_global_local()`, the global-vs-local decision columns). |
 | `$stats` | Aggregate counts for that stage. |
 
-`run_regatta()` writes one such triple per stage plus a top-level 21-row
-`summarize_regatta()` summary and a `run_log.txt`, all under `out_dir`.
+`run_regatta()` returns these; when given `out_dir` it also writes one such
+triple per stage plus a top-level 21-row `summarize_regatta()` summary and a
+`run_log.txt` there.
 
 ## Caveats
 

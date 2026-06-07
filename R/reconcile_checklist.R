@@ -83,14 +83,15 @@
 #' @param id_col ASV identifier column name.
 #' @param sql_path Path to the local `accessionTaxa.sql` taxonomizr DB, used
 #'   only if `checklist` still needs taxonomizing.
-#' @param output_dir Directory path; defaults to `"reconcile_checklist_out"`.
-#'   Pass NULL to disable file writing.
+#' @param output_dir Directory path; default `NULL` writes nothing (the
+#'   `result`/`tracking`/`stats` list is returned). Supply a directory to also
+#'   write the 3 CSVs there.
 #' @param output_prefix Filename prefix for the 3 CSVs. Default
 #'   `"reconcile_checklist"`.
-#' @param prior_dir,prior_prefix Where to look for a prior
-#'   [reconcile_global_local()] output folder. When found, the tracking
-#'   and summary CSVs written into `output_dir` are augmented with the
-#'   prior stage's columns/rows. Pass `prior_dir = NULL` to disable.
+#' @param prior_dir,prior_prefix Optional directory of a prior
+#'   [reconcile_global_local()] output to augment the tracking/summary CSVs
+#'   with. Default `prior_dir = NULL` (no augmentation); supply the directory
+#'   to enable it (only relevant when `output_dir` is also set).
 #' @param tracking_drop_pattern Regex matched against input column names;
 #'   matching columns are dropped before they enter `$tracking`.
 #'
@@ -102,9 +103,9 @@ reconcile_checklist <- function(taxonomy_table,
                                 checklist,
                                 id_col        = "ASV_id",
                                 sql_path      = "accessionTaxa.sql",
-                                output_dir    = "reconcile_checklist_out",
+                                output_dir    = NULL,
                                 output_prefix = "reconcile_checklist",
-                                prior_dir     = "reconcile_global_local_out",
+                                prior_dir     = NULL,
                                 prior_prefix  = "reconcile_global_local",
                                 tracking_drop_pattern =
                                   "^(MERGED_sample:|obiclean_|seq_rank|ID_STATUS|DEFINITION)") {
