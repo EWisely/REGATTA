@@ -8,6 +8,7 @@ OBIS_download(
   obis_taxa,
   worms_taxa = NA,
   regional_poly,
+  output_dir = NULL,
   obis_outputname = "OBIS_Species",
   kingdom = "Animalia",
   marine = NA,
@@ -33,10 +34,12 @@ instead of \code{obis_taxa} when looking up WoRMS IDs. NA reuses
 \code{"POLYGON ((long lat, long lat, ...))"}. Draw a region on
 \href{https://wktmap.com}{wktmap.com} and copy the generated polygon.}
 
-\item{obis_outputname}{Basename (no \code{.csv} extension) for the output
-file under \verb{checklist_sources/}. Default \code{"OBIS_Species"}. Choose a short
-distinctive name -- you will pass it into
-\code{\link[=build_regional_checklist]{build_regional_checklist()}} later.}
+\item{output_dir}{Optional directory to write the result into. Default
+\code{NULL} writes nothing (the function just returns the data); supply a
+directory to also save \verb{<output_dir>/<obis_outputname>.csv}.}
+
+\item{obis_outputname}{Basename (no \code{.csv} extension) for the output file,
+used only when \code{output_dir} is supplied. Default \code{"OBIS_Species"}.}
 
 \item{kingdom}{Kingdom used by \code{\link[=resolve_taxa]{resolve_taxa()}} to disambiguate the query
 taxa. Default \code{"Animalia"}; \code{NULL} disables the filter.}
@@ -46,13 +49,14 @@ returns only species marked in that habitat; FALSE excludes them;
 NA (default) means no filter.}
 }
 \value{
-Invisibly NULL. Writes
-\verb{checklist_sources/<obis_outputname>.csv} as a side effect.
+Invisibly, a data.frame with \code{Species} and \code{Source} columns.
+Writes \verb{<output_dir>/<obis_outputname>.csv} only when \code{output_dir} is
+supplied.
 }
 \description{
 Pulls an OBIS checklist for the given taxa within a regional WKT
-polygon, with optional habitat filters. Writes the result to
-\verb{checklist_sources/<obis_outputname>.csv} and prints the file path.
+polygon, with optional habitat filters. \strong{Returns} the species data
+frame; writes it to disk only if you supply \code{output_dir}.
 }
 \details{
 The four habitat filters \strong{stack as intersections, not unions}. So

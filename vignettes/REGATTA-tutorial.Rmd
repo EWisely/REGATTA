@@ -87,21 +87,21 @@ per region × group. The more complete it is, the fewer real local species get
 mistaken for off-target calls downstream (and the same species list also seeds
 your reference database).
 
-**How:** one call pulls the records, merges them, writes the two regional lists,
-and taxonomizes the LCA list in the background. OBIS runs by default (the more
+**How:** one call pulls the records, merges them, taxonomizes the LCA list, and
+**returns** everything — assign the result. OBIS runs by default (the more
 complete marine source); GBIF is **off by default** because its `occ_download`
 is slow and asynchronous — switch it on with `GBIF = TRUE` for a fresh download,
 or hand it a finished download's key/object to reuse one. Fold in any local
 checklist with `CSV =` (a path anywhere on disk). `region` and `label` name the
-output files; `taxa` is the query. This needs internet (and a GBIF account if
-`GBIF` is on, and a `taxonomizr` database for the background taxonomize), so
-it's shown, not run.
+output files *if* you write them; `taxa` is the query. This needs internet (and
+a GBIF account if `GBIF` is on, and a `taxonomizr` database for the background
+taxonomize), so it's shown, not run.
 
 ```{r build, eval = FALSE}
 poly <- "POLYGON ((-117.421875 31.952162, -91.933594 -6.315299, -81.386719 -6.315299, -76.113281 7.710992, -82.089844 8.581021, -87.011719 13.581921, -104.238281 20.303418, -112.5 32.249974, -117.421875 31.952162))"  # E. Tropical Pacific incl. Galapagos
 
-build_regional_checklist(
-  region        = "galapagos",   # names the output files
+cl <- build_regional_checklist(
+  region        = "galapagos",   # names the output files (if written)
   label         = "fish",        # ...short, even if `taxa` is a long name list
   taxa          = "fish",        # query: "fish" = ray-finned + sharks/rays/hagfish/lampreys
   regional_poly = poly,
@@ -110,14 +110,18 @@ build_regional_checklist(
   CSV           = "2016Aug24_Tirado-Sanchez_et_al_Galapagos_Pisces_Checklist.csv",
   marine        = TRUE, terrestrial = FALSE,   # keep marine + diadromous fish, drop land contaminants
   sql_path      = "/path/to/accessionTaxa.sql"
+  # output_dir  = "my_checklists"              # uncomment to also write the files
 )
 ```
 
-It writes two lists under `local_database_checklist/` — a species-only
-`..._for_making_localdb.txt` for a reference-database builder (e.g. CRABS), and
-a `..._for_LCA.txt` that also keeps any genus-level entries — plus, when
-`sql_path` points at a taxonomizr database, the taxonomized
-`..._for_LCA_taxonomized.rds` ready for the LCA.
+`build_regional_checklist()` **returns** a list, writing nothing unless you
+pass `output_dir`:
+
+* `cl$for_making_localdb` — species binomials only, for a reference-database
+  builder (e.g. CRABS).
+* `cl$for_LCA` — those plus any retained genus-level entries.
+* `cl$checklist` — the taxonomized LCA list (when `sql_path` pointed at a
+  `taxonomizr` database), ready to hand straight to `run_regatta()`.
 
 ---
 
@@ -150,19 +154,21 @@ classifier file into a corrected, audited taxonomy table — you don't wire the
 preprocessing, reconciliation, and reporting steps together yourself.
 
 **How:** point `run_regatta()` at your results file and the taxonomized
-checklist `build_regional_checklist()` produced. It detects the format (here an
-obitools `.tab`, recognized by its `TAXID` column), resolves the taxIDs to
-lineages, runs the checklist LCA, and writes the output bundle. (You can also
-pass the raw `..._for_LCA.txt` — `run_regatta()` will warn and taxonomize it on
-the fly.)
+checklist from the previous step (`cl$checklist`). It detects the format (here
+an obitools `.tab`, recognized by its `TAXID` column), resolves the taxIDs to
+lineages, runs the checklist LCA, and **returns** the corrected table + summary.
+(You can also pass the raw `cl$for_LCA` — `run_regatta()` will warn and
+taxonomize it on the fly.)
 
 ```{r run, eval = FALSE}
-run_regatta(
-  input     = "MiFish_obitools.tab",                   # obitools .tab (global DB)
-  checklist = "local_database_checklist/comprehensive_galapagos_fish_list_for_LCA_taxonomized.rds",
+res <- run_regatta(
+  input     = "MiFish_obitools.tab",   # obitools .tab (global DB)
+  checklist = cl$checklist,            # from build_regional_checklist() above
   sql_path  = "/path/to/accessionTaxa.sql"
+  # out_dir = "regatta_out"            # uncomment to also write the output bundle
 )
-#> -> regatta_out/{ reconcile_checklist/*, regatta_summary.csv, run_log.txt }
+#> returns res$post_checklist (corrected table) + res$summary (21-row).
+#> with out_dir set, also writes reconcile_checklist/*, regatta_summary.csv, run_log.txt
 ```
 
 On this dataset, of the 542 obitools-assigned ASVs (out of 1,438 total):

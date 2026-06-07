@@ -6,7 +6,6 @@
 ## (rgbif, robis, worrms, taxize) are Suggests and are called via `pkg::fn`
 ## behind requireNamespace() guards, so they are not imported here.
 #' @importFrom dplyr %>% filter select rename mutate pull bind_rows
-#' @importFrom here here
 #' @importFrom readr write_delim
 #' @importFrom utils read.csv read.delim write.csv head
 NULL

@@ -4,8 +4,8 @@
 #' Download an OBIS species list inside a WKT polygon
 #'
 #' Pulls an OBIS checklist for the given taxa within a regional WKT
-#' polygon, with optional habitat filters. Writes the result to
-#' `checklist_sources/<obis_outputname>.csv` and prints the file path.
+#' polygon, with optional habitat filters. **Returns** the species data
+#' frame; writes it to disk only if you supply `output_dir`.
 #'
 #' @param obis_taxa A character vector of taxon names at any level (OBIS
 #'   recognizes class, order, family, genus, species, etc.). Names are
@@ -22,10 +22,11 @@
 #' @param regional_poly A WKT POLYGON string of the form
 #'   `"POLYGON ((long lat, long lat, ...))"`. Draw a region on
 #'   [wktmap.com](https://wktmap.com) and copy the generated polygon.
-#' @param obis_outputname Basename (no `.csv` extension) for the output
-#'   file under `checklist_sources/`. Default `"OBIS_Species"`. Choose a short
-#'   distinctive name -- you will pass it into
-#'   [build_regional_checklist()] later.
+#' @param output_dir Optional directory to write the result into. Default
+#'   `NULL` writes nothing (the function just returns the data); supply a
+#'   directory to also save `<output_dir>/<obis_outputname>.csv`.
+#' @param obis_outputname Basename (no `.csv` extension) for the output file,
+#'   used only when `output_dir` is supplied. Default `"OBIS_Species"`.
 #' @param marine,freshwater,terrestrial,brackish Habitat filters. TRUE
 #'   returns only species marked in that habitat; FALSE excludes them;
 #'   NA (default) means no filter.
@@ -37,8 +38,9 @@
 #' freshwater, set `terrestrial = FALSE` and leave marine/freshwater
 #' as NA.
 #'
-#' @return Invisibly NULL. Writes
-#'   `checklist_sources/<obis_outputname>.csv` as a side effect.
+#' @return Invisibly, a data.frame with `Species` and `Source` columns.
+#'   Writes `<output_dir>/<obis_outputname>.csv` only when `output_dir` is
+#'   supplied.
 #'
 #' @examples
 #' \dontrun{
@@ -62,6 +64,7 @@
 OBIS_download <- function(obis_taxa,
                           worms_taxa = NA,
                           regional_poly,
+                          output_dir = NULL,
                           obis_outputname = "OBIS_Species",
                           kingdom = "Animalia",
                           marine = NA,
@@ -143,12 +146,17 @@ OBIS_download <- function(obis_taxa,
     mutate(Source = "OBIS"
     )
   
-  print("First few rows of output: ")
+  message("First few rows of output:")
   print(utils::head(obis_sp))
-  dir.create(here::here("checklist_sources"), recursive = TRUE, showWarnings = FALSE)
-  utils::write.csv(obis_sp, paste(here::here("checklist_sources"), sep = "", "/", obis_outputname, ".csv"), row.names = FALSE)
 
-  print("OBIS download complete.  Check your checklist_sources folder for the output.")
-  print(paste("Find your output at:", paste(here::here("checklist_sources"), sep = "", "/", obis_outputname, ".csv")), sep = " ")
+  if (!is.null(output_dir)) {
+    dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
+    out_path <- file.path(output_dir, paste0(obis_outputname, ".csv"))
+    utils::write.csv(obis_sp, out_path, row.names = FALSE)
+    message("OBIS species list written to ", out_path)
+  }
+
+  message("OBIS download complete (", nrow(obis_sp), " species).")
+  invisible(obis_sp)
 }
 

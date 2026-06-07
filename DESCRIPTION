@@ -29,7 +29,6 @@ Imports:
     RSQLite,
     dplyr,
     readr,
-    here,
     rgbif,
     robis,
     worrms,

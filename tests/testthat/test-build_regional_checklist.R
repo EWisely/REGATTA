@@ -1,86 +1,67 @@
-# Offline tests for the build_regional_checklist() orchestrator and the
-# background/lazy taxonomize helper. here::here() is mocked so output lands in
-# a temp dir; taxonomize_checklist() is mocked so no network or taxonomizr DB
-# is ever touched.
+# Offline tests for the build_regional_checklist() orchestrator. It now
+# returns the lists and writes nothing unless output_dir is given, so no
+# here::here() redirection is needed. Real taxonomize (DB) tests are guarded
+# by skip_on_cran() + skip-if-no-DB.
 
 ranks <- c("domain", "phylum", "class", "order", "family", "genus", "species")
 
-test_that("CSV source splits genus-only from species, and names files from region/label", {
-  tmp <- tempfile(); dir.create(tmp)
-  local_mocked_bindings(here = function(...) file.path(tmp, ...), .package = "here")
-
-  csv <- file.path(tmp, "local.csv")
+test_that("CSV source splits genus-only from species in the returned lists", {
+  csv <- tempfile(fileext = ".csv")
   utils::write.csv(
     data.frame(Genus   = c("Lutjanus", "Caranx", "Sebastes"),
                Species = c("argentiventris", "sp.", "mystinus")),
     csv, row.names = FALSE)
 
-  res <- build_regional_checklist(
+  res <- suppressMessages(build_regional_checklist(
     region = "testreg", label = "testlab",
-    OBIS = FALSE, GBIF = FALSE, CSV = csv,
-    sql_path = file.path(tmp, "absent.sql"))   # no DB -> skip taxonomize
-
-  expect_match(res$db_path,  "comprehensive_testreg_testlab_list_for_making_localdb\\.txt$")
-  expect_match(res$lca_path, "comprehensive_testreg_testlab_list_for_LCA\\.txt$")
-
-  db  <- utils::read.delim(res$db_path)
-  lca <- utils::read.delim(res$lca_path)
+    OBIS = FALSE, GBIF = FALSE, CSV = csv, sql_path = tempfile()))   # no DB
 
   # DB list: species binomials only, NO bare genus
-  expect_setequal(db$Species, c("Lutjanus argentiventris", "Sebastes mystinus"))
-  expect_false("Caranx" %in% db$Species)
-
-  # LCA list: same binomials PLUS the retained bare genus
-  expect_true("Caranx" %in% lca$Species)
-  expect_true(all(c("Lutjanus argentiventris", "Sebastes mystinus") %in% lca$Species))
-
-  # No taxonomizr DB available -> no background taxonomize
-  expect_null(res$rds_path)
+  expect_setequal(res$for_making_localdb$Species,
+                  c("Lutjanus argentiventris", "Sebastes mystinus"))
+  expect_false("Caranx" %in% res$for_making_localdb$Species)
+  # LCA list: + the retained bare genus
+  expect_true("Caranx" %in% res$for_LCA$Species)
+  # no DB -> not taxonomized
+  expect_null(res$checklist)
 })
 
-test_that("a taxonomizr DB present triggers the background taxonomize", {
-  skip_on_cran()
-  sql <- Sys.getenv("REGATTA_TAXONOMIZR_SQL", "accessionTaxa.sql")
-  skip_if(!file.exists(sql), "taxonomizr DB not available")
-
-  tmp <- tempfile(); dir.create(tmp)
-  local_mocked_bindings(here = function(...) file.path(tmp, ...), .package = "here")
-
-  csv <- file.path(tmp, "local.csv")
+test_that("nothing is written to the working directory by default", {
+  csv <- tempfile(fileext = ".csv")
   utils::write.csv(data.frame(Genus = "Lutjanus", Species = "argentiventris"),
                    csv, row.names = FALSE)
+  wd <- tempfile(); dir.create(wd); old <- setwd(wd); on.exit(setwd(old))
 
-  res <- suppressMessages(
-    build_regional_checklist(region = "r", label = "l",
-                             OBIS = FALSE, CSV = csv, sql_path = sql))
+  suppressMessages(build_regional_checklist(
+    region = "r", label = "l", OBIS = FALSE, CSV = csv, sql_path = tempfile()))
+  expect_equal(length(list.files(wd, recursive = TRUE)), 0L)
+})
 
-  expect_match(res$rds_path, "_for_LCA_taxonomized\\.rds$")
-  expect_true(file.exists(res$rds_path))
-  tx <- readRDS(res$rds_path)                       # real taxonomized output
-  expect_true(all(c("genus", "species") %in% names(tx)))
-  expect_equal(tx$genus[tx$input_name == "Lutjanus argentiventris"], "Lutjanus")
+test_that("output_dir writes the two lists with region/label filenames", {
+  csv <- tempfile(fileext = ".csv")
+  utils::write.csv(data.frame(Genus = "Lutjanus", Species = "argentiventris"),
+                   csv, row.names = FALSE)
+  out <- tempfile(); dir.create(out)
+
+  suppressMessages(build_regional_checklist(
+    region = "testreg", label = "testlab",
+    OBIS = FALSE, CSV = csv, sql_path = tempfile(), output_dir = out))
+
+  expect_true(file.exists(file.path(out, "comprehensive_testreg_testlab_list_for_making_localdb.txt")))
+  expect_true(file.exists(file.path(out, "comprehensive_testreg_testlab_list_for_LCA.txt")))
 })
 
 test_that("pre-made OBIS/GBIF source CSVs are fed in and stacked", {
-  tmp <- tempfile(); dir.create(tmp)
-  local_mocked_bindings(here = function(...) file.path(tmp, ...), .package = "here")
-
-  obis <- file.path(tmp, "obis.csv")
-  gbif <- file.path(tmp, "gbif.csv")
+  obis <- tempfile(fileext = ".csv"); gbif <- tempfile(fileext = ".csv")
   utils::write.csv(data.frame(Species = "Aaa bbb", Source = "OBIS"), obis, row.names = FALSE)
   utils::write.csv(data.frame(Species = "Ccc ddd", Source = "GBIF"), gbif, row.names = FALSE)
 
-  res <- build_regional_checklist(region = "r", label = "l",
-                                  OBIS = obis, GBIF = gbif,
-                                  sql_path = file.path(tmp, "absent.sql"))
-  lca <- utils::read.delim(res$lca_path)
-  expect_true(all(c("Aaa bbb", "Ccc ddd") %in% lca$Species))
+  res <- suppressMessages(build_regional_checklist(
+    region = "r", label = "l", OBIS = obis, GBIF = gbif, sql_path = tempfile()))
+  expect_true(all(c("Aaa bbb", "Ccc ddd") %in% res$for_LCA$Species))
 })
 
 test_that("region/label are required and at least one source must be on", {
-  tmp <- tempfile(); dir.create(tmp)
-  local_mocked_bindings(here = function(...) file.path(tmp, ...), .package = "here")
-
   expect_error(build_regional_checklist(label = "l", OBIS = FALSE, CSV = FALSE), "region")
   expect_error(build_regional_checklist(region = "r", OBIS = FALSE, CSV = FALSE), "label")
   expect_error(
@@ -90,11 +71,25 @@ test_that("region/label are required and at least one source must be on", {
 })
 
 test_that("a fresh download requires taxa and regional_poly", {
-  tmp <- tempfile(); dir.create(tmp)
-  local_mocked_bindings(here = function(...) file.path(tmp, ...), .package = "here")
-  # OBIS = TRUE (default) but no taxa/poly -> clear error before any network call
   expect_error(build_regional_checklist(region = "r", label = "l"),
                "taxa.*regional_poly|regional_poly")
+})
+
+test_that("background taxonomize populates $checklist when a DB is present", {
+  skip_on_cran()
+  sql <- Sys.getenv("REGATTA_TAXONOMIZR_SQL", "accessionTaxa.sql")
+  skip_if(!file.exists(sql), "taxonomizr DB not available")
+
+  csv <- tempfile(fileext = ".csv")
+  utils::write.csv(data.frame(Genus = "Lutjanus", Species = "argentiventris"),
+                   csv, row.names = FALSE)
+  res <- suppressMessages(build_regional_checklist(
+    region = "r", label = "l", OBIS = FALSE, CSV = csv, sql_path = sql))
+
+  expect_false(is.null(res$checklist))
+  expect_true(all(c("genus", "species") %in% names(res$checklist)))
+  expect_equal(res$checklist$genus[res$checklist$input_name == "Lutjanus argentiventris"],
+               "Lutjanus")
 })
 
 test_that(".regatta_ensure_taxonomized passes a taxonomized checklist through untouched", {

@@ -1,31 +1,30 @@
 # Eldridge Wisely
 # Originally `dataset_combine()`, modified for function use by Ella Crotty.
 # Now the orchestrator for the checklist-building stage: it can run the
-# OBIS/GBIF downloads (or reuse pre-made sources), fold in local CSVs, write
-# the two regional lists, and taxonomize the LCA list in the background.
+# OBIS/GBIF downloads (or reuse pre-made sources), fold in local CSVs,
+# taxonomize the LCA list, and RETURN everything. It writes files only when
+# given an output_dir.
 
 #' Build a regional species checklist (orchestrator)
 #'
 #' The basic entry point for the checklist-building stage. Pulls regional
 #' species records from OBIS and/or GBIF (or reuses pre-made sources), folds
-#' in any local `Genus`+`Species` CSVs, deduplicates, and writes **two**
-#' tab-delimited lists under `local_database_checklist/`:
+#' in any local `Genus`+`Species` CSVs, deduplicates, taxonomizes the LCA
+#' list (when a `taxonomizr` database is available), and **returns** the
+#' results. Two species lists are produced:
 #' \itemize{
-#'   \item `comprehensive_<region>_<label>_list_for_making_localdb.txt` --
-#'     species binomials only, for a reference-database builder (e.g. CRABS).
-#'   \item `comprehensive_<region>_<label>_list_for_LCA.txt` -- those binomials
-#'     **plus** any retained genus-level entries, for the checklist LCA.
+#'   \item `for_making_localdb` -- species binomials only, for a
+#'     reference-database builder (e.g. CRABS).
+#'   \item `for_LCA` -- those binomials **plus** any retained genus-level
+#'     entries, the input to the checklist LCA.
 #' }
-#' The LCA list is then **taxonomized in the background** (when an
-#' `accessionTaxa.sql` database is available), writing
-#' `comprehensive_<region>_<label>_list_for_LCA_taxonomized.rds` ready for
-#' [reconcile_checklist()] / [run_regatta()]. If no database is available the
-#' taxonomize step is skipped here and runs (with a warning) at the LCA step
-#' instead.
+#' Nothing is written to disk unless you pass `output_dir`; then the two
+#' lists and the taxonomized checklist are saved there, named from `region`
+#' and `label`.
 #'
 #' [OBIS_download()], [GBIF_download()], and [taxonomize_checklist()] remain
-#' exported for direct/advanced use (caching, inspection), but the typical
-#' user only calls this wrapper.
+#' exported for direct/advanced use, but the typical user only calls this
+#' wrapper.
 #'
 #' @param region Region label for the output filenames, e.g. `"galapagos"`.
 #'   Required.
@@ -41,46 +40,50 @@
 #'   [OBIS_download()]; `FALSE` skips OBIS; a path to a pre-made OBIS source
 #'   CSV (with `Species`/`Source` columns) feeds that instead of downloading.
 #' @param GBIF Source control for GBIF: `FALSE` (default) skips GBIF; `TRUE`
-#'   submits and runs a fresh `occ_download`; a GBIF download **key** string
-#'   or an `occ_download` **object** reuses an already-finished download
-#'   (no resubmission); a path to a pre-made GBIF source CSV feeds that.
+#'   runs a fresh `occ_download`; a GBIF download **key** string or an
+#'   `occ_download` **object** reuses an already-finished download; a path to
+#'   a pre-made GBIF source CSV feeds that.
 #' @param CSV Local checklist input: `FALSE` (default) for none, or a
-#'   character vector of paths to local `Genus`+`Species` CSV(s) (anywhere on
-#'   disk). A `Species` value of `"sp."` keeps the genus alone (no epithet),
-#'   and that genus-level entry goes into the `_for_LCA` file only.
+#'   character vector of paths to local `Genus`+`Species` CSV(s). A `Species`
+#'   value of `"sp."` keeps the genus alone (no epithet); that genus-level
+#'   entry goes into `for_LCA` only, never `for_making_localdb`.
 #' @param marine,freshwater,terrestrial,brackish OBIS habitat filters, passed
-#'   to [OBIS_download()]. Defaults (`marine = TRUE`, `terrestrial = FALSE`,
-#'   the others `NA`) keep marine plus anadromous/catadromous species (which
-#'   carry a freshwater flag) and drop only land contaminants. Set explicitly
-#'   to override.
-#' @param sql_path Path to the local `accessionTaxa.sql` taxonomizr DB used
-#'   for the background taxonomize step. If the file is absent, taxonomizing
-#'   is deferred to the LCA step.
+#'   to [OBIS_download()]. Defaults keep marine plus anadromous/catadromous
+#'   species and drop only land contaminants.
+#' @param sql_path Path to the local `accessionTaxa.sql` taxonomizr DB used to
+#'   taxonomize the LCA list. If absent, the LCA list is returned
+#'   un-taxonomized and taxonomizing is deferred to the reconcile step.
+#' @param output_dir Optional directory to write outputs into. Default `NULL`
+#'   writes nothing (everything is returned); supply a directory to also save
+#'   `comprehensive_<region>_<label>_list_for_making_localdb.txt`,
+#'   `..._for_LCA.txt`, and `..._for_LCA_taxonomized.rds`.
 #' @param kingdom Kingdom used by [resolve_taxa()] to disambiguate query
 #'   taxa in the downloaders. Default `"Animalia"`.
 #' @param gbif_fill_families Passed to [GBIF_download()] for a fresh GBIF run.
 #'
-#' @return Invisibly a list with `db_path`, `lca_path`, and (when
-#'   taxonomized here) `rds_path`. Writes the two `.txt` lists and, when a DB
-#'   is available, the taxonomized `.rds`.
+#' @return Invisibly, a list with `for_making_localdb` (species-only
+#'   data.frame), `for_LCA` (data.frame with retained genus-level entries),
+#'   and `checklist` (the taxonomized LCA list, or `NULL` if no DB was
+#'   available). Pass `checklist` straight to [run_regatta()] /
+#'   [reconcile_checklist()].
 #'
 #' @examples
 #' \dontrun{
-#' # Fish in the Galapagos: OBIS (default) + a local checklist, no GBIF.
-#' build_regional_checklist(
+#' # OBIS (default) + a local checklist, no GBIF, no taxonomizr DB needed yet.
+#' cl <- build_regional_checklist(
 #'   region        = "galapagos",
 #'   label         = "fish",
 #'   taxa          = "fish",
 #'   regional_poly = "POLYGON ((-92 2, -89 2, -89 -2, -92 -2, -92 2))",
 #'   CSV           = "~/other_project/galapagos_fish_checklist.csv"
 #' )
+#' run_regatta(input = "MiFish_obitools.tab", checklist = cl$checklist,
+#'             sql_path = "/path/to/accessionTaxa.sql")
 #'
-#' # Add GBIF, reusing an occ_download you already ran:
-#' build_regional_checklist(
-#'   region = "galapagos", label = "fish", taxa = "fish",
+#' # Persist the lists to a directory of your choosing:
+#' build_regional_checklist(region = "galapagos", label = "fish", taxa = "fish",
 #'   regional_poly = "POLYGON ((-92 2, -89 2, -89 -2, -92 -2, -92 2))",
-#'   GBIF   = "0012345-230101000000000"   # an existing GBIF download key
-#' )
+#'   sql_path = "/path/to/accessionTaxa.sql", output_dir = "my_checklists")
 #' }
 #'
 #' @importFrom utils read.csv
@@ -97,9 +100,9 @@ build_regional_checklist <- function(region,
                                      terrestrial = FALSE,
                                      brackish = NA,
                                      sql_path = "accessionTaxa.sql",
+                                     output_dir = NULL,
                                      kingdom = "Animalia",
                                      gbif_fill_families = TRUE) {
-  if (!requireNamespace("here",  quietly = TRUE)) stop("`here` is required.")
   if (!requireNamespace("dplyr", quietly = TRUE)) stop("`dplyr` is required.")
   if (!requireNamespace("readr", quietly = TRUE)) stop("`readr` is required.")
   if (missing(region) || missing(label) ||
@@ -109,63 +112,50 @@ build_regional_checklist <- function(region,
     stop("Provide a non-empty `region` and `label` -- they name the output ",
          'files, e.g. region = "galapagos", label = "fish".')
 
-  stem      <- paste0("comprehensive_", trimws(region), "_", trimws(label), "_list")
-  src_dir   <- here::here("checklist_sources")
-  needs_dl  <- isTRUE(OBIS) || isTRUE(GBIF)
+  needs_dl <- isTRUE(OBIS) || isTRUE(GBIF)
   if (needs_dl && (is.null(taxa) || is.null(regional_poly)))
     stop("Running a fresh OBIS/GBIF download needs both `taxa` and ",
          "`regional_poly`. Set OBIS/GBIF to FALSE or to a pre-made source ",
          "to skip downloading.")
 
+  cols         <- c("Species", "Source")
   empty        <- data.frame(Species = character(0), Source = character(0),
                              stringsAsFactors = FALSE)
   species_rows <- empty   # binomials: OBIS/GBIF + local non-"sp." rows
   genus_rows   <- empty   # genus-only: local "Genus / sp." rows
 
-  # --- OBIS source --------------------------------------------------------
+  # --- OBIS source (uses the function's return value, not a written file) --
   if (isTRUE(OBIS)) {
-    out <- paste0("OBIS_", trimws(region), "_", trimws(label))
-    OBIS_download(obis_taxa = taxa, regional_poly = regional_poly,
-                  obis_outputname = out, kingdom = kingdom,
-                  marine = marine, freshwater = freshwater,
-                  terrestrial = terrestrial, brackish = brackish)
-    species_rows <- unique(rbind(species_rows,
-      .regatta_read_source_csv(file.path(src_dir, paste0(out, ".csv")), "OBIS")))
+    obis_df <- OBIS_download(obis_taxa = taxa, regional_poly = regional_poly,
+                            output_dir = NULL, kingdom = kingdom,
+                            marine = marine, freshwater = freshwater,
+                            terrestrial = terrestrial, brackish = brackish)
+    species_rows <- unique(rbind(species_rows, obis_df[, cols, drop = FALSE]))
   } else if (is.character(OBIS)) {
-    species_rows <- unique(rbind(species_rows,
-      .regatta_read_source_csv(OBIS, "OBIS")))
+    species_rows <- unique(rbind(species_rows, .regatta_read_source_csv(OBIS, "OBIS")))
   }
 
   # --- GBIF source --------------------------------------------------------
   if (!.regatta_is_off(GBIF)) {
-    out <- paste0("GBIF_", trimws(region), "_", trimws(label))
-    gbif_csv <- file.path(src_dir, paste0(out, ".csv"))
     if (isTRUE(GBIF)) {
-      GBIF_download(obis_taxa = taxa, regional_poly = regional_poly,
-                    gbif_outputname = out, kingdom = kingdom,
-                    gbif_fill_families = gbif_fill_families)
-      species_rows <- unique(rbind(species_rows,
-        .regatta_read_source_csv(gbif_csv, "GBIF")))
+      gbif_df <- GBIF_download(obis_taxa = taxa, regional_poly = regional_poly,
+                              output_dir = NULL, kingdom = kingdom,
+                              gbif_fill_families = gbif_fill_families)
     } else if (is.character(GBIF) && length(GBIF) == 1 &&
                (grepl("\\.csv$", GBIF, ignore.case = TRUE) || file.exists(GBIF))) {
-      species_rows <- unique(rbind(species_rows,
-        .regatta_read_source_csv(GBIF, "GBIF")))            # pre-made CSV
+      gbif_df <- .regatta_read_source_csv(GBIF, "GBIF")          # pre-made CSV
     } else {
-      # a download key (character) or an occ_download object -> reuse it
-      GBIF_download(existing_download = GBIF, gbif_outputname = out)
-      species_rows <- unique(rbind(species_rows,
-        .regatta_read_source_csv(gbif_csv, "GBIF")))
+      gbif_df <- GBIF_download(existing_download = GBIF, output_dir = NULL)
     }
+    species_rows <- unique(rbind(species_rows, gbif_df[, cols, drop = FALSE]))
   }
 
   # --- Local CSV(s) -------------------------------------------------------
   if (!.regatta_is_off(CSV)) {
     for (lc in CSV) {
-      path <- if (file.exists(lc)) lc else file.path(src_dir, lc)
-      if (!file.exists(path))
-        stop("Cannot find local CSV '", lc, "'. Give a path to an existing ",
-             "file, or place the file in checklist_sources/ and pass its name.")
-      db <- utils::read.csv(path, fileEncoding = "latin1", check.names = FALSE)
+      if (!file.exists(lc))
+        stop("Cannot find local CSV '", lc, "'. Give a path to an existing file.")
+      db <- utils::read.csv(lc, fileEncoding = "latin1", check.names = FALSE)
       if (!"Genus" %in% colnames(db))
         stop('Local CSV "', lc, '" needs a column named exactly "Genus".')
       if (!"Species" %in% colnames(db))
@@ -190,34 +180,40 @@ build_regional_checklist <- function(region,
   species_rows <- dplyr::filter(species_rows, Species != "NA")
   lca_rows     <- dplyr::filter(unique(rbind(species_rows, genus_rows)),
                                 Species != "NA")
+  message(nrow(species_rows), " species-level entries (for the reference DB); ",
+          nrow(lca_rows), " entries incl. ", nrow(genus_rows),
+          " genus-level (for the checklist LCA).")
 
-  out_dir  <- here::here("local_database_checklist")
-  dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
-  db_path  <- file.path(out_dir, paste0(stem, "_for_making_localdb.txt"))
-  lca_path <- file.path(out_dir, paste0(stem, "_for_LCA.txt"))
-  readr::write_delim(species_rows, db_path,  delim = "\t")
-  readr::write_delim(lca_rows,     lca_path, delim = "\t")
-  message(nrow(species_rows), " species-level entries -> ", db_path,
-          " (for building the local reference DB)")
-  message(nrow(lca_rows), " entries (incl. ", nrow(genus_rows),
-          " genus-level) -> ", lca_path, " (for reconcile_checklist)")
-
-  # --- Background taxonomize of the LCA list ------------------------------
-  rds_path <- NULL
+  # --- Taxonomize the LCA list (when a DB is available) -------------------
+  taxonomized <- NULL
   if (file.exists(sql_path)) {
-    message("Taxonomizing the LCA checklist in the background ...")
-    tx <- taxonomize_checklist(lca_path, sql_path = sql_path)
-    rds_path <- file.path(out_dir, paste0(stem, "_for_LCA_taxonomized.rds"))
-    saveRDS(tx, rds_path)
-    message("Taxonomized checklist -> ", rds_path,
-            " (ready for reconcile_checklist / run_regatta)")
+    message("Taxonomizing the LCA checklist ...")
+    taxonomized <- taxonomize_checklist(lca_rows, sql_path = sql_path)
   } else {
-    message("No taxonomizr DB at '", sql_path, "' -- skipping taxonomize here. ",
-            "It will run (with a warning) at the LCA step. Pass `sql_path` to ",
-            "a built accessionTaxa.sql to taxonomize now.")
+    message("No taxonomizr DB at '", sql_path, "' -- returning the LCA list ",
+            "un-taxonomized; reconcile_checklist()/run_regatta() will ",
+            "taxonomize it (with a warning) at the LCA step.")
   }
 
-  invisible(list(db_path = db_path, lca_path = lca_path, rds_path = rds_path))
+  # --- Write only when an output directory is given -----------------------
+  if (!is.null(output_dir)) {
+    dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
+    stem <- paste0("comprehensive_", trimws(region), "_", trimws(label), "_list")
+    readr::write_delim(species_rows,
+                       file.path(output_dir, paste0(stem, "_for_making_localdb.txt")),
+                       delim = "\t")
+    readr::write_delim(lca_rows,
+                       file.path(output_dir, paste0(stem, "_for_LCA.txt")),
+                       delim = "\t")
+    if (!is.null(taxonomized))
+      saveRDS(taxonomized,
+              file.path(output_dir, paste0(stem, "_for_LCA_taxonomized.rds")))
+    message("Wrote checklist files to ", output_dir)
+  }
+
+  invisible(list(for_making_localdb = species_rows,
+                 for_LCA            = lca_rows,
+                 checklist          = taxonomized))
 }
 
 # FALSE / NULL / NA all mean "this source is off". A non-FALSE value (TRUE, a
@@ -227,8 +223,6 @@ build_regional_checklist <- function(region,
 # At the LCA step, accept a checklist that may not be taxonomized yet: if it
 # lacks the 7 rank columns, warn and taxonomize it on the fly. A path, a
 # character vector of names, or a names-only data.frame all work.
-# build_regional_checklist() normally taxonomizes ahead of time so this is a
-# no-op, but a hand-fed raw checklist still runs.
 .regatta_ensure_taxonomized <- function(checklist, sql_path = "accessionTaxa.sql") {
   ranks <- c("domain", "phylum", "class", "order", "family", "genus", "species")
   if (is.data.frame(checklist) && all(ranks %in% names(checklist)))
@@ -239,7 +233,7 @@ build_regional_checklist <- function(region,
   taxonomize_checklist(checklist, sql_path = sql_path)
 }
 
-# Read a per-source checklist CSV (OBIS/GBIF output or a fed-in equivalent)
+# Read a pre-made per-source checklist CSV (a fed-in OBIS/GBIF equivalent)
 # down to the {Species, Source} shape the combiner stacks.
 .regatta_read_source_csv <- function(path, kind) {
   if (!file.exists(path))

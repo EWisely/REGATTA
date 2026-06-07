@@ -116,9 +116,9 @@ For most users the whole pipeline collapses to a single `run_regatta()`
 call once you have a taxonomized regional checklist. It accepts file paths,
 a vsearch `lca + userout` pair, a folder of inputs, or an explicit
 `list(global =, local =)` for the two-DB workflow; file formats are
-auto-detected and the right preprocessor is dispatched. Outputs land under
-`<input>/regatta_out/` by default, with a `run_log.txt` recording what was
-detected and run.
+auto-detected and the right preprocessor is dispatched. It **returns** the
+results; pass `out_dir` to also write the per-stage CSV triples, the 21-row
+summary, and a `run_log.txt` recording what was detected and run.
 
 ```r
 # Single-DB workflow (one classifier output, any tool)
@@ -150,15 +150,14 @@ available; `run_regatta()` is a thin orchestrator on top of them.
 
 ## Setup
 
-Building your own regional checklist needs two things in your project.
+A few things to set up before building your own regional checklist.
 
-**Folders.** In your project working directory, the GBIF/OBIS downloaders
-write their per-source species lists to `checklist_sources/`, and
-`build_regional_checklist()` / `taxonomize_checklist()` write the combined,
-taxonomized list to `local_database_checklist/`. Both folders are created
-automatically if missing. Local checklist CSVs (each with `Genus` and
-`Species` columns) can live anywhere — you pass their paths straight to
-`build_regional_checklist(local_csvs = ...)`, no copying required.
+**Output locations.** REGATTA functions **return** their results and write
+nothing to disk by default — pass an `output_dir` (downloaders / build) or
+`out_dir` (`run_regatta()`) to also save files in a directory you choose.
+Local checklist CSVs (each with `Genus` and `Species` columns) can live
+anywhere; pass their paths to `build_regional_checklist(CSV = ...)`, no
+copying required.
 
 **Credentials & taxonomy DB.** `GBIF_download()` uses your GBIF login; add
 `GBIF_USER` / `GBIF_PWD` / `GBIF_EMAIL` to your `.Renviron`
@@ -185,10 +184,10 @@ argument.
 poly <- "POLYGON ((-117.4 32.0, -91.9 -6.3, -81.4 -6.3, -76.1 7.7, -82.1 8.6, -104.2 20.3, -112.5 32.2, -117.4 32.0))"
 
 # One call: downloads OBIS (default on) and/or GBIF (default off), folds in
-# any local CSV, writes the two regional lists, and taxonomizes the _for_LCA
-# list in the background -> ..._for_LCA_taxonomized.rds, ready for the LCA.
-build_regional_checklist(
-  region        = "galapagos",   # names the output files
+# any local CSV, and taxonomizes the LCA list. It RETURNS everything; assign
+# it. (Add output_dir = "some/dir" to also write the files there.)
+cl <- build_regional_checklist(
+  region        = "galapagos",   # names the output files (if written)
   label         = "fish",        # short filename label (kept separate from taxa)
   taxa          = "fish",        # the query passed to the downloaders
   regional_poly = poly,
@@ -198,10 +197,9 @@ build_regional_checklist(
   marine        = TRUE, terrestrial = FALSE,
   sql_path      = "/path/to/accessionTaxa.sql"
 )
-# Writes, under local_database_checklist/:
-#   comprehensive_galapagos_fish_list_for_making_localdb.txt   (species only -> CRABS etc.)
-#   comprehensive_galapagos_fish_list_for_LCA.txt              (+ retained genera)
-#   comprehensive_galapagos_fish_list_for_LCA_taxonomized.rds  (ready for run_regatta)
+# cl$for_making_localdb  species-only list (-> a reference-DB builder like CRABS)
+# cl$for_LCA             + retained genus-level entries
+# cl$checklist           taxonomized, ready for run_regatta(checklist = cl$checklist)
 ```
 
 ## Per-taxonomic-group separation
