@@ -61,12 +61,13 @@ res <- run_regatta(
                "MiFish_vsearch_userout.txt")        # vsearch %ID
   ),
   checklist = cl$for_LCA,                            # from build_regional_checklist()
-  sql_path  = "/path/to/accessionTaxa.sql"
-  # out_dir = "regatta_out"                          # uncomment to also write the bundle
+  out_dir   = "regatta_out",                         # REQUIRED: dated run subfolder
+  region    = "galapagos", label = "fish"            # name the run subfolder
+  # sql_path defaults to the cache; pass a path to override.
 )
-#> returns res$reconciled, res$post_checklist, res$summary.
-#> with out_dir set, also writes reconcile_global_local/*, reconcile_checklist/*,
-#> regatta_summary.csv, run_log.txt
+#> returns res$reconciled, res$post_checklist, res$summary, and writes
+#> reconcile_global_local/*, reconcile_checklist/*, regatta_summary.csv,
+#> run_log.txt into regatta_out/galapagos_fish_<date>/
 ```
 
 On the full dataset, of the 1,438 ASVs, 892 were unassigned by both

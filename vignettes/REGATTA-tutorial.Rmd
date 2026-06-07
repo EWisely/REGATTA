@@ -255,11 +255,13 @@ taxonomizes it on the fly.)
 res <- run_regatta(
   input     = "MiFish_obitools.tab",   # obitools .tab (global DB)
   checklist = cl$for_LCA,              # from build_regional_checklist() above
-  sql_path  = "/path/to/accessionTaxa.sql"
-  # out_dir = "regatta_out"            # uncomment to also write the output bundle
+  out_dir   = "regatta_out",           # REQUIRED: outputs go in a dated subfolder
+  region    = "galapagos", label = "fish"  # name the run subfolder (match build)
+  # sql_path defaults to the cache; pass a path to override.
 )
-#> returns res$post_checklist (reconciled table) + res$summary (21-row).
-#> with out_dir set, also writes reconcile_checklist/*, regatta_summary.csv, run_log.txt
+#> returns res$post_checklist (reconciled table) + res$summary (21-row), and
+#> writes reconcile_checklist/*, regatta_summary.csv, run_log.txt into
+#> regatta_out/galapagos_fish_<date>/
 ```
 
 On this dataset, of the 542 obitools-assigned ASVs (out of 1,438 total):

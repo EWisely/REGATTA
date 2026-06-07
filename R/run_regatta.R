@@ -247,10 +247,14 @@
 #'     where each entry is a single path or a length-2 vsearch pair.
 #' @param checklist Path to a taxonomized regional checklist (`.rds` or
 #'   `.csv`), or a data.frame with the 7 rank columns.
-#' @param out_dir Output directory. Default `NULL` returns the results
-#'   without writing anything; supply a directory to also write the per-stage
-#'   CSV triples, the 21-row summary, and `run_log.txt` there (created if
-#'   missing).
+#' @param out_dir **Required.** Output directory. Each run writes into its own
+#'   dated subfolder of it -- `<region>_<label>_<Date>` when you pass `region`
+#'   and `label`, otherwise `regatta_run_<Date>` -- so successive runs don't
+#'   pile up. That subfolder gets the per-stage CSV triples, the 21-row summary,
+#'   and `run_log.txt`. The results list is also returned.
+#' @param region,label Optional labels used only to name the dated run
+#'   subfolder (pass the same ones you gave [build_regional_checklist()] for a
+#'   consistent layout). Omit both for a generic `regatta_run_<Date>` folder.
 #' @param sql_path Path to the local `accessionTaxa.sql` taxonomizr DB, used to
 #'   resolve obitools / BestTaxon input and to taxonomize a raw `checklist`.
 #'   Defaults to the same persistent per-user cache as
@@ -294,25 +298,36 @@
 #' }
 #'
 #' @return Invisibly a list with the final tables and the
-#'   [summarize_regatta()] data.frame. Writes CSV outputs and `run_log.txt`
-#'   under `out_dir` only when `out_dir` is supplied.
+#'   [summarize_regatta()] data.frame. Always also writes the CSV outputs and
+#'   `run_log.txt` into the dated run subfolder of `out_dir`.
 #'
 #' @importFrom utils read.csv read.delim write.csv
 #' @export
 run_regatta <- function(input,
                         checklist,
-                        out_dir         = NULL,
+                        out_dir,
+                        region          = NULL,
+                        label           = NULL,
                         sql_path        = .regatta_default_sql_path(),
                         overwrite_taxonomy_files = FALSE,
                         id_col          = "ASV_id",
                         Local_advantage = TRUE) {
   t_start <- Sys.time()
+  if (missing(out_dir) || is.null(out_dir) || !is.character(out_dir) ||
+      length(out_dir) != 1 || !nzchar(trimws(out_dir)))
+    stop("`out_dir` is required: give a directory to write the run outputs ",
+         'into, e.g. out_dir = "regatta_out". Outputs land in a dated ',
+         "<region>_<label>_<Date> (or regatta_run_<Date>) subfolder of it.")
   norm <- .regatta_normalize_input(input)
 
-  # out_dir = NULL: return results only, write nothing. Supply a directory to
-  # also persist the per-stage CSV triples + summary + run_log there.
-  if (!is.null(out_dir)) dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
-  .sub <- function(name) if (is.null(out_dir)) NULL else file.path(out_dir, name)
+  # Each run lands in its own dated subfolder so successive runs don't pile up.
+  run_name <- if (!is.null(region) && !is.null(label))
+    paste0(trimws(region), "_", trimws(label), "_", Sys.Date())
+  else
+    paste0("regatta_run_", Sys.Date())
+  run_dir <- file.path(out_dir, run_name)
+  dir.create(run_dir, recursive = TRUE, showWarnings = FALSE)
+  .sub <- function(name) file.path(run_dir, name)
 
   if (is.character(checklist) && length(checklist) == 1) {
     cl <- if (grepl("\\.rds$", checklist, ignore.case = TRUE)) readRDS(checklist)
@@ -326,7 +341,7 @@ run_regatta <- function(input,
   # warning; a pre-taxonomized checklist passes through unchanged.
   cl <- .regatta_ensure_taxonomized(cl, sql_path, overwrite_taxonomy_files)
 
-  dest <- if (is.null(out_dir)) "(return only; no files written)" else normalizePath(out_dir)
+  dest <- normalizePath(run_dir)
   log_lines <- c(
     paste0("REGATTA run started: ", format(t_start)),
     paste0("Workflow: ", norm$role),
@@ -379,12 +394,10 @@ run_regatta <- function(input,
 
   log_lines <- c(log_lines,
                  paste0("Total elapsed: ", format(Sys.time() - t_start)))
-  if (!is.null(out_dir)) {
-    utils::write.csv(summ, file.path(out_dir, "regatta_summary.csv"),
-                     row.names = FALSE)
-    writeLines(log_lines, file.path(out_dir, "run_log.txt"))
-    message("Wrote ", normalizePath(file.path(out_dir, "regatta_summary.csv")))
-  }
+  utils::write.csv(summ, file.path(run_dir, "regatta_summary.csv"),
+                   row.names = FALSE)
+  writeLines(log_lines, file.path(run_dir, "run_log.txt"))
+  message("Wrote run outputs to ", normalizePath(run_dir))
 
   invisible(result)
 }

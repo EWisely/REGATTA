@@ -123,20 +123,24 @@ call once you have a taxonomized regional checklist. It accepts file paths,
 a vsearch `lca + userout` pair, a folder of inputs, or an explicit
 `list(global =, local =)` for the two-DB workflow; file formats are
 auto-detected and the right preprocessor is dispatched. It **returns** the
-results; pass `out_dir` to also write the per-stage CSV triples, the 21-row
-summary, and a `run_log.txt` recording what was detected and run.
+results and also writes them: `out_dir` is **required**, and each run lands in
+its own dated `<region>_<label>_<Date>` subfolder of it (the per-stage CSV
+triples, the 21-row summary, and a `run_log.txt` recording what was detected
+and run). Pass the same `region`/`label` you gave `build_regional_checklist()`.
 
 ```r
 # Single-DB workflow (one classifier output, any tool)
 run_regatta(
   input     = "data/MiFish_obi.tab",                              # obitools .tab
-  checklist = "local_database_checklist/my_regional_checklist.rds"
+  checklist = "local_database_checklist/my_regional_checklist.rds",
+  out_dir   = "regatta_out", region = "galapagos", label = "fish"
 )
 
 # Single-DB with a vsearch lca + userout pair (LCA taxonomy + userout pct_id)
 run_regatta(
   input     = c("data/vs_lca.txt", "data/vs_userout.txt"),
-  checklist = "local_database_checklist/my_regional_checklist.rds"
+  checklist = "local_database_checklist/my_regional_checklist.rds",
+  out_dir   = "regatta_out", region = "galapagos", label = "fish"
 )
 
 # Two-DB workflow. Roles are declared explicitly via the named list,
@@ -146,7 +150,8 @@ run_regatta(
     global = "data/obi.tab",
     local  = c("data/vs_lca.txt", "data/vs_userout.txt")
   ),
-  checklist = "local_database_checklist/my_regional_checklist.rds"
+  checklist = "local_database_checklist/my_regional_checklist.rds",
+  out_dir   = "regatta_out", region = "galapagos", label = "fish"
 )
 ```
 
@@ -158,14 +163,16 @@ available; `run_regatta()` is a thin orchestrator on top of them.
 
 A few things to set up before building your own regional checklist.
 
-**Output locations.** Most REGATTA functions **return** their results and write
-nothing to disk by default — pass an `output_dir` / `out_dir` to also save
-files in a directory you choose. The exception is `build_regional_checklist()`,
-where `output_dir` is **required**: its outputs (taxonomized checklist, source
-lists, methods/provenance) are expensive to regenerate, so they are always
-persisted to the directory you name. Local checklist CSVs (each with `Genus`
-and `Species` columns) can live anywhere; pass their paths to
-`build_regional_checklist(CSV = ...)`, no copying required.
+**Output locations.** The two entry points — `build_regional_checklist()`
+(`output_dir`) and `run_regatta()` (`out_dir`) — **require** an output
+directory and write each run into its own dated `<region>_<label>_<Date>`
+subfolder of it, so successive runs don't pile up. The results are also
+returned. The lower-level building blocks (`reconcile_checklist()`,
+`reconcile_global_local()`, `OBIS_download()`, `GBIF_download()`, `resolve_*()`)
+keep their output dir **optional** (default: return only, write nothing) so they
+compose cleanly. Local checklist CSVs (each with `Genus` and `Species` columns)
+can live anywhere; pass their paths to `build_regional_checklist(CSV = ...)`, no
+copying required.
 
 **GBIF credentials.** `GBIF_download()` (and `build_regional_checklist(GBIF = TRUE)`)
 needs a free [GBIF account](https://www.gbif.org/user/profile) and authenticates
@@ -271,7 +278,7 @@ groups side-by-side in one project without naming collisions.
 
 | Function | Purpose |
 |---|---|
-| `run_regatta()` | **High-level wrapper / recommended entry point.** Auto-detects classifier format, dispatches the right preprocessor, runs the reconcile steps, and **returns** the reconciled tables + a 21-row summary; writes the output triples + `run_log.txt` only when given `out_dir`. |
+| `run_regatta()` | **High-level wrapper / recommended entry point.** Auto-detects classifier format, dispatches the right preprocessor, runs the reconcile steps, and **returns** the reconciled tables + a 21-row summary. **`out_dir` is required**; the output triples + summary + `run_log.txt` are written into a dated `<region>_<label>_<Date>` subfolder of it (pass `region`/`label` to name it). |
 | `resolve_taxa()` | Validate & disambiguate query taxon names against WoRMS (by kingdom); report GBIF backbone coverage. Run standalone to pre-check names. |
 | `GBIF_download()` | Pull a GBIF species list inside a WKT polygon for given taxa. |
 | `OBIS_download()` | Pull an OBIS species list, with optional marine/brackish/freshwater filters. |
@@ -297,9 +304,9 @@ three data frames, and write them as three CSVs only when given an `output_dir`:
 | `$tracking` | Per-ASV before/after audit trail (and, after `reconcile_global_local()`, the global-vs-local decision columns). |
 | `$stats` | Aggregate counts for that stage. |
 
-`run_regatta()` returns these; when given `out_dir` it also writes one such
-triple per stage plus a top-level 21-row `summarize_regatta()` summary and a
-`run_log.txt` there.
+`run_regatta()` returns these and writes one such triple per stage — plus a
+top-level 21-row `summarize_regatta()` summary and a `run_log.txt` — into the
+dated run subfolder of `out_dir`.
 
 ## Caveats
 

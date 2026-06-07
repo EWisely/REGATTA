@@ -7,7 +7,9 @@
 run_regatta(
   input,
   checklist,
-  out_dir = NULL,
+  out_dir,
+  region = NULL,
+  label = NULL,
   sql_path = .regatta_default_sql_path(),
   overwrite_taxonomy_files = FALSE,
   id_col = "ASV_id",
@@ -29,10 +31,15 @@ where each entry is a single path or a length-2 vsearch pair.
 \item{checklist}{Path to a taxonomized regional checklist (\code{.rds} or
 \code{.csv}), or a data.frame with the 7 rank columns.}
 
-\item{out_dir}{Output directory. Default \code{NULL} returns the results
-without writing anything; supply a directory to also write the per-stage
-CSV triples, the 21-row summary, and \code{run_log.txt} there (created if
-missing).}
+\item{out_dir}{\strong{Required.} Output directory. Each run writes into its own
+dated subfolder of it -- \verb{<region>_<label>_<Date>} when you pass \code{region}
+and \code{label}, otherwise \verb{regatta_run_<Date>} -- so successive runs don't
+pile up. That subfolder gets the per-stage CSV triples, the 21-row summary,
+and \code{run_log.txt}. The results list is also returned.}
+
+\item{region, label}{Optional labels used only to name the dated run
+subfolder (pass the same ones you gave \code{\link[=build_regional_checklist]{build_regional_checklist()}} for a
+consistent layout). Omit both for a generic \verb{regatta_run_<Date>} folder.}
 
 \item{sql_path}{Path to the local \code{accessionTaxa.sql} taxonomizr DB, used to
 resolve obitools / BestTaxon input and to taxonomize a raw \code{checklist}.
@@ -65,8 +72,8 @@ when one exists, since only that path collapses long tables.}
 }
 \value{
 Invisibly a list with the final tables and the
-\code{\link[=summarize_regatta]{summarize_regatta()}} data.frame. Writes CSV outputs and \code{run_log.txt}
-under \code{out_dir} only when \code{out_dir} is supplied.
+\code{\link[=summarize_regatta]{summarize_regatta()}} data.frame. Always also writes the CSV outputs and
+\code{run_log.txt} into the dated run subfolder of \code{out_dir}.
 }
 \description{
 One-call wrapper around \code{\link[=reconcile_global_local]{reconcile_global_local()}}, \code{\link[=reconcile_checklist]{reconcile_checklist()}},
