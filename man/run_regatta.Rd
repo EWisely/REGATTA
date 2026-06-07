@@ -8,7 +8,8 @@ run_regatta(
   input,
   checklist,
   out_dir = NULL,
-  sql_path = "accessionTaxa.sql",
+  sql_path = .regatta_default_sql_path(),
+  overwrite_taxonomy_files = FALSE,
   id_col = "ASV_id",
   Local_advantage = TRUE
 )
@@ -33,8 +34,20 @@ without writing anything; supply a directory to also write the per-stage
 CSV triples, the 21-row summary, and \code{run_log.txt} there (created if
 missing).}
 
-\item{sql_path}{Path to the local \code{accessionTaxa.sql} taxonomizr DB
-(used for obitools / BestTaxon input shapes).}
+\item{sql_path}{Path to the local \code{accessionTaxa.sql} taxonomizr DB, used to
+resolve obitools / BestTaxon input and to taxonomize a raw \code{checklist}.
+Defaults to the same persistent per-user cache as
+\code{\link[=build_regional_checklist]{build_regional_checklist()}} (\code{tools::R_user_dir("REGATTA", "cache")}). If
+it is missing when needed, REGATTA prompts to build it (interactive) or
+errors with the build command (non-interactive) unless
+\code{overwrite_taxonomy_files = TRUE}. Pre-resolved input (vsearch) and a
+pre-taxonomized \code{checklist} need no DB. (Note: accession-based input would
+need the full \code{taxonomizr} build with \code{accession2taxid}; the auto-build is
+names+nodes only.)}
+
+\item{overwrite_taxonomy_files}{If \code{TRUE}, (re)build the taxonomy DB at
+\code{sql_path} even if one exists. Default \code{FALSE}. See
+\code{\link[=build_regional_checklist]{build_regional_checklist()}}.}
 
 \item{id_col}{Name of the per-ASV identifier column. Default
 \code{"ASV_id"} (matches the obitools and vsearch preprocessors). For

@@ -30,7 +30,10 @@
 #'   `Species` column), a character vector of names, or a data.frame
 #'   with a `Species` / `scientific_name` column.
 #' @param sql_path Path to the local `accessionTaxa.sql` taxonomizr DB.
-#' @param prepare_db Build the SQL DB if missing.
+#'   Defaults to the persistent per-user cache shared across REGATTA
+#'   (`tools::R_user_dir("REGATTA", "cache")`).
+#' @param prepare_db Build the SQL DB if missing (names+nodes only, via
+#'   `taxonomizr::prepareDatabase(getAccessions = FALSE)` -- a few hundred MB).
 #' @param accept_types NCBI name types to accept; default is scientific
 #'   name plus recorded synonyms.
 #'
@@ -40,7 +43,7 @@
 #' @importFrom utils read.delim
 #' @export
 taxonomize_checklist <- function(input,
-                                 sql_path = "accessionTaxa.sql",
+                                 sql_path = .regatta_default_sql_path(),
                                  prepare_db = !file.exists(sql_path),
                                  accept_types = c("scientific name", "synonym")) {
   if (!requireNamespace("taxonomizr", quietly = TRUE)) {
@@ -88,9 +91,9 @@ taxonomize_checklist <- function(input,
       message("`prepare_db = TRUE` but ", sql_path,
               " already exists -- skipping rebuild.")
     } else {
-      message("Building taxonomizr SQL DB at ", sql_path,
-              " -- this takes ~15 min and downloads several GB.")
-      taxonomizr::prepareDatabase(sql_path)
+      # names+nodes only -- all getId()/getTaxonomy() need -- and stamps the
+      # build date (shared with build_regional_checklist()).
+      .regatta_build_taxonomy_db(sql_path)
     }
   } else if (!file.exists(sql_path)) {
     stop("SQL DB not found at ", sql_path,

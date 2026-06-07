@@ -137,9 +137,7 @@ build_regional_checklist <- function(region,
                                      terrestrial = FALSE,
                                      brackish = NA,
                                      output_dir,
-                                     sql_path = file.path(
-                                       tools::R_user_dir("REGATTA", "cache"),
-                                       "accessionTaxa.sql"),
+                                     sql_path = .regatta_default_sql_path(),
                                      overwrite_taxonomy_files = FALSE,
                                      kingdom = "Animalia",
                                      gbif_fill_families = TRUE) {
@@ -371,6 +369,23 @@ build_regional_checklist <- function(region,
 .regatta_db_build_cmd <- function(sql_path)
   paste0('taxonomizr::prepareDatabase("', sql_path, '", getAccessions = FALSE)')
 
+# Package-wide default location for the taxonomizr DB: a persistent per-user
+# cache, shared across projects/sessions. Used as the default sql_path
+# everywhere so build/run/reconcile all look in the same place.
+.regatta_default_sql_path <- function()
+  file.path(tools::R_user_dir("REGATTA", "cache"), "accessionTaxa.sql")
+
+# Like .regatta_ensure_taxonomy_db(), but for steps where a DB is mandatory
+# (resolving classifier input, taxonomizing a raw checklist): error if one
+# isn't available afterward instead of returning FALSE.
+.regatta_require_taxonomy_db <- function(sql_path, overwrite_taxonomy_files = FALSE) {
+  if (!.regatta_ensure_taxonomy_db(sql_path, overwrite_taxonomy_files))
+    stop("A taxonomy database is required here but none is available. Re-run ",
+         "with overwrite_taxonomy_files = TRUE, or build it first with:\n  ",
+         .regatta_db_build_cmd(sql_path), call. = FALSE)
+  invisible(TRUE)
+}
+
 # Build/refresh the names+nodes-only DB at sql_path and stamp its build date.
 .regatta_build_taxonomy_db <- function(sql_path) {
   if (!requireNamespace("taxonomizr", quietly = TRUE))
@@ -448,13 +463,16 @@ build_regional_checklist <- function(region,
 # At the LCA step, accept a checklist that may not be taxonomized yet: if it
 # lacks the 7 rank columns, warn and taxonomize it on the fly. A path, a
 # character vector of names, or a names-only data.frame all work.
-.regatta_ensure_taxonomized <- function(checklist, sql_path = "accessionTaxa.sql") {
+.regatta_ensure_taxonomized <- function(checklist,
+                                        sql_path = .regatta_default_sql_path(),
+                                        overwrite_taxonomy_files = FALSE) {
   ranks <- c("domain", "phylum", "class", "order", "family", "genus", "species")
   if (is.data.frame(checklist) && all(ranks %in% names(checklist)))
     return(checklist)
   warning("checklist was not pre-taxonomized; taxonomizing it now via ",
           "taxonomize_checklist(). Build it with build_regional_checklist() ",
           "to do this ahead of time and silence this warning.", call. = FALSE)
+  .regatta_require_taxonomy_db(sql_path, overwrite_taxonomy_files)
   taxonomize_checklist(checklist, sql_path = sql_path)
 }
 

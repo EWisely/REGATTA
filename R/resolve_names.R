@@ -51,6 +51,8 @@ clean_taxon_names <- function(x) {
 #' @param input A character vector or a data.frame.
 #' @param name_col Required when `input` is a data.frame.
 #' @param sql_path Path to the local `accessionTaxa.sql` taxonomizr DB.
+#'   Defaults to the persistent per-user cache shared across REGATTA
+#'   (`tools::R_user_dir("REGATTA", "cache")`).
 #' @param output_prefix If non-NULL, writes a CSV with this prefix.
 #' @param output_dir Directory to write the CSV into.
 #' @param clean If TRUE (default), strip junk strings before lookup.
@@ -64,7 +66,7 @@ clean_taxon_names <- function(x) {
 #' @export
 resolve_names <- function(input,
                           name_col      = NULL,
-                          sql_path      = "accessionTaxa.sql",
+                          sql_path      = .regatta_default_sql_path(),
                           output_prefix = NULL,
                           output_dir    = ".",
                           clean         = TRUE,

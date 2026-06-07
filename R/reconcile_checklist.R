@@ -83,7 +83,15 @@
 #'   warning, using `sql_path`.
 #' @param id_col ASV identifier column name.
 #' @param sql_path Path to the local `accessionTaxa.sql` taxonomizr DB, used
-#'   only if `checklist` still needs taxonomizing.
+#'   only if `checklist` still needs taxonomizing. Defaults to the same
+#'   persistent per-user cache as [build_regional_checklist()]
+#'   (`tools::R_user_dir("REGATTA", "cache")`). If it is missing when a raw
+#'   checklist must be taxonomized, REGATTA prompts to build it (interactive)
+#'   or errors with the build command (non-interactive) unless
+#'   `overwrite_taxonomy_files = TRUE`.
+#' @param overwrite_taxonomy_files If `TRUE`, (re)build the taxonomy DB at
+#'   `sql_path` even if one exists. Only consulted when a raw checklist needs
+#'   taxonomizing. Default `FALSE`. See [build_regional_checklist()].
 #' @param output_dir Directory path; default `NULL` writes nothing (the
 #'   `result`/`tracking`/`stats` list is returned). Supply a directory to also
 #'   write the 3 CSVs there.
@@ -103,7 +111,8 @@
 reconcile_checklist <- function(taxonomy_table,
                                 checklist,
                                 id_col        = "ASV_id",
-                                sql_path      = "accessionTaxa.sql",
+                                sql_path      = .regatta_default_sql_path(),
+                                overwrite_taxonomy_files = FALSE,
                                 output_dir    = NULL,
                                 output_prefix = "reconcile_checklist",
                                 prior_dir     = NULL,
@@ -130,7 +139,8 @@ reconcile_checklist <- function(taxonomy_table,
   }
   # Accept a not-yet-taxonomized checklist: taxonomize on the fly (with a
   # warning) so the LCA still runs. A pre-taxonomized checklist is unchanged.
-  checklist <- .regatta_ensure_taxonomized(checklist, sql_path)
+  checklist <- .regatta_ensure_taxonomized(checklist, sql_path,
+                                           overwrite_taxonomy_files)
   missing_c <- setdiff(ranks, names(checklist))
   if (length(missing_c) > 0) {
     stop("checklist is missing required rank columns after taxonomizing: ",

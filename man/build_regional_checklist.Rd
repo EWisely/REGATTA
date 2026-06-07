@@ -17,7 +17,7 @@ build_regional_checklist(
   terrestrial = FALSE,
   brackish = NA,
   output_dir,
-  sql_path = file.path(tools::R_user_dir("REGATTA", "cache"), "accessionTaxa.sql"),
+  sql_path = .regatta_default_sql_path(),
   overwrite_taxonomy_files = FALSE,
   kingdom = "Animalia",
   gbif_fill_families = TRUE

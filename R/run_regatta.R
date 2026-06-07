@@ -163,12 +163,14 @@
 #' Read a classifier file or vsearch pair into a tax table (internal)
 #' @keywords internal
 #' @noRd
-.regatta_read_input <- function(paths, sql_path, id_col = "ASV_id") {
+.regatta_read_input <- function(paths, sql_path, id_col = "ASV_id",
+                                overwrite_taxonomy_files = FALSE) {
   if (length(paths) == 1) {
     fmt <- .regatta_detect_format(paths)
     if (fmt == "obitools_tab") {
       raw <- utils::read.delim(paths, sep = "\t", check.names = FALSE,
                                stringsAsFactors = FALSE)
+      .regatta_require_taxonomy_db(sql_path, overwrite_taxonomy_files)
       tax <- resolve_taxids(raw, taxid_col = "TAXID", sql_path = sql_path)
       tax$pct_id <- suppressWarnings(as.numeric(raw$BEST_IDENTITY))
       names(tax)[names(tax) == "ID"] <- "ASV_id"
@@ -201,6 +203,7 @@
                   nrow(raw), " unique ASVs (by ", id_col, ").")
         }
       }
+      .regatta_require_taxonomy_db(sql_path, overwrite_taxonomy_files)
       tax <- resolve_names(raw, name_col = "BestTaxon", sql_path = sql_path)
       return(list(table = .regatta_ensure_id_col(tax, id_col), format = fmt))
     }
@@ -248,8 +251,19 @@
 #'   without writing anything; supply a directory to also write the per-stage
 #'   CSV triples, the 21-row summary, and `run_log.txt` there (created if
 #'   missing).
-#' @param sql_path Path to the local `accessionTaxa.sql` taxonomizr DB
-#'   (used for obitools / BestTaxon input shapes).
+#' @param sql_path Path to the local `accessionTaxa.sql` taxonomizr DB, used to
+#'   resolve obitools / BestTaxon input and to taxonomize a raw `checklist`.
+#'   Defaults to the same persistent per-user cache as
+#'   [build_regional_checklist()] (`tools::R_user_dir("REGATTA", "cache")`). If
+#'   it is missing when needed, REGATTA prompts to build it (interactive) or
+#'   errors with the build command (non-interactive) unless
+#'   `overwrite_taxonomy_files = TRUE`. Pre-resolved input (vsearch) and a
+#'   pre-taxonomized `checklist` need no DB. (Note: accession-based input would
+#'   need the full `taxonomizr` build with `accession2taxid`; the auto-build is
+#'   names+nodes only.)
+#' @param overwrite_taxonomy_files If `TRUE`, (re)build the taxonomy DB at
+#'   `sql_path` even if one exists. Default `FALSE`. See
+#'   [build_regional_checklist()].
 #' @param id_col Name of the per-ASV identifier column. Default
 #'   `"ASV_id"` (matches the obitools and vsearch preprocessors). For
 #'   BestTaxon/Kraken2-style CSVs whose identifier is named differently
@@ -288,7 +302,8 @@
 run_regatta <- function(input,
                         checklist,
                         out_dir         = NULL,
-                        sql_path        = "accessionTaxa.sql",
+                        sql_path        = .regatta_default_sql_path(),
+                        overwrite_taxonomy_files = FALSE,
                         id_col          = "ASV_id",
                         Local_advantage = TRUE) {
   t_start <- Sys.time()
@@ -309,7 +324,7 @@ run_regatta <- function(input,
   }
   # If a raw (un-taxonomized) checklist was supplied, taxonomize it now with a
   # warning; a pre-taxonomized checklist passes through unchanged.
-  cl <- .regatta_ensure_taxonomized(cl, sql_path)
+  cl <- .regatta_ensure_taxonomized(cl, sql_path, overwrite_taxonomy_files)
 
   dest <- if (is.null(out_dir)) "(return only; no files written)" else normalizePath(out_dir)
   log_lines <- c(
@@ -320,10 +335,12 @@ run_regatta <- function(input,
   message("REGATTA: ", norm$role, " workflow -> ", dest)
 
   if (norm$role == "two-DB") {
-    g <- .regatta_read_input(norm$global, sql_path, id_col = id_col)
+    g <- .regatta_read_input(norm$global, sql_path, id_col = id_col,
+                             overwrite_taxonomy_files = overwrite_taxonomy_files)
     log_lines <- c(log_lines, paste0("global (", g$format, "): ",
                                      nrow(g$table), " ASVs"))
-    l <- .regatta_read_input(norm$local, sql_path, id_col = id_col)
+    l <- .regatta_read_input(norm$local, sql_path, id_col = id_col,
+                             overwrite_taxonomy_files = overwrite_taxonomy_files)
     log_lines <- c(log_lines, paste0("local  (", l$format, "): ",
                                      nrow(l$table), " ASVs"))
 
@@ -345,7 +362,8 @@ run_regatta <- function(input,
     result <- list(global_tax = g$table, local_tax = l$table,
                    reconciled = rec, post_checklist = post, summary = summ)
   } else {
-    c1 <- .regatta_read_input(norm$classifier[[1]], sql_path, id_col = id_col)
+    c1 <- .regatta_read_input(norm$classifier[[1]], sql_path, id_col = id_col,
+                              overwrite_taxonomy_files = overwrite_taxonomy_files)
     log_lines <- c(log_lines, paste0("classifier (", c1$format, "): ",
                                      nrow(c1$table), " ASVs"))
     post <- reconcile_checklist(

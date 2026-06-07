@@ -8,7 +8,8 @@ reconcile_checklist(
   taxonomy_table,
   checklist,
   id_col = "ASV_id",
-  sql_path = "accessionTaxa.sql",
+  sql_path = .regatta_default_sql_path(),
+  overwrite_taxonomy_files = FALSE,
   output_dir = NULL,
   output_prefix = "reconcile_checklist",
   prior_dir = NULL,
@@ -30,7 +31,16 @@ warning, using \code{sql_path}.}
 \item{id_col}{ASV identifier column name.}
 
 \item{sql_path}{Path to the local \code{accessionTaxa.sql} taxonomizr DB, used
-only if \code{checklist} still needs taxonomizing.}
+only if \code{checklist} still needs taxonomizing. Defaults to the same
+persistent per-user cache as \code{\link[=build_regional_checklist]{build_regional_checklist()}}
+(\code{tools::R_user_dir("REGATTA", "cache")}). If it is missing when a raw
+checklist must be taxonomized, REGATTA prompts to build it (interactive)
+or errors with the build command (non-interactive) unless
+\code{overwrite_taxonomy_files = TRUE}.}
+
+\item{overwrite_taxonomy_files}{If \code{TRUE}, (re)build the taxonomy DB at
+\code{sql_path} even if one exists. Only consulted when a raw checklist needs
+taxonomizing. Default \code{FALSE}. See \code{\link[=build_regional_checklist]{build_regional_checklist()}}.}
 
 \item{output_dir}{Directory path; default \code{NULL} writes nothing (the
 \code{result}/\code{tracking}/\code{stats} list is returned). Supply a directory to also
