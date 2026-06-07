@@ -5,14 +5,14 @@
 # species checklist by walking each row's lineage from species up
 # toward domain, finding the lowest rank present in the checklist,
 # and NA-ing every rank below that match. This is the REGATTA
-# "off-target downgrade" step (originally Pass 3 in
-# Validate_local_assignments.R) -- it preserves specificity where the
-# regional checklist supports it and downgrades where it doesn't,
-# without using percent-identity heuristics.
+# geographic-reconciliation / specificity-downgrade step (originally
+# Pass 3 in Validate_local_assignments.R) -- it preserves specificity
+# where the regional checklist supports it and downgrades where it
+# doesn't, without using percent-identity heuristics.
 #
 # By default, output_dir = "reconcile_checklist_out" and the three
 # return-list elements are written to disk there as CSVs named
-#   <output_prefix>_taxonomy_table.csv  (the corrected $result, strict 8 cols)
+#   <output_prefix>_taxonomy_table.csv  (the reconciled $result, strict 8 cols)
 #   <output_prefix>_tracking.csv        (per-ASV before/after audit)
 #   <output_prefix>_summary.csv         (the stats data frame)
 # The directory is created if it doesn't exist. Pass output_dir = NULL
@@ -40,7 +40,7 @@
 #
 # Output: a list with three elements.
 #
-#   $result    The corrected per-ASV taxonomy table. EXACTLY 8
+#   $result    The reconciled per-ASV taxonomy table. EXACTLY 8
 #              columns: id_col + the 7 lowercase rank columns. Same
 #              shape as reconcile_global_local()$result so REGATTA
 #              functions chain cleanly. Drop-in to phyloseq
@@ -50,11 +50,12 @@
 #   $tracking  Per-ASV before-vs-after audit: before_<rank> and
 #              after_<rank> at every rank, regatta_match_rank (the
 #              rank at which the input matched the checklist, or NA
-#              for fully off-target), and any input metadata columns
+#              when nothing matched at any rank -- no regional record),
+#              and any input metadata columns
 #              passed through. One row per ASV in the input.
 #
 #   $stats     Match-rank distribution and per-rank specificity
-#              counts of the corrected output, plus the change in
+#              counts of the reconciled output, plus the change in
 #              number of ASVs assigned before vs. after.
 
 #' Reconcile a taxonomy table against a regional species checklist
@@ -82,7 +83,15 @@
 #'   warning, using `sql_path`.
 #' @param id_col ASV identifier column name.
 #' @param sql_path Path to the local `accessionTaxa.sql` taxonomizr DB, used
-#'   only if `checklist` still needs taxonomizing.
+#'   only if `checklist` still needs taxonomizing. Defaults to the same
+#'   persistent per-user cache as [build_regional_checklist()]
+#'   (`tools::R_user_dir("REGATTA", "cache")`). If it is missing when a raw
+#'   checklist must be taxonomized, REGATTA prompts to build it (interactive)
+#'   or errors with the build command (non-interactive) unless
+#'   `overwrite_taxonomy_files = TRUE`.
+#' @param overwrite_taxonomy_files If `TRUE`, (re)build the taxonomy DB at
+#'   `sql_path` even if one exists. Only consulted when a raw checklist needs
+#'   taxonomizing. Default `FALSE`. See [build_regional_checklist()].
 #' @param output_dir Directory path; default `NULL` writes nothing (the
 #'   `result`/`tracking`/`stats` list is returned). Supply a directory to also
 #'   write the 3 CSVs there.
@@ -102,7 +111,8 @@
 reconcile_checklist <- function(taxonomy_table,
                                 checklist,
                                 id_col        = "ASV_id",
-                                sql_path      = "accessionTaxa.sql",
+                                sql_path      = .regatta_default_sql_path(),
+                                overwrite_taxonomy_files = FALSE,
                                 output_dir    = NULL,
                                 output_prefix = "reconcile_checklist",
                                 prior_dir     = NULL,
@@ -129,7 +139,8 @@ reconcile_checklist <- function(taxonomy_table,
   }
   # Accept a not-yet-taxonomized checklist: taxonomize on the fly (with a
   # warning) so the LCA still runs. A pre-taxonomized checklist is unchanged.
-  checklist <- .regatta_ensure_taxonomized(checklist, sql_path)
+  checklist <- .regatta_ensure_taxonomized(checklist, sql_path,
+                                           overwrite_taxonomy_files)
   missing_c <- setdiff(ranks, names(checklist))
   if (length(missing_c) > 0) {
     stop("checklist is missing required rank columns after taxonomizing: ",
@@ -164,7 +175,7 @@ reconcile_checklist <- function(taxonomy_table,
   }
 
   # NA out ranks below the matched rank; rows with no match anywhere
-  # get every rank NA'd (fully off-target).
+  # get every rank NA'd (no regional record at any rank).
   for (p in seq_along(ranks)) {
     blank <- is.na(match_idx) | p > match_idx
     corrected[[ranks[p]]][blank] <- NA
@@ -220,7 +231,7 @@ reconcile_checklist <- function(taxonomy_table,
                "matched at class",
                "matched at phylum",
                "matched at domain",
-               "not matched (off-target)",
+               "not matched (no regional record)",
                "ID'ed to kingdom only",
                "ID'ed to phylum only",
                "ID'ed to class only",

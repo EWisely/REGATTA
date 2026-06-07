@@ -13,19 +13,18 @@ GBIF_download(
   gbif_descend_to = "order",
   gbif_fill_families = TRUE,
   output_dir = NULL,
+  download_dir = NULL,
   existing_download = NULL
 )
 }
 \arguments{
-\item{obis_taxa}{A character vector of taxon names at \strong{class level or
-broader} (GBIF won't accept order/family/genus/species here). List the
-specific classes you want -- \strong{avoid broad ambiguous names}. For example
-\code{"Vertebrata"} is ambiguous in WoRMS (the vertebrate subphylum \emph{and} a
-red-algae genus) and errors here; pass the classes instead
-(e.g. \code{c("Actinopterygii", "Chondrichthyes", "Mammalia", "Aves", "Reptilia")}). Names are validated and disambiguated by \code{\link[=resolve_taxa]{resolve_taxa()}}
-(kingdom-aware), so you can type any common synonym -- e.g. \code{Teleostei},
-\code{Actinopteri}, \code{Actinopterygii}, or \code{Osteichthyes} all work for
-ray-finned fish.}
+\item{obis_taxa}{A character vector of taxon names at any level. They are
+validated, disambiguated, and resolved to GBIF backbone keys by
+\code{\link[=resolve_taxa]{resolve_taxa()}}, which walks broad taxa down to the orders/families GBIF
+populates -- so subphyla GBIF has no usable key for (e.g. \code{"Vertebrata"},
+\code{"Crustacea"}, or the ray-finned-fish classes) still work, as do common
+synonyms (\code{Teleostei}, \code{Actinopteri}, \code{Osteichthyes}) and the \code{"fish"} /
+\code{"vertebrates"} shorthands.}
 
 \item{worms_taxa}{A character vector of substitute taxon names to use
 instead of \code{obis_taxa} when looking up WoRMS IDs. NA reuses
@@ -62,12 +61,19 @@ whole search is a single \code{occ_download} (all keys in one request -- the key
 count does not cost extra downloads against GBIF's concurrent-download
 limit), completeness is the sensible default. The only cost is a second
 WoRMS family walk during preparation. A phylum guard prevents stray
-family-name collisions from adding off-target taxa. Set FALSE to skip the
+family-name collisions from pulling in unrelated taxa. Set FALSE to skip the
 family walk for a faster, order-only (~97\%) preparation.}
 
 \item{output_dir}{Optional directory to write the result into. Default
 \code{NULL} writes nothing (the function just returns the data); supply a
-directory to also save \verb{<output_dir>/<gbif_outputname>.csv}.}
+directory to also save \verb{<output_dir>/<gbif_outputname>.csv} and
+\verb{<output_dir>/<gbif_outputname>_download_info.txt} (the download key +
+GBIF citation).}
+
+\item{download_dir}{Directory the GBIF occurrence \code{.zip} is downloaded into.
+Default \code{NULL} keeps it out of the working directory: it uses \code{output_dir}
+if supplied, otherwise a session temp dir. (\code{build_regional_checklist()}
+passes its dated run directory so the zip is kept with the run.)}
 
 \item{existing_download}{Reuse an already-finished GBIF download instead of
 submitting a new one: a GBIF download \strong{key} string (e.g.
@@ -76,16 +82,18 @@ the function skips taxon resolution and submission and just imports that
 download, so \code{obis_taxa} / \code{regional_poly} are not needed. Default \code{NULL}.}
 }
 \value{
-Invisibly, a data.frame with \code{Species} and \code{Source} columns.
-Writes \verb{<output_dir>/<gbif_outputname>.csv} only when \code{output_dir} is
-supplied.
+Invisibly, a data.frame with \code{Species} and \code{Source} columns. The
+GBIF download key and citation are attached as \code{attr(result, "gbif_download")} (a one-row data.frame: \code{download_key}, \code{doi}, \code{created},
+\code{format}, \code{citation}) -- \strong{keep this for your methods section and to reuse
+the download} (pass \code{download_key} back via \verb{existing_download =}). It is
+also printed to the console and, when \code{output_dir} is supplied, written to
+\verb{<gbif_outputname>_download_info.txt}.
 }
 \description{
 Resolves the given high-level taxa via WoRMS, finds GBIF backbone
 keys for the resulting classes, and submits a GBIF occurrence
 download restricted to the polygon. \strong{Returns} the species data frame;
-writes it to disk only if you supply \code{output_dir}. GBIF login credentials
-must already be set in \verb{~/.Renviron}; see the Setup section of the README.
+writes it to disk only if you supply \code{output_dir}.
 }
 \details{
 Takes ~15 minutes to run end to end. The function prints status
@@ -94,6 +102,19 @@ download API; this is normal. GBIF coverage is uneven -- see the
 Common troubleshooting section of the README for known issues
 (Osteichthyes not recognized, occasional timeouts, etc.).
 }
+\section{Time and credentials}{
+
+This submits an asynchronous GBIF \code{occ_download} and \strong{waits for GBIF to
+assemble it server-side, which typically takes several minutes} (longer for
+large polygons or broad taxa) -- the call blocks while it polls. GBIF
+requires a free account, and \code{rgbif} authenticates with your account
+\strong{credentials} (there is no separate "API key" for downloads). Register at
+\url{https://www.gbif.org/user/profile}, then store three values in your
+\verb{~/.Renviron} (via \code{usethis::edit_r_environ()}, then restart R) so nothing is
+hardcoded: \code{GBIF_USER}, \code{GBIF_PWD}, and \code{GBIF_EMAIL} (the email you
+registered with).
+}
+
 \examples{
 \dontrun{
 # Pick the gbif_outputname for your region + group; the convention

@@ -24,6 +24,8 @@
 #' @param input A numeric/character vector of taxIDs, or a data.frame.
 #' @param taxid_col Required when `input` is a data.frame.
 #' @param sql_path Path to the local `accessionTaxa.sql` taxonomizr DB.
+#'   Defaults to the persistent per-user cache shared across REGATTA
+#'   (`tools::R_user_dir("REGATTA", "cache")`).
 #' @param output_prefix If non-NULL, writes a CSV with this prefix.
 #' @param output_dir Directory to write the CSV into.
 #'
@@ -33,7 +35,7 @@
 #' @export
 resolve_taxids <- function(input,
                            taxid_col     = NULL,
-                           sql_path      = "accessionTaxa.sql",
+                           sql_path      = .regatta_default_sql_path(),
                            output_prefix = NULL,
                            output_dir    = ".") {
   if (!requireNamespace("taxonomizr", quietly = TRUE)) {

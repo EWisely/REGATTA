@@ -75,7 +75,6 @@ OBIS_download <- function(obis_taxa,
     stop("OBIS_download() needs the 'robis' package. Install it with ",
          'install.packages("robis").')
   }
-  message("Check the documentation for setup steps before running this function.")
 
   # throw an error if polygon is incorrect
   if(grepl("POLYGON \\(\\([-. |[[:digit:]]|,]*\\)\\)", # finds POLYGON (( [-, space, period, 

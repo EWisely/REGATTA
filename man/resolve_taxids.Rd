@@ -7,7 +7,7 @@
 resolve_taxids(
   input,
   taxid_col = NULL,
-  sql_path = "accessionTaxa.sql",
+  sql_path = .regatta_default_sql_path(),
   output_prefix = NULL,
   output_dir = "."
 )
@@ -17,7 +17,9 @@ resolve_taxids(
 
 \item{taxid_col}{Required when \code{input} is a data.frame.}
 
-\item{sql_path}{Path to the local \code{accessionTaxa.sql} taxonomizr DB.}
+\item{sql_path}{Path to the local \code{accessionTaxa.sql} taxonomizr DB.
+Defaults to the persistent per-user cache shared across REGATTA
+(\code{tools::R_user_dir("REGATTA", "cache")}).}
 
 \item{output_prefix}{If non-NULL, writes a CSV with this prefix.}
 

@@ -9,7 +9,9 @@ resolve_taxa(
   kingdom = "Animalia",
   check_gbif = requireNamespace("rgbif", quietly = TRUE),
   on_ambiguous = c("error", "warn", "first"),
-  aliases = .regatta_taxon_aliases()
+  aliases = .regatta_taxon_aliases(),
+  gbif_descend_to = "order",
+  gbif_fill_families = TRUE
 )
 }
 \arguments{
@@ -32,18 +34,31 @@ and warns.}
 \item{aliases}{A named list (or named character vector) mapping (lower-cased)
 input names to one or more substitute names for the WoRMS lookup. Defaults
 to REGATTA's curated table, which includes one-to-many shorthands:
-\code{"fish"} -> \code{c("Actinopterygii", "Elasmobranchii", "Myxini", "Petromyzonti")} (ray-finned fish + sharks/rays + hagfishes + lampreys),
-\code{"vertebrates"} -> \code{"Vertebrata"}, \code{"lepidosauria"} ->
-\code{"Reptilia"}, \code{"osteichthyes"} -> \code{"Actinopteri"}. Pass your own to extend
-or override. A multi-name alias expands into one result row per taxon.}
+\code{"fish"} -> ray-finned fish + sharks/rays + hagfishes + lampreys
+(\code{Actinopterygii}, \code{Elasmobranchii}, \code{Myxini}, \code{Petromyzonti}),
+\code{"vertebrates"} -> those plus \code{Mammalia}, \code{Aves}, \code{Reptilia}, \code{Amphibia}
+(the vertebrate classes; works in both OBIS and GBIF, unlike the bare
+subphylum \code{Vertebrata}), \code{"lepidosauria"} -> \code{"Reptilia"},
+\code{"osteichthyes"} -> \code{"Actinopteri"}. Pass your own to extend or override. A
+multi-name alias expands into one result row per taxon.}
+
+\item{gbif_descend_to, gbif_fill_families}{Control the GBIF descent (used only
+when \code{check_gbif} and a taxon has no usable direct key). \code{gbif_descend_to}
+is the WoRMS rank to walk down to (default \code{"order"} -- fast, and a rank
+GBIF populates); \code{gbif_fill_families} (default TRUE) additionally adds keys
+for families whose GBIF parent at that rank isn't matched, lifting
+coverage.}
 }
 \value{
 A data.frame with one row per resolved taxon: \code{input} (the original
 name you passed -- repeated when an alias expanded to several taxa),
-\code{alias_used}, \code{aphia_id}, \code{valid_name}, \code{rank}, \code{kingdom}, \code{worms_status}
-(\code{ok}/\code{ambiguous}/\code{wrong_kingdom}/\code{not_found}), \code{n_candidates},
-and (when \code{check_gbif}) \code{gbif_key}, \code{gbif_usable}, plus a human-readable
-\code{note}.
+\code{alias_used}, \code{aphia_id} (the \strong{OBIS} query key -- OBIS descends it
+server-side), \code{valid_name}, \code{rank}, \code{kingdom}, \code{worms_status}
+(\code{ok}/\code{ambiguous}/\code{wrong_kingdom}/\code{not_found}), \code{n_candidates}, and (when
+\code{check_gbif}) \code{gbif_key} (the taxon's own backbone key, NA if not usable),
+\code{gbif_usable}, \code{gbif_keys} (a list-column: the \strong{GBIF} query keys -- the
+direct key when usable, otherwise the keys reached by descent), plus a
+human-readable \code{note}.
 }
 \description{
 Resolves a vector of high-level taxon names to unambiguous WoRMS AphiaIDs,

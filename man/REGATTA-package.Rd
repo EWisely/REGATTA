@@ -6,7 +6,7 @@
 \alias{REGATTA-package}
 \title{REGATTA: Reconciling eDNA Geographic Assignments via Taxonomy Table Adjustment}
 \description{
-Correct off-target species assignments in eDNA metabarcoding results by reconciling classifier output against a regional species checklist, without manual curation and while preserving as much taxonomic specificity as possible. The package optionally also reconciles two classifier outputs (e.g. against a global vs. a locally-curated reference database) using percent identity to pick the better-supported call and falling back to the lowest common ancestor when the two disagree.
+Reconcile eDNA metabarcoding taxonomic assignments against a regional species checklist, downgrading the taxonomic specificity of assignments to taxa with no records in the study area rather than discarding them. Such geographically spurious species-level calls arise from genetic and geographic gaps and outdated names in reference databases, not from the DNA itself. Works without manual curation and preserves as much taxonomic specificity as the regional evidence supports. The package optionally also reconciles two classifier outputs (e.g. against a global vs. a locally-curated reference database) using percent identity to pick the better-supported call and falling back to the lowest common ancestor when the two disagree.
 }
 \seealso{
 Useful links:

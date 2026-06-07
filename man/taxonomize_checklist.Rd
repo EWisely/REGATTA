@@ -6,7 +6,7 @@
 \usage{
 taxonomize_checklist(
   input,
-  sql_path = "accessionTaxa.sql",
+  sql_path = .regatta_default_sql_path(),
   prepare_db = !file.exists(sql_path),
   accept_types = c("scientific name", "synonym")
 )
@@ -16,9 +16,12 @@ taxonomize_checklist(
 \code{Species} column), a character vector of names, or a data.frame
 with a \code{Species} / \code{scientific_name} column.}
 
-\item{sql_path}{Path to the local \code{accessionTaxa.sql} taxonomizr DB.}
+\item{sql_path}{Path to the local \code{accessionTaxa.sql} taxonomizr DB.
+Defaults to the persistent per-user cache shared across REGATTA
+(\code{tools::R_user_dir("REGATTA", "cache")}).}
 
-\item{prepare_db}{Build the SQL DB if missing.}
+\item{prepare_db}{Build the SQL DB if missing (names+nodes only, via
+\code{taxonomizr::prepareDatabase(getAccessions = FALSE)} -- a few hundred MB).}
 
 \item{accept_types}{NCBI name types to accept; default is scientific
 name plus recorded synonyms.}

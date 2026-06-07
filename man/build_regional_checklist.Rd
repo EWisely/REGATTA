@@ -11,13 +11,14 @@ build_regional_checklist(
   regional_poly = NULL,
   OBIS = TRUE,
   GBIF = FALSE,
-  CSV = FALSE,
+  CSV = NULL,
   marine = TRUE,
   freshwater = NA,
   terrestrial = FALSE,
   brackish = NA,
-  sql_path = "accessionTaxa.sql",
-  output_dir = NULL,
+  output_dir,
+  sql_path = .regatta_default_sql_path(),
+  overwrite_taxonomy_files = FALSE,
   kingdom = "Animalia",
   gbif_fill_families = TRUE
 )
@@ -46,23 +47,45 @@ runs a fresh \code{occ_download}; a GBIF download \strong{key} string or an
 \code{occ_download} \strong{object} reuses an already-finished download; a path to
 a pre-made GBIF source CSV feeds that.}
 
-\item{CSV}{Local checklist input: \code{FALSE} (default) for none, or a
-character vector of paths to local \code{Genus}+\code{Species} CSV(s). A \code{Species}
-value of \code{"sp."} keeps the genus alone (no epithet); that genus-level
-entry goes into \code{for_LCA} only, never \code{for_making_localdb}.}
+\item{CSV}{Optional local checklist input. \code{NULL} (default) adds none --
+the public sources (OBIS/GBIF) drive the checklist. Otherwise a character
+vector of paths to local \code{Genus}+\code{Species} CSV(s). A \code{Species} value of
+\code{"sp."} keeps the genus alone (no epithet); that genus-level entry goes
+into \code{for_LCA} only, never \code{for_making_localdb}. If you supply one, prefer
+a \strong{citable} source (e.g. a published regional checklist) so your pipeline
+stays reproducible -- record its citation in your methods.}
 
 \item{marine, freshwater, terrestrial, brackish}{OBIS habitat filters, passed
 to \code{\link[=OBIS_download]{OBIS_download()}}. Defaults keep marine plus anadromous/catadromous
 species and drop only land contaminants.}
 
-\item{sql_path}{Path to the local \code{accessionTaxa.sql} taxonomizr DB used to
-taxonomize the LCA list. If absent, the LCA list is returned
-un-taxonomized and taxonomizing is deferred to the reconcile step.}
+\item{output_dir}{\strong{Required.} Directory to write the outputs into. Each run
+gets its own dated subdirectory \verb{<region>_<label>_<Date>} inside it, so
+successive runs don't pile up loose files (the GBIF \code{.zip}, when a download
+runs, is kept there too). The expensive artifacts are always saved (so you
+don't rebuild them): \verb{<region>_<label>_list_for_making_localdb.txt}
+(one name per line), \code{..._checklist_summary.csv}, \code{..._for_LCA.rds} (or
+\code{.txt} when not taxonomized), and \code{..._methods.txt} (which carries any GBIF
+download key/DOI/citation). The same objects are also returned.}
 
-\item{output_dir}{Optional directory to write outputs into. Default \code{NULL}
-writes nothing (everything is returned); supply a directory to also save
-\verb{comprehensive_<region>_<label>_list_for_making_localdb.txt},
-\code{..._for_LCA.txt}, and \code{..._for_LCA_taxonomized.rds}.}
+\item{sql_path}{Path to the local \code{accessionTaxa.sql} taxonomizr DB used to
+taxonomize the LCA list. Defaults to a persistent per-user cache
+(\code{tools::R_user_dir("REGATTA", "cache")}), shared across projects and
+sessions and built on first use. \strong{Override it} by pointing \code{sql_path} at
+an existing DB (e.g. one you already downloaded). If the chosen path is
+missing, REGATTA prompts to build it (interactive) or errors with the
+one-line build command (non-interactive) unless
+\code{overwrite_taxonomy_files = TRUE}. Set \code{sql_path = NULL} to skip
+taxonomization entirely and defer it to the reconcile step. Only
+names+nodes are needed here, so the build uses
+\code{taxonomizr::prepareDatabase(getAccessions = FALSE)} (a few hundred MB).}
+
+\item{overwrite_taxonomy_files}{If \code{TRUE}, (re)build the taxonomy DB at
+\code{sql_path} even if one exists -- the way to refresh a stale cached snapshot
+in place without hunting for the file. Default \code{FALSE} reuses an existing
+DB (reporting its build date and soft-warning if it is old). The DB is a
+snapshot of NCBI taxonomy and is never rebuilt silently, to keep results
+reproducible.}
 
 \item{kingdom}{Kingdom used by \code{\link[=resolve_taxa]{resolve_taxa()}} to disambiguate query
 taxa in the downloaders. Default \code{"Animalia"}.}
@@ -70,27 +93,42 @@ taxa in the downloaders. Default \code{"Animalia"}.}
 \item{gbif_fill_families}{Passed to \code{\link[=GBIF_download]{GBIF_download()}} for a fresh GBIF run.}
 }
 \value{
-Invisibly, a list with \code{for_making_localdb} (species-only
-data.frame), \code{for_LCA} (data.frame with retained genus-level entries),
-and \code{checklist} (the taxonomized LCA list, or \code{NULL} if no DB was
-available). Pass \code{checklist} straight to \code{\link[=run_regatta]{run_regatta()}} /
-\code{\link[=reconcile_checklist]{reconcile_checklist()}}.
+Invisibly, a list with \code{for_making_localdb} (a bare character vector
+of unique species binomials, for a reference-database builder),
+\code{checklist_summary} (the full taxonomized table with per-name resolution
+status, or \code{NULL} if no DB was available), \code{for_LCA} (\code{taxID} + the 7
+ranks, ready for the LCA step), and \code{methods} (a citations-included
+provenance sentence -- the home for any GBIF download key/DOI/citation).
+Pass \code{for_LCA} straight to \code{\link[=run_regatta]{run_regatta()}} / \code{\link[=reconcile_checklist]{reconcile_checklist()}}.
 }
 \description{
 The basic entry point for the checklist-building stage. Pulls regional
 species records from OBIS and/or GBIF (or reuses pre-made sources), folds
 in any local \code{Genus}+\code{Species} CSVs, deduplicates, taxonomizes the LCA
 list (when a \code{taxonomizr} database is available), and \strong{returns} the
-results. Two species lists are produced:
+results. Three outputs are produced:
 \itemize{
-\item \code{for_making_localdb} -- species binomials only, for a
-reference-database builder (e.g. CRABS).
-\item \code{for_LCA} -- those binomials \strong{plus} any retained genus-level
-entries, the input to the checklist LCA.
+\item \code{for_making_localdb} -- a bare, sorted character vector of the unique
+species binomials (no columns). Write it one-name-per-line and feed it to
+a reference-database builder (e.g. CRABS).
+\item \code{checklist_summary} -- the full taxonomized table, including how each
+name resolved (scientific name / synonym / unresolved). The audit view.
+\code{NULL} when no \code{taxonomizr} database was available.
+\item \code{for_LCA} -- the \code{taxID} column plus the 7 ranks only (resolved rows,
+genus-level entries retained), cleaned and ready to hand straight to
+\code{\link[=run_regatta]{run_regatta()}} / \code{\link[=reconcile_checklist]{reconcile_checklist()}}. When no database is available
+this is the un-taxonomized name list, deferred to the reconcile step.
+\item \code{methods} -- a ready-to-adapt methods/provenance sentence naming the
+region/label (and the queried taxa when they differ from the label), the
+sources used, the date, the polygon, the NCBI taxonomy snapshot date, and
+the citations to include. \strong{When GBIF is used (fresh or a reused download)
+this is where its download key, DOI, and citation live} -- there is no
+separate GBIF section. Package citations are pulled live from
+\code{\link[utils:citation]{utils::citation()}} and the GBIF line uses the download's own DOI --
+nothing is invented; verify against your reference manager.
 }
-Nothing is written to disk unless you pass \code{output_dir}; then the two
-lists and the taxonomized checklist are saved there, named from \code{region}
-and \code{label}.
+The outputs are always written to the required \code{output_dir} (named from
+\code{region} and \code{label}) and also returned, so the expensive artifacts persist.
 }
 \details{
 \code{\link[=OBIS_download]{OBIS_download()}}, \code{\link[=GBIF_download]{GBIF_download()}}, and \code{\link[=taxonomize_checklist]{taxonomize_checklist()}} remain
@@ -99,21 +137,27 @@ wrapper.
 }
 \examples{
 \dontrun{
-# OBIS (default) + a local checklist, no GBIF, no taxonomizr DB needed yet.
+# OBIS (default) + a local checklist. output_dir is required; the default
+# cached taxonomy DB is built on first use (prompted) or reused after.
 cl <- build_regional_checklist(
   region        = "galapagos",
   label         = "fish",
   taxa          = "fish",
   regional_poly = "POLYGON ((-92 2, -89 2, -89 -2, -92 -2, -92 2))",
-  CSV           = "~/other_project/galapagos_fish_checklist.csv"
+  CSV           = "~/other_project/galapagos_fish_checklist.csv",
+  output_dir    = "my_checklists"
 )
-run_regatta(input = "MiFish_obitools.tab", checklist = cl$checklist,
-            sql_path = "/path/to/accessionTaxa.sql")
+run_regatta(input = "MiFish_obitools.tab", checklist = cl$for_LCA)
 
-# Persist the lists to a directory of your choosing:
+# Refresh a stale cached taxonomy snapshot in place:
 build_regional_checklist(region = "galapagos", label = "fish", taxa = "fish",
   regional_poly = "POLYGON ((-92 2, -89 2, -89 -2, -92 -2, -92 2))",
-  sql_path = "/path/to/accessionTaxa.sql", output_dir = "my_checklists")
+  output_dir = "my_checklists", overwrite_taxonomy_files = TRUE)
+
+# Skip taxonomization now and defer it to the reconcile step:
+build_regional_checklist(region = "galapagos", label = "fish", taxa = "fish",
+  regional_poly = "POLYGON ((-92 2, -89 2, -89 -2, -92 -2, -92 2))",
+  output_dir = "my_checklists", sql_path = NULL)
 }
 
 }

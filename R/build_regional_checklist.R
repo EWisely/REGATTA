@@ -11,16 +11,29 @@
 #' species records from OBIS and/or GBIF (or reuses pre-made sources), folds
 #' in any local `Genus`+`Species` CSVs, deduplicates, taxonomizes the LCA
 #' list (when a `taxonomizr` database is available), and **returns** the
-#' results. Two species lists are produced:
+#' results. Three outputs are produced:
 #' \itemize{
-#'   \item `for_making_localdb` -- species binomials only, for a
-#'     reference-database builder (e.g. CRABS).
-#'   \item `for_LCA` -- those binomials **plus** any retained genus-level
-#'     entries, the input to the checklist LCA.
+#'   \item `for_making_localdb` -- a bare, sorted character vector of the unique
+#'     species binomials (no columns). Write it one-name-per-line and feed it to
+#'     a reference-database builder (e.g. CRABS).
+#'   \item `checklist_summary` -- the full taxonomized table, including how each
+#'     name resolved (scientific name / synonym / unresolved). The audit view.
+#'     `NULL` when no `taxonomizr` database was available.
+#'   \item `for_LCA` -- the `taxID` column plus the 7 ranks only (resolved rows,
+#'     genus-level entries retained), cleaned and ready to hand straight to
+#'     [run_regatta()] / [reconcile_checklist()]. When no database is available
+#'     this is the un-taxonomized name list, deferred to the reconcile step.
+#'   \item `methods` -- a ready-to-adapt methods/provenance sentence naming the
+#'     region/label (and the queried taxa when they differ from the label), the
+#'     sources used, the date, the polygon, the NCBI taxonomy snapshot date, and
+#'     the citations to include. **When GBIF is used (fresh or a reused download)
+#'     this is where its download key, DOI, and citation live** -- there is no
+#'     separate GBIF section. Package citations are pulled live from
+#'     [utils::citation()] and the GBIF line uses the download's own DOI --
+#'     nothing is invented; verify against your reference manager.
 #' }
-#' Nothing is written to disk unless you pass `output_dir`; then the two
-#' lists and the taxonomized checklist are saved there, named from `region`
-#' and `label`.
+#' The outputs are always written to the required `output_dir` (named from
+#' `region` and `label`) and also returned, so the expensive artifacts persist.
 #'
 #' [OBIS_download()], [GBIF_download()], and [taxonomize_checklist()] remain
 #' exported for direct/advanced use, but the typical user only calls this
@@ -43,47 +56,76 @@
 #'   runs a fresh `occ_download`; a GBIF download **key** string or an
 #'   `occ_download` **object** reuses an already-finished download; a path to
 #'   a pre-made GBIF source CSV feeds that.
-#' @param CSV Local checklist input: `FALSE` (default) for none, or a
-#'   character vector of paths to local `Genus`+`Species` CSV(s). A `Species`
-#'   value of `"sp."` keeps the genus alone (no epithet); that genus-level
-#'   entry goes into `for_LCA` only, never `for_making_localdb`.
+#' @param CSV Optional local checklist input. `NULL` (default) adds none --
+#'   the public sources (OBIS/GBIF) drive the checklist. Otherwise a character
+#'   vector of paths to local `Genus`+`Species` CSV(s). A `Species` value of
+#'   `"sp."` keeps the genus alone (no epithet); that genus-level entry goes
+#'   into `for_LCA` only, never `for_making_localdb`. If you supply one, prefer
+#'   a **citable** source (e.g. a published regional checklist) so your pipeline
+#'   stays reproducible -- record its citation in your methods.
 #' @param marine,freshwater,terrestrial,brackish OBIS habitat filters, passed
 #'   to [OBIS_download()]. Defaults keep marine plus anadromous/catadromous
 #'   species and drop only land contaminants.
+#' @param output_dir **Required.** Directory to write the outputs into. Each run
+#'   gets its own dated subdirectory `<region>_<label>_<Date>` inside it, so
+#'   successive runs don't pile up loose files (the GBIF `.zip`, when a download
+#'   runs, is kept there too). The expensive artifacts are always saved (so you
+#'   don't rebuild them): `<region>_<label>_list_for_making_localdb.txt`
+#'   (one name per line), `..._checklist_summary.csv`, `..._for_LCA.rds` (or
+#'   `.txt` when not taxonomized), and `..._methods.txt` (which carries any GBIF
+#'   download key/DOI/citation). The same objects are also returned.
 #' @param sql_path Path to the local `accessionTaxa.sql` taxonomizr DB used to
-#'   taxonomize the LCA list. If absent, the LCA list is returned
-#'   un-taxonomized and taxonomizing is deferred to the reconcile step.
-#' @param output_dir Optional directory to write outputs into. Default `NULL`
-#'   writes nothing (everything is returned); supply a directory to also save
-#'   `comprehensive_<region>_<label>_list_for_making_localdb.txt`,
-#'   `..._for_LCA.txt`, and `..._for_LCA_taxonomized.rds`.
+#'   taxonomize the LCA list. Defaults to a persistent per-user cache
+#'   (`tools::R_user_dir("REGATTA", "cache")`), shared across projects and
+#'   sessions and built on first use. **Override it** by pointing `sql_path` at
+#'   an existing DB (e.g. one you already downloaded). If the chosen path is
+#'   missing, REGATTA prompts to build it (interactive) or errors with the
+#'   one-line build command (non-interactive) unless
+#'   `overwrite_taxonomy_files = TRUE`. Set `sql_path = NULL` to skip
+#'   taxonomization entirely and defer it to the reconcile step. Only
+#'   names+nodes are needed here, so the build uses
+#'   `taxonomizr::prepareDatabase(getAccessions = FALSE)` (a few hundred MB).
+#' @param overwrite_taxonomy_files If `TRUE`, (re)build the taxonomy DB at
+#'   `sql_path` even if one exists -- the way to refresh a stale cached snapshot
+#'   in place without hunting for the file. Default `FALSE` reuses an existing
+#'   DB (reporting its build date and soft-warning if it is old). The DB is a
+#'   snapshot of NCBI taxonomy and is never rebuilt silently, to keep results
+#'   reproducible.
 #' @param kingdom Kingdom used by [resolve_taxa()] to disambiguate query
 #'   taxa in the downloaders. Default `"Animalia"`.
 #' @param gbif_fill_families Passed to [GBIF_download()] for a fresh GBIF run.
 #'
-#' @return Invisibly, a list with `for_making_localdb` (species-only
-#'   data.frame), `for_LCA` (data.frame with retained genus-level entries),
-#'   and `checklist` (the taxonomized LCA list, or `NULL` if no DB was
-#'   available). Pass `checklist` straight to [run_regatta()] /
-#'   [reconcile_checklist()].
+#' @return Invisibly, a list with `for_making_localdb` (a bare character vector
+#'   of unique species binomials, for a reference-database builder),
+#'   `checklist_summary` (the full taxonomized table with per-name resolution
+#'   status, or `NULL` if no DB was available), `for_LCA` (`taxID` + the 7
+#'   ranks, ready for the LCA step), and `methods` (a citations-included
+#'   provenance sentence -- the home for any GBIF download key/DOI/citation).
+#'   Pass `for_LCA` straight to [run_regatta()] / [reconcile_checklist()].
 #'
 #' @examples
 #' \dontrun{
-#' # OBIS (default) + a local checklist, no GBIF, no taxonomizr DB needed yet.
+#' # OBIS (default) + a local checklist. output_dir is required; the default
+#' # cached taxonomy DB is built on first use (prompted) or reused after.
 #' cl <- build_regional_checklist(
 #'   region        = "galapagos",
 #'   label         = "fish",
 #'   taxa          = "fish",
 #'   regional_poly = "POLYGON ((-92 2, -89 2, -89 -2, -92 -2, -92 2))",
-#'   CSV           = "~/other_project/galapagos_fish_checklist.csv"
+#'   CSV           = "~/other_project/galapagos_fish_checklist.csv",
+#'   output_dir    = "my_checklists"
 #' )
-#' run_regatta(input = "MiFish_obitools.tab", checklist = cl$checklist,
-#'             sql_path = "/path/to/accessionTaxa.sql")
+#' run_regatta(input = "MiFish_obitools.tab", checklist = cl$for_LCA)
 #'
-#' # Persist the lists to a directory of your choosing:
+#' # Refresh a stale cached taxonomy snapshot in place:
 #' build_regional_checklist(region = "galapagos", label = "fish", taxa = "fish",
 #'   regional_poly = "POLYGON ((-92 2, -89 2, -89 -2, -92 -2, -92 2))",
-#'   sql_path = "/path/to/accessionTaxa.sql", output_dir = "my_checklists")
+#'   output_dir = "my_checklists", overwrite_taxonomy_files = TRUE)
+#'
+#' # Skip taxonomization now and defer it to the reconcile step:
+#' build_regional_checklist(region = "galapagos", label = "fish", taxa = "fish",
+#'   regional_poly = "POLYGON ((-92 2, -89 2, -89 -2, -92 -2, -92 2))",
+#'   output_dir = "my_checklists", sql_path = NULL)
 #' }
 #'
 #' @importFrom utils read.csv
@@ -94,13 +136,14 @@ build_regional_checklist <- function(region,
                                      regional_poly = NULL,
                                      OBIS = TRUE,
                                      GBIF = FALSE,
-                                     CSV  = FALSE,
+                                     CSV  = NULL,
                                      marine = TRUE,
                                      freshwater = NA,
                                      terrestrial = FALSE,
                                      brackish = NA,
-                                     sql_path = "accessionTaxa.sql",
-                                     output_dir = NULL,
+                                     output_dir,
+                                     sql_path = .regatta_default_sql_path(),
+                                     overwrite_taxonomy_files = FALSE,
                                      kingdom = "Animalia",
                                      gbif_fill_families = TRUE) {
   if (!requireNamespace("dplyr", quietly = TRUE)) stop("`dplyr` is required.")
@@ -111,6 +154,12 @@ build_regional_checklist <- function(region,
       !nzchar(trimws(region)) || !nzchar(trimws(label)))
     stop("Provide a non-empty `region` and `label` -- they name the output ",
          'files, e.g. region = "galapagos", label = "fish".')
+  if (missing(output_dir) || is.null(output_dir) || !is.character(output_dir) ||
+      length(output_dir) != 1 || !nzchar(trimws(output_dir)))
+    stop("`output_dir` is required: give a directory to write the checklist ",
+         'outputs into, e.g. output_dir = "my_checklists". The expensive ',
+         "artifacts (taxonomized checklist, source lists) are always saved so ",
+         "you don't have to rebuild them.")
 
   needs_dl <- isTRUE(OBIS) || isTRUE(GBIF)
   if (needs_dl && (is.null(taxa) || is.null(regional_poly)))
@@ -123,6 +172,14 @@ build_regional_checklist <- function(region,
                              stringsAsFactors = FALSE)
   species_rows <- empty   # binomials: OBIS/GBIF + local non-"sp." rows
   genus_rows   <- empty   # genus-only: local "Genus / sp." rows
+  gbif_citation <- NULL   # download key + DOI + citation, for the methods sentence
+  sources_used  <- character(0)  # which sources actually contributed, for cl$methods
+
+  # Per-run output directory, so successive runs land in their own dated folder
+  # (outputs and the GBIF .zip) instead of piling up loose in output_dir.
+  run_dir <- file.path(output_dir,
+                       paste0(trimws(region), "_", trimws(label), "_", Sys.Date()))
+  dir.create(run_dir, recursive = TRUE, showWarnings = FALSE)
 
   # --- OBIS source (uses the function's return value, not a written file) --
   if (isTRUE(OBIS)) {
@@ -131,8 +188,10 @@ build_regional_checklist <- function(region,
                             marine = marine, freshwater = freshwater,
                             terrestrial = terrestrial, brackish = brackish)
     species_rows <- unique(rbind(species_rows, obis_df[, cols, drop = FALSE]))
+    sources_used <- c(sources_used, "OBIS")
   } else if (is.character(OBIS)) {
     species_rows <- unique(rbind(species_rows, .regatta_read_source_csv(OBIS, "OBIS")))
+    sources_used <- c(sources_used, "OBIS")
   }
 
   # --- GBIF source --------------------------------------------------------
@@ -140,14 +199,21 @@ build_regional_checklist <- function(region,
     if (isTRUE(GBIF)) {
       gbif_df <- GBIF_download(obis_taxa = taxa, regional_poly = regional_poly,
                               output_dir = NULL, kingdom = kingdom,
-                              gbif_fill_families = gbif_fill_families)
+                              gbif_fill_families = gbif_fill_families,
+                              download_dir = run_dir)
     } else if (is.character(GBIF) && length(GBIF) == 1 &&
                (grepl("\\.csv$", GBIF, ignore.case = TRUE) || file.exists(GBIF))) {
       gbif_df <- .regatta_read_source_csv(GBIF, "GBIF")          # pre-made CSV
     } else {
-      gbif_df <- GBIF_download(existing_download = GBIF, output_dir = NULL)
+      gbif_df <- GBIF_download(existing_download = GBIF, output_dir = NULL,
+                               download_dir = run_dir)            # reuse a key/object
     }
+    # Capture the download key + DOI + citation for the methods sentence -- for
+    # both a fresh download and a reused one (occ_download_meta() yields the DOI
+    # for any key). NULL only for a pre-made CSV, which carries no download.
+    gbif_citation <- attr(gbif_df, "gbif_download")
     species_rows <- unique(rbind(species_rows, gbif_df[, cols, drop = FALSE]))
+    sources_used <- c(sources_used, "GBIF")
   }
 
   # --- Local CSV(s) -------------------------------------------------------
@@ -172,6 +238,7 @@ build_regional_checklist <- function(region,
           Species = trimws(gen$Genus),
           Source  = "Local_csv", stringsAsFactors = FALSE)))
     }
+    sources_used <- c(sources_used, "a local CSV checklist")
   }
 
   if (nrow(species_rows) == 0 && nrow(genus_rows) == 0)
@@ -184,36 +251,232 @@ build_regional_checklist <- function(region,
           nrow(lca_rows), " entries incl. ", nrow(genus_rows),
           " genus-level (for the checklist LCA).")
 
-  # --- Taxonomize the LCA list (when a DB is available) -------------------
-  taxonomized <- NULL
-  if (file.exists(sql_path)) {
+  # --- Three return objects ------------------------------------------------
+  # for_making_localdb : bare, sorted, unique scientific names -- nothing else.
+  #   Written one-per-line, this is the input for FASTA-building tools (CRABS).
+  # checklist_summary  : the full taxonomized table, including how each name
+  #   resolved (scientific name / synonym / unresolved) -- the audit view.
+  # for_LCA            : the taxID column + the 7 ranks only, resolved rows,
+  #   cleaned and ready for the LCA step (run_regatta()/reconcile_checklist()).
+  ranks <- c("domain", "phylum", "class", "order", "family", "genus", "species")
+  for_making_localdb <- sort(unique(species_rows$Species))
+
+  # Ensure (or deliberately skip) the taxonomy DB. sql_path = NULL skips
+  # taxonomization entirely and defers it to the reconcile step.
+  checklist_summary <- NULL
+  db_date <- NA_character_
+  have_db <- !is.null(sql_path) &&
+    .regatta_ensure_taxonomy_db(sql_path, overwrite_taxonomy_files)
+  if (have_db) {
     message("Taxonomizing the LCA checklist ...")
-    taxonomized <- taxonomize_checklist(lca_rows, sql_path = sql_path)
+    checklist_summary <- taxonomize_checklist(lca_rows, sql_path = sql_path)
+    resolved_rows <- !is.na(checklist_summary$taxID)
+    for_LCA <- checklist_summary[resolved_rows, c("taxID", ranks), drop = FALSE]
+    rownames(for_LCA) <- NULL
+    db_date <- .regatta_taxonomy_db_date(sql_path)$date
   } else {
-    message("No taxonomizr DB at '", sql_path, "' -- returning the LCA list ",
-            "un-taxonomized; reconcile_checklist()/run_regatta() will ",
-            "taxonomize it (with a warning) at the LCA step.")
+    message("for_LCA is returned as a name list and checklist_summary is NULL; ",
+            "reconcile_checklist()/run_regatta() will taxonomize it (with a ",
+            "warning) at the LCA step.")
+    for_LCA <- lca_rows
+  }
+  lca_taxonomized <- all(ranks %in% names(for_LCA))
+
+  # --- Methods sentence (real citations only -- pulled live, never invented) -
+  # The GBIF download key + DOI + citation live here, not in a separate section.
+  methods <- .regatta_methods(region, label, taxa, sources_used, regional_poly,
+                              gbif_citation, db_date)
+
+  # --- Write the outputs into this run's dated directory ------------------
+  {
+    stem <- paste0(trimws(region), "_", trimws(label), "_list")
+    # CRABS input: one scientific name per line, no header, no columns.
+    writeLines(for_making_localdb,
+               file.path(run_dir, paste0(stem, "_for_making_localdb.txt")))
+    if (!is.null(checklist_summary))
+      utils::write.csv(checklist_summary,
+                       file.path(run_dir, paste0(stem, "_checklist_summary.csv")),
+                       row.names = FALSE)
+    if (lca_taxonomized)
+      saveRDS(for_LCA, file.path(run_dir, paste0(stem, "_for_LCA.rds")))
+    else
+      readr::write_delim(for_LCA,
+                         file.path(run_dir, paste0(stem, "_for_LCA.txt")),
+                         delim = "\t")
+    # The GBIF download key/DOI/citation are part of the methods file now, not a
+    # separate GBIF section.
+    writeLines(methods, file.path(run_dir, paste0(stem, "_methods.txt")))
+    message("Wrote checklist files to ", run_dir)
   }
 
-  # --- Write only when an output directory is given -----------------------
-  if (!is.null(output_dir)) {
-    dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
-    stem <- paste0("comprehensive_", trimws(region), "_", trimws(label), "_list")
-    readr::write_delim(species_rows,
-                       file.path(output_dir, paste0(stem, "_for_making_localdb.txt")),
-                       delim = "\t")
-    readr::write_delim(lca_rows,
-                       file.path(output_dir, paste0(stem, "_for_LCA.txt")),
-                       delim = "\t")
-    if (!is.null(taxonomized))
-      saveRDS(taxonomized,
-              file.path(output_dir, paste0(stem, "_for_LCA_taxonomized.rds")))
-    message("Wrote checklist files to ", output_dir)
+  invisible(list(for_making_localdb = for_making_localdb,
+                 checklist_summary  = checklist_summary,
+                 for_LCA            = for_LCA,
+                 methods            = methods))
+}
+
+# Assemble the methods/provenance sentence. CITATIONS ARE REAL: R-package
+# citations are pulled live from citation() (the maintainer-supplied entry),
+# the GBIF database citation is the DOI GBIF minted for this exact download,
+# and nothing is hardcoded as a fabricated author/year/DOI. Where a citation
+# cannot be pulled (package not installed, OBIS has no machine citation) the
+# string says so and points the user to the canonical source to fill in.
+.regatta_methods <- function(region, label, taxa = NULL, sources_used,
+                             regional_poly, gbif_citation,
+                             db_date = NA_character_) {
+  today <- as.character(Sys.Date())
+  src   <- if (length(sources_used)) paste(sources_used, collapse = ", ") else "the supplied sources"
+
+  # Wrap region + label in parentheses; add the queried taxa when they differ
+  # from the label (e.g. label "vertebrates" but taxa = c("Mammalia","Aves")).
+  taxa_differs <- !is.null(taxa) &&
+    !(length(taxa) == 1 && identical(trimws(taxa), trimws(label)))
+  rl_phrase <- if (taxa_differs)
+    paste0("(", trimws(region), ", ", trimws(label),
+           "; taxa: ", paste(taxa, collapse = ", "), ")")
+  else
+    paste0("(", trimws(region), ", ", trimws(label), ")")
+
+  cite_pkg <- function(p) tryCatch(
+    trimws(gsub("\\s+", " ",
+                paste(format(utils::citation(p), style = "text"), collapse = " "))),
+    error = function(e)
+      paste0("the '", p, "' R package (run citation(\"", p, "\") to get the citation)"))
+
+  refs <- c(paste0("REGATTA: ", cite_pkg("REGATTA")))
+  if ("OBIS" %in% sources_used) {
+    refs <- c(refs, paste0("robis (OBIS R client): ", cite_pkg("robis")))
+    refs <- c(refs, paste0("OBIS database: cite per https://obis.org/ ",
+                           "(Ocean Biodiversity Information System), accessed ", today))
+  }
+  if ("GBIF" %in% sources_used) {
+    refs <- c(refs, paste0("rgbif (GBIF R client): ", cite_pkg("rgbif")))
+    gbif_ref <- if (!is.null(gbif_citation)) {
+      key <- gbif_citation$download_key
+      doi <- if (!is.na(gbif_citation$doi)) gbif_citation$doi else "(pending)"
+      cit <- if (!is.na(gbif_citation$citation)) gbif_citation$citation else
+        paste0("https://www.gbif.org/occurrence/download/", key)
+      paste0("GBIF occurrence download (key ", key, ", DOI ", doi, "): ", cit)
+    } else {
+      paste0("GBIF occurrence download: cite the download DOI per ",
+             "https://www.gbif.org/citation-guidelines, accessed ", today)
+    }
+    refs <- c(refs, gbif_ref)
   }
 
-  invisible(list(for_making_localdb = species_rows,
-                 for_LCA            = lca_rows,
-                 checklist          = taxonomized))
+  poly_phrase <- if (is.null(regional_poly))
+    "The region was defined by the polygon(s) in the supplied source files."
+  else
+    paste0("The region was defined by the WKT polygon encompassing ", regional_poly, ".")
+
+  tax_phrase <- if (!is.na(db_date))
+    paste0(" Taxonomy was resolved against an NCBI taxonomy snapshot built ",
+           db_date, " (via the taxonomizr R package).")
+  else ""
+
+  paste0(
+    "The regional species checklist for ", rl_phrase,
+    " was built from ", src, " on ", today,
+    " using the R package REGATTA. ", poly_phrase, tax_phrase,
+    " Please cite the following (verify against your reference manager): ",
+    paste(refs, collapse = " | "))
+}
+
+# --- Taxonomy-DB lifecycle helpers --------------------------------------
+# REGATTA caches a persistent taxonomizr DB (default under R_user_dir). The DB
+# is a SNAPSHOT of NCBI taxonomy and goes stale as NCBI changes; we never
+# rebuild it silently (that would make results irreproducible). Instead we
+# report its build date, soft-warn when it is old, and rebuild only on
+# explicit request (overwrite_taxonomy_files = TRUE) or interactive consent.
+
+.regatta_db_build_cmd <- function(sql_path)
+  paste0('taxonomizr::prepareDatabase("', sql_path, '", getAccessions = FALSE)')
+
+# Package-wide default location for the taxonomizr DB: a persistent per-user
+# cache, shared across projects/sessions. Used as the default sql_path
+# everywhere so build/run/reconcile all look in the same place.
+.regatta_default_sql_path <- function()
+  file.path(tools::R_user_dir("REGATTA", "cache"), "accessionTaxa.sql")
+
+# Like .regatta_ensure_taxonomy_db(), but for steps where a DB is mandatory
+# (resolving classifier input, taxonomizing a raw checklist): error if one
+# isn't available afterward instead of returning FALSE.
+.regatta_require_taxonomy_db <- function(sql_path, overwrite_taxonomy_files = FALSE) {
+  if (!.regatta_ensure_taxonomy_db(sql_path, overwrite_taxonomy_files))
+    stop("A taxonomy database is required here but none is available. Re-run ",
+         "with overwrite_taxonomy_files = TRUE, or build it first with:\n  ",
+         .regatta_db_build_cmd(sql_path), call. = FALSE)
+  invisible(TRUE)
+}
+
+# Build/refresh the names+nodes-only DB at sql_path and stamp its build date.
+.regatta_build_taxonomy_db <- function(sql_path) {
+  if (!requireNamespace("taxonomizr", quietly = TRUE))
+    stop("Building the taxonomy DB needs the 'taxonomizr' package. Install it ",
+         'with install.packages("taxonomizr").')
+  dir.create(dirname(sql_path), recursive = TRUE, showWarnings = FALSE)
+  message("Building the NCBI taxonomy DB (names/nodes only) at ", sql_path,
+          " -- this downloads ~hundreds of MB and takes a few minutes ...")
+  taxonomizr::prepareDatabase(sql_path, getAccessions = FALSE)
+  writeLines(as.character(Sys.Date()), paste0(sql_path, ".built_on"))
+  message("Taxonomy DB ready.")
+  invisible(TRUE)
+}
+
+# Build date + its provenance: the sidecar we write when WE build the DB, else
+# the .sql file's modification date (approximate).
+.regatta_taxonomy_db_date <- function(sql_path) {
+  side <- paste0(sql_path, ".built_on")
+  if (file.exists(side)) {
+    d <- tryCatch(trimws(readLines(side, n = 1)), error = function(e) NA_character_)
+    return(list(date = d, source = "REGATTA build"))
+  }
+  if (file.exists(sql_path))
+    return(list(date = as.character(as.Date(file.info(sql_path)$mtime)),
+                source = "file date (approx)"))
+  list(date = NA_character_, source = NA_character_)
+}
+
+# Make sure a usable taxonomy DB is present at sql_path. Returns TRUE if one is
+# available afterward, FALSE if the user (interactively) declined to build one
+# -- in which case taxonomization is deferred to the reconcile step.
+.regatta_ensure_taxonomy_db <- function(sql_path, overwrite_taxonomy_files,
+                                        stale_days = 180L) {
+  if (isTRUE(overwrite_taxonomy_files)) {
+    if (file.exists(sql_path)) {
+      message("overwrite_taxonomy_files = TRUE: replacing the taxonomy DB at ", sql_path)
+      unlink(c(sql_path, paste0(sql_path, ".built_on")))
+    }
+    return(.regatta_build_taxonomy_db(sql_path))
+  }
+  if (file.exists(sql_path)) {
+    info <- .regatta_taxonomy_db_date(sql_path)
+    message("Using NCBI taxonomy snapshot built ", info$date, " (", info$source,
+            "). Pass overwrite_taxonomy_files = TRUE to refresh it.")
+    bd <- suppressWarnings(as.Date(info$date))
+    if (!is.na(bd) && as.numeric(Sys.Date() - bd) > stale_days)
+      warning("This taxonomy snapshot is ", as.numeric(Sys.Date() - bd),
+              " days old; NCBI taxonomy has likely changed since. For a current ",
+              "analysis, rebuild it with overwrite_taxonomy_files = TRUE.",
+              call. = FALSE)
+    return(TRUE)
+  }
+  # DB missing, no overwrite flag.
+  if (interactive()) {
+    ans <- readline(paste0(
+      "No taxonomy DB at '", sql_path, "'. Build one now? ",
+      "(~hundreds of MB, a few minutes) [y/N]: "))
+    if (tolower(trimws(ans)) %in% c("y", "yes"))
+      return(.regatta_build_taxonomy_db(sql_path))
+    message("Skipping the taxonomy-DB build at your request.")
+    return(FALSE)
+  }
+  stop("No taxonomy DB at '", sql_path, "'. In a non-interactive session, ",
+       "build it once with:\n  ", .regatta_db_build_cmd(sql_path),
+       "\nor call build_regional_checklist(..., overwrite_taxonomy_files = TRUE) ",
+       "to build it here, or point sql_path at an existing DB (or sql_path = ",
+       "NULL to skip taxonomization and defer it to the reconcile step).",
+       call. = FALSE)
 }
 
 # FALSE / NULL / NA all mean "this source is off". A non-FALSE value (TRUE, a
@@ -223,13 +486,16 @@ build_regional_checklist <- function(region,
 # At the LCA step, accept a checklist that may not be taxonomized yet: if it
 # lacks the 7 rank columns, warn and taxonomize it on the fly. A path, a
 # character vector of names, or a names-only data.frame all work.
-.regatta_ensure_taxonomized <- function(checklist, sql_path = "accessionTaxa.sql") {
+.regatta_ensure_taxonomized <- function(checklist,
+                                        sql_path = .regatta_default_sql_path(),
+                                        overwrite_taxonomy_files = FALSE) {
   ranks <- c("domain", "phylum", "class", "order", "family", "genus", "species")
   if (is.data.frame(checklist) && all(ranks %in% names(checklist)))
     return(checklist)
   warning("checklist was not pre-taxonomized; taxonomizing it now via ",
           "taxonomize_checklist(). Build it with build_regional_checklist() ",
           "to do this ahead of time and silence this warning.", call. = FALSE)
+  .regatta_require_taxonomy_db(sql_path, overwrite_taxonomy_files)
   taxonomize_checklist(checklist, sql_path = sql_path)
 }
 

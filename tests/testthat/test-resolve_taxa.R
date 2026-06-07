@@ -1,6 +1,8 @@
 # Tests for resolve_taxa(). The resolution path queries WoRMS (and optionally
-# GBIF), so the network-dependent tests skip on CRAN and when offline. The
-# alias table itself is pure data and is tested without a network.
+# GBIF), so the network-dependent tests skip on CRAN, on CI, and when offline --
+# live third-party APIs (esp. the GBIF backbone, which rate-limits) flake in CI
+# and would block merges. Run them locally. The alias table itself is pure data
+# and is tested without a network.
 
 test_that("curated alias table has the expected shorthands", {
   al <- REGATTA:::.regatta_taxon_aliases()
@@ -8,12 +10,15 @@ test_that("curated alias table has the expected shorthands", {
   # one-to-many "fish" shorthand: ray-finned fish + sharks/rays + hagfish + lamprey
   expect_setequal(al[["fish"]],
                   c("Actinopterygii", "Elasmobranchii", "Myxini", "Petromyzonti"))
-  expect_identical(al[["vertebrates"]], "Vertebrata")
+  expect_setequal(al[["vertebrates"]],
+                  c("Actinopterygii", "Elasmobranchii", "Myxini", "Petromyzonti",
+                    "Mammalia", "Aves", "Reptilia", "Amphibia"))
   expect_identical(al[["lepidosauria"]], "Reptilia")
 })
 
 test_that("kingdom filtering disambiguates Vertebrata to the vertebrate subphylum", {
   skip_on_cran()
+  skip_on_ci()        # live WoRMS/GBIF calls are flaky on CI (3rd-party rate limits)
   skip_if_offline()
   r <- resolve_taxa("Vertebrata", check_gbif = FALSE)
   expect_equal(nrow(r), 1L)
@@ -23,6 +28,7 @@ test_that("kingdom filtering disambiguates Vertebrata to the vertebrate subphylu
 
 test_that("the AphiaID escape hatch resolves a numeric input directly", {
   skip_on_cran()
+  skip_on_ci()        # live WoRMS/GBIF calls are flaky on CI (3rd-party rate limits)
   skip_if_offline()
   r <- resolve_taxa("146419", check_gbif = FALSE)
   expect_equal(r$aphia_id, 146419L)
@@ -31,6 +37,7 @@ test_that("the AphiaID escape hatch resolves a numeric input directly", {
 
 test_that("one-to-many 'fish' alias expands into four resolved taxa", {
   skip_on_cran()
+  skip_on_ci()        # live WoRMS/GBIF calls are flaky on CI (3rd-party rate limits)
   skip_if_offline()
   r <- resolve_taxa("fish", check_gbif = FALSE)
   expect_equal(nrow(r), 4L)
@@ -42,6 +49,7 @@ test_that("one-to-many 'fish' alias expands into four resolved taxa", {
 
 test_that("absent names are aliased (Lepidosauria -> Reptilia)", {
   skip_on_cran()
+  skip_on_ci()        # live WoRMS/GBIF calls are flaky on CI (3rd-party rate limits)
   skip_if_offline()
   r <- resolve_taxa("Lepidosauria", check_gbif = FALSE)
   expect_equal(r$alias_used, "Reptilia")
@@ -51,6 +59,7 @@ test_that("absent names are aliased (Lepidosauria -> Reptilia)", {
 
 test_that("an unresolvable name errors under the default on_ambiguous = 'error'", {
   skip_on_cran()
+  skip_on_ci()        # live WoRMS/GBIF calls are flaky on CI (3rd-party rate limits)
   skip_if_offline()
   expect_error(resolve_taxa("Notarealtaxonxyz", check_gbif = FALSE),
                "could not resolve")
@@ -58,6 +67,7 @@ test_that("an unresolvable name errors under the default on_ambiguous = 'error'"
 
 test_that("on_ambiguous = 'warn' returns the table instead of erroring", {
   skip_on_cran()
+  skip_on_ci()        # live WoRMS/GBIF calls are flaky on CI (3rd-party rate limits)
   skip_if_offline()
   expect_warning(
     r <- resolve_taxa("Notarealtaxonxyz", check_gbif = FALSE, on_ambiguous = "warn"),
@@ -66,11 +76,19 @@ test_that("on_ambiguous = 'warn' returns the table instead of erroring", {
   expect_true(is.na(r$aphia_id))
 })
 
-test_that("GBIF coverage flags: bony fish lack a usable key, sharks have one", {
+test_that("GBIF coverage flags + descent: bony fish descend to keys, sharks use a direct key", {
   skip_on_cran()
+  skip_on_ci()        # live WoRMS/GBIF calls are flaky on CI (3rd-party rate limits)
   skip_if_offline()
   r <- resolve_taxa(c("Actinopterygii", "Elasmobranchii"), check_gbif = TRUE)
   expect_false(r$gbif_usable[r$valid_name == "Actinopterygii"])  # no usable class node
   expect_true(r$gbif_usable[r$valid_name == "Elasmobranchii"])   # class key 121
-  expect_true(all(c("gbif_key", "gbif_usable", "note") %in% names(r)))
+  expect_true(all(c("gbif_key", "gbif_usable", "gbif_keys", "note") %in% names(r)))
+
+  # resolve_taxa now returns usable GBIF keys for both: Actinopterygii via
+  # order/family descent, Elasmobranchii via its direct key.
+  acti <- r$gbif_keys[[which(r$valid_name == "Actinopterygii")]]
+  elas <- r$gbif_keys[[which(r$valid_name == "Elasmobranchii")]]
+  expect_gt(length(acti), 0L)     # descended keys, not integer(0)
+  expect_gt(length(elas), 0L)     # direct key
 })

@@ -54,7 +54,12 @@
     # ray-finned fish + sharks/rays + hagfishes + lampreys (the fishes a
     # vertebrate metabarcoding primer like MiFish targets):
     "fish"         = c("Actinopterygii", "Elasmobranchii", "Myxini", "Petromyzonti"),
-    "vertebrates"  = "Vertebrata"                   # convenient plural
+    # All vertebrate classes. Expands like "fish" (rather than mapping to the
+    # subphylum "Vertebrata", which has no usable GBIF backbone key) so it works
+    # in BOTH OBIS (queried by AphiaID) and GBIF (direct keys for
+    # mammals/birds/etc. + order descent for ray-finned fish and reptiles):
+    "vertebrates"  = c("Actinopterygii", "Elasmobranchii", "Myxini", "Petromyzonti",
+                       "Mammalia", "Aves", "Reptilia", "Amphibia")
   )
 }
 
@@ -151,6 +156,76 @@
        usable = isTRUE(usable))
 }
 
+#' Usable GBIF backbone key(s) for one taxon (internal)
+#'
+#' Returns the taxon's own backbone key when it is usable; otherwise **walks
+#' down** the WoRMS tree (to `descend_to`, with an optional family gap-fill) and
+#' returns the GBIF keys those descendants resolve to. This is what makes broad
+#' nodes GBIF lacks a usable key for -- ray-finned fish, `Crustacea`,
+#' `Vertebrata`, ... -- still return occurrences. OBIS needs no equivalent: a
+#' query by the parent AphiaID returns all descendants server-side.
+#' @keywords internal
+#' @noRd
+.gbif_keys_for <- function(aphia_id, direct_key, direct_usable,
+                           descend_to = "order", fill_families = TRUE) {
+  if (isTRUE(direct_usable)) return(stats::na.omit(as.integer(direct_key)))
+  if (!requireNamespace("rgbif", quietly = TRUE) ||
+      !requireNamespace("taxize", quietly = TRUE) ||
+      is.na(aphia_id)) {
+    return(integer(0))
+  }
+
+  walk <- function(rank) {
+    d <- tryCatch(taxize::worms_downstream(id = aphia_id, downto = rank),
+                  error = function(e) NULL)
+    if (!is.null(d) && nrow(d) > 0) unique(d$name) else character(0)
+  }
+  # GBIF backbone match with retry/backoff -- name_backbone_checklist() can
+  # return a transient rate-limit error ("Status: 0 - try lower bucket_size or
+  # larger sleep"). Returns NULL (treated as "no matches") if it keeps failing.
+  nb <- function(nms) {
+    for (i in seq_len(3L)) {
+      res <- tryCatch(rgbif::name_backbone_checklist(nms), error = function(e) e)
+      if (!inherits(res, "condition")) return(res)
+      if (i < 3L) Sys.sleep(2L * i)
+    }
+    NULL
+  }
+
+  # Primary descent (default: order -- fast, hits a rank GBIF populates).
+  primary_names <- walk(descend_to)
+  primary_keys  <- integer(0)
+  valid_phyla   <- character(0)
+  if (length(primary_names) > 0) {
+    bbp <- nb(primary_names)
+    if (!is.null(bbp)) {
+      keep <- bbp$matchType != "NONE"
+      primary_keys <- bbp$usageKey[keep]
+      if ("phylum" %in% names(bbp)) valid_phyla <- unique(stats::na.omit(bbp$phylum[keep]))
+    }
+  }
+
+  # Gap-fill: families whose GBIF parent at the primary rank isn't in the
+  # matched set (e.g. families GBIF files with no order). Phylum-guarded so a
+  # stray family-name collision can't drag in unrelated taxa.
+  fill_keys <- integer(0)
+  if (isTRUE(fill_families) && descend_to != "family") {
+    fam_names <- walk("family")
+    bbf <- if (length(fam_names) > 0) nb(fam_names) else NULL
+    if (!is.null(bbf)) {
+      bbf <- bbf[bbf$matchType != "NONE", , drop = FALSE]
+      parent_col <- paste0(descend_to, "Key")
+      covered    <- if (parent_col %in% names(bbf)) bbf[[parent_col]] %in% primary_keys else FALSE
+      covered[is.na(covered)] <- FALSE
+      in_phylum  <- if (length(valid_phyla) && "phylum" %in% names(bbf))
+                      bbf$phylum %in% valid_phyla else TRUE
+      fill_keys  <- bbf$usageKey[!covered & in_phylum]
+    }
+  }
+
+  unique(as.integer(c(primary_keys, fill_keys)))
+}
+
 #' Validate and disambiguate query taxa for the checklist downloaders
 #'
 #' Resolves a vector of high-level taxon names to unambiguous WoRMS AphiaIDs,
@@ -177,18 +252,29 @@
 #' @param aliases A named list (or named character vector) mapping (lower-cased)
 #'   input names to one or more substitute names for the WoRMS lookup. Defaults
 #'   to REGATTA's curated table, which includes one-to-many shorthands:
-#'   `"fish"` -> `c("Actinopterygii", "Elasmobranchii", "Myxini",
-#'   "Petromyzonti")` (ray-finned fish + sharks/rays + hagfishes + lampreys),
-#'   `"vertebrates"` -> `"Vertebrata"`, `"lepidosauria"` ->
-#'   `"Reptilia"`, `"osteichthyes"` -> `"Actinopteri"`. Pass your own to extend
-#'   or override. A multi-name alias expands into one result row per taxon.
+#'   `"fish"` -> ray-finned fish + sharks/rays + hagfishes + lampreys
+#'   (`Actinopterygii`, `Elasmobranchii`, `Myxini`, `Petromyzonti`),
+#'   `"vertebrates"` -> those plus `Mammalia`, `Aves`, `Reptilia`, `Amphibia`
+#'   (the vertebrate classes; works in both OBIS and GBIF, unlike the bare
+#'   subphylum `Vertebrata`), `"lepidosauria"` -> `"Reptilia"`,
+#'   `"osteichthyes"` -> `"Actinopteri"`. Pass your own to extend or override. A
+#'   multi-name alias expands into one result row per taxon.
+#' @param gbif_descend_to,gbif_fill_families Control the GBIF descent (used only
+#'   when `check_gbif` and a taxon has no usable direct key). `gbif_descend_to`
+#'   is the WoRMS rank to walk down to (default `"order"` -- fast, and a rank
+#'   GBIF populates); `gbif_fill_families` (default TRUE) additionally adds keys
+#'   for families whose GBIF parent at that rank isn't matched, lifting
+#'   coverage.
 #'
 #' @return A data.frame with one row per resolved taxon: `input` (the original
 #'   name you passed -- repeated when an alias expanded to several taxa),
-#'   `alias_used`, `aphia_id`, `valid_name`, `rank`, `kingdom`, `worms_status`
-#'   (`ok`/`ambiguous`/`wrong_kingdom`/`not_found`), `n_candidates`,
-#'   and (when `check_gbif`) `gbif_key`, `gbif_usable`, plus a human-readable
-#'   `note`.
+#'   `alias_used`, `aphia_id` (the **OBIS** query key -- OBIS descends it
+#'   server-side), `valid_name`, `rank`, `kingdom`, `worms_status`
+#'   (`ok`/`ambiguous`/`wrong_kingdom`/`not_found`), `n_candidates`, and (when
+#'   `check_gbif`) `gbif_key` (the taxon's own backbone key, NA if not usable),
+#'   `gbif_usable`, `gbif_keys` (a list-column: the **GBIF** query keys -- the
+#'   direct key when usable, otherwise the keys reached by descent), plus a
+#'   human-readable `note`.
 #'
 #' @examples
 #' \dontrun{
@@ -205,10 +291,12 @@
 #'
 #' @export
 resolve_taxa <- function(taxa,
-                         kingdom      = "Animalia",
-                         check_gbif   = requireNamespace("rgbif", quietly = TRUE),
-                         on_ambiguous = c("error", "warn", "first"),
-                         aliases      = .regatta_taxon_aliases()) {
+                         kingdom            = "Animalia",
+                         check_gbif         = requireNamespace("rgbif", quietly = TRUE),
+                         on_ambiguous       = c("error", "warn", "first"),
+                         aliases            = .regatta_taxon_aliases(),
+                         gbif_descend_to    = "order",
+                         gbif_fill_families = TRUE) {
   if (!requireNamespace("worrms", quietly = TRUE)) {
     stop("Package 'worrms' is required for resolve_taxa().")
   }
@@ -247,11 +335,19 @@ resolve_taxa <- function(taxa,
       .gbif_diag(w$valid, w$rank, w$kingdom)
     } else list(key = NA_integer_, usable = NA)
 
+    # Usable GBIF backbone keys for the query: the direct key when usable,
+    # otherwise the keys reached by walking WoRMS down to orders/families.
+    gbif_keys_vec <- if (isTRUE(check_gbif) && w$status == "ok") {
+      .gbif_keys_for(w$aphia, g$key, g$usable, gbif_descend_to, gbif_fill_families)
+    } else integer(0)
+
     note <- switch(
       w$status,
-      ok            = if (isTRUE(check_gbif) && isFALSE(g$usable))
-                        "resolved; no usable GBIF backbone key (use OBIS for this taxon)"
-                      else "resolved",
+      ok            = if (!isTRUE(check_gbif) || isTRUE(g$usable)) "resolved"
+                      else if (length(gbif_keys_vec) > 0)
+                        paste0("resolved; GBIF via ", gbif_descend_to, " descent (",
+                               length(gbif_keys_vec), " key(s))")
+                      else "resolved; no usable GBIF backbone key (use OBIS for this taxon)",
       ambiguous     = paste0(w$n, " accepted matches in kingdom; pass an AphiaID. Candidates: ",
                              paste(w$others, collapse = "; ")),
       wrong_kingdom = paste0("no accepted match in kingdom '", kingdom,
@@ -274,6 +370,7 @@ resolve_taxa <- function(taxa,
       n_candidates = w$n,
       gbif_key     = g$key,
       gbif_usable  = g$usable,
+      gbif_keys    = I(list(gbif_keys_vec)),
       note         = note,
       stringsAsFactors = FALSE
     )

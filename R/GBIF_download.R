@@ -6,19 +6,26 @@
 #' Resolves the given high-level taxa via WoRMS, finds GBIF backbone
 #' keys for the resulting classes, and submits a GBIF occurrence
 #' download restricted to the polygon. **Returns** the species data frame;
-#' writes it to disk only if you supply `output_dir`. GBIF login credentials
-#' must already be set in `~/.Renviron`; see the Setup section of the README.
+#' writes it to disk only if you supply `output_dir`.
 #'
-#' @param obis_taxa A character vector of taxon names at **class level or
-#'   broader** (GBIF won't accept order/family/genus/species here). List the
-#'   specific classes you want -- **avoid broad ambiguous names**. For example
-#'   `"Vertebrata"` is ambiguous in WoRMS (the vertebrate subphylum *and* a
-#'   red-algae genus) and errors here; pass the classes instead
-#'   (e.g. `c("Actinopterygii", "Chondrichthyes", "Mammalia", "Aves",
-#'   "Reptilia")`). Names are validated and disambiguated by [resolve_taxa()]
-#'   (kingdom-aware), so you can type any common synonym -- e.g. `Teleostei`,
-#'   `Actinopteri`, `Actinopterygii`, or `Osteichthyes` all work for
-#'   ray-finned fish.
+#' @section Time and credentials:
+#' This submits an asynchronous GBIF `occ_download` and **waits for GBIF to
+#' assemble it server-side, which typically takes several minutes** (longer for
+#' large polygons or broad taxa) -- the call blocks while it polls. GBIF
+#' requires a free account, and `rgbif` authenticates with your account
+#' **credentials** (there is no separate "API key" for downloads). Register at
+#' \url{https://www.gbif.org/user/profile}, then store three values in your
+#' `~/.Renviron` (via `usethis::edit_r_environ()`, then restart R) so nothing is
+#' hardcoded: `GBIF_USER`, `GBIF_PWD`, and `GBIF_EMAIL` (the email you
+#' registered with).
+#'
+#' @param obis_taxa A character vector of taxon names at any level. They are
+#'   validated, disambiguated, and resolved to GBIF backbone keys by
+#'   [resolve_taxa()], which walks broad taxa down to the orders/families GBIF
+#'   populates -- so subphyla GBIF has no usable key for (e.g. `"Vertebrata"`,
+#'   `"Crustacea"`, or the ray-finned-fish classes) still work, as do common
+#'   synonyms (`Teleostei`, `Actinopteri`, `Osteichthyes`) and the `"fish"` /
+#'   `"vertebrates"` shorthands.
 #' @param worms_taxa A character vector of substitute taxon names to use
 #'   instead of `obis_taxa` when looking up WoRMS IDs. NA reuses
 #'   `obis_taxa`. Rarely needed now that names route through [resolve_taxa()].
@@ -27,7 +34,13 @@
 #'   [wktmap.com](https://wktmap.com) and copy the generated polygon.
 #' @param output_dir Optional directory to write the result into. Default
 #'   `NULL` writes nothing (the function just returns the data); supply a
-#'   directory to also save `<output_dir>/<gbif_outputname>.csv`.
+#'   directory to also save `<output_dir>/<gbif_outputname>.csv` and
+#'   `<output_dir>/<gbif_outputname>_download_info.txt` (the download key +
+#'   GBIF citation).
+#' @param download_dir Directory the GBIF occurrence `.zip` is downloaded into.
+#'   Default `NULL` keeps it out of the working directory: it uses `output_dir`
+#'   if supplied, otherwise a session temp dir. (`build_regional_checklist()`
+#'   passes its dated run directory so the zip is kept with the run.)
 #' @param gbif_outputname Basename (no `.csv` extension) for the output file,
 #'   used only when `output_dir` is supplied. Default `"GBIF_Species"`.
 #' @param kingdom Kingdom used by [resolve_taxa()] to disambiguate the query
@@ -52,7 +65,7 @@
 #'   count does not cost extra downloads against GBIF's concurrent-download
 #'   limit), completeness is the sensible default. The only cost is a second
 #'   WoRMS family walk during preparation. A phylum guard prevents stray
-#'   family-name collisions from adding off-target taxa. Set FALSE to skip the
+#'   family-name collisions from pulling in unrelated taxa. Set FALSE to skip the
 #'   family walk for a faster, order-only (~97%) preparation.
 #' @param existing_download Reuse an already-finished GBIF download instead of
 #'   submitting a new one: a GBIF download **key** string (e.g.
@@ -67,9 +80,13 @@
 #' Common troubleshooting section of the README for known issues
 #' (Osteichthyes not recognized, occasional timeouts, etc.).
 #'
-#' @return Invisibly, a data.frame with `Species` and `Source` columns.
-#'   Writes `<output_dir>/<gbif_outputname>.csv` only when `output_dir` is
-#'   supplied.
+#' @return Invisibly, a data.frame with `Species` and `Source` columns. The
+#'   GBIF download key and citation are attached as `attr(result,
+#'   "gbif_download")` (a one-row data.frame: `download_key`, `doi`, `created`,
+#'   `format`, `citation`) -- **keep this for your methods section and to reuse
+#'   the download** (pass `download_key` back via `existing_download =`). It is
+#'   also printed to the console and, when `output_dir` is supplied, written to
+#'   `<gbif_outputname>_download_info.txt`.
 #'
 #' @examples
 #' \dontrun{
@@ -98,8 +115,14 @@ GBIF_download <- function(obis_taxa = NULL,
                           gbif_descend_to = "order",
                           gbif_fill_families = TRUE,
                           output_dir = NULL,
+                          download_dir = NULL,
                           existing_download = NULL
     ) {
+  # Where rgbif drops the occurrence .zip. Default keeps it out of the working
+  # directory: the chosen output_dir if given, else a temp dir (CRAN-safe).
+  zip_dir <- if (!is.null(download_dir)) download_dir
+             else if (!is.null(output_dir)) output_dir else tempdir()
+  dir.create(zip_dir, recursive = TRUE, showWarnings = FALSE)
  if (is.null(existing_download)) {
   if (is.null(obis_taxa) || is.null(regional_poly))
     stop("GBIF_download() needs `obis_taxa` and `regional_poly` to submit a ",
@@ -123,98 +146,21 @@ GBIF_download <- function(obis_taxa = NULL,
   #Find list of Classes within 
   #Worms (World Register of Marine Species)
   
-  # Validate + disambiguate query taxa to unambiguous WoRMS AphiaIDs. Replaces
-  # the old per-name wm_name2id() call, which errored (206 Partial Content) on
-  # ambiguous names like "Vertebrata". check_gbif = TRUE also gives us each
-  # taxon's direct GBIF backbone key (reliable for Mammalia, Aves, ...).
-  resolved <- resolve_taxa(query_taxa, kingdom = kingdom, check_gbif = TRUE)
+  # Validate + disambiguate query taxa AND resolve their GBIF backbone keys in
+  # one call: resolve_taxa() returns, per taxon, an unambiguous WoRMS AphiaID
+  # plus `gbif_keys` -- the taxon's own backbone key when usable, otherwise the
+  # keys reached by walking WoRMS down to orders/families (the fix for broad
+  # nodes GBIF lacks a usable key for: ray-finned fish, Crustacea, Vertebrata).
+  resolved <- resolve_taxa(query_taxa, kingdom = kingdom, check_gbif = TRUE,
+                           gbif_descend_to = gbif_descend_to,
+                           gbif_fill_families = gbif_fill_families)
   message("GBIF query resolved to: ",
           paste0(resolved$valid_name, " (AphiaID ", resolved$aphia_id, ")",
                  collapse = "; "))
 
-  # GBIF backbone keys are assembled from up to three sources, kept small and
-  # fast while still complete:
-  #  (1) DIRECT: each resolved taxon's own backbone key (resolve_taxa's
-  #      gbif_key) -- reliable for taxa GBIF has as nodes (Mammalia, Aves,
-  #      Elasmobranchii).
-  #  (2) PRIMARY descent (default `gbif_descend_to = "order"`): keys for the
-  #      taxon's descendants at that rank. This is the fix for ray-finned fish
-  #      -- GBIF's backbone skips the class rank for them (bony fish hang under
-  #      phylum Chordata with NO class node), so a class-level match drops every
-  #      fish; descending to ORDER hits a rank GBIF populates. Order is fast
-  #      (tens of keys) and reaches ~97% of fish families, because GBIF files
-  #      most modern-order fish under its broad `Perciformes`, which is matched.
-  #  (3) GAP-FILL families (`gbif_fill_families = TRUE`): for the ~3% of fish
-  #      families whose GBIF parent order is NOT in the matched primary set
-  #      (GBIF gives them no order, etc.), add just those family keys. This
-  #      lifts coverage to ~98% while adding only a handful of keys -- far
-  #      cheaper than descending everything to family (~10x the keys, a much
-  #      slower download, and GBIF throttles concurrent downloads).
-  direct_keys <- resolved$gbif_key[!is.na(resolved$gbif_key)]
-
-  # Only taxa WITHOUT a usable direct GBIF key need descending. A taxon GBIF
-  # has as a node -- sharks/rays under class Elasmobranchii (key 121), Mammalia
-  # (359), Aves (212) -- is fully covered by that ONE key, so we skip the
-  # redundant order/family walk for it. Bony fish have no usable class node, so
-  # they fall through to the order descent below.
-  descend_ids <- resolved$aphia_id[is.na(resolved$gbif_key)]
-  if (length(descend_ids) < nrow(resolved)) {
-    message(nrow(resolved) - length(descend_ids), " taxon/taxa covered by a ",
-            "single direct GBIF key (no descent needed): ",
-            paste(resolved$valid_name[!is.na(resolved$gbif_key)], collapse = ", "))
-  }
-
-  # Walk the taxa that need descending down to a rank; return unique names.
-  .walk <- function(rank) {
-    acc <- c()
-    for (id in descend_ids) {
-      d <- tryCatch(
-        taxize::worms_downstream(id = id, downto = rank),
-        error = function(e) NULL)   # tolerate taxize rank-walk failures per taxon
-      if (!is.null(d) && nrow(d) > 0) acc <- rbind(acc, d)
-    }
-    if (is.null(acc)) character(0) else unique(acc$name)
-  }
-
-  # (2) Primary descent.
-  print(paste0("Getting WoRMS downstream ", gbif_descend_to, "s"))
-  primary_names <- .walk(gbif_descend_to)
-  classnameno   <- length(primary_names)
-  primary_keys  <- integer(0)
-  valid_phyla   <- character(0)
-  if (length(primary_names) > 0) {
-    bbp          <- rgbif::name_backbone_checklist(primary_names)
-    keep         <- bbp$matchType != "NONE"
-    primary_keys <- bbp$usageKey[keep]
-    if ("phylum" %in% names(bbp)) valid_phyla <- unique(stats::na.omit(bbp$phylum[keep]))
-  }
-
-  # (3) Gap-fill families not reached by the primary nodes (skip if already
-  # descending to family). Guarded by phylum so a stray family-name collision
-  # (e.g. a WoRMS fish-family name that matches a GBIF mollusc family) can't
-  # drag in off-target taxa.
-  fill_keys <- integer(0)
-  if (isTRUE(gbif_fill_families) && gbif_descend_to != "family") {
-    fam_names <- .walk("family")
-    if (length(fam_names) > 0) {
-      bbf        <- rgbif::name_backbone_checklist(fam_names)
-      bbf        <- bbf[bbf$matchType != "NONE", , drop = FALSE]
-      parent_col <- paste0(gbif_descend_to, "Key")
-      covered    <- if (parent_col %in% names(bbf)) bbf[[parent_col]] %in% primary_keys else FALSE
-      covered[is.na(covered)] <- FALSE
-      in_phylum  <- if (length(valid_phyla) && "phylum" %in% names(bbf))
-                      bbf$phylum %in% valid_phyla else TRUE
-      fill_keys  <- bbf$usageKey[!covered & in_phylum]
-      if (length(fill_keys) > 0) {
-        message("Gap-fill: added ", length(fill_keys), " GBIF family key(s) for taxa ",
-                "not under a matched ", gbif_descend_to,
-                " (e.g. families GBIF gives no order). Set gbif_fill_families = ",
-                "FALSE to skip, or gbif_descend_to = \"family\" for full family descent.")
-      }
-    }
-  }
-
-  backbone_keys <- unique(c(direct_keys, primary_keys, fill_keys))
+  ntaxa         <- nrow(resolved)
+  backbone_keys <- unique(unlist(resolved$gbif_keys, use.names = FALSE))
+  backbone_keys <- backbone_keys[!is.na(backbone_keys)]
   print("GBIF backbone keys:")
   print(backbone_keys)
   backbonekeyno <- length(backbone_keys)
@@ -259,20 +205,57 @@ GBIF_download <- function(obis_taxa = NULL,
   
   ##### Import and get the species list ####
   
-  GBIF_list <- rgbif::occ_download_get(download_id) %>%
+  GBIF_list <- rgbif::occ_download_get(download_id, path = zip_dir,
+                                       overwrite = TRUE) %>%
     rgbif::occ_download_import()
-  
+
   print("Download Complete")
-  
+
   # Reprint key info because the download status messages clogged the console
-  print("Taxa walked downstream:")
-  print(primary_names)
   print("GBIF backbone keys:")
   print(backbone_keys)
+
+  # --- Capture the citation/provenance the user must keep ------------------
+  # rgbif stamps the full GBIF citation onto the occ_download object; the DOI
+  # and timestamp come from the final metadata. This is the reproducibility
+  # record (and the reuse key), so we return it rather than only printing it.
+  final_meta  <- rgbif::occ_download_meta(key = download_id)
+  # The DOI is often blank on the submission object but populated in the final
+  # metadata; take the first non-empty of the two. (rgbif stamps doi/citation/
+  # created as attributes on the occ_download object -- see print.occ_download.)
+  pick <- function(...) {
+    for (v in list(...))
+      if (!is.null(v) && length(v) == 1 && !is.na(v) && nzchar(v)) return(v)
+    NA_character_
+  }
+  dl_doi      <- pick(final_meta$doi, attr(download, "doi"))
+  dl_created  <- pick(as.character(final_meta$created), attr(download, "created"))
+  dl_citation <- attr(download, "citation")
+  if (is.null(dl_citation) || !nzchar(dl_citation))
+    dl_citation <- paste0("GBIF Occurrence Download https://www.gbif.org/",
+                          "occurrence/download/", download_id,
+                          " accessed from R via rgbif")
+  gbif_info <- data.frame(
+    download_key = download_id, doi = dl_doi, created = dl_created,
+    format = "SPECIES_LIST", citation = dl_citation, stringsAsFactors = FALSE)
  } else {
    message("Reusing existing GBIF occ_download (no new request submitted).")
-   GBIF_list <- rgbif::occ_download_get(existing_download) %>%
+   GBIF_list <- rgbif::occ_download_get(existing_download, path = zip_dir,
+                                        overwrite = TRUE) %>%
      rgbif::occ_download_import()
+   reuse_key <- as.character(existing_download)[1]
+   rm_meta   <- tryCatch(rgbif::occ_download_meta(key = reuse_key),
+                         error = function(e) NULL)
+   gbif_info <- data.frame(
+     download_key = reuse_key,
+     doi     = if (!is.null(rm_meta$doi)) rm_meta$doi else NA_character_,
+     created = if (!is.null(rm_meta$created)) as.character(rm_meta$created) else NA_character_,
+     format  = "SPECIES_LIST",
+     citation = if (!is.null(rm_meta$doi))
+                  paste0("GBIF Occurrence Download ", rm_meta$doi,
+                         " accessed from R via rgbif")
+                else NA_character_,
+     stringsAsFactors = FALSE)
  }
   
   
@@ -323,12 +306,39 @@ GBIF_download <- function(obis_taxa = NULL,
     out_path <- file.path(output_dir, paste0(gbif_outputname, ".csv"))
     utils::write.csv(GBIF_species, out_path, row.names = FALSE)
     message("GBIF species list written to ", out_path)
+    # Persist the citation/provenance alongside the data (opt-in via output_dir).
+    info_path <- file.path(output_dir, paste0(gbif_outputname, "_download_info.txt"))
+    writeLines(c(
+      "GBIF download -- cite this in your paper.",
+      "GBIF citation guidelines: https://www.gbif.org/citation-guidelines",
+      "",
+      paste0("Download key: ", gbif_info$download_key),
+      paste0("DOI: ",          gbif_info$doi),
+      paste0("Created: ",      gbif_info$created),
+      "Citation:",
+      gbif_info$citation), info_path)
+    message("GBIF download info (key + citation) written to ", info_path)
   }
 
   # The backbone-key summary only exists on the fresh-download path.
   if (is.null(existing_download))
-    message(backbonekeyno, " backbone keys found out of ", classnameno, " classes in list")
+    message(backbonekeyno, " GBIF backbone key(s) resolved for ", ntaxa, " query taxon/taxa")
+
+  # Surface the citation/key prominently -- it scrolls past in the status pings,
+  # and the user needs it for their methods section and to reuse the download.
+  message("")
+  message("=== GBIF download info -- SAVE THIS (needed for your paper) ===")
+  message("  Download key : ", gbif_info$download_key)
+  message("                 reuse without re-downloading via ",
+          'GBIF = "', gbif_info$download_key, '" (or existing_download=).')
+  if (!is.na(gbif_info$doi)) message("  DOI          : ", gbif_info$doi)
+  message("  Citation     : ", gbif_info$citation)
+  message('  Also on the result: attr(<result>, "gbif_download")')
+  message("==============================================================")
+  message("")
+
   message("GBIF download complete (", nrow(GBIF_species), " species).")
+  attr(GBIF_species, "gbif_download") <- gbif_info
   invisible(GBIF_species)
 }
 

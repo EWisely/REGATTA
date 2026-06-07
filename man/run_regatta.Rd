@@ -7,8 +7,11 @@
 run_regatta(
   input,
   checklist,
-  out_dir = NULL,
-  sql_path = "accessionTaxa.sql",
+  out_dir,
+  region,
+  label,
+  sql_path = .regatta_default_sql_path(),
+  overwrite_taxonomy_files = FALSE,
   id_col = "ASV_id",
   Local_advantage = TRUE
 )
@@ -18,7 +21,7 @@ run_regatta(
 \itemize{
 \item a single file path (single-DB workflow);
 \item a length-2 character vector of vsearch \code{lca} + \code{userout} paths
-(single-DB workflow using the LCA-correct taxonomy);
+(single-DB workflow using the LCA-resolved taxonomy);
 \item a folder path (the function scans the folder -- see Details for the
 convention);
 \item \code{list(global = ..., local = ...)} for an explicit two-DB workflow
@@ -28,13 +31,31 @@ where each entry is a single path or a length-2 vsearch pair.
 \item{checklist}{Path to a taxonomized regional checklist (\code{.rds} or
 \code{.csv}), or a data.frame with the 7 rank columns.}
 
-\item{out_dir}{Output directory. Default \code{NULL} returns the results
-without writing anything; supply a directory to also write the per-stage
-CSV triples, the 21-row summary, and \code{run_log.txt} there (created if
-missing).}
+\item{out_dir}{\strong{Required.} Output directory. Each run writes into its own
+dated \verb{<region>_<label>_<Date>} subfolder of it, so successive runs don't
+pile up. That subfolder gets the per-stage CSV triples, the 21-row summary,
+and \code{run_log.txt}. The results list is also returned.}
 
-\item{sql_path}{Path to the local \code{accessionTaxa.sql} taxonomizr DB
-(used for obitools / BestTaxon input shapes).}
+\item{region, label}{\strong{Required.} Region and taxon-group labels for this run.
+REGATTA filters/adjusts the taxonomy against the regional checklist built
+for that region x group, so the run is labeled by them -- pass the same
+values you gave \code{\link[=build_regional_checklist]{build_regional_checklist()}}. They name the dated run
+subfolder \verb{<region>_<label>_<Date>}.}
+
+\item{sql_path}{Path to the local \code{accessionTaxa.sql} taxonomizr DB, used to
+resolve obitools / BestTaxon input and to taxonomize a raw \code{checklist}.
+Defaults to the same persistent per-user cache as
+\code{\link[=build_regional_checklist]{build_regional_checklist()}} (\code{tools::R_user_dir("REGATTA", "cache")}). If
+it is missing when needed, REGATTA prompts to build it (interactive) or
+errors with the build command (non-interactive) unless
+\code{overwrite_taxonomy_files = TRUE}. Pre-resolved input (vsearch) and a
+pre-taxonomized \code{checklist} need no DB. (Note: accession-based input would
+need the full \code{taxonomizr} build with \code{accession2taxid}; the auto-build is
+names+nodes only.)}
+
+\item{overwrite_taxonomy_files}{If \code{TRUE}, (re)build the taxonomy DB at
+\code{sql_path} even if one exists. Default \code{FALSE}. See
+\code{\link[=build_regional_checklist]{build_regional_checklist()}}.}
 
 \item{id_col}{Name of the per-ASV identifier column. Default
 \code{"ASV_id"} (matches the obitools and vsearch preprocessors). For
@@ -52,8 +73,8 @@ when one exists, since only that path collapses long tables.}
 }
 \value{
 Invisibly a list with the final tables and the
-\code{\link[=summarize_regatta]{summarize_regatta()}} data.frame. Writes CSV outputs and \code{run_log.txt}
-under \code{out_dir} only when \code{out_dir} is supplied.
+\code{\link[=summarize_regatta]{summarize_regatta()}} data.frame. Always also writes the CSV outputs and
+\code{run_log.txt} into the dated run subfolder of \code{out_dir}.
 }
 \description{
 One-call wrapper around \code{\link[=reconcile_global_local]{reconcile_global_local()}}, \code{\link[=reconcile_checklist]{reconcile_checklist()}},

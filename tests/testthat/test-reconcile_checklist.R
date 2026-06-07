@@ -51,7 +51,7 @@ test_that("multi-rank downgrade (ASV_3) lands at order", {
   expect_equal(result$result$order[3], "Clupeiformes")
 })
 
-test_that("fully off-target (ASV_5) ends all-NA", {
+test_that("no-regional-record (ASV_5) ends all-NA", {
   expect_true(is.na(result$result$domain[5]))
   expect_true(is.na(result$result$species[5]))
 })
@@ -69,5 +69,5 @@ test_that("$tracking carries regatta_match_rank + before/after", {
 test_that("$stats has expected counts", {
   expect_equal(result$stats$count[result$stats$metric == "total ASVs"], 6)
   expect_equal(result$stats$count[result$stats$metric == "matched at species"], 2)
-  expect_equal(result$stats$count[result$stats$metric == "not matched (off-target)"], 1)
+  expect_equal(result$stats$count[result$stats$metric == "not matched (no regional record)"], 1)
 })

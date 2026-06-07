@@ -26,7 +26,8 @@ test_that("run_regatta dispatches a vsearch lca+userout pair through to the chec
     species = "Sebastes mystinus", stringsAsFactors = FALSE)
 
   res <- suppressMessages(suppressWarnings(
-    run_regatta(input = c(lca, uo), checklist = checklist, out_dir = out)
+    run_regatta(input = c(lca, uo), checklist = checklist, out_dir = out,
+                region = "testreg", label = "fish")
   ))
 
   # ASV_1 on the checklist -> kept at species; ASV_2 species off, genus on
@@ -39,15 +40,30 @@ test_that("run_regatta dispatches a vsearch lca+userout pair through to the chec
   # 21-row summary returned
   expect_equal(nrow(res$summary), 21L)
 
-  # output bundle written under out_dir
-  expect_true(file.exists(file.path(out, "regatta_summary.csv")))
-  expect_true(file.exists(file.path(out, "run_log.txt")))
-  expect_true(file.exists(file.path(out, "reconcile_checklist",
+  # output bundle written under a dated run subfolder of out_dir
+  run <- file.path(out, paste0("testreg_fish_", Sys.Date()))
+  expect_true(dir.exists(run))
+  expect_true(file.exists(file.path(run, "regatta_summary.csv")))
+  expect_true(file.exists(file.path(run, "run_log.txt")))
+  expect_true(file.exists(file.path(run, "reconcile_checklist",
                                     "reconcile_checklist_taxonomy_table.csv")))
 })
 
 test_that("run_regatta rejects an unsupported checklist argument", {
   expect_error(
-    suppressMessages(run_regatta(input = "x.tab", checklist = 42)),
+    suppressMessages(run_regatta(input = "x.tab", checklist = 42,
+                                 out_dir = tempfile(),
+                                 region = "r", label = "l")),
     "checklist must be")
+})
+
+test_that("run_regatta requires out_dir, region, and label", {
+  expect_error(
+    suppressMessages(run_regatta(input = "x.tab", checklist = 42,
+                                 region = "r", label = "l")),
+    "out_dir")
+  expect_error(
+    suppressMessages(run_regatta(input = "x.tab", checklist = 42,
+                                 out_dir = tempfile(), label = "l")),
+    "region")
 })

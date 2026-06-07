@@ -60,13 +60,14 @@ res <- run_regatta(
     local  = c("MiFish_vsearch_lca.txt",            # vsearch LCA taxonomy
                "MiFish_vsearch_userout.txt")        # vsearch %ID
   ),
-  checklist = cl$checklist,                          # from build_regional_checklist()
-  sql_path  = "/path/to/accessionTaxa.sql"
-  # out_dir = "regatta_out"                          # uncomment to also write the bundle
+  checklist = cl$for_LCA,                            # from build_regional_checklist()
+  out_dir   = "regatta_out",                         # REQUIRED: dated run subfolder
+  region    = "galapagos", label = "fish"            # name the run subfolder
+  # sql_path defaults to the cache; pass a path to override.
 )
-#> returns res$reconciled, res$post_checklist, res$summary.
-#> with out_dir set, also writes reconcile_global_local/*, reconcile_checklist/*,
-#> regatta_summary.csv, run_log.txt
+#> returns res$reconciled, res$post_checklist, res$summary, and writes
+#> reconcile_global_local/*, reconcile_checklist/*, regatta_summary.csv,
+#> run_log.txt into regatta_out/galapagos_fish_<date>/
 ```
 
 On the full dataset, of the 1,438 ASVs, 892 were unassigned by both
@@ -79,7 +80,7 @@ classifiers and 546 were assigned by at least one. Stage 1 resolved those:
 | global downgraded to global∩local LCA | 45 |
 
 and Stage 2 (checklist) then gave 295 species / 231 genus / 19 family / 1 order
-/ 892 off-target — versus the main tutorial's single-classifier obitools run
+/ 892 with no regional record — versus the main tutorial's single-classifier obitools run
 (287 species). Those extra species-level calls are the local database's
 contribution.
 

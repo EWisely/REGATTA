@@ -163,12 +163,14 @@
 #' Read a classifier file or vsearch pair into a tax table (internal)
 #' @keywords internal
 #' @noRd
-.regatta_read_input <- function(paths, sql_path, id_col = "ASV_id") {
+.regatta_read_input <- function(paths, sql_path, id_col = "ASV_id",
+                                overwrite_taxonomy_files = FALSE) {
   if (length(paths) == 1) {
     fmt <- .regatta_detect_format(paths)
     if (fmt == "obitools_tab") {
       raw <- utils::read.delim(paths, sep = "\t", check.names = FALSE,
                                stringsAsFactors = FALSE)
+      .regatta_require_taxonomy_db(sql_path, overwrite_taxonomy_files)
       tax <- resolve_taxids(raw, taxid_col = "TAXID", sql_path = sql_path)
       tax$pct_id <- suppressWarnings(as.numeric(raw$BEST_IDENTITY))
       names(tax)[names(tax) == "ID"] <- "ASV_id"
@@ -201,6 +203,7 @@
                   nrow(raw), " unique ASVs (by ", id_col, ").")
         }
       }
+      .regatta_require_taxonomy_db(sql_path, overwrite_taxonomy_files)
       tax <- resolve_names(raw, name_col = "BestTaxon", sql_path = sql_path)
       return(list(table = .regatta_ensure_id_col(tax, id_col), format = fmt))
     }
@@ -237,19 +240,35 @@
 #' @param input One of:
 #'   * a single file path (single-DB workflow);
 #'   * a length-2 character vector of vsearch `lca` + `userout` paths
-#'     (single-DB workflow using the LCA-correct taxonomy);
+#'     (single-DB workflow using the LCA-resolved taxonomy);
 #'   * a folder path (the function scans the folder -- see Details for the
 #'     convention);
 #'   * `list(global = ..., local = ...)` for an explicit two-DB workflow
 #'     where each entry is a single path or a length-2 vsearch pair.
 #' @param checklist Path to a taxonomized regional checklist (`.rds` or
 #'   `.csv`), or a data.frame with the 7 rank columns.
-#' @param out_dir Output directory. Default `NULL` returns the results
-#'   without writing anything; supply a directory to also write the per-stage
-#'   CSV triples, the 21-row summary, and `run_log.txt` there (created if
-#'   missing).
-#' @param sql_path Path to the local `accessionTaxa.sql` taxonomizr DB
-#'   (used for obitools / BestTaxon input shapes).
+#' @param out_dir **Required.** Output directory. Each run writes into its own
+#'   dated `<region>_<label>_<Date>` subfolder of it, so successive runs don't
+#'   pile up. That subfolder gets the per-stage CSV triples, the 21-row summary,
+#'   and `run_log.txt`. The results list is also returned.
+#' @param region,label **Required.** Region and taxon-group labels for this run.
+#'   REGATTA filters/adjusts the taxonomy against the regional checklist built
+#'   for that region x group, so the run is labeled by them -- pass the same
+#'   values you gave [build_regional_checklist()]. They name the dated run
+#'   subfolder `<region>_<label>_<Date>`.
+#' @param sql_path Path to the local `accessionTaxa.sql` taxonomizr DB, used to
+#'   resolve obitools / BestTaxon input and to taxonomize a raw `checklist`.
+#'   Defaults to the same persistent per-user cache as
+#'   [build_regional_checklist()] (`tools::R_user_dir("REGATTA", "cache")`). If
+#'   it is missing when needed, REGATTA prompts to build it (interactive) or
+#'   errors with the build command (non-interactive) unless
+#'   `overwrite_taxonomy_files = TRUE`. Pre-resolved input (vsearch) and a
+#'   pre-taxonomized `checklist` need no DB. (Note: accession-based input would
+#'   need the full `taxonomizr` build with `accession2taxid`; the auto-build is
+#'   names+nodes only.)
+#' @param overwrite_taxonomy_files If `TRUE`, (re)build the taxonomy DB at
+#'   `sql_path` even if one exists. Default `FALSE`. See
+#'   [build_regional_checklist()].
 #' @param id_col Name of the per-ASV identifier column. Default
 #'   `"ASV_id"` (matches the obitools and vsearch preprocessors). For
 #'   BestTaxon/Kraken2-style CSVs whose identifier is named differently
@@ -280,24 +299,41 @@
 #' }
 #'
 #' @return Invisibly a list with the final tables and the
-#'   [summarize_regatta()] data.frame. Writes CSV outputs and `run_log.txt`
-#'   under `out_dir` only when `out_dir` is supplied.
+#'   [summarize_regatta()] data.frame. Always also writes the CSV outputs and
+#'   `run_log.txt` into the dated run subfolder of `out_dir`.
 #'
 #' @importFrom utils read.csv read.delim write.csv
 #' @export
 run_regatta <- function(input,
                         checklist,
-                        out_dir         = NULL,
-                        sql_path        = "accessionTaxa.sql",
+                        out_dir,
+                        region,
+                        label,
+                        sql_path        = .regatta_default_sql_path(),
+                        overwrite_taxonomy_files = FALSE,
                         id_col          = "ASV_id",
                         Local_advantage = TRUE) {
   t_start <- Sys.time()
+  if (missing(region) || missing(label) ||
+      !is.character(region) || !is.character(label) ||
+      length(region) != 1 || length(label) != 1 ||
+      !nzchar(trimws(region)) || !nzchar(trimws(label)))
+    stop("Provide a non-empty `region` and `label`. REGATTA filters/adjusts ",
+         "the taxonomy against the regional checklist built for that ",
+         "region x group, so the run is labeled by them. e.g. ",
+         'region = "galapagos", label = "fish".')
+  if (missing(out_dir) || is.null(out_dir) || !is.character(out_dir) ||
+      length(out_dir) != 1 || !nzchar(trimws(out_dir)))
+    stop("`out_dir` is required: give a directory to write the run outputs ",
+         'into, e.g. out_dir = "regatta_out". Outputs land in a dated ',
+         "<region>_<label>_<Date> subfolder of it.")
   norm <- .regatta_normalize_input(input)
 
-  # out_dir = NULL: return results only, write nothing. Supply a directory to
-  # also persist the per-stage CSV triples + summary + run_log there.
-  if (!is.null(out_dir)) dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
-  .sub <- function(name) if (is.null(out_dir)) NULL else file.path(out_dir, name)
+  # Each run lands in its own dated <region>_<label>_<Date> subfolder.
+  run_dir <- file.path(out_dir,
+                       paste0(trimws(region), "_", trimws(label), "_", Sys.Date()))
+  dir.create(run_dir, recursive = TRUE, showWarnings = FALSE)
+  .sub <- function(name) file.path(run_dir, name)
 
   if (is.character(checklist) && length(checklist) == 1) {
     cl <- if (grepl("\\.rds$", checklist, ignore.case = TRUE)) readRDS(checklist)
@@ -309,9 +345,9 @@ run_regatta <- function(input,
   }
   # If a raw (un-taxonomized) checklist was supplied, taxonomize it now with a
   # warning; a pre-taxonomized checklist passes through unchanged.
-  cl <- .regatta_ensure_taxonomized(cl, sql_path)
+  cl <- .regatta_ensure_taxonomized(cl, sql_path, overwrite_taxonomy_files)
 
-  dest <- if (is.null(out_dir)) "(return only; no files written)" else normalizePath(out_dir)
+  dest <- normalizePath(run_dir)
   log_lines <- c(
     paste0("REGATTA run started: ", format(t_start)),
     paste0("Workflow: ", norm$role),
@@ -320,10 +356,12 @@ run_regatta <- function(input,
   message("REGATTA: ", norm$role, " workflow -> ", dest)
 
   if (norm$role == "two-DB") {
-    g <- .regatta_read_input(norm$global, sql_path, id_col = id_col)
+    g <- .regatta_read_input(norm$global, sql_path, id_col = id_col,
+                             overwrite_taxonomy_files = overwrite_taxonomy_files)
     log_lines <- c(log_lines, paste0("global (", g$format, "): ",
                                      nrow(g$table), " ASVs"))
-    l <- .regatta_read_input(norm$local, sql_path, id_col = id_col)
+    l <- .regatta_read_input(norm$local, sql_path, id_col = id_col,
+                             overwrite_taxonomy_files = overwrite_taxonomy_files)
     log_lines <- c(log_lines, paste0("local  (", l$format, "): ",
                                      nrow(l$table), " ASVs"))
 
@@ -345,7 +383,8 @@ run_regatta <- function(input,
     result <- list(global_tax = g$table, local_tax = l$table,
                    reconciled = rec, post_checklist = post, summary = summ)
   } else {
-    c1 <- .regatta_read_input(norm$classifier[[1]], sql_path, id_col = id_col)
+    c1 <- .regatta_read_input(norm$classifier[[1]], sql_path, id_col = id_col,
+                              overwrite_taxonomy_files = overwrite_taxonomy_files)
     log_lines <- c(log_lines, paste0("classifier (", c1$format, "): ",
                                      nrow(c1$table), " ASVs"))
     post <- reconcile_checklist(
@@ -361,12 +400,10 @@ run_regatta <- function(input,
 
   log_lines <- c(log_lines,
                  paste0("Total elapsed: ", format(Sys.time() - t_start)))
-  if (!is.null(out_dir)) {
-    utils::write.csv(summ, file.path(out_dir, "regatta_summary.csv"),
-                     row.names = FALSE)
-    writeLines(log_lines, file.path(out_dir, "run_log.txt"))
-    message("Wrote ", normalizePath(file.path(out_dir, "regatta_summary.csv")))
-  }
+  utils::write.csv(summ, file.path(run_dir, "regatta_summary.csv"),
+                   row.names = FALSE)
+  writeLines(log_lines, file.path(run_dir, "run_log.txt"))
+  message("Wrote run outputs to ", normalizePath(run_dir))
 
   invisible(result)
 }
