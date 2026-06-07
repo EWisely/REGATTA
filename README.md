@@ -176,21 +176,20 @@ asynchronous `occ_download` that **takes several minutes** while GBIF assembles
 it server-side.
 
 **Taxonomy database.** Taxonomizing needs a local NCBI snapshot built by
-`taxonomizr`. `build_regional_checklist()` does **not** taxonomize by default
-(`sql_path = NULL` → it returns an un-taxonomized name list and defers the
-lookup); pass a `sql_path` there only if you want it done up front. The LCA
-steps that *do* need it — `run_regatta()` / `reconcile_checklist()` — default
-`sql_path` to a **persistent per-user cache** (`tools::R_user_dir("REGATTA","cache")`),
-shared across projects/sessions, and build only the lightweight names+nodes (~a
-few hundred MB, a few minutes — not the multi-GB accession data). When a needed
-DB is missing they prompt to build it (interactively) or, in a script, error
-with the one-line build command unless `overwrite_taxonomy_files = TRUE`. The
-cache is a **snapshot** of NCBI taxonomy and is never rebuilt silently (for
+`taxonomizr`. `build_regional_checklist()`, `run_regatta()`, and
+`reconcile_checklist()` default `sql_path` to a **persistent per-user cache**
+(`tools::R_user_dir("REGATTA","cache")`), shared across projects/sessions, and
+build only the lightweight names+nodes (~a few hundred MB, a few minutes — not
+the multi-GB accession data) on first use. **Override** it by pointing
+`sql_path` at an existing DB you already have. When a needed DB is missing they
+prompt to build it (interactively) or, in a script, error with the one-line
+build command unless `overwrite_taxonomy_files = TRUE`. The cache is a
+**snapshot** of NCBI taxonomy and is never rebuilt silently (for
 reproducibility) — its build date is reported and recorded in `cl$methods`;
-`overwrite_taxonomy_files = TRUE` refreshes it in place. Point `sql_path` at your
-own DB to use it instead. (Accession-based input to `run_regatta()` is the only
-path that needs the full `taxonomizr::prepareDatabase()` build with
-`accession2taxid`.)
+`overwrite_taxonomy_files = TRUE` refreshes it in place. (Set `sql_path = NULL`
+in `build_regional_checklist()` to skip taxonomizing there and defer it to
+`run_regatta()`. Accession-based input to `run_regatta()` is the only path that
+needs the full `taxonomizr::prepareDatabase()` build with `accession2taxid`.)
 
 **Draw your polygon** at [wktmap.com](https://wktmap.com) and copy the WKT
 `POLYGON ((long lat, long lat, ...))` string for the `regional_poly`
@@ -224,11 +223,11 @@ cl <- build_regional_checklist(
   CSV           = NULL,          # optional: path(s) to YOUR local checklist CSV(s),
                                  # ideally a citable published list (for reproducibility)
   marine        = TRUE, terrestrial = FALSE,
-  output_dir    = "my_checklists",  # REQUIRED: outputs go in a dated
+  output_dir    = "my_checklists"   # REQUIRED: outputs go in a dated
                                     # <region>_<label>_<date> subfolder here
-  sql_path      = NULL           # default NULL = skip taxonomizing now (deferred to
-                                 # run_regatta). Give a DB path to taxonomize here;
-                                 # overwrite_taxonomy_files = TRUE refreshes a stale one.
+  # sql_path defaults to a persistent per-user cache, built on first use;
+  # override it with a path to an existing DB. overwrite_taxonomy_files = TRUE
+  # refreshes a stale one; sql_path = NULL skips taxonomizing (defer to run_regatta).
 )
 # cl$for_making_localdb     bare vector of unique species names; write one-per-line
 #                           for a reference-DB builder like CRABS:
@@ -276,7 +275,7 @@ groups side-by-side in one project without naming collisions.
 | `resolve_taxa()` | Validate & disambiguate query taxon names against WoRMS (by kingdom); report GBIF backbone coverage. Run standalone to pre-check names. |
 | `GBIF_download()` | Pull a GBIF species list inside a WKT polygon for given taxa. |
 | `OBIS_download()` | Pull an OBIS species list, with optional marine/brackish/freshwater filters. |
-| `build_regional_checklist()` | **Checklist-building entry point.** Runs OBIS (default) and/or GBIF (off by default; `TRUE` for a fresh download or a key/object to reuse one), folds in any local `Genus`+`Species` CSVs (optional, default `NULL`; prefer a citable list), optionally taxonomizes the LCA list, and **returns** `for_making_localdb` (a bare vector of unique species names, for a reference-DB builder), `checklist_summary` (the full taxonomized table with per-name resolution status), and `for_LCA` (`taxID` + the 7 ranks, ready for the LCA step), plus `methods` and (when `GBIF = TRUE`) `GBIF_download_citation`. **`output_dir` is required** — outputs go in a dated `<region>_<label>_<date>` subfolder. `sql_path` defaults to `NULL` (skip taxonomizing here; deferred to `run_regatta()`); give a DB path to do it up front. A fresh `GBIF = TRUE` download takes several minutes and needs GBIF account credentials in `~/.Renviron`. |
+| `build_regional_checklist()` | **Checklist-building entry point.** Runs OBIS (default) and/or GBIF (off by default; `TRUE` for a fresh download or a key/object to reuse one), folds in any local `Genus`+`Species` CSVs (optional, default `NULL`; prefer a citable list), optionally taxonomizes the LCA list, and **returns** `for_making_localdb` (a bare vector of unique species names, for a reference-DB builder), `checklist_summary` (the full taxonomized table with per-name resolution status), and `for_LCA` (`taxID` + the 7 ranks, ready for the LCA step), plus `methods` and (when `GBIF = TRUE`) `GBIF_download_citation`. **`output_dir` is required** — outputs go in a dated `<region>_<label>_<date>` subfolder. `sql_path` defaults to a persistent per-user cache (built on first use, overridable with an existing DB path); `sql_path = NULL` skips taxonomizing here. A fresh `GBIF = TRUE` download takes several minutes and needs GBIF account credentials in `~/.Renviron`. |
 | `taxonomize_checklist()` | Resolve a regional list to a 7-rank NCBI taxonomy table (synonym-aware). Runs **in the background** from `build_regional_checklist()`; `reconcile_checklist()`/`run_regatta()` also taxonomize on the fly (with a warning) if handed a raw checklist. Call directly only for inspection/caching. |
 | `parse_sintax()` | Convert vsearch SINTAX taxonomy strings to 7 rank columns. |
 | `parse_vsearch_results()` | Canonical vsearch preprocessor: join a vsearch `lca` (taxonomy) + `--userout` (pct_id) by ASV id. |

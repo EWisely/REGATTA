@@ -17,7 +17,7 @@ build_regional_checklist(
   terrestrial = FALSE,
   brackish = NA,
   output_dir,
-  sql_path = NULL,
+  sql_path = .regatta_default_sql_path(),
   overwrite_taxonomy_files = FALSE,
   kingdom = "Animalia",
   gbif_fill_families = TRUE
@@ -70,16 +70,16 @@ don't rebuild them): \verb{comprehensive_<region>_<label>_list_for_making_locald
 are also returned.}
 
 \item{sql_path}{Path to the local \code{accessionTaxa.sql} taxonomizr DB used to
-taxonomize the LCA list. \strong{Default \code{NULL} skips taxonomization} here
-(\code{for_LCA} is returned as a name list and \code{checklist_summary} is \code{NULL});
-it is deferred to the reconcile step (\code{\link[=run_regatta]{run_regatta()}} /
-\code{\link[=reconcile_checklist]{reconcile_checklist()}}), which taxonomize using their own cached DB. Pass
-a path to taxonomize now -- e.g. an existing DB, or the shared cache
-\code{file.path(tools::R_user_dir("REGATTA", "cache"), "accessionTaxa.sql")}. If
-the given path is missing, REGATTA prompts to build it (interactive) or
-errors with the one-line build command (non-interactive) unless
-\code{overwrite_taxonomy_files = TRUE}. Only names+nodes are needed here, so the
-build uses \code{taxonomizr::prepareDatabase(getAccessions = FALSE)}.}
+taxonomize the LCA list. Defaults to a persistent per-user cache
+(\code{tools::R_user_dir("REGATTA", "cache")}), shared across projects and
+sessions and built on first use. \strong{Override it} by pointing \code{sql_path} at
+an existing DB (e.g. one you already downloaded). If the chosen path is
+missing, REGATTA prompts to build it (interactive) or errors with the
+one-line build command (non-interactive) unless
+\code{overwrite_taxonomy_files = TRUE}. Set \code{sql_path = NULL} to skip
+taxonomization entirely and defer it to the reconcile step. Only
+names+nodes are needed here, so the build uses
+\code{taxonomizr::prepareDatabase(getAccessions = FALSE)} (a few hundred MB).}
 
 \item{overwrite_taxonomy_files}{If \code{TRUE}, (re)build the taxonomy DB at
 \code{sql_path} even if one exists -- the way to refresh a stale cached snapshot
