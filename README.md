@@ -203,11 +203,13 @@ cl <- build_regional_checklist(
   marine        = TRUE, terrestrial = FALSE,
   sql_path      = "/path/to/accessionTaxa.sql"
 )
-# cl$for_making_localdb  bare vector of unique species names; write one-per-line
-#                        for a reference-DB builder like CRABS:
-#                        writeLines(cl$for_making_localdb, "fish_for_crabs.txt")
-# cl$checklist_summary   full taxonomized table with per-name resolution status (audit)
-# cl$for_LCA             taxID + the 7 ranks, ready for run_regatta(checklist = cl$for_LCA)
+# cl$for_making_localdb     bare vector of unique species names; write one-per-line
+#                           for a reference-DB builder like CRABS:
+#                           writeLines(cl$for_making_localdb, "fish_for_crabs.txt")
+# cl$checklist_summary      full taxonomized table with per-name resolution status (audit)
+# cl$for_LCA                taxID + the 7 ranks, ready for run_regatta(checklist = cl$for_LCA)
+# cl$methods                methods/provenance sentence with live citations (verify them)
+# cl$GBIF_download_citation only when GBIF = TRUE: the download key + GBIF citation
 ```
 
 > **GBIF (`GBIF = TRUE`) takes several minutes** — it submits an `occ_download`
@@ -216,6 +218,11 @@ cl <- build_regional_checklist(
 > [gbif.org](https://www.gbif.org/user/profile), then add `GBIF_USER`, `GBIF_PWD`,
 > and `GBIF_EMAIL` to your `~/.Renviron` (`usethis::edit_r_environ()`, then restart
 > R). Reuse a finished download by passing its key/object to `GBIF =`.
+>
+> A fresh `GBIF = TRUE` download returns its **citation + DOI** on
+> `cl$GBIF_download_citation` (cite it in your paper). `cl$methods` gives a
+> ready-to-adapt methods sentence with all the source citations pulled live —
+> always verify them against your reference manager.
 
 ## Per-taxonomic-group separation
 

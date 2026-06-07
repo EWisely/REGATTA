@@ -23,9 +23,15 @@
 #'     genus-level entries retained), cleaned and ready to hand straight to
 #'     [run_regatta()] / [reconcile_checklist()]. When no database is available
 #'     this is the un-taxonomized name list, deferred to the reconcile step.
-#'   \item `gbif_download` -- when a GBIF download ran, the download key + GBIF
-#'     citation (`NULL` otherwise). **Keep it for your paper** and to reuse the
-#'     download via `GBIF = <download_key>`.
+#'   \item `methods` -- a ready-to-adapt methods/provenance sentence naming the
+#'     sources used, the date, the polygon, and the citations to include.
+#'     Package citations are pulled live from [utils::citation()] and the GBIF
+#'     line uses the download's own DOI -- nothing is invented; verify against
+#'     your reference manager.
+#'   \item `GBIF_download_citation` -- **only when `GBIF = TRUE`** (a fresh
+#'     download): the download key + GBIF citation (one-row data.frame).
+#'     `NULL` otherwise. Keep it for your paper and to reuse the download via
+#'     `GBIF = <download_key>`.
 #' }
 #' Nothing is written to disk unless you pass `output_dir`; then the outputs are
 #' saved there, named from `region` and `label`.
@@ -74,9 +80,10 @@
 #'   of unique species binomials, for a reference-database builder),
 #'   `checklist_summary` (the full taxonomized table with per-name resolution
 #'   status, or `NULL` if no DB was available), `for_LCA` (`taxID` + the 7
-#'   ranks, ready for the LCA step), and `gbif_download` (the GBIF download
-#'   key + citation when a GBIF download ran, else `NULL`). Pass `for_LCA`
-#'   straight to [run_regatta()] / [reconcile_checklist()].
+#'   ranks, ready for the LCA step), `methods` (a citations-included provenance
+#'   sentence), and `GBIF_download_citation` (the GBIF download key + citation,
+#'   only when `GBIF = TRUE`, else `NULL`). Pass `for_LCA` straight to
+#'   [run_regatta()] / [reconcile_checklist()].
 #'
 #' @examples
 #' \dontrun{
@@ -134,7 +141,8 @@ build_regional_checklist <- function(region,
                              stringsAsFactors = FALSE)
   species_rows <- empty   # binomials: OBIS/GBIF + local non-"sp." rows
   genus_rows   <- empty   # genus-only: local "Genus / sp." rows
-  gbif_download_info <- NULL  # GBIF citation/key, when a GBIF download runs
+  gbif_citation <- NULL   # set ONLY for a fresh GBIF = TRUE download
+  sources_used  <- character(0)  # which sources actually contributed, for cl$methods
 
   # --- OBIS source (uses the function's return value, not a written file) --
   if (isTRUE(OBIS)) {
@@ -143,8 +151,10 @@ build_regional_checklist <- function(region,
                             marine = marine, freshwater = freshwater,
                             terrestrial = terrestrial, brackish = brackish)
     species_rows <- unique(rbind(species_rows, obis_df[, cols, drop = FALSE]))
+    sources_used <- c(sources_used, "OBIS")
   } else if (is.character(OBIS)) {
     species_rows <- unique(rbind(species_rows, .regatta_read_source_csv(OBIS, "OBIS")))
+    sources_used <- c(sources_used, "OBIS")
   }
 
   # --- GBIF source --------------------------------------------------------
@@ -153,14 +163,16 @@ build_regional_checklist <- function(region,
       gbif_df <- GBIF_download(obis_taxa = taxa, regional_poly = regional_poly,
                               output_dir = NULL, kingdom = kingdom,
                               gbif_fill_families = gbif_fill_families)
+      # The citation/key is surfaced only for a fresh download (GBIF = TRUE).
+      gbif_citation <- attr(gbif_df, "gbif_download")
     } else if (is.character(GBIF) && length(GBIF) == 1 &&
                (grepl("\\.csv$", GBIF, ignore.case = TRUE) || file.exists(GBIF))) {
       gbif_df <- .regatta_read_source_csv(GBIF, "GBIF")          # pre-made CSV
     } else {
       gbif_df <- GBIF_download(existing_download = GBIF, output_dir = NULL)
     }
-    gbif_download_info <- attr(gbif_df, "gbif_download")  # NULL for a pre-made CSV
     species_rows <- unique(rbind(species_rows, gbif_df[, cols, drop = FALSE]))
+    sources_used <- c(sources_used, "GBIF")
   }
 
   # --- Local CSV(s) -------------------------------------------------------
@@ -185,6 +197,7 @@ build_regional_checklist <- function(region,
           Species = trimws(gen$Genus),
           Source  = "Local_csv", stringsAsFactors = FALSE)))
     }
+    sources_used <- c(sources_used, "a local CSV checklist")
   }
 
   if (nrow(species_rows) == 0 && nrow(genus_rows) == 0)
@@ -222,6 +235,9 @@ build_regional_checklist <- function(region,
   }
   lca_taxonomized <- all(ranks %in% names(for_LCA))
 
+  # --- Methods sentence (real citations only -- pulled live, never invented) -
+  methods <- .regatta_methods(sources_used, regional_poly, gbif_citation)
+
   # --- Write only when an output directory is given -----------------------
   if (!is.null(output_dir)) {
     dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
@@ -239,24 +255,70 @@ build_regional_checklist <- function(region,
       readr::write_delim(for_LCA,
                          file.path(output_dir, paste0(stem, "_for_LCA.txt")),
                          delim = "\t")
-    if (!is.null(gbif_download_info))
+    writeLines(methods, file.path(output_dir, paste0(stem, "_methods.txt")))
+    if (!is.null(gbif_citation))
       writeLines(c(
         "GBIF download -- cite this in your paper.",
         "GBIF citation guidelines: https://www.gbif.org/citation-guidelines",
         "",
-        paste0("Download key: ", gbif_download_info$download_key),
-        paste0("DOI: ",          gbif_download_info$doi),
-        paste0("Created: ",      gbif_download_info$created),
+        paste0("Download key: ", gbif_citation$download_key),
+        paste0("DOI: ",          gbif_citation$doi),
+        paste0("Created: ",      gbif_citation$created),
         "Citation:",
-        gbif_download_info$citation),
+        gbif_citation$citation),
         file.path(output_dir, paste0(stem, "_GBIF_download_info.txt")))
     message("Wrote checklist files to ", output_dir)
   }
 
-  invisible(list(for_making_localdb = for_making_localdb,
-                 checklist_summary  = checklist_summary,
-                 for_LCA            = for_LCA,
-                 gbif_download      = gbif_download_info))
+  invisible(list(for_making_localdb     = for_making_localdb,
+                 checklist_summary      = checklist_summary,
+                 for_LCA                = for_LCA,
+                 methods                = methods,
+                 GBIF_download_citation = gbif_citation))
+}
+
+# Assemble the methods/provenance sentence. CITATIONS ARE REAL: R-package
+# citations are pulled live from citation() (the maintainer-supplied entry),
+# the GBIF database citation is the DOI GBIF minted for this exact download,
+# and nothing is hardcoded as a fabricated author/year/DOI. Where a citation
+# cannot be pulled (package not installed, OBIS has no machine citation) the
+# string says so and points the user to the canonical source to fill in.
+.regatta_methods <- function(sources_used, regional_poly, gbif_citation) {
+  today <- as.character(Sys.Date())
+  src   <- if (length(sources_used)) paste(sources_used, collapse = ", ") else "the supplied sources"
+
+  cite_pkg <- function(p) tryCatch(
+    trimws(gsub("\\s+", " ",
+                paste(format(utils::citation(p), style = "text"), collapse = " "))),
+    error = function(e)
+      paste0("the '", p, "' R package (run citation(\"", p, "\") to get the citation)"))
+
+  refs <- c(paste0("REGATTA: ", cite_pkg("REGATTA")))
+  if ("OBIS" %in% sources_used) {
+    refs <- c(refs, paste0("robis (OBIS R client): ", cite_pkg("robis")))
+    refs <- c(refs, paste0("OBIS database: cite per https://obis.org/ ",
+                           "(Ocean Biodiversity Information System), accessed ", today))
+  }
+  if ("GBIF" %in% sources_used) {
+    refs <- c(refs, paste0("rgbif (GBIF R client): ", cite_pkg("rgbif")))
+    gbif_ref <- if (!is.null(gbif_citation) && !is.na(gbif_citation$citation))
+      gbif_citation$citation
+    else
+      paste0("GBIF download: cite the download DOI per ",
+             "https://www.gbif.org/citation-guidelines, accessed ", today)
+    refs <- c(refs, paste0("GBIF database download: ", gbif_ref))
+  }
+
+  poly_phrase <- if (is.null(regional_poly))
+    "The region was defined by the polygon(s) in the supplied source files."
+  else
+    paste0("The region was defined by the WKT polygon encompassing ", regional_poly, ".")
+
+  paste0(
+    "The regional species checklist was built from ", src, " on ", today,
+    " using the R package REGATTA. ", poly_phrase,
+    " Please cite the following (verify against your reference manager): ",
+    paste(refs, collapse = " | "))
 }
 
 # FALSE / NULL / NA all mean "this source is off". A non-FALSE value (TRUE, a
