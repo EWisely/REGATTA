@@ -65,7 +65,9 @@ family walk for a faster, order-only (~97\%) preparation.}
 
 \item{output_dir}{Optional directory to write the result into. Default
 \code{NULL} writes nothing (the function just returns the data); supply a
-directory to also save \verb{<output_dir>/<gbif_outputname>.csv}.}
+directory to also save \verb{<output_dir>/<gbif_outputname>.csv} and
+\verb{<output_dir>/<gbif_outputname>_download_info.txt} (the download key +
+GBIF citation).}
 
 \item{existing_download}{Reuse an already-finished GBIF download instead of
 submitting a new one: a GBIF download \strong{key} string (e.g.
@@ -74,9 +76,12 @@ the function skips taxon resolution and submission and just imports that
 download, so \code{obis_taxa} / \code{regional_poly} are not needed. Default \code{NULL}.}
 }
 \value{
-Invisibly, a data.frame with \code{Species} and \code{Source} columns.
-Writes \verb{<output_dir>/<gbif_outputname>.csv} only when \code{output_dir} is
-supplied.
+Invisibly, a data.frame with \code{Species} and \code{Source} columns. The
+GBIF download key and citation are attached as \code{attr(result, "gbif_download")} (a one-row data.frame: \code{download_key}, \code{doi}, \code{created},
+\code{format}, \code{citation}) -- \strong{keep this for your methods section and to reuse
+the download} (pass \code{download_key} back via \verb{existing_download =}). It is
+also printed to the console and, when \code{output_dir} is supplied, written to
+\verb{<gbif_outputname>_download_info.txt}.
 }
 \description{
 Resolves the given high-level taxa via WoRMS, finds GBIF backbone

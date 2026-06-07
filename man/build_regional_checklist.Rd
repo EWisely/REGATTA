@@ -74,9 +74,10 @@ taxa in the downloaders. Default \code{"Animalia"}.}
 Invisibly, a list with \code{for_making_localdb} (a bare character vector
 of unique species binomials, for a reference-database builder),
 \code{checklist_summary} (the full taxonomized table with per-name resolution
-status, or \code{NULL} if no DB was available), and \code{for_LCA} (\code{taxID} + the 7
-ranks, ready for the LCA step). Pass \code{for_LCA} straight to \code{\link[=run_regatta]{run_regatta()}}
-/ \code{\link[=reconcile_checklist]{reconcile_checklist()}}.
+status, or \code{NULL} if no DB was available), \code{for_LCA} (\code{taxID} + the 7
+ranks, ready for the LCA step), and \code{gbif_download} (the GBIF download
+key + citation when a GBIF download ran, else \code{NULL}). Pass \code{for_LCA}
+straight to \code{\link[=run_regatta]{run_regatta()}} / \code{\link[=reconcile_checklist]{reconcile_checklist()}}.
 }
 \description{
 The basic entry point for the checklist-building stage. Pulls regional
@@ -95,6 +96,9 @@ name resolved (scientific name / synonym / unresolved). The audit view.
 genus-level entries retained), cleaned and ready to hand straight to
 \code{\link[=run_regatta]{run_regatta()}} / \code{\link[=reconcile_checklist]{reconcile_checklist()}}. When no database is available
 this is the un-taxonomized name list, deferred to the reconcile step.
+\item \code{gbif_download} -- when a GBIF download ran, the download key + GBIF
+citation (\code{NULL} otherwise). \strong{Keep it for your paper} and to reuse the
+download via \verb{GBIF = <download_key>}.
 }
 Nothing is written to disk unless you pass \code{output_dir}; then the outputs are
 saved there, named from \code{region} and \code{label}.

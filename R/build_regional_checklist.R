@@ -23,6 +23,9 @@
 #'     genus-level entries retained), cleaned and ready to hand straight to
 #'     [run_regatta()] / [reconcile_checklist()]. When no database is available
 #'     this is the un-taxonomized name list, deferred to the reconcile step.
+#'   \item `gbif_download` -- when a GBIF download ran, the download key + GBIF
+#'     citation (`NULL` otherwise). **Keep it for your paper** and to reuse the
+#'     download via `GBIF = <download_key>`.
 #' }
 #' Nothing is written to disk unless you pass `output_dir`; then the outputs are
 #' saved there, named from `region` and `label`.
@@ -70,9 +73,10 @@
 #' @return Invisibly, a list with `for_making_localdb` (a bare character vector
 #'   of unique species binomials, for a reference-database builder),
 #'   `checklist_summary` (the full taxonomized table with per-name resolution
-#'   status, or `NULL` if no DB was available), and `for_LCA` (`taxID` + the 7
-#'   ranks, ready for the LCA step). Pass `for_LCA` straight to [run_regatta()]
-#'   / [reconcile_checklist()].
+#'   status, or `NULL` if no DB was available), `for_LCA` (`taxID` + the 7
+#'   ranks, ready for the LCA step), and `gbif_download` (the GBIF download
+#'   key + citation when a GBIF download ran, else `NULL`). Pass `for_LCA`
+#'   straight to [run_regatta()] / [reconcile_checklist()].
 #'
 #' @examples
 #' \dontrun{
@@ -130,6 +134,7 @@ build_regional_checklist <- function(region,
                              stringsAsFactors = FALSE)
   species_rows <- empty   # binomials: OBIS/GBIF + local non-"sp." rows
   genus_rows   <- empty   # genus-only: local "Genus / sp." rows
+  gbif_download_info <- NULL  # GBIF citation/key, when a GBIF download runs
 
   # --- OBIS source (uses the function's return value, not a written file) --
   if (isTRUE(OBIS)) {
@@ -154,6 +159,7 @@ build_regional_checklist <- function(region,
     } else {
       gbif_df <- GBIF_download(existing_download = GBIF, output_dir = NULL)
     }
+    gbif_download_info <- attr(gbif_df, "gbif_download")  # NULL for a pre-made CSV
     species_rows <- unique(rbind(species_rows, gbif_df[, cols, drop = FALSE]))
   }
 
@@ -233,12 +239,24 @@ build_regional_checklist <- function(region,
       readr::write_delim(for_LCA,
                          file.path(output_dir, paste0(stem, "_for_LCA.txt")),
                          delim = "\t")
+    if (!is.null(gbif_download_info))
+      writeLines(c(
+        "GBIF download -- cite this in your paper.",
+        "GBIF citation guidelines: https://www.gbif.org/citation-guidelines",
+        "",
+        paste0("Download key: ", gbif_download_info$download_key),
+        paste0("DOI: ",          gbif_download_info$doi),
+        paste0("Created: ",      gbif_download_info$created),
+        "Citation:",
+        gbif_download_info$citation),
+        file.path(output_dir, paste0(stem, "_GBIF_download_info.txt")))
     message("Wrote checklist files to ", output_dir)
   }
 
   invisible(list(for_making_localdb = for_making_localdb,
                  checklist_summary  = checklist_summary,
-                 for_LCA            = for_LCA))
+                 for_LCA            = for_LCA,
+                 gbif_download      = gbif_download_info))
 }
 
 # FALSE / NULL / NA all mean "this source is off". A non-FALSE value (TRUE, a

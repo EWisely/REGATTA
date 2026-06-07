@@ -34,7 +34,9 @@
 #'   [wktmap.com](https://wktmap.com) and copy the generated polygon.
 #' @param output_dir Optional directory to write the result into. Default
 #'   `NULL` writes nothing (the function just returns the data); supply a
-#'   directory to also save `<output_dir>/<gbif_outputname>.csv`.
+#'   directory to also save `<output_dir>/<gbif_outputname>.csv` and
+#'   `<output_dir>/<gbif_outputname>_download_info.txt` (the download key +
+#'   GBIF citation).
 #' @param gbif_outputname Basename (no `.csv` extension) for the output file,
 #'   used only when `output_dir` is supplied. Default `"GBIF_Species"`.
 #' @param kingdom Kingdom used by [resolve_taxa()] to disambiguate the query
@@ -74,9 +76,13 @@
 #' Common troubleshooting section of the README for known issues
 #' (Osteichthyes not recognized, occasional timeouts, etc.).
 #'
-#' @return Invisibly, a data.frame with `Species` and `Source` columns.
-#'   Writes `<output_dir>/<gbif_outputname>.csv` only when `output_dir` is
-#'   supplied.
+#' @return Invisibly, a data.frame with `Species` and `Source` columns. The
+#'   GBIF download key and citation are attached as `attr(result,
+#'   "gbif_download")` (a one-row data.frame: `download_key`, `doi`, `created`,
+#'   `format`, `citation`) -- **keep this for your methods section and to reuse
+#'   the download** (pass `download_key` back via `existing_download =`). It is
+#'   also printed to the console and, when `output_dir` is supplied, written to
+#'   `<gbif_outputname>_download_info.txt`.
 #'
 #' @examples
 #' \dontrun{
@@ -197,10 +203,47 @@ GBIF_download <- function(obis_taxa = NULL,
   # Reprint key info because the download status messages clogged the console
   print("GBIF backbone keys:")
   print(backbone_keys)
+
+  # --- Capture the citation/provenance the user must keep ------------------
+  # rgbif stamps the full GBIF citation onto the occ_download object; the DOI
+  # and timestamp come from the final metadata. This is the reproducibility
+  # record (and the reuse key), so we return it rather than only printing it.
+  final_meta  <- rgbif::occ_download_meta(key = download_id)
+  # The DOI is often blank on the submission object but populated in the final
+  # metadata; take the first non-empty of the two. (rgbif stamps doi/citation/
+  # created as attributes on the occ_download object -- see print.occ_download.)
+  pick <- function(...) {
+    for (v in list(...))
+      if (!is.null(v) && length(v) == 1 && !is.na(v) && nzchar(v)) return(v)
+    NA_character_
+  }
+  dl_doi      <- pick(final_meta$doi, attr(download, "doi"))
+  dl_created  <- pick(as.character(final_meta$created), attr(download, "created"))
+  dl_citation <- attr(download, "citation")
+  if (is.null(dl_citation) || !nzchar(dl_citation))
+    dl_citation <- paste0("GBIF Occurrence Download https://www.gbif.org/",
+                          "occurrence/download/", download_id,
+                          " accessed from R via rgbif")
+  gbif_info <- data.frame(
+    download_key = download_id, doi = dl_doi, created = dl_created,
+    format = "SPECIES_LIST", citation = dl_citation, stringsAsFactors = FALSE)
  } else {
    message("Reusing existing GBIF occ_download (no new request submitted).")
    GBIF_list <- rgbif::occ_download_get(existing_download) %>%
      rgbif::occ_download_import()
+   reuse_key <- as.character(existing_download)[1]
+   rm_meta   <- tryCatch(rgbif::occ_download_meta(key = reuse_key),
+                         error = function(e) NULL)
+   gbif_info <- data.frame(
+     download_key = reuse_key,
+     doi     = if (!is.null(rm_meta$doi)) rm_meta$doi else NA_character_,
+     created = if (!is.null(rm_meta$created)) as.character(rm_meta$created) else NA_character_,
+     format  = "SPECIES_LIST",
+     citation = if (!is.null(rm_meta$doi))
+                  paste0("GBIF Occurrence Download ", rm_meta$doi,
+                         " accessed from R via rgbif")
+                else NA_character_,
+     stringsAsFactors = FALSE)
  }
   
   
@@ -251,12 +294,39 @@ GBIF_download <- function(obis_taxa = NULL,
     out_path <- file.path(output_dir, paste0(gbif_outputname, ".csv"))
     utils::write.csv(GBIF_species, out_path, row.names = FALSE)
     message("GBIF species list written to ", out_path)
+    # Persist the citation/provenance alongside the data (opt-in via output_dir).
+    info_path <- file.path(output_dir, paste0(gbif_outputname, "_download_info.txt"))
+    writeLines(c(
+      "GBIF download -- cite this in your paper.",
+      "GBIF citation guidelines: https://www.gbif.org/citation-guidelines",
+      "",
+      paste0("Download key: ", gbif_info$download_key),
+      paste0("DOI: ",          gbif_info$doi),
+      paste0("Created: ",      gbif_info$created),
+      "Citation:",
+      gbif_info$citation), info_path)
+    message("GBIF download info (key + citation) written to ", info_path)
   }
 
   # The backbone-key summary only exists on the fresh-download path.
   if (is.null(existing_download))
     message(backbonekeyno, " GBIF backbone key(s) resolved for ", ntaxa, " query taxon/taxa")
+
+  # Surface the citation/key prominently -- it scrolls past in the status pings,
+  # and the user needs it for their methods section and to reuse the download.
+  message("")
+  message("=== GBIF download info -- SAVE THIS (needed for your paper) ===")
+  message("  Download key : ", gbif_info$download_key)
+  message("                 reuse without re-downloading via ",
+          'GBIF = "', gbif_info$download_key, '" (or existing_download=).')
+  if (!is.na(gbif_info$doi)) message("  DOI          : ", gbif_info$doi)
+  message("  Citation     : ", gbif_info$citation)
+  message('  Also on the result: attr(<result>, "gbif_download")')
+  message("==============================================================")
+  message("")
+
   message("GBIF download complete (", nrow(GBIF_species), " species).")
+  attr(GBIF_species, "gbif_download") <- gbif_info
   invisible(GBIF_species)
 }
 
