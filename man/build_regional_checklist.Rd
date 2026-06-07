@@ -71,25 +71,26 @@ taxa in the downloaders. Default \code{"Animalia"}.}
 }
 \value{
 Invisibly, a list with \code{for_making_localdb} (species-only
-data.frame), \code{for_LCA} (data.frame with retained genus-level entries),
-and \code{checklist} (the taxonomized LCA list, or \code{NULL} if no DB was
-available). Pass \code{checklist} straight to \code{\link[=run_regatta]{run_regatta()}} /
-\code{\link[=reconcile_checklist]{reconcile_checklist()}}.
+data.frame, for a reference-database builder) and \code{for_LCA} (the checklist
+for the LCA step, retaining genus-level entries; taxonomized when a DB was
+available, otherwise a name list). Pass \code{for_LCA} straight to
+\code{\link[=run_regatta]{run_regatta()}} / \code{\link[=reconcile_checklist]{reconcile_checklist()}}.
 }
 \description{
 The basic entry point for the checklist-building stage. Pulls regional
 species records from OBIS and/or GBIF (or reuses pre-made sources), folds
 in any local \code{Genus}+\code{Species} CSVs, deduplicates, taxonomizes the LCA
 list (when a \code{taxonomizr} database is available), and \strong{returns} the
-results. Two species lists are produced:
+results. Two outputs are produced:
 \itemize{
-\item \code{for_making_localdb} -- species binomials only, for a
+\item \code{for_making_localdb} -- species binomials only; feed to a
 reference-database builder (e.g. CRABS).
-\item \code{for_LCA} -- those binomials \strong{plus} any retained genus-level
-entries, the input to the checklist LCA.
+\item \code{for_LCA} -- the checklist for the LCA step: it retains genus-level
+entries and is taxonomized (ready to hand straight to \code{\link[=run_regatta]{run_regatta()}} /
+\code{\link[=reconcile_checklist]{reconcile_checklist()}}) when a \code{taxonomizr} database is available.
 }
 Nothing is written to disk unless you pass \code{output_dir}; then the two
-lists and the taxonomized checklist are saved there, named from \code{region}
+outputs are saved there, named from \code{region}
 and \code{label}.
 }
 \details{
@@ -107,7 +108,7 @@ cl <- build_regional_checklist(
   regional_poly = "POLYGON ((-92 2, -89 2, -89 -2, -92 -2, -92 2))",
   CSV           = "~/other_project/galapagos_fish_checklist.csv"
 )
-run_regatta(input = "MiFish_obitools.tab", checklist = cl$checklist,
+run_regatta(input = "MiFish_obitools.tab", checklist = cl$for_LCA,
             sql_path = "/path/to/accessionTaxa.sql")
 
 # Persist the lists to a directory of your choosing:

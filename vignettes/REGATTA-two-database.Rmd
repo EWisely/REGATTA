@@ -60,7 +60,7 @@ res <- run_regatta(
     local  = c("MiFish_vsearch_lca.txt",            # vsearch LCA taxonomy
                "MiFish_vsearch_userout.txt")        # vsearch %ID
   ),
-  checklist = cl$checklist,                          # from build_regional_checklist()
+  checklist = cl$for_LCA,                            # from build_regional_checklist()
   sql_path  = "/path/to/accessionTaxa.sql"
   # out_dir = "regatta_out"                          # uncomment to also write the bundle
 )

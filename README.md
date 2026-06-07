@@ -193,13 +193,13 @@ cl <- build_regional_checklist(
   regional_poly = poly,
   OBIS          = TRUE,          # primary source (default)
   GBIF          = FALSE,         # off by default; TRUE = fresh download, or a key/object to reuse one
-  CSV           = "~/other_project/Tirado-Sanchez_Galapagos_Pisces.csv",
+  CSV           = "checklist_sources/2016Aug24_Tirado-Sanchez_et_al_Galapagos_Pisces_Checklist.csv",
   marine        = TRUE, terrestrial = FALSE,
   sql_path      = "/path/to/accessionTaxa.sql"
 )
-# cl$for_making_localdb  species-only list (-> a reference-DB builder like CRABS)
-# cl$for_LCA             + retained genus-level entries
-# cl$checklist           taxonomized, ready for run_regatta(checklist = cl$checklist)
+# cl$for_making_localdb  species-only list (Feed to a reference-DB builder like CRABS)
+# cl$for_LCA             the checklist for the LCA step -- retains genus-level
+#                        entries and is taxonomized: run_regatta(checklist = cl$for_LCA)
 ```
 
 ## Per-taxonomic-group separation

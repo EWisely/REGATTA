@@ -117,11 +117,11 @@ cl <- build_regional_checklist(
 `build_regional_checklist()` **returns** a list, writing nothing unless you
 pass `output_dir`:
 
-* `cl$for_making_localdb` — species binomials only, for a reference-database
+* `cl$for_making_localdb` — species binomials only; feed to a reference-database
   builder (e.g. CRABS).
-* `cl$for_LCA` — those plus any retained genus-level entries.
-* `cl$checklist` — the taxonomized LCA list (when `sql_path` pointed at a
-  `taxonomizr` database), ready to hand straight to `run_regatta()`.
+* `cl$for_LCA` — the checklist for the LCA step: it retains genus-level entries
+  and is taxonomized (when `sql_path` pointed at a `taxonomizr` database), ready
+  to hand straight to `run_regatta(checklist = cl$for_LCA)`.
 
 ---
 
@@ -153,17 +153,17 @@ checklist <- taxonomize_checklist(
 classifier file into a corrected, audited taxonomy table — you don't wire the
 preprocessing, reconciliation, and reporting steps together yourself.
 
-**How:** point `run_regatta()` at your results file and the taxonomized
-checklist from the previous step (`cl$checklist`). It detects the format (here
-an obitools `.tab`, recognized by its `TAXID` column), resolves the taxIDs to
-lineages, runs the checklist LCA, and **returns** the corrected table + summary.
-(You can also pass the raw `cl$for_LCA` — `run_regatta()` will warn and
-taxonomize it on the fly.)
+**How:** point `run_regatta()` at your results file and the checklist from the
+previous step (`cl$for_LCA`). It detects the format (here an obitools `.tab`,
+recognized by its `TAXID` column), resolves the taxIDs to lineages, runs the
+checklist LCA, and **returns** the corrected table + summary. (If `cl$for_LCA`
+wasn't taxonomized — no DB at build time — `run_regatta()` warns and
+taxonomizes it on the fly.)
 
 ```{r run, eval = FALSE}
 res <- run_regatta(
   input     = "MiFish_obitools.tab",   # obitools .tab (global DB)
-  checklist = cl$checklist,            # from build_regional_checklist() above
+  checklist = cl$for_LCA,              # from build_regional_checklist() above
   sql_path  = "/path/to/accessionTaxa.sql"
   # out_dir = "regatta_out"            # uncomment to also write the output bundle
 )

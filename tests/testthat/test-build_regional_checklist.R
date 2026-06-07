@@ -20,10 +20,11 @@ test_that("CSV source splits genus-only from species in the returned lists", {
   expect_setequal(res$for_making_localdb$Species,
                   c("Lutjanus argentiventris", "Sebastes mystinus"))
   expect_false("Caranx" %in% res$for_making_localdb$Species)
-  # LCA list: + the retained bare genus
+  # LCA list: + the retained bare genus. No DB -> for_LCA is the raw name list
+  # (Species/Source), not a taxonomized rank table.
   expect_true("Caranx" %in% res$for_LCA$Species)
-  # no DB -> not taxonomized
-  expect_null(res$checklist)
+  expect_false("genus" %in% names(res$for_LCA))
+  expect_null(res$checklist)            # the separate $checklist element is gone
 })
 
 test_that("nothing is written to the working directory by default", {
@@ -75,7 +76,7 @@ test_that("a fresh download requires taxa and regional_poly", {
                "taxa.*regional_poly|regional_poly")
 })
 
-test_that("background taxonomize populates $checklist when a DB is present", {
+test_that("for_LCA is taxonomized when a DB is present", {
   skip_on_cran()
   sql <- Sys.getenv("REGATTA_TAXONOMIZR_SQL", "accessionTaxa.sql")
   skip_if(!file.exists(sql), "taxonomizr DB not available")
@@ -86,9 +87,10 @@ test_that("background taxonomize populates $checklist when a DB is present", {
   res <- suppressMessages(build_regional_checklist(
     region = "r", label = "l", OBIS = FALSE, CSV = csv, sql_path = sql))
 
-  expect_false(is.null(res$checklist))
-  expect_true(all(c("genus", "species") %in% names(res$checklist)))
-  expect_equal(res$checklist$genus[res$checklist$input_name == "Lutjanus argentiventris"],
+  # for_LCA is now the taxonomized checklist itself (no separate $checklist)
+  expect_null(res$checklist)
+  expect_true(all(c("genus", "species") %in% names(res$for_LCA)))
+  expect_equal(res$for_LCA$genus[res$for_LCA$input_name == "Lutjanus argentiventris"],
                "Lutjanus")
 })
 
