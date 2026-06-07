@@ -37,6 +37,10 @@
 #'   directory to also save `<output_dir>/<gbif_outputname>.csv` and
 #'   `<output_dir>/<gbif_outputname>_download_info.txt` (the download key +
 #'   GBIF citation).
+#' @param download_dir Directory the GBIF occurrence `.zip` is downloaded into.
+#'   Default `NULL` keeps it out of the working directory: it uses `output_dir`
+#'   if supplied, otherwise a session temp dir. (`build_regional_checklist()`
+#'   passes its dated run directory so the zip is kept with the run.)
 #' @param gbif_outputname Basename (no `.csv` extension) for the output file,
 #'   used only when `output_dir` is supplied. Default `"GBIF_Species"`.
 #' @param kingdom Kingdom used by [resolve_taxa()] to disambiguate the query
@@ -111,8 +115,14 @@ GBIF_download <- function(obis_taxa = NULL,
                           gbif_descend_to = "order",
                           gbif_fill_families = TRUE,
                           output_dir = NULL,
+                          download_dir = NULL,
                           existing_download = NULL
     ) {
+  # Where rgbif drops the occurrence .zip. Default keeps it out of the working
+  # directory: the chosen output_dir if given, else a temp dir (CRAN-safe).
+  zip_dir <- if (!is.null(download_dir)) download_dir
+             else if (!is.null(output_dir)) output_dir else tempdir()
+  dir.create(zip_dir, recursive = TRUE, showWarnings = FALSE)
  if (is.null(existing_download)) {
   if (is.null(obis_taxa) || is.null(regional_poly))
     stop("GBIF_download() needs `obis_taxa` and `regional_poly` to submit a ",
@@ -195,9 +205,10 @@ GBIF_download <- function(obis_taxa = NULL,
   
   ##### Import and get the species list ####
   
-  GBIF_list <- rgbif::occ_download_get(download_id) %>%
+  GBIF_list <- rgbif::occ_download_get(download_id, path = zip_dir,
+                                       overwrite = TRUE) %>%
     rgbif::occ_download_import()
-  
+
   print("Download Complete")
 
   # Reprint key info because the download status messages clogged the console
@@ -229,7 +240,8 @@ GBIF_download <- function(obis_taxa = NULL,
     format = "SPECIES_LIST", citation = dl_citation, stringsAsFactors = FALSE)
  } else {
    message("Reusing existing GBIF occ_download (no new request submitted).")
-   GBIF_list <- rgbif::occ_download_get(existing_download) %>%
+   GBIF_list <- rgbif::occ_download_get(existing_download, path = zip_dir,
+                                        overwrite = TRUE) %>%
      rgbif::occ_download_import()
    reuse_key <- as.character(existing_download)[1]
    rm_meta   <- tryCatch(rgbif::occ_download_meta(key = reuse_key),

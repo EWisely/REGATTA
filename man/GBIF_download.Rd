@@ -13,6 +13,7 @@ GBIF_download(
   gbif_descend_to = "order",
   gbif_fill_families = TRUE,
   output_dir = NULL,
+  download_dir = NULL,
   existing_download = NULL
 )
 }
@@ -68,6 +69,11 @@ family walk for a faster, order-only (~97\%) preparation.}
 directory to also save \verb{<output_dir>/<gbif_outputname>.csv} and
 \verb{<output_dir>/<gbif_outputname>_download_info.txt} (the download key +
 GBIF citation).}
+
+\item{download_dir}{Directory the GBIF occurrence \code{.zip} is downloaded into.
+Default \code{NULL} keeps it out of the working directory: it uses \code{output_dir}
+if supplied, otherwise a session temp dir. (\code{build_regional_checklist()}
+passes its dated run directory so the zip is kept with the run.)}
 
 \item{existing_download}{Reuse an already-finished GBIF download instead of
 submitting a new one: a GBIF download \strong{key} string (e.g.

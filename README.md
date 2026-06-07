@@ -219,7 +219,8 @@ cl <- build_regional_checklist(
   GBIF          = FALSE,         # off by default; TRUE = fresh download, or a key/object to reuse one
   CSV           = "checklist_sources/2016Aug24_Tirado-Sanchez_et_al_Galapagos_Pisces_Checklist.csv",
   marine        = TRUE, terrestrial = FALSE,
-  output_dir    = "my_checklists"   # REQUIRED: outputs are written here
+  output_dir    = "my_checklists"   # REQUIRED: outputs go in a dated
+                                    # <region>_<label>_<date> subfolder here
   # sql_path defaults to a persistent per-user cache, built on first use;
   # overwrite_taxonomy_files = TRUE to refresh it; sql_path = NULL to skip it.
 )

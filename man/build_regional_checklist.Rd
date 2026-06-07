@@ -56,12 +56,15 @@ entry goes into \code{for_LCA} only, never \code{for_making_localdb}.}
 to \code{\link[=OBIS_download]{OBIS_download()}}. Defaults keep marine plus anadromous/catadromous
 species and drop only land contaminants.}
 
-\item{output_dir}{\strong{Required.} Directory to write the outputs into. The
-expensive artifacts are always saved (so you don't rebuild them):
-\verb{comprehensive_<region>_<label>_list_for_making_localdb.txt} (one name per
-line), \code{..._checklist_summary.csv}, \code{..._for_LCA.rds} (or \code{.txt} when not
-taxonomized), \code{..._methods.txt}, and \code{..._GBIF_download_info.txt} (when a
-GBIF download ran). The same objects are also returned.}
+\item{output_dir}{\strong{Required.} Directory to write the outputs into. Each run
+gets its own dated subdirectory \verb{<region>_<label>_<Date>} inside it, so
+successive runs don't pile up loose files (the GBIF \code{.zip}, when a download
+runs, is kept there too). The expensive artifacts are always saved (so you
+don't rebuild them): \verb{comprehensive_<region>_<label>_list_for_making_localdb.txt}
+(one name per line), \code{..._checklist_summary.csv}, \code{..._for_LCA.rds} (or
+\code{.txt} when not taxonomized), \code{..._methods.txt}, and
+\code{..._GBIF_download_info.txt} (when a GBIF download ran). The same objects
+are also returned.}
 
 \item{sql_path}{Path to the local \code{accessionTaxa.sql} taxonomizr DB used to
 taxonomize the LCA list. Defaults to a persistent per-user cache

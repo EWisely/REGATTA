@@ -64,12 +64,15 @@
 #' @param marine,freshwater,terrestrial,brackish OBIS habitat filters, passed
 #'   to [OBIS_download()]. Defaults keep marine plus anadromous/catadromous
 #'   species and drop only land contaminants.
-#' @param output_dir **Required.** Directory to write the outputs into. The
-#'   expensive artifacts are always saved (so you don't rebuild them):
-#'   `comprehensive_<region>_<label>_list_for_making_localdb.txt` (one name per
-#'   line), `..._checklist_summary.csv`, `..._for_LCA.rds` (or `.txt` when not
-#'   taxonomized), `..._methods.txt`, and `..._GBIF_download_info.txt` (when a
-#'   GBIF download ran). The same objects are also returned.
+#' @param output_dir **Required.** Directory to write the outputs into. Each run
+#'   gets its own dated subdirectory `<region>_<label>_<Date>` inside it, so
+#'   successive runs don't pile up loose files (the GBIF `.zip`, when a download
+#'   runs, is kept there too). The expensive artifacts are always saved (so you
+#'   don't rebuild them): `comprehensive_<region>_<label>_list_for_making_localdb.txt`
+#'   (one name per line), `..._checklist_summary.csv`, `..._for_LCA.rds` (or
+#'   `.txt` when not taxonomized), `..._methods.txt`, and
+#'   `..._GBIF_download_info.txt` (when a GBIF download ran). The same objects
+#'   are also returned.
 #' @param sql_path Path to the local `accessionTaxa.sql` taxonomizr DB used to
 #'   taxonomize the LCA list. Defaults to a persistent per-user cache
 #'   (`tools::R_user_dir("REGATTA", "cache")`), shared across projects and
@@ -170,6 +173,12 @@ build_regional_checklist <- function(region,
   gbif_citation <- NULL   # set ONLY for a fresh GBIF = TRUE download
   sources_used  <- character(0)  # which sources actually contributed, for cl$methods
 
+  # Per-run output directory, so successive runs land in their own dated folder
+  # (outputs and the GBIF .zip) instead of piling up loose in output_dir.
+  run_dir <- file.path(output_dir,
+                       paste0(trimws(region), "_", trimws(label), "_", Sys.Date()))
+  dir.create(run_dir, recursive = TRUE, showWarnings = FALSE)
+
   # --- OBIS source (uses the function's return value, not a written file) --
   if (isTRUE(OBIS)) {
     obis_df <- OBIS_download(obis_taxa = taxa, regional_poly = regional_poly,
@@ -188,7 +197,8 @@ build_regional_checklist <- function(region,
     if (isTRUE(GBIF)) {
       gbif_df <- GBIF_download(obis_taxa = taxa, regional_poly = regional_poly,
                               output_dir = NULL, kingdom = kingdom,
-                              gbif_fill_families = gbif_fill_families)
+                              gbif_fill_families = gbif_fill_families,
+                              download_dir = run_dir)
       # The citation/key is surfaced only for a fresh download (GBIF = TRUE).
       gbif_citation <- attr(gbif_df, "gbif_download")
     } else if (is.character(GBIF) && length(GBIF) == 1 &&
@@ -268,26 +278,26 @@ build_regional_checklist <- function(region,
   lca_taxonomized <- all(ranks %in% names(for_LCA))
 
   # --- Methods sentence (real citations only -- pulled live, never invented) -
-  methods <- .regatta_methods(sources_used, regional_poly, gbif_citation, db_date)
+  methods <- .regatta_methods(region, label, sources_used, regional_poly,
+                              gbif_citation, db_date)
 
-  # --- Write the outputs (output_dir is required) -------------------------
+  # --- Write the outputs into this run's dated directory ------------------
   {
-    dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
     stem <- paste0("comprehensive_", trimws(region), "_", trimws(label), "_list")
     # CRABS input: one scientific name per line, no header, no columns.
     writeLines(for_making_localdb,
-               file.path(output_dir, paste0(stem, "_for_making_localdb.txt")))
+               file.path(run_dir, paste0(stem, "_for_making_localdb.txt")))
     if (!is.null(checklist_summary))
       utils::write.csv(checklist_summary,
-                       file.path(output_dir, paste0(stem, "_checklist_summary.csv")),
+                       file.path(run_dir, paste0(stem, "_checklist_summary.csv")),
                        row.names = FALSE)
     if (lca_taxonomized)
-      saveRDS(for_LCA, file.path(output_dir, paste0(stem, "_for_LCA.rds")))
+      saveRDS(for_LCA, file.path(run_dir, paste0(stem, "_for_LCA.rds")))
     else
       readr::write_delim(for_LCA,
-                         file.path(output_dir, paste0(stem, "_for_LCA.txt")),
+                         file.path(run_dir, paste0(stem, "_for_LCA.txt")),
                          delim = "\t")
-    writeLines(methods, file.path(output_dir, paste0(stem, "_methods.txt")))
+    writeLines(methods, file.path(run_dir, paste0(stem, "_methods.txt")))
     if (!is.null(gbif_citation))
       writeLines(c(
         "GBIF download -- cite this in your paper.",
@@ -298,8 +308,8 @@ build_regional_checklist <- function(region,
         paste0("Created: ",      gbif_citation$created),
         "Citation:",
         gbif_citation$citation),
-        file.path(output_dir, paste0(stem, "_GBIF_download_info.txt")))
-    message("Wrote checklist files to ", output_dir)
+        file.path(run_dir, paste0(stem, "_GBIF_download_info.txt")))
+    message("Wrote checklist files to ", run_dir)
   }
 
   invisible(list(for_making_localdb     = for_making_localdb,
@@ -315,8 +325,8 @@ build_regional_checklist <- function(region,
 # and nothing is hardcoded as a fabricated author/year/DOI. Where a citation
 # cannot be pulled (package not installed, OBIS has no machine citation) the
 # string says so and points the user to the canonical source to fill in.
-.regatta_methods <- function(sources_used, regional_poly, gbif_citation,
-                             db_date = NA_character_) {
+.regatta_methods <- function(region, label, sources_used, regional_poly,
+                             gbif_citation, db_date = NA_character_) {
   today <- as.character(Sys.Date())
   src   <- if (length(sources_used)) paste(sources_used, collapse = ", ") else "the supplied sources"
 
@@ -353,7 +363,8 @@ build_regional_checklist <- function(region,
   else ""
 
   paste0(
-    "The regional species checklist was built from ", src, " on ", today,
+    "The regional species checklist for ", trimws(region), " (", trimws(label),
+    ") was built from ", src, " on ", today,
     " using the R package REGATTA. ", poly_phrase, tax_phrase,
     " Please cite the following (verify against your reference manager): ",
     paste(refs, collapse = " | "))

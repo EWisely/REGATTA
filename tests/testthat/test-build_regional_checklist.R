@@ -50,9 +50,12 @@ test_that("output_dir writes the lists + methods with region/label filenames", {
     region = "testreg", label = "testlab",
     OBIS = FALSE, CSV = csv, sql_path = NULL, output_dir = out))
 
-  expect_true(file.exists(file.path(out, "comprehensive_testreg_testlab_list_for_making_localdb.txt")))
-  expect_true(file.exists(file.path(out, "comprehensive_testreg_testlab_list_for_LCA.txt")))
-  expect_true(file.exists(file.path(out, "comprehensive_testreg_testlab_list_methods.txt")))
+  # outputs land in a dated per-run subdirectory: <region>_<label>_<Date>
+  run <- file.path(out, paste0("testreg_testlab_", Sys.Date()))
+  expect_true(dir.exists(run))
+  expect_true(file.exists(file.path(run, "comprehensive_testreg_testlab_list_for_making_localdb.txt")))
+  expect_true(file.exists(file.path(run, "comprehensive_testreg_testlab_list_for_LCA.txt")))
+  expect_true(file.exists(file.path(run, "comprehensive_testreg_testlab_list_methods.txt")))
 })
 
 test_that("pre-made OBIS/GBIF source CSVs are fed in and stacked", {

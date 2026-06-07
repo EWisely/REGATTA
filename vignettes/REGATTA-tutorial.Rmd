@@ -182,7 +182,8 @@ cl <- build_regional_checklist(
 > defer it to the reconcile step.
 
 `build_regional_checklist()` **returns** a list (and writes the same outputs to
-`output_dir`):
+a dated `<region>_<label>_<date>` subfolder of `output_dir`, so successive runs
+don't pile up — the GBIF `.zip` is kept there too):
 
 * `cl$for_making_localdb` — a bare character vector of the unique species
   binomials (no columns). This is the input for FASTA-building tools like
