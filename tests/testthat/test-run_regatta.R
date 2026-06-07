@@ -52,11 +52,18 @@ test_that("run_regatta dispatches a vsearch lca+userout pair through to the chec
 test_that("run_regatta rejects an unsupported checklist argument", {
   expect_error(
     suppressMessages(run_regatta(input = "x.tab", checklist = 42,
-                                 out_dir = tempfile())),
+                                 out_dir = tempfile(),
+                                 region = "r", label = "l")),
     "checklist must be")
 })
 
-test_that("run_regatta requires out_dir", {
-  expect_error(suppressMessages(run_regatta(input = "x.tab", checklist = 42)),
-               "out_dir")
+test_that("run_regatta requires out_dir, region, and label", {
+  expect_error(
+    suppressMessages(run_regatta(input = "x.tab", checklist = 42,
+                                 region = "r", label = "l")),
+    "out_dir")
+  expect_error(
+    suppressMessages(run_regatta(input = "x.tab", checklist = 42,
+                                 out_dir = tempfile(), label = "l")),
+    "region")
 })

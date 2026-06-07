@@ -8,8 +8,8 @@ run_regatta(
   input,
   checklist,
   out_dir,
-  region = NULL,
-  label = NULL,
+  region,
+  label,
   sql_path = .regatta_default_sql_path(),
   overwrite_taxonomy_files = FALSE,
   id_col = "ASV_id",
@@ -32,14 +32,15 @@ where each entry is a single path or a length-2 vsearch pair.
 \code{.csv}), or a data.frame with the 7 rank columns.}
 
 \item{out_dir}{\strong{Required.} Output directory. Each run writes into its own
-dated subfolder of it -- \verb{<region>_<label>_<Date>} when you pass \code{region}
-and \code{label}, otherwise \verb{regatta_run_<Date>} -- so successive runs don't
+dated \verb{<region>_<label>_<Date>} subfolder of it, so successive runs don't
 pile up. That subfolder gets the per-stage CSV triples, the 21-row summary,
 and \code{run_log.txt}. The results list is also returned.}
 
-\item{region, label}{Optional labels used only to name the dated run
-subfolder (pass the same ones you gave \code{\link[=build_regional_checklist]{build_regional_checklist()}} for a
-consistent layout). Omit both for a generic \verb{regatta_run_<Date>} folder.}
+\item{region, label}{\strong{Required.} Region and taxon-group labels for this run.
+REGATTA filters/adjusts the taxonomy against the regional checklist built
+for that region x group, so the run is labeled by them -- pass the same
+values you gave \code{\link[=build_regional_checklist]{build_regional_checklist()}}. They name the dated run
+subfolder \verb{<region>_<label>_<Date>}.}
 
 \item{sql_path}{Path to the local \code{accessionTaxa.sql} taxonomizr DB, used to
 resolve obitools / BestTaxon input and to taxonomize a raw \code{checklist}.

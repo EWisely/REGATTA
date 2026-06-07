@@ -63,7 +63,7 @@ species and drop only land contaminants.}
 gets its own dated subdirectory \verb{<region>_<label>_<Date>} inside it, so
 successive runs don't pile up loose files (the GBIF \code{.zip}, when a download
 runs, is kept there too). The expensive artifacts are always saved (so you
-don't rebuild them): \verb{comprehensive_<region>_<label>_list_for_making_localdb.txt}
+don't rebuild them): \verb{<region>_<label>_list_for_making_localdb.txt}
 (one name per line), \code{..._checklist_summary.csv}, \code{..._for_LCA.rds} (or
 \code{.txt} when not taxonomized), \code{..._methods.txt}, and
 \code{..._GBIF_download_info.txt} (when a GBIF download ran). The same objects

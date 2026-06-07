@@ -248,13 +248,14 @@
 #' @param checklist Path to a taxonomized regional checklist (`.rds` or
 #'   `.csv`), or a data.frame with the 7 rank columns.
 #' @param out_dir **Required.** Output directory. Each run writes into its own
-#'   dated subfolder of it -- `<region>_<label>_<Date>` when you pass `region`
-#'   and `label`, otherwise `regatta_run_<Date>` -- so successive runs don't
+#'   dated `<region>_<label>_<Date>` subfolder of it, so successive runs don't
 #'   pile up. That subfolder gets the per-stage CSV triples, the 21-row summary,
 #'   and `run_log.txt`. The results list is also returned.
-#' @param region,label Optional labels used only to name the dated run
-#'   subfolder (pass the same ones you gave [build_regional_checklist()] for a
-#'   consistent layout). Omit both for a generic `regatta_run_<Date>` folder.
+#' @param region,label **Required.** Region and taxon-group labels for this run.
+#'   REGATTA filters/adjusts the taxonomy against the regional checklist built
+#'   for that region x group, so the run is labeled by them -- pass the same
+#'   values you gave [build_regional_checklist()]. They name the dated run
+#'   subfolder `<region>_<label>_<Date>`.
 #' @param sql_path Path to the local `accessionTaxa.sql` taxonomizr DB, used to
 #'   resolve obitools / BestTaxon input and to taxonomize a raw `checklist`.
 #'   Defaults to the same persistent per-user cache as
@@ -306,26 +307,31 @@
 run_regatta <- function(input,
                         checklist,
                         out_dir,
-                        region          = NULL,
-                        label           = NULL,
+                        region,
+                        label,
                         sql_path        = .regatta_default_sql_path(),
                         overwrite_taxonomy_files = FALSE,
                         id_col          = "ASV_id",
                         Local_advantage = TRUE) {
   t_start <- Sys.time()
+  if (missing(region) || missing(label) ||
+      !is.character(region) || !is.character(label) ||
+      length(region) != 1 || length(label) != 1 ||
+      !nzchar(trimws(region)) || !nzchar(trimws(label)))
+    stop("Provide a non-empty `region` and `label`. REGATTA filters/adjusts ",
+         "the taxonomy against the regional checklist built for that ",
+         "region x group, so the run is labeled by them. e.g. ",
+         'region = "galapagos", label = "fish".')
   if (missing(out_dir) || is.null(out_dir) || !is.character(out_dir) ||
       length(out_dir) != 1 || !nzchar(trimws(out_dir)))
     stop("`out_dir` is required: give a directory to write the run outputs ",
          'into, e.g. out_dir = "regatta_out". Outputs land in a dated ',
-         "<region>_<label>_<Date> (or regatta_run_<Date>) subfolder of it.")
+         "<region>_<label>_<Date> subfolder of it.")
   norm <- .regatta_normalize_input(input)
 
-  # Each run lands in its own dated subfolder so successive runs don't pile up.
-  run_name <- if (!is.null(region) && !is.null(label))
-    paste0(trimws(region), "_", trimws(label), "_", Sys.Date())
-  else
-    paste0("regatta_run_", Sys.Date())
-  run_dir <- file.path(out_dir, run_name)
+  # Each run lands in its own dated <region>_<label>_<Date> subfolder.
+  run_dir <- file.path(out_dir,
+                       paste0(trimws(region), "_", trimws(label), "_", Sys.Date()))
   dir.create(run_dir, recursive = TRUE, showWarnings = FALSE)
   .sub <- function(name) file.path(run_dir, name)
 

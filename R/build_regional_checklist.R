@@ -71,7 +71,7 @@
 #'   gets its own dated subdirectory `<region>_<label>_<Date>` inside it, so
 #'   successive runs don't pile up loose files (the GBIF `.zip`, when a download
 #'   runs, is kept there too). The expensive artifacts are always saved (so you
-#'   don't rebuild them): `comprehensive_<region>_<label>_list_for_making_localdb.txt`
+#'   don't rebuild them): `<region>_<label>_list_for_making_localdb.txt`
 #'   (one name per line), `..._checklist_summary.csv`, `..._for_LCA.rds` (or
 #'   `.txt` when not taxonomized), `..._methods.txt`, and
 #'   `..._GBIF_download_info.txt` (when a GBIF download ran). The same objects
@@ -288,7 +288,7 @@ build_regional_checklist <- function(region,
 
   # --- Write the outputs into this run's dated directory ------------------
   {
-    stem <- paste0("comprehensive_", trimws(region), "_", trimws(label), "_list")
+    stem <- paste0(trimws(region), "_", trimws(label), "_list")
     # CRABS input: one scientific name per line, no header, no columns.
     writeLines(for_making_localdb,
                file.path(run_dir, paste0(stem, "_for_making_localdb.txt")))

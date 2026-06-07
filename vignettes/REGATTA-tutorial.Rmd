@@ -231,7 +231,7 @@ min, several GB); later runs reuse it.
 
 ```{r taxonomize, eval = FALSE}
 checklist <- taxonomize_checklist(
-  input    = "local_database_checklist/comprehensive_galapagos_fish_list_for_LCA.txt",
+  input    = "local_database_checklist/galapagos_fish_list_for_LCA.txt",
   sql_path = "/path/to/accessionTaxa.sql"
 )
 ```
