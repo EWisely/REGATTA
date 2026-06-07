@@ -17,15 +17,13 @@ GBIF_download(
 )
 }
 \arguments{
-\item{obis_taxa}{A character vector of taxon names at \strong{class level or
-broader} (GBIF won't accept order/family/genus/species here). List the
-specific classes you want -- \strong{avoid broad ambiguous names}. For example
-\code{"Vertebrata"} is ambiguous in WoRMS (the vertebrate subphylum \emph{and} a
-red-algae genus) and errors here; pass the classes instead
-(e.g. \code{c("Actinopterygii", "Chondrichthyes", "Mammalia", "Aves", "Reptilia")}). Names are validated and disambiguated by \code{\link[=resolve_taxa]{resolve_taxa()}}
-(kingdom-aware), so you can type any common synonym -- e.g. \code{Teleostei},
-\code{Actinopteri}, \code{Actinopterygii}, or \code{Osteichthyes} all work for
-ray-finned fish.}
+\item{obis_taxa}{A character vector of taxon names at any level. They are
+validated, disambiguated, and resolved to GBIF backbone keys by
+\code{\link[=resolve_taxa]{resolve_taxa()}}, which walks broad taxa down to the orders/families GBIF
+populates -- so subphyla GBIF has no usable key for (e.g. \code{"Vertebrata"},
+\code{"Crustacea"}, or the ray-finned-fish classes) still work, as do common
+synonyms (\code{Teleostei}, \code{Actinopteri}, \code{Osteichthyes}) and the \code{"fish"} /
+\code{"vertebrates"} shorthands.}
 
 \item{worms_taxa}{A character vector of substitute taxon names to use
 instead of \code{obis_taxa} when looking up WoRMS IDs. NA reuses

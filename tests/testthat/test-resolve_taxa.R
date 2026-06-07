@@ -68,11 +68,18 @@ test_that("on_ambiguous = 'warn' returns the table instead of erroring", {
   expect_true(is.na(r$aphia_id))
 })
 
-test_that("GBIF coverage flags: bony fish lack a usable key, sharks have one", {
+test_that("GBIF coverage flags + descent: bony fish descend to keys, sharks use a direct key", {
   skip_on_cran()
   skip_if_offline()
   r <- resolve_taxa(c("Actinopterygii", "Elasmobranchii"), check_gbif = TRUE)
   expect_false(r$gbif_usable[r$valid_name == "Actinopterygii"])  # no usable class node
   expect_true(r$gbif_usable[r$valid_name == "Elasmobranchii"])   # class key 121
-  expect_true(all(c("gbif_key", "gbif_usable", "note") %in% names(r)))
+  expect_true(all(c("gbif_key", "gbif_usable", "gbif_keys", "note") %in% names(r)))
+
+  # resolve_taxa now returns usable GBIF keys for both: Actinopterygii via
+  # order/family descent, Elasmobranchii via its direct key.
+  acti <- r$gbif_keys[[which(r$valid_name == "Actinopterygii")]]
+  elas <- r$gbif_keys[[which(r$valid_name == "Elasmobranchii")]]
+  expect_gt(length(acti), 0L)     # descended keys, not integer(0)
+  expect_gt(length(elas), 0L)     # direct key
 })

@@ -9,16 +9,13 @@
 #' writes it to disk only if you supply `output_dir`. GBIF login credentials
 #' must already be set in `~/.Renviron`; see the Setup section of the README.
 #'
-#' @param obis_taxa A character vector of taxon names at **class level or
-#'   broader** (GBIF won't accept order/family/genus/species here). List the
-#'   specific classes you want -- **avoid broad ambiguous names**. For example
-#'   `"Vertebrata"` is ambiguous in WoRMS (the vertebrate subphylum *and* a
-#'   red-algae genus) and errors here; pass the classes instead
-#'   (e.g. `c("Actinopterygii", "Chondrichthyes", "Mammalia", "Aves",
-#'   "Reptilia")`). Names are validated and disambiguated by [resolve_taxa()]
-#'   (kingdom-aware), so you can type any common synonym -- e.g. `Teleostei`,
-#'   `Actinopteri`, `Actinopterygii`, or `Osteichthyes` all work for
-#'   ray-finned fish.
+#' @param obis_taxa A character vector of taxon names at any level. They are
+#'   validated, disambiguated, and resolved to GBIF backbone keys by
+#'   [resolve_taxa()], which walks broad taxa down to the orders/families GBIF
+#'   populates -- so subphyla GBIF has no usable key for (e.g. `"Vertebrata"`,
+#'   `"Crustacea"`, or the ray-finned-fish classes) still work, as do common
+#'   synonyms (`Teleostei`, `Actinopteri`, `Osteichthyes`) and the `"fish"` /
+#'   `"vertebrates"` shorthands.
 #' @param worms_taxa A character vector of substitute taxon names to use
 #'   instead of `obis_taxa` when looking up WoRMS IDs. NA reuses
 #'   `obis_taxa`. Rarely needed now that names route through [resolve_taxa()].
@@ -123,98 +120,21 @@ GBIF_download <- function(obis_taxa = NULL,
   #Find list of Classes within 
   #Worms (World Register of Marine Species)
   
-  # Validate + disambiguate query taxa to unambiguous WoRMS AphiaIDs. Replaces
-  # the old per-name wm_name2id() call, which errored (206 Partial Content) on
-  # ambiguous names like "Vertebrata". check_gbif = TRUE also gives us each
-  # taxon's direct GBIF backbone key (reliable for Mammalia, Aves, ...).
-  resolved <- resolve_taxa(query_taxa, kingdom = kingdom, check_gbif = TRUE)
+  # Validate + disambiguate query taxa AND resolve their GBIF backbone keys in
+  # one call: resolve_taxa() returns, per taxon, an unambiguous WoRMS AphiaID
+  # plus `gbif_keys` -- the taxon's own backbone key when usable, otherwise the
+  # keys reached by walking WoRMS down to orders/families (the fix for broad
+  # nodes GBIF lacks a usable key for: ray-finned fish, Crustacea, Vertebrata).
+  resolved <- resolve_taxa(query_taxa, kingdom = kingdom, check_gbif = TRUE,
+                           gbif_descend_to = gbif_descend_to,
+                           gbif_fill_families = gbif_fill_families)
   message("GBIF query resolved to: ",
           paste0(resolved$valid_name, " (AphiaID ", resolved$aphia_id, ")",
                  collapse = "; "))
 
-  # GBIF backbone keys are assembled from up to three sources, kept small and
-  # fast while still complete:
-  #  (1) DIRECT: each resolved taxon's own backbone key (resolve_taxa's
-  #      gbif_key) -- reliable for taxa GBIF has as nodes (Mammalia, Aves,
-  #      Elasmobranchii).
-  #  (2) PRIMARY descent (default `gbif_descend_to = "order"`): keys for the
-  #      taxon's descendants at that rank. This is the fix for ray-finned fish
-  #      -- GBIF's backbone skips the class rank for them (bony fish hang under
-  #      phylum Chordata with NO class node), so a class-level match drops every
-  #      fish; descending to ORDER hits a rank GBIF populates. Order is fast
-  #      (tens of keys) and reaches ~97% of fish families, because GBIF files
-  #      most modern-order fish under its broad `Perciformes`, which is matched.
-  #  (3) GAP-FILL families (`gbif_fill_families = TRUE`): for the ~3% of fish
-  #      families whose GBIF parent order is NOT in the matched primary set
-  #      (GBIF gives them no order, etc.), add just those family keys. This
-  #      lifts coverage to ~98% while adding only a handful of keys -- far
-  #      cheaper than descending everything to family (~10x the keys, a much
-  #      slower download, and GBIF throttles concurrent downloads).
-  direct_keys <- resolved$gbif_key[!is.na(resolved$gbif_key)]
-
-  # Only taxa WITHOUT a usable direct GBIF key need descending. A taxon GBIF
-  # has as a node -- sharks/rays under class Elasmobranchii (key 121), Mammalia
-  # (359), Aves (212) -- is fully covered by that ONE key, so we skip the
-  # redundant order/family walk for it. Bony fish have no usable class node, so
-  # they fall through to the order descent below.
-  descend_ids <- resolved$aphia_id[is.na(resolved$gbif_key)]
-  if (length(descend_ids) < nrow(resolved)) {
-    message(nrow(resolved) - length(descend_ids), " taxon/taxa covered by a ",
-            "single direct GBIF key (no descent needed): ",
-            paste(resolved$valid_name[!is.na(resolved$gbif_key)], collapse = ", "))
-  }
-
-  # Walk the taxa that need descending down to a rank; return unique names.
-  .walk <- function(rank) {
-    acc <- c()
-    for (id in descend_ids) {
-      d <- tryCatch(
-        taxize::worms_downstream(id = id, downto = rank),
-        error = function(e) NULL)   # tolerate taxize rank-walk failures per taxon
-      if (!is.null(d) && nrow(d) > 0) acc <- rbind(acc, d)
-    }
-    if (is.null(acc)) character(0) else unique(acc$name)
-  }
-
-  # (2) Primary descent.
-  print(paste0("Getting WoRMS downstream ", gbif_descend_to, "s"))
-  primary_names <- .walk(gbif_descend_to)
-  classnameno   <- length(primary_names)
-  primary_keys  <- integer(0)
-  valid_phyla   <- character(0)
-  if (length(primary_names) > 0) {
-    bbp          <- rgbif::name_backbone_checklist(primary_names)
-    keep         <- bbp$matchType != "NONE"
-    primary_keys <- bbp$usageKey[keep]
-    if ("phylum" %in% names(bbp)) valid_phyla <- unique(stats::na.omit(bbp$phylum[keep]))
-  }
-
-  # (3) Gap-fill families not reached by the primary nodes (skip if already
-  # descending to family). Guarded by phylum so a stray family-name collision
-  # (e.g. a WoRMS fish-family name that matches a GBIF mollusc family) can't
-  # drag in off-target taxa.
-  fill_keys <- integer(0)
-  if (isTRUE(gbif_fill_families) && gbif_descend_to != "family") {
-    fam_names <- .walk("family")
-    if (length(fam_names) > 0) {
-      bbf        <- rgbif::name_backbone_checklist(fam_names)
-      bbf        <- bbf[bbf$matchType != "NONE", , drop = FALSE]
-      parent_col <- paste0(gbif_descend_to, "Key")
-      covered    <- if (parent_col %in% names(bbf)) bbf[[parent_col]] %in% primary_keys else FALSE
-      covered[is.na(covered)] <- FALSE
-      in_phylum  <- if (length(valid_phyla) && "phylum" %in% names(bbf))
-                      bbf$phylum %in% valid_phyla else TRUE
-      fill_keys  <- bbf$usageKey[!covered & in_phylum]
-      if (length(fill_keys) > 0) {
-        message("Gap-fill: added ", length(fill_keys), " GBIF family key(s) for taxa ",
-                "not under a matched ", gbif_descend_to,
-                " (e.g. families GBIF gives no order). Set gbif_fill_families = ",
-                "FALSE to skip, or gbif_descend_to = \"family\" for full family descent.")
-      }
-    }
-  }
-
-  backbone_keys <- unique(c(direct_keys, primary_keys, fill_keys))
+  ntaxa         <- nrow(resolved)
+  backbone_keys <- unique(unlist(resolved$gbif_keys, use.names = FALSE))
+  backbone_keys <- backbone_keys[!is.na(backbone_keys)]
   print("GBIF backbone keys:")
   print(backbone_keys)
   backbonekeyno <- length(backbone_keys)
@@ -263,10 +183,8 @@ GBIF_download <- function(obis_taxa = NULL,
     rgbif::occ_download_import()
   
   print("Download Complete")
-  
+
   # Reprint key info because the download status messages clogged the console
-  print("Taxa walked downstream:")
-  print(primary_names)
   print("GBIF backbone keys:")
   print(backbone_keys)
  } else {
@@ -327,7 +245,7 @@ GBIF_download <- function(obis_taxa = NULL,
 
   # The backbone-key summary only exists on the fresh-download path.
   if (is.null(existing_download))
-    message(backbonekeyno, " backbone keys found out of ", classnameno, " classes in list")
+    message(backbonekeyno, " GBIF backbone key(s) resolved for ", ntaxa, " query taxon/taxa")
   message("GBIF download complete (", nrow(GBIF_species), " species).")
   invisible(GBIF_species)
 }
