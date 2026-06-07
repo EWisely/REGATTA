@@ -16,15 +16,17 @@ test_that("CSV source splits genus-only from species in the returned lists", {
     region = "testreg", label = "testlab",
     OBIS = FALSE, GBIF = FALSE, CSV = csv, sql_path = tempfile()))   # no DB
 
-  # DB list: species binomials only, NO bare genus
-  expect_setequal(res$for_making_localdb$Species,
+  # DB list: a bare character vector of species binomials, NO bare genus
+  expect_type(res$for_making_localdb, "character")
+  expect_null(names(res$for_making_localdb))   # no column names, just names
+  expect_setequal(res$for_making_localdb,
                   c("Lutjanus argentiventris", "Sebastes mystinus"))
-  expect_false("Caranx" %in% res$for_making_localdb$Species)
+  expect_false("Caranx" %in% res$for_making_localdb)
   # LCA list: + the retained bare genus. No DB -> for_LCA is the raw name list
-  # (Species/Source), not a taxonomized rank table.
+  # (Species/Source), not a taxonomized rank table; checklist_summary is NULL.
   expect_true("Caranx" %in% res$for_LCA$Species)
   expect_false("genus" %in% names(res$for_LCA))
-  expect_null(res$checklist)            # the separate $checklist element is gone
+  expect_null(res$checklist_summary)    # no DB -> no taxonomized summary
 })
 
 test_that("nothing is written to the working directory by default", {
@@ -76,7 +78,7 @@ test_that("a fresh download requires taxa and regional_poly", {
                "taxa.*regional_poly|regional_poly")
 })
 
-test_that("for_LCA is taxonomized when a DB is present", {
+test_that("for_LCA is taxID + ranks, checklist_summary holds the audit columns", {
   skip_on_cran()
   sql <- Sys.getenv("REGATTA_TAXONOMIZR_SQL", "accessionTaxa.sql")
   skip_if(!file.exists(sql), "taxonomizr DB not available")
@@ -87,11 +89,17 @@ test_that("for_LCA is taxonomized when a DB is present", {
   res <- suppressMessages(build_regional_checklist(
     region = "r", label = "l", OBIS = FALSE, CSV = csv, sql_path = sql))
 
-  # for_LCA is now the taxonomized checklist itself (no separate $checklist)
-  expect_null(res$checklist)
-  expect_true(all(c("genus", "species") %in% names(res$for_LCA)))
-  expect_equal(res$for_LCA$genus[res$for_LCA$input_name == "Lutjanus argentiventris"],
+  # for_LCA: taxID + the 7 ranks only -- audit columns stripped out
+  expect_equal(names(res$for_LCA), c("taxID", ranks))
+  expect_false("input_name" %in% names(res$for_LCA))
+  expect_equal(res$for_LCA$genus[res$for_LCA$species == "Lutjanus argentiventris"],
                "Lutjanus")
+  # checklist_summary: the full table with the resolution-status columns
+  expect_true(all(c("input_name", "resolution_status", "name_match_type", "taxID")
+                  %in% names(res$checklist_summary)))
+  expect_equal(
+    res$checklist_summary$genus[res$checklist_summary$input_name == "Lutjanus argentiventris"],
+    "Lutjanus")
 })
 
 test_that(".regatta_ensure_taxonomized passes a taxonomized checklist through untouched", {

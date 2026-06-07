@@ -82,8 +82,7 @@ supplied.
 Resolves the given high-level taxa via WoRMS, finds GBIF backbone
 keys for the resulting classes, and submits a GBIF occurrence
 download restricted to the polygon. \strong{Returns} the species data frame;
-writes it to disk only if you supply \code{output_dir}. GBIF login credentials
-must already be set in \verb{~/.Renviron}; see the Setup section of the README.
+writes it to disk only if you supply \code{output_dir}.
 }
 \details{
 Takes ~15 minutes to run end to end. The function prints status
@@ -92,6 +91,19 @@ download API; this is normal. GBIF coverage is uneven -- see the
 Common troubleshooting section of the README for known issues
 (Osteichthyes not recognized, occasional timeouts, etc.).
 }
+\section{Time and credentials}{
+
+This submits an asynchronous GBIF \code{occ_download} and \strong{waits for GBIF to
+assemble it server-side, which typically takes several minutes} (longer for
+large polygons or broad taxa) -- the call blocks while it polls. GBIF
+requires a free account, and \code{rgbif} authenticates with your account
+\strong{credentials} (there is no separate "API key" for downloads). Register at
+\url{https://www.gbif.org/user/profile}, then store three values in your
+\verb{~/.Renviron} (via \code{usethis::edit_r_environ()}, then restart R) so nothing is
+hardcoded: \code{GBIF_USER}, \code{GBIF_PWD}, and \code{GBIF_EMAIL} (the email you
+registered with).
+}
+
 \examples{
 \dontrun{
 # Pick the gbif_outputname for your region + group; the convention

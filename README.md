@@ -159,9 +159,13 @@ Local checklist CSVs (each with `Genus` and `Species` columns) can live
 anywhere; pass their paths to `build_regional_checklist(CSV = ...)`, no
 copying required.
 
-**Credentials & taxonomy DB.** `GBIF_download()` uses your GBIF login; add
+**Credentials & taxonomy DB.** `GBIF_download()` (and `build_regional_checklist(GBIF = TRUE)`)
+needs a free [GBIF account](https://www.gbif.org/user/profile) and authenticates
+with your account credentials — there is no separate "API key". Add
 `GBIF_USER` / `GBIF_PWD` / `GBIF_EMAIL` to your `.Renviron`
-(`usethis::edit_r_environ()`). `taxonomize_checklist()`, `resolve_names()`,
+(`usethis::edit_r_environ()`, then restart R). A fresh GBIF download is an
+asynchronous `occ_download` that **takes several minutes** while GBIF assembles
+it server-side. `taxonomize_checklist()`, `resolve_names()`,
 and `resolve_taxids()` need a local NCBI snapshot built by `taxonomizr`; the
 first `taxonomize_checklist()` run builds `accessionTaxa.sql` (~15 min,
 several GB) and reuses it after. Point each function at it via `sql_path`.
@@ -199,10 +203,19 @@ cl <- build_regional_checklist(
   marine        = TRUE, terrestrial = FALSE,
   sql_path      = "/path/to/accessionTaxa.sql"
 )
-# cl$for_making_localdb  species-only list (Feed to a reference-DB builder like CRABS)
-# cl$for_LCA             the checklist for the LCA step -- retains genus-level
-#                        entries and is taxonomized: run_regatta(checklist = cl$for_LCA)
+# cl$for_making_localdb  bare vector of unique species names; write one-per-line
+#                        for a reference-DB builder like CRABS:
+#                        writeLines(cl$for_making_localdb, "fish_for_crabs.txt")
+# cl$checklist_summary   full taxonomized table with per-name resolution status (audit)
+# cl$for_LCA             taxID + the 7 ranks, ready for run_regatta(checklist = cl$for_LCA)
 ```
+
+> **GBIF (`GBIF = TRUE`) takes several minutes** — it submits an `occ_download`
+> job and waits for GBIF to build it. GBIF needs a free account and authenticates
+> with your account **credentials** (no separate "API key"): register at
+> [gbif.org](https://www.gbif.org/user/profile), then add `GBIF_USER`, `GBIF_PWD`,
+> and `GBIF_EMAIL` to your `~/.Renviron` (`usethis::edit_r_environ()`, then restart
+> R). Reuse a finished download by passing its key/object to `GBIF =`.
 
 ## Per-taxonomic-group separation
 
@@ -227,7 +240,7 @@ groups side-by-side in one project without naming collisions.
 | `resolve_taxa()` | Validate & disambiguate query taxon names against WoRMS (by kingdom); report GBIF backbone coverage. Run standalone to pre-check names. |
 | `GBIF_download()` | Pull a GBIF species list inside a WKT polygon for given taxa. |
 | `OBIS_download()` | Pull an OBIS species list, with optional marine/brackish/freshwater filters. |
-| `build_regional_checklist()` | **Checklist-building entry point.** Runs OBIS (default) and/or GBIF (off by default; `TRUE` for a fresh download or a key/object to reuse one), folds in any local `Genus`+`Species` CSVs, taxonomizes the LCA list, and **returns** `for_making_localdb` (species-only, for a reference-DB builder), `for_LCA` (keeps genus-level entries), and the taxonomized `checklist`. Writes them (named from `region`+`label`) only when given `output_dir`. |
+| `build_regional_checklist()` | **Checklist-building entry point.** Runs OBIS (default) and/or GBIF (off by default; `TRUE` for a fresh download or a key/object to reuse one), folds in any local `Genus`+`Species` CSVs, taxonomizes the LCA list, and **returns** `for_making_localdb` (a bare vector of unique species names, for a reference-DB builder), `checklist_summary` (the full taxonomized table with per-name resolution status), and `for_LCA` (`taxID` + the 7 ranks, ready for the LCA step). Writes them (named from `region`+`label`) only when given `output_dir`. A fresh `GBIF = TRUE` download takes several minutes and needs GBIF account credentials in `~/.Renviron`. |
 | `taxonomize_checklist()` | Resolve a regional list to a 7-rank NCBI taxonomy table (synonym-aware). Runs **in the background** from `build_regional_checklist()`; `reconcile_checklist()`/`run_regatta()` also taxonomize on the fly (with a warning) if handed a raw checklist. Call directly only for inspection/caching. |
 | `parse_sintax()` | Convert vsearch SINTAX taxonomy strings to 7 rank columns. |
 | `parse_vsearch_results()` | Canonical vsearch preprocessor: join a vsearch `lca` (taxonomy) + `--userout` (pct_id) by ASV id. |

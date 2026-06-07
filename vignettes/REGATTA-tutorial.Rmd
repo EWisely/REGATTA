@@ -98,6 +98,25 @@ output files *if* you write them; `taxa` is the query. This needs internet (and
 a GBIF account if `GBIF` is on, and a `taxonomizr` database for the background
 taxonomize), so it's shown, not run.
 
+> **Turning on GBIF (`GBIF = TRUE`).** A fresh GBIF run submits an
+> `occ_download` job and waits for GBIF to assemble it server-side — this
+> **typically takes several minutes** (longer for large regions or broad
+> taxa), so expect the call to block while it polls. GBIF requires a free
+> account, and `rgbif` authenticates with your account **credentials** (there
+> is no separate "API key" for downloads). Register at
+> [gbif.org](https://www.gbif.org/user/profile), then store three values in
+> your `~/.Renviron` so REGATTA can use them without hardcoding secrets:
+>
+> ```
+> GBIF_USER=your_gbif_username
+> GBIF_PWD=your_gbif_password
+> GBIF_EMAIL=the_email_you_registered_with
+> ```
+>
+> Edit the file with `usethis::edit_r_environ()`, save, and **restart R** so
+> the variables load. Once a download finishes you can reuse it instead of
+> re-running: pass its key string or the `occ_download` object to `GBIF =`.
+
 ```{r build, eval = FALSE}
 poly <- "POLYGON ((-117.421875 31.952162, -91.933594 -6.315299, -81.386719 -6.315299, -76.113281 7.710992, -82.089844 8.581021, -87.011719 13.581921, -104.238281 20.303418, -112.5 32.249974, -117.421875 31.952162))"  # E. Tropical Pacific incl. Galapagos
 
@@ -118,11 +137,20 @@ cl <- build_regional_checklist(
 `build_regional_checklist()` **returns** a list, writing nothing unless you
 pass `output_dir`:
 
-* `cl$for_making_localdb` — species binomials only; feed to a reference-database
-  builder (e.g. CRABS).
-* `cl$for_LCA` — the checklist for the LCA step: it retains genus-level entries
-  and is taxonomized (when `sql_path` pointed at a `taxonomizr` database), ready
-  to hand straight to `run_regatta(checklist = cl$for_LCA)`.
+* `cl$for_making_localdb` — a bare character vector of the unique species
+  binomials (no columns). This is the input for FASTA-building tools like
+  [CRABS](https://github.com/gjeunen/reference_database_creator), which expect
+  one scientific name per line. Write it out with:
+
+    ```{r write-localdb, eval = FALSE}
+    writeLines(cl$for_making_localdb, "galapagos_fish_for_crabs.txt")
+    ```
+
+* `cl$checklist_summary` — the full taxonomized table, including how each name
+  resolved (scientific name / synonym / unresolved). Use it to audit the
+  checklist; `NULL` if no `taxonomizr` database was available.
+* `cl$for_LCA` — the `taxID` column plus the 7 taxonomic ranks, cleaned and
+  ready to hand straight to `run_regatta(checklist = cl$for_LCA)`.
 
 ---
 

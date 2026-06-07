@@ -61,8 +61,9 @@ un-taxonomized and taxonomizing is deferred to the reconcile step.}
 
 \item{output_dir}{Optional directory to write outputs into. Default \code{NULL}
 writes nothing (everything is returned); supply a directory to also save
-\verb{comprehensive_<region>_<label>_list_for_making_localdb.txt},
-\code{..._for_LCA.txt}, and \code{..._for_LCA_taxonomized.rds}.}
+\verb{comprehensive_<region>_<label>_list_for_making_localdb.txt} (one name per
+line), \code{..._checklist_summary.csv}, and \code{..._for_LCA.rds} (or \code{.txt} when
+no database was available).}
 
 \item{kingdom}{Kingdom used by \code{\link[=resolve_taxa]{resolve_taxa()}} to disambiguate query
 taxa in the downloaders. Default \code{"Animalia"}.}
@@ -70,28 +71,33 @@ taxa in the downloaders. Default \code{"Animalia"}.}
 \item{gbif_fill_families}{Passed to \code{\link[=GBIF_download]{GBIF_download()}} for a fresh GBIF run.}
 }
 \value{
-Invisibly, a list with \code{for_making_localdb} (species-only
-data.frame, for a reference-database builder) and \code{for_LCA} (the checklist
-for the LCA step, retaining genus-level entries; taxonomized when a DB was
-available, otherwise a name list). Pass \code{for_LCA} straight to
-\code{\link[=run_regatta]{run_regatta()}} / \code{\link[=reconcile_checklist]{reconcile_checklist()}}.
+Invisibly, a list with \code{for_making_localdb} (a bare character vector
+of unique species binomials, for a reference-database builder),
+\code{checklist_summary} (the full taxonomized table with per-name resolution
+status, or \code{NULL} if no DB was available), and \code{for_LCA} (\code{taxID} + the 7
+ranks, ready for the LCA step). Pass \code{for_LCA} straight to \code{\link[=run_regatta]{run_regatta()}}
+/ \code{\link[=reconcile_checklist]{reconcile_checklist()}}.
 }
 \description{
 The basic entry point for the checklist-building stage. Pulls regional
 species records from OBIS and/or GBIF (or reuses pre-made sources), folds
 in any local \code{Genus}+\code{Species} CSVs, deduplicates, taxonomizes the LCA
 list (when a \code{taxonomizr} database is available), and \strong{returns} the
-results. Two outputs are produced:
+results. Three outputs are produced:
 \itemize{
-\item \code{for_making_localdb} -- species binomials only; feed to a
-reference-database builder (e.g. CRABS).
-\item \code{for_LCA} -- the checklist for the LCA step: it retains genus-level
-entries and is taxonomized (ready to hand straight to \code{\link[=run_regatta]{run_regatta()}} /
-\code{\link[=reconcile_checklist]{reconcile_checklist()}}) when a \code{taxonomizr} database is available.
+\item \code{for_making_localdb} -- a bare, sorted character vector of the unique
+species binomials (no columns). Write it one-name-per-line and feed it to
+a reference-database builder (e.g. CRABS).
+\item \code{checklist_summary} -- the full taxonomized table, including how each
+name resolved (scientific name / synonym / unresolved). The audit view.
+\code{NULL} when no \code{taxonomizr} database was available.
+\item \code{for_LCA} -- the \code{taxID} column plus the 7 ranks only (resolved rows,
+genus-level entries retained), cleaned and ready to hand straight to
+\code{\link[=run_regatta]{run_regatta()}} / \code{\link[=reconcile_checklist]{reconcile_checklist()}}. When no database is available
+this is the un-taxonomized name list, deferred to the reconcile step.
 }
-Nothing is written to disk unless you pass \code{output_dir}; then the two
-outputs are saved there, named from \code{region}
-and \code{label}.
+Nothing is written to disk unless you pass \code{output_dir}; then the outputs are
+saved there, named from \code{region} and \code{label}.
 }
 \details{
 \code{\link[=OBIS_download]{OBIS_download()}}, \code{\link[=GBIF_download]{GBIF_download()}}, and \code{\link[=taxonomize_checklist]{taxonomize_checklist()}} remain

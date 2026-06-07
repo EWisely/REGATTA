@@ -11,17 +11,21 @@
 #' species records from OBIS and/or GBIF (or reuses pre-made sources), folds
 #' in any local `Genus`+`Species` CSVs, deduplicates, taxonomizes the LCA
 #' list (when a `taxonomizr` database is available), and **returns** the
-#' results. Two outputs are produced:
+#' results. Three outputs are produced:
 #' \itemize{
-#'   \item `for_making_localdb` -- species binomials only; feed to a
-#'     reference-database builder (e.g. CRABS).
-#'   \item `for_LCA` -- the checklist for the LCA step: it retains genus-level
-#'     entries and is taxonomized (ready to hand straight to [run_regatta()] /
-#'     [reconcile_checklist()]) when a `taxonomizr` database is available.
+#'   \item `for_making_localdb` -- a bare, sorted character vector of the unique
+#'     species binomials (no columns). Write it one-name-per-line and feed it to
+#'     a reference-database builder (e.g. CRABS).
+#'   \item `checklist_summary` -- the full taxonomized table, including how each
+#'     name resolved (scientific name / synonym / unresolved). The audit view.
+#'     `NULL` when no `taxonomizr` database was available.
+#'   \item `for_LCA` -- the `taxID` column plus the 7 ranks only (resolved rows,
+#'     genus-level entries retained), cleaned and ready to hand straight to
+#'     [run_regatta()] / [reconcile_checklist()]. When no database is available
+#'     this is the un-taxonomized name list, deferred to the reconcile step.
 #' }
-#' Nothing is written to disk unless you pass `output_dir`; then the two
-#' outputs are saved there, named from `region`
-#' and `label`.
+#' Nothing is written to disk unless you pass `output_dir`; then the outputs are
+#' saved there, named from `region` and `label`.
 #'
 #' [OBIS_download()], [GBIF_download()], and [taxonomize_checklist()] remain
 #' exported for direct/advanced use, but the typical user only calls this
@@ -56,17 +60,19 @@
 #'   un-taxonomized and taxonomizing is deferred to the reconcile step.
 #' @param output_dir Optional directory to write outputs into. Default `NULL`
 #'   writes nothing (everything is returned); supply a directory to also save
-#'   `comprehensive_<region>_<label>_list_for_making_localdb.txt`,
-#'   `..._for_LCA.txt`, and `..._for_LCA_taxonomized.rds`.
+#'   `comprehensive_<region>_<label>_list_for_making_localdb.txt` (one name per
+#'   line), `..._checklist_summary.csv`, and `..._for_LCA.rds` (or `.txt` when
+#'   no database was available).
 #' @param kingdom Kingdom used by [resolve_taxa()] to disambiguate query
 #'   taxa in the downloaders. Default `"Animalia"`.
 #' @param gbif_fill_families Passed to [GBIF_download()] for a fresh GBIF run.
 #'
-#' @return Invisibly, a list with `for_making_localdb` (species-only
-#'   data.frame, for a reference-database builder) and `for_LCA` (the checklist
-#'   for the LCA step, retaining genus-level entries; taxonomized when a DB was
-#'   available, otherwise a name list). Pass `for_LCA` straight to
-#'   [run_regatta()] / [reconcile_checklist()].
+#' @return Invisibly, a list with `for_making_localdb` (a bare character vector
+#'   of unique species binomials, for a reference-database builder),
+#'   `checklist_summary` (the full taxonomized table with per-name resolution
+#'   status, or `NULL` if no DB was available), and `for_LCA` (`taxID` + the 7
+#'   ranks, ready for the LCA step). Pass `for_LCA` straight to [run_regatta()]
+#'   / [reconcile_checklist()].
 #'
 #' @examples
 #' \dontrun{
@@ -185,18 +191,27 @@ build_regional_checklist <- function(region,
           nrow(lca_rows), " entries incl. ", nrow(genus_rows),
           " genus-level (for the checklist LCA).")
 
-  # --- for_LCA: the checklist for the LCA step -----------------------------
-  # It retains the genus-level entries and is taxonomized when a DB is
-  # available (ready to hand straight to run_regatta()). Without a DB it is the
-  # species+genus name list, which the reconcile step taxonomizes on the fly.
+  # --- Three return objects ------------------------------------------------
+  # for_making_localdb : bare, sorted, unique scientific names -- nothing else.
+  #   Written one-per-line, this is the input for FASTA-building tools (CRABS).
+  # checklist_summary  : the full taxonomized table, including how each name
+  #   resolved (scientific name / synonym / unresolved) -- the audit view.
+  # for_LCA            : the taxID column + the 7 ranks only, resolved rows,
+  #   cleaned and ready for the LCA step (run_regatta()/reconcile_checklist()).
   ranks <- c("domain", "phylum", "class", "order", "family", "genus", "species")
+  for_making_localdb <- sort(unique(species_rows$Species))
+
+  checklist_summary <- NULL
   if (file.exists(sql_path)) {
     message("Taxonomizing the LCA checklist ...")
-    for_LCA <- taxonomize_checklist(lca_rows, sql_path = sql_path)
+    checklist_summary <- taxonomize_checklist(lca_rows, sql_path = sql_path)
+    resolved_rows <- !is.na(checklist_summary$taxID)
+    for_LCA <- checklist_summary[resolved_rows, c("taxID", ranks), drop = FALSE]
+    rownames(for_LCA) <- NULL
   } else {
     message("No taxonomizr DB at '", sql_path, "' -- for_LCA is returned as a ",
-            "name list; reconcile_checklist()/run_regatta() will taxonomize it ",
-            "(with a warning) at the LCA step.")
+            "name list and checklist_summary is NULL; reconcile_checklist()/",
+            "run_regatta() will taxonomize it (with a warning) at the LCA step.")
     for_LCA <- lca_rows
   }
   lca_taxonomized <- all(ranks %in% names(for_LCA))
@@ -205,9 +220,13 @@ build_regional_checklist <- function(region,
   if (!is.null(output_dir)) {
     dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
     stem <- paste0("comprehensive_", trimws(region), "_", trimws(label), "_list")
-    readr::write_delim(species_rows,
-                       file.path(output_dir, paste0(stem, "_for_making_localdb.txt")),
-                       delim = "\t")
+    # CRABS input: one scientific name per line, no header, no columns.
+    writeLines(for_making_localdb,
+               file.path(output_dir, paste0(stem, "_for_making_localdb.txt")))
+    if (!is.null(checklist_summary))
+      utils::write.csv(checklist_summary,
+                       file.path(output_dir, paste0(stem, "_checklist_summary.csv")),
+                       row.names = FALSE)
     if (lca_taxonomized)
       saveRDS(for_LCA, file.path(output_dir, paste0(stem, "_for_LCA.rds")))
     else
@@ -217,7 +236,9 @@ build_regional_checklist <- function(region,
     message("Wrote checklist files to ", output_dir)
   }
 
-  invisible(list(for_making_localdb = species_rows, for_LCA = for_LCA))
+  invisible(list(for_making_localdb = for_making_localdb,
+                 checklist_summary  = checklist_summary,
+                 for_LCA            = for_LCA))
 }
 
 # FALSE / NULL / NA all mean "this source is off". A non-FALSE value (TRUE, a

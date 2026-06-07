@@ -6,8 +6,18 @@
 #' Resolves the given high-level taxa via WoRMS, finds GBIF backbone
 #' keys for the resulting classes, and submits a GBIF occurrence
 #' download restricted to the polygon. **Returns** the species data frame;
-#' writes it to disk only if you supply `output_dir`. GBIF login credentials
-#' must already be set in `~/.Renviron`; see the Setup section of the README.
+#' writes it to disk only if you supply `output_dir`.
+#'
+#' @section Time and credentials:
+#' This submits an asynchronous GBIF `occ_download` and **waits for GBIF to
+#' assemble it server-side, which typically takes several minutes** (longer for
+#' large polygons or broad taxa) -- the call blocks while it polls. GBIF
+#' requires a free account, and `rgbif` authenticates with your account
+#' **credentials** (there is no separate "API key" for downloads). Register at
+#' \url{https://www.gbif.org/user/profile}, then store three values in your
+#' `~/.Renviron` (via `usethis::edit_r_environ()`, then restart R) so nothing is
+#' hardcoded: `GBIF_USER`, `GBIF_PWD`, and `GBIF_EMAIL` (the email you
+#' registered with).
 #'
 #' @param obis_taxa A character vector of taxon names at any level. They are
 #'   validated, disambiguated, and resolved to GBIF backbone keys by
