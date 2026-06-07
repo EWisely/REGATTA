@@ -57,10 +57,13 @@
 #'   runs a fresh `occ_download`; a GBIF download **key** string or an
 #'   `occ_download` **object** reuses an already-finished download; a path to
 #'   a pre-made GBIF source CSV feeds that.
-#' @param CSV Local checklist input: `FALSE` (default) for none, or a
-#'   character vector of paths to local `Genus`+`Species` CSV(s). A `Species`
-#'   value of `"sp."` keeps the genus alone (no epithet); that genus-level
-#'   entry goes into `for_LCA` only, never `for_making_localdb`.
+#' @param CSV Optional local checklist input. `NULL` (default) adds none --
+#'   the public sources (OBIS/GBIF) drive the checklist. Otherwise a character
+#'   vector of paths to local `Genus`+`Species` CSV(s). A `Species` value of
+#'   `"sp."` keeps the genus alone (no epithet); that genus-level entry goes
+#'   into `for_LCA` only, never `for_making_localdb`. If you supply one, prefer
+#'   a **citable** source (e.g. a published regional checklist) so your pipeline
+#'   stays reproducible -- record its citation in your methods.
 #' @param marine,freshwater,terrestrial,brackish OBIS habitat filters, passed
 #'   to [OBIS_download()]. Defaults keep marine plus anadromous/catadromous
 #'   species and drop only land contaminants.
@@ -74,14 +77,16 @@
 #'   `..._GBIF_download_info.txt` (when a GBIF download ran). The same objects
 #'   are also returned.
 #' @param sql_path Path to the local `accessionTaxa.sql` taxonomizr DB used to
-#'   taxonomize the LCA list. Defaults to a persistent per-user cache
-#'   (`tools::R_user_dir("REGATTA", "cache")`), shared across projects and
-#'   sessions. If the DB is missing, REGATTA prompts to build it (interactive)
-#'   or errors with the one-line build command (non-interactive) unless
-#'   `overwrite_taxonomy_files = TRUE`. Set `sql_path = NULL` to skip
-#'   taxonomization entirely and defer it to the reconcile step. Only
-#'   names+nodes are needed here, so the build uses
-#'   `taxonomizr::prepareDatabase(getAccessions = FALSE)` (a few hundred MB).
+#'   taxonomize the LCA list. **Default `NULL` skips taxonomization** here
+#'   (`for_LCA` is returned as a name list and `checklist_summary` is `NULL`);
+#'   it is deferred to the reconcile step ([run_regatta()] /
+#'   [reconcile_checklist()]), which taxonomize using their own cached DB. Pass
+#'   a path to taxonomize now -- e.g. an existing DB, or the shared cache
+#'   `file.path(tools::R_user_dir("REGATTA", "cache"), "accessionTaxa.sql")`. If
+#'   the given path is missing, REGATTA prompts to build it (interactive) or
+#'   errors with the one-line build command (non-interactive) unless
+#'   `overwrite_taxonomy_files = TRUE`. Only names+nodes are needed here, so the
+#'   build uses `taxonomizr::prepareDatabase(getAccessions = FALSE)`.
 #' @param overwrite_taxonomy_files If `TRUE`, (re)build the taxonomy DB at
 #'   `sql_path` even if one exists -- the way to refresh a stale cached snapshot
 #'   in place without hunting for the file. Default `FALSE` reuses an existing
@@ -134,13 +139,13 @@ build_regional_checklist <- function(region,
                                      regional_poly = NULL,
                                      OBIS = TRUE,
                                      GBIF = FALSE,
-                                     CSV  = FALSE,
+                                     CSV  = NULL,
                                      marine = TRUE,
                                      freshwater = NA,
                                      terrestrial = FALSE,
                                      brackish = NA,
                                      output_dir,
-                                     sql_path = .regatta_default_sql_path(),
+                                     sql_path = NULL,
                                      overwrite_taxonomy_files = FALSE,
                                      kingdom = "Animalia",
                                      gbif_fill_families = TRUE) {
