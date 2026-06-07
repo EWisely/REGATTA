@@ -156,10 +156,12 @@ cl <- build_regional_checklist(
                                                # optional: your own checklist, ideally a
                                                # citable published list (here, a real one)
   marine        = TRUE, terrestrial = FALSE,   # keep marine + diadromous fish, drop land contaminants
-  output_dir    = "my_checklists"              # REQUIRED: where the outputs are written
-  # sql_path defaults to a persistent per-user cache (built on first use);
-  # override with sql_path = "/path/to/your/accessionTaxa.sql" to reuse an existing DB.
-  # overwrite_taxonomy_files = TRUE            # rebuild a stale DB snapshot in place
+  output_dir    = "my_checklists",             # REQUIRED: where the outputs are written
+  sql_path      = file.path(tools::R_user_dir("REGATTA", "cache"), "accessionTaxa.sql")
+  # ^ this IS the default (a persistent cache, built on first use; run that
+  #   file.path(...) to see where). Replace with "/path/to/your/accessionTaxa.sql"
+  #   to reuse an existing DB; overwrite_taxonomy_files = TRUE refreshes a stale
+  #   one; sql_path = NULL skips taxonomizing (defer to run_regatta()).
 )
 ```
 

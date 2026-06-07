@@ -217,9 +217,14 @@ argument.
 ```r
 poly <- "POLYGON ((-117.4 32.0, -91.9 -6.3, -81.4 -6.3, -76.1 7.7, -82.1 8.6, -104.2 20.3, -112.5 32.2, -117.4 32.0))"
 
+# Where the taxonomy cache lives (built once on first use, reused across
+# projects) -- run this to see the path; pass your own path to sql_path to
+# override it:
+tools::R_user_dir("REGATTA", "cache")
+
 # One call: downloads OBIS (default on) and/or GBIF (default off), folds in
-# any local CSV, and (if you give it a sql_path) taxonomizes the LCA list.
-# It RETURNS everything AND writes it to the required output_dir.
+# any local CSV, and taxonomizes the LCA list. It RETURNS everything AND writes
+# it to the required output_dir.
 cl <- build_regional_checklist(
   region        = "galapagos",   # names the output files
   label         = "fish",        # short filename label (kept separate from taxa)
@@ -230,11 +235,12 @@ cl <- build_regional_checklist(
   CSV           = NULL,          # optional: path(s) to YOUR local checklist CSV(s),
                                  # ideally a citable published list (for reproducibility)
   marine        = TRUE, terrestrial = FALSE,
-  output_dir    = "my_checklists"   # REQUIRED: outputs go in a dated
+  output_dir    = "my_checklists",  # REQUIRED: outputs go in a dated
                                     # <region>_<label>_<date> subfolder here
-  # sql_path defaults to a persistent per-user cache, built on first use;
-  # override it with a path to an existing DB. overwrite_taxonomy_files = TRUE
-  # refreshes a stale one; sql_path = NULL skips taxonomizing (defer to run_regatta).
+  sql_path      = file.path(tools::R_user_dir("REGATTA", "cache"), "accessionTaxa.sql")
+  # ^ this IS the default (a persistent cache, built on first use). Replace it
+  #   with "/path/to/your/accessionTaxa.sql" to reuse an existing DB.
+  #   overwrite_taxonomy_files = TRUE refreshes a stale one; sql_path = NULL skips it.
 )
 # cl$for_making_localdb     bare vector of unique species names; write one-per-line
 #                           for a reference-DB builder like CRABS:
