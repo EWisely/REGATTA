@@ -71,8 +71,9 @@ sidestep the pitfalls:
 
 - `"fish"` → ray-finned fishes + sharks & rays + hagfishes + lampreys (the
   usual MiFish target)
-- `"vertebrates"` → the vertebrate subphylum `Vertebrata`, routed to return
-  vertebrates and **not** the red-algae genus of the same name
+- `"vertebrates"` → the vertebrate classes (the `"fish"` set plus `Mammalia`,
+  `Aves`, `Reptilia`, `Amphibia`), so it works in both OBIS and GBIF — unlike
+  the bare subphylum `Vertebrata`, which GBIF can't resolve to a usable key
 
 Run `resolve_taxa()` on your names first to see what each resolves to — and
 whether GBIF has a usable key — before kicking off a long download.

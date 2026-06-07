@@ -8,7 +8,9 @@ test_that("curated alias table has the expected shorthands", {
   # one-to-many "fish" shorthand: ray-finned fish + sharks/rays + hagfish + lamprey
   expect_setequal(al[["fish"]],
                   c("Actinopterygii", "Elasmobranchii", "Myxini", "Petromyzonti"))
-  expect_identical(al[["vertebrates"]], "Vertebrata")
+  expect_setequal(al[["vertebrates"]],
+                  c("Actinopterygii", "Elasmobranchii", "Myxini", "Petromyzonti",
+                    "Mammalia", "Aves", "Reptilia", "Amphibia"))
   expect_identical(al[["lepidosauria"]], "Reptilia")
 })
 

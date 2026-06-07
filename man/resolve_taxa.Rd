@@ -32,10 +32,13 @@ and warns.}
 \item{aliases}{A named list (or named character vector) mapping (lower-cased)
 input names to one or more substitute names for the WoRMS lookup. Defaults
 to REGATTA's curated table, which includes one-to-many shorthands:
-\code{"fish"} -> \code{c("Actinopterygii", "Elasmobranchii", "Myxini", "Petromyzonti")} (ray-finned fish + sharks/rays + hagfishes + lampreys),
-\code{"vertebrates"} -> \code{"Vertebrata"}, \code{"lepidosauria"} ->
-\code{"Reptilia"}, \code{"osteichthyes"} -> \code{"Actinopteri"}. Pass your own to extend
-or override. A multi-name alias expands into one result row per taxon.}
+\code{"fish"} -> ray-finned fish + sharks/rays + hagfishes + lampreys
+(\code{Actinopterygii}, \code{Elasmobranchii}, \code{Myxini}, \code{Petromyzonti}),
+\code{"vertebrates"} -> those plus \code{Mammalia}, \code{Aves}, \code{Reptilia}, \code{Amphibia}
+(the vertebrate classes; works in both OBIS and GBIF, unlike the bare
+subphylum \code{Vertebrata}), \code{"lepidosauria"} -> \code{"Reptilia"},
+\code{"osteichthyes"} -> \code{"Actinopteri"}. Pass your own to extend or override. A
+multi-name alias expands into one result row per taxon.}
 }
 \value{
 A data.frame with one row per resolved taxon: \code{input} (the original

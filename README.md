@@ -174,7 +174,9 @@ argument.
 > it disambiguates names against WoRMS by kingdom and flags GBIF backbone
 > coverage. The shorthand `"fish"` expands to ray-finned fishes + sharks &
 > rays + hagfishes + lampreys (the typical MiFish target), and `"vertebrates"`
-> to `Vertebrata`. GBIF's backbone has no usable class node for bony fish, so
+> to those plus mammals, birds, reptiles, and amphibians (all the vertebrate
+> classes, so it works in both OBIS and GBIF). GBIF's backbone has no usable
+> class node for bony fish, so
 > `GBIF_download()` descends to order automatically — OBIS remains the more
 > complete fish source, with GBIF as a supplement.
 

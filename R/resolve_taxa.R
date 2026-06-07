@@ -54,7 +54,12 @@
     # ray-finned fish + sharks/rays + hagfishes + lampreys (the fishes a
     # vertebrate metabarcoding primer like MiFish targets):
     "fish"         = c("Actinopterygii", "Elasmobranchii", "Myxini", "Petromyzonti"),
-    "vertebrates"  = "Vertebrata"                   # convenient plural
+    # All vertebrate classes. Expands like "fish" (rather than mapping to the
+    # subphylum "Vertebrata", which has no usable GBIF backbone key) so it works
+    # in BOTH OBIS (queried by AphiaID) and GBIF (direct keys for
+    # mammals/birds/etc. + order descent for ray-finned fish and reptiles):
+    "vertebrates"  = c("Actinopterygii", "Elasmobranchii", "Myxini", "Petromyzonti",
+                       "Mammalia", "Aves", "Reptilia", "Amphibia")
   )
 }
 
@@ -177,11 +182,13 @@
 #' @param aliases A named list (or named character vector) mapping (lower-cased)
 #'   input names to one or more substitute names for the WoRMS lookup. Defaults
 #'   to REGATTA's curated table, which includes one-to-many shorthands:
-#'   `"fish"` -> `c("Actinopterygii", "Elasmobranchii", "Myxini",
-#'   "Petromyzonti")` (ray-finned fish + sharks/rays + hagfishes + lampreys),
-#'   `"vertebrates"` -> `"Vertebrata"`, `"lepidosauria"` ->
-#'   `"Reptilia"`, `"osteichthyes"` -> `"Actinopteri"`. Pass your own to extend
-#'   or override. A multi-name alias expands into one result row per taxon.
+#'   `"fish"` -> ray-finned fish + sharks/rays + hagfishes + lampreys
+#'   (`Actinopterygii`, `Elasmobranchii`, `Myxini`, `Petromyzonti`),
+#'   `"vertebrates"` -> those plus `Mammalia`, `Aves`, `Reptilia`, `Amphibia`
+#'   (the vertebrate classes; works in both OBIS and GBIF, unlike the bare
+#'   subphylum `Vertebrata`), `"lepidosauria"` -> `"Reptilia"`,
+#'   `"osteichthyes"` -> `"Actinopteri"`. Pass your own to extend or override. A
+#'   multi-name alias expands into one result row per taxon.
 #'
 #' @return A data.frame with one row per resolved taxon: `input` (the original
 #'   name you passed -- repeated when an alias expanded to several taxa),
