@@ -237,7 +237,7 @@
 #' @param input One of:
 #'   * a single file path (single-DB workflow);
 #'   * a length-2 character vector of vsearch `lca` + `userout` paths
-#'     (single-DB workflow using the LCA-correct taxonomy);
+#'     (single-DB workflow using the LCA-resolved taxonomy);
 #'   * a folder path (the function scans the folder -- see Details for the
 #'     convention);
 #'   * `list(global = ..., local = ...)` for an explicit two-DB workflow

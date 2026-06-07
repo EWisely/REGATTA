@@ -6,9 +6,11 @@
 
 **Reconciling eDNA Geographic Assignments via Taxonomy Table Adjustment**
 
-An R package for correcting off-target species assignments in eDNA
-metabarcoding results using a regional species checklist — without manual
-curation, and preserving as much taxonomic specificity as possible.
+An R package for reconciling eDNA metabarcoding taxonomic assignments against
+a regional species checklist — downgrading the taxonomic specificity of
+species-level calls to taxa with no records in the study area, rather than
+discarding them — without manual curation, and preserving as much taxonomic
+specificity as the regional evidence supports.
 
 ## The problem
 
@@ -32,8 +34,8 @@ checklist stays at species. A call to *S. goodei* (a Pacific rockfish) in a
 region whose checklist has other *Sebastes* but not *S. goodei* is
 downgraded to genus *Sebastes* and flagged. A call to a tropical species in
 a temperate-region checklist with no *Sebastes* at all gets walked up the
-tree until something matches, or flagged as fully off-target if nothing
-does.
+tree until something matches, or flagged as having no regional record if
+nothing does.
 
 Names on both sides — classifier output and checklist — are routed through a
 **synonym-aware NCBI lookup**, so older nomenclature is updated to current
@@ -228,8 +230,8 @@ cl <- build_regional_checklist(
 
 Run the pipeline **once per taxonomic group** your primer targets — one pass
 for fish (with a fish-only checklist), a separate pass for crustaceans, and
-so on. Mixing groups into one megalist defeats the off-target check: a
-MiFish primer that accidentally amplifies a crustacean would pass through a
+so on. Mixing groups into one megalist defeats the per-group reconciliation:
+a MiFish primer that incidentally amplifies a crustacean would pass through a
 fish+crustacean checklist instead of being flagged.
 
 Nothing in the pipeline is fish-, marine-, or Galapagos-specific — the
@@ -243,7 +245,7 @@ groups side-by-side in one project without naming collisions.
 
 | Function | Purpose |
 |---|---|
-| `run_regatta()` | **High-level wrapper / recommended entry point.** Auto-detects classifier format, dispatches the right preprocessor, runs the reconcile steps, and **returns** the corrected tables + a 21-row summary; writes the output triples + `run_log.txt` only when given `out_dir`. |
+| `run_regatta()` | **High-level wrapper / recommended entry point.** Auto-detects classifier format, dispatches the right preprocessor, runs the reconcile steps, and **returns** the reconciled tables + a 21-row summary; writes the output triples + `run_log.txt` only when given `out_dir`. |
 | `resolve_taxa()` | Validate & disambiguate query taxon names against WoRMS (by kingdom); report GBIF backbone coverage. Run standalone to pre-check names. |
 | `GBIF_download()` | Pull a GBIF species list inside a WKT polygon for given taxa. |
 | `OBIS_download()` | Pull an OBIS species list, with optional marine/brackish/freshwater filters. |

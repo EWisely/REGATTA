@@ -1,5 +1,5 @@
 ---
-title: "REGATTA tutorial: correcting off-target eDNA assignments with a regional checklist"
+title: "REGATTA tutorial: reconciling eDNA assignments against a regional checklist"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{REGATTA tutorial}
@@ -15,9 +15,13 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 
 Your classifier confidently assigns eDNA reads to species that don't live in
 your study area, because the closest match in a global reference database is
-often a relative from the other side of the world. REGATTA corrects those
-off-target calls against a regional species checklist — with **no hand-curated
-reference database** and **no blanket percent-identity cutoff** that would
+often a relative from the other side of the world. The DNA isn't wrong — the
+reference database is geographically and genetically incomplete and carries
+outdated names, which together produce geographically spurious species-level
+calls. REGATTA reconciles those calls against a regional species checklist,
+downgrading the taxonomic specificity of any assignment to a taxon with no
+regional record — with **no hand-curated reference database** and **no blanket
+percent-identity cutoff** that would
 throw away good species-level calls. It walks each assignment up the taxonomic
 tree only as far as the regional checklist forces, and no further.
 
@@ -49,8 +53,8 @@ missing group breaks both:
   database — a group you leave out simply never gets references downloaded; and
 - it's the **regional taxa list for the geographic–taxonomic reconciliation**
   of your taxonomy table — gaps there leave real local species unrepresented,
-  so a present species can't be confirmed and may be wrongly flagged
-  off-target.
+  so a present species can't be confirmed and may be wrongly downgraded as
+  having no regional record.
 
 **How:** enter the scientific name(s) of your group. Scientific names work
 directly when OBIS and GBIF both recognize them — e.g. `Mammalia`:
@@ -85,7 +89,7 @@ whether GBIF has a usable key — before kicking off a long download.
 **Why this matters:** REGATTA judges every assignment against the species that
 actually occur in your region, so the first job is to assemble that list — once
 per region × group. The more complete it is, the fewer real local species get
-mistaken for off-target calls downstream (and the same species list also seeds
+mistaken for geographically spurious calls and downgraded downstream (and the same species list also seeds
 your reference database).
 
 **How:** one call pulls the records, merges them, taxonomizes the LCA list, and
@@ -207,13 +211,13 @@ checklist <- taxonomize_checklist(
 ## `run_regatta()`
 
 **Why this matters:** once the checklist is taxonomized, one call turns your raw
-classifier file into a corrected, audited taxonomy table — you don't wire the
+classifier file into a reconciled, audited taxonomy table — you don't wire the
 preprocessing, reconciliation, and reporting steps together yourself.
 
 **How:** point `run_regatta()` at your results file and the checklist from the
 previous step (`cl$for_LCA`). It detects the format (here an obitools `.tab`,
 recognized by its `TAXID` column), resolves the taxIDs to lineages, runs the
-checklist LCA, and **returns** the corrected table + summary. (If `cl$for_LCA`
+checklist LCA, and **returns** the reconciled table + summary. (If `cl$for_LCA`
 wasn't taxonomized — no DB at build time — `run_regatta()` warns and
 taxonomizes it on the fly.)
 
@@ -224,7 +228,7 @@ res <- run_regatta(
   sql_path  = "/path/to/accessionTaxa.sql"
   # out_dir = "regatta_out"            # uncomment to also write the output bundle
 )
-#> returns res$post_checklist (corrected table) + res$summary (21-row).
+#> returns res$post_checklist (reconciled table) + res$summary (21-row).
 #> with out_dir set, also writes reconcile_checklist/*, regatta_summary.csv, run_log.txt
 ```
 
@@ -238,10 +242,10 @@ On this dataset, of the 542 obitools-assigned ASVs (out of 1,438 total):
 | order   | 1 |
 | class   | 9 |
 
-The 229 genus-level and 9 class-level results are exactly the off-target calls
-REGATTA exists to catch: globally-confident species assignments to fish that
-don't occur in the Galapagos, each walked down to the lowest rank the regional
-checklist can actually support.
+The 229 genus-level and 9 class-level results are exactly the geographically
+spurious calls REGATTA exists to reconcile: globally-confident species
+assignments to fish with no Galapagos record, each downgraded to the lowest
+rank the regional checklist can actually support.
 
 > **Classified the same ASVs against a second, locally-curated database too?**
 > REGATTA can reconcile the two classifier runs against each other before the
@@ -254,7 +258,7 @@ checklist can actually support.
 **Why this matters:** this is the core step `run_regatta()` calls for you — and
 because it's pure base R, you can watch it work right here, with no internet and
 no database, on real data bundled with the package. Seeing each ASV's outcome
-makes the correction concrete before you run it on your own table.
+makes the reconciliation concrete before you run it on your own table.
 
 **How:** pass a taxonomy table and the taxonomized checklist. The demo below
 uses the bundled Galapagos checklist and **12 real obitools assignments (10
@@ -345,7 +349,7 @@ CSVs per stage):
   classifier runs against each other before the checklist step. See
   `vignette("REGATTA-two-database")` and `?reconcile_global_local`.
 * **One pass per primer.** Run the pipeline once per taxonomic group your
-  primers target. Mixing groups into one megalist lets off-target
-  amplifications slip through.
+  primers target. Mixing groups into one megalist lets a primer's incidental
+  amplification of another group slip through unflagged.
 * **Pre-check your taxon names** with `resolve_taxa()` before a long download,
   and see the README troubleshooting section for GBIF/OBIS specifics.

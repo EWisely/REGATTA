@@ -79,7 +79,7 @@ classifiers and 546 were assigned by at least one. Stage 1 resolved those:
 | global downgraded to global∩local LCA | 45 |
 
 and Stage 2 (checklist) then gave 295 species / 231 genus / 19 family / 1 order
-/ 892 off-target — versus the main tutorial's single-classifier obitools run
+/ 892 with no regional record — versus the main tutorial's single-classifier obitools run
 (287 species). Those extra species-level calls are the local database's
 contribution.
 

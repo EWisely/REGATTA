@@ -18,7 +18,7 @@ run_regatta(
 \itemize{
 \item a single file path (single-DB workflow);
 \item a length-2 character vector of vsearch \code{lca} + \code{userout} paths
-(single-DB workflow using the LCA-correct taxonomy);
+(single-DB workflow using the LCA-resolved taxonomy);
 \item a folder path (the function scans the folder -- see Details for the
 convention);
 \item \code{list(global = ..., local = ...)} for an explicit two-DB workflow

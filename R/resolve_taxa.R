@@ -207,7 +207,7 @@
 
   # Gap-fill: families whose GBIF parent at the primary rank isn't in the
   # matched set (e.g. families GBIF files with no order). Phylum-guarded so a
-  # stray family-name collision can't drag in off-target taxa.
+  # stray family-name collision can't drag in unrelated taxa.
   fill_keys <- integer(0)
   if (isTRUE(fill_families) && descend_to != "family") {
     fam_names <- walk("family")

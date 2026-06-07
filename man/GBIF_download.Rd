@@ -60,7 +60,7 @@ whole search is a single \code{occ_download} (all keys in one request -- the key
 count does not cost extra downloads against GBIF's concurrent-download
 limit), completeness is the sensible default. The only cost is a second
 WoRMS family walk during preparation. A phylum guard prevents stray
-family-name collisions from adding off-target taxa. Set FALSE to skip the
+family-name collisions from pulling in unrelated taxa. Set FALSE to skip the
 family walk for a faster, order-only (~97\%) preparation.}
 
 \item{output_dir}{Optional directory to write the result into. Default
