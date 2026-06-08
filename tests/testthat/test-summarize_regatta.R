@@ -68,6 +68,33 @@ test_that("transition rows sit in regatta_result with NA in the before column", 
   expect_equal(sum(vals), 12)
 })
 
+# helper mirroring summarize_regatta's "assigned = any non-NA rank"
+n_assigned_any_test <- function(t) {
+  ranks <- c("domain","phylum","class","order","family","genus","species")
+  sum(rowSums(!is.na(t[, ranks, drop = FALSE])) > 0)
+}
+
+test_that("two-DB source-breakdown rows are NA in the inputs, valued only in regatta_result", {
+  local <- read.csv(system.file("extdata", "mifish_vsearch_example.csv", package = "REGATTA"),
+                    stringsAsFactors = FALSE)
+  rec  <- suppressMessages(reconcile_global_local(global, local, output_dir = NULL))
+  post2 <- suppressMessages(reconcile_checklist(rec$result, checklist, output_dir = NULL))
+  s <- summarize_regatta(rec, post2, global, local, checklist = checklist)
+  # these describe the global-vs-local reconciliation, not either raw input
+  for (lbl in c("count of local assignment preferred",
+                "count of global assignment preferred",
+                "change in number of ASVs assigned")) {
+    row <- s[s$row_names == lbl, ]
+    expect_true(is.na(row$global))          # NA in the input columns
+    expect_true(is.na(row$local))
+    expect_false(is.na(row$regatta_result)) # single value in the result column
+  }
+  # local-preferred + global-preferred = ASVs the global DB assigned (denominator)
+  lp <- s$regatta_result[s$row_names == "count of local assignment preferred"]
+  gp <- s$regatta_result[s$row_names == "count of global assignment preferred"]
+  expect_equal(lp + gp, n_assigned_any_test(global))
+})
+
 test_that("summarize_regatta errors with no inputs and on a malformed list", {
   expect_error(summarize_regatta(), "Supply at least one")
   expect_error(summarize_regatta(post_checklist = list(foo = 1)), "result")

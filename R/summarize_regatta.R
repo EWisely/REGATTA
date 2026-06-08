@@ -222,11 +222,14 @@ summarize_regatta <- function(reconciled     = NULL,
     n_global <- sum(tr$best_pctid_winner == "global" & have_g)
     denom    <- sum(have_g)
 
-    for (j in seq_along(out)) {
-      out[[j]][4] <- n_local
-      out[[j]][5] <- if (denom > 0) 100 * n_local  / denom else NA_real_
-      out[[j]][6] <- n_global
-      out[[j]][7] <- if (denom > 0) 100 * n_global / denom else NA_real_
+    # These describe the global-vs-local reconciliation, not either raw input,
+    # so they belong only in the result column (NA in the global/local inputs).
+    rc <- intersect("regatta_result", names(out))
+    if (length(rc)) {
+      out[[rc]][4] <- n_local
+      out[[rc]][5] <- if (denom > 0) 100 * n_local  / denom else NA_real_
+      out[[rc]][6] <- n_global
+      out[[rc]][7] <- if (denom > 0) 100 * n_global / denom else NA_real_
     }
   }
 
@@ -240,7 +243,8 @@ summarize_regatta <- function(reconciled     = NULL,
   if (!is.null(reconciled) && !is.null(global_input)) {
     n_global_assigned     <- n_assigned_any(global_input)
     n_reconciled_assigned <- n_assigned_any(reconciled$result)
-    for (j in seq_along(out)) out[[j]][8] <- n_reconciled_assigned - n_global_assigned
+    rc <- intersect("regatta_result", names(out))
+    if (length(rc)) out[[rc]][8] <- n_reconciled_assigned - n_global_assigned
   }
 
   row_labels <- c(
