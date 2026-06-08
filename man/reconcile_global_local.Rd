@@ -62,8 +62,12 @@ A list with three elements:
 database's percent identity, kept right after the id for downstream
 filtering), then the 7 rank columns. Feeds straight into
 \code{\link[=reconcile_checklist]{reconcile_checklist()}}.
-\item \code{tracking}: per-ASV decision record (both inputs preserved with
-\verb{_global} / \verb{_local} suffixes plus REGATTA bookkeeping).
+\item \code{tracking}: per-ASV decision record with columns grouped per field as
+\verb{<field>_global} / \verb{<field>_local} / \verb{<field>_regatta} (the reconciled
+value) -- each of the 7 ranks and \code{pct_id} side by side -- then the
+decision columns (\code{best_pctid_winner}, \code{preferred_database},
+\code{preferred_scientific_name}, \code{global_lca_to_local_triggered}) and any
+remaining classifier columns.
 \item \code{stats}: (metric, count) data.frame.
 }
 }

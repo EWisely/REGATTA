@@ -108,14 +108,15 @@ local  <- read.csv(system.file("extdata", "mifish_vsearch_example.csv",
 rec <- reconcile_global_local(global, local, output_dir = NULL)
 ```
 
-`$tracking` shows the per-ASV decision — both classifiers' calls side by side,
-which won on percent identity, and the database REGATTA preferred:
+`$tracking` shows the per-ASV decision with each field grouped global / local /
+regatta (the reconciled value), so you can read the two classifiers' calls and
+REGATTA's pick side by side:
 
 ```{r demo-tracking}
-rec$tracking[, c("ASV_id", "species_global", "pct_id_global",
-                 "species_local", "pct_id_local",
-                 "best_pctid_winner", "preferred_database",
-                 "preferred_scientific_name")]
+rec$tracking[, c("ASV_id",
+                 "species_global", "species_local", "species_regatta",
+                 "pct_id_global", "pct_id_local", "pct_id_regatta",
+                 "best_pctid_winner", "preferred_database")]
 ```
 
 There are **four** per-ASV outcomes, two genera each here:
@@ -199,9 +200,11 @@ scales are handled to fit your databases.
 **How:**
 
 - The full Stage 1 audit (`reconcile_global_local/` on disk, or `rec$tracking`)
-  carries every input column from both classifiers suffixed `_global` /
-  `_local`, plus `preferred_pctid` and the reconciled `preferred_<rank>`
-  lineage — so you can see exactly why each ASV got its call.
+  groups its columns per field as `<field>_global` / `<field>_local` /
+  `<field>_regatta` (the reconciled value) — each of the 7 ranks and `pct_id`
+  read global / local / regatta side by side — followed by the decision columns
+  (`best_pctid_winner`, `preferred_database`, …) and any remaining classifier
+  columns, so you can see exactly why each ASV got its call.
 - `Local_advantage = FALSE` makes ties go to the global database instead.
 - Percent-identity scales are auto-detected per input (obitools' 0–1
   `BEST_IDENTITY` is rescaled to 0–100 to match vsearch); override with
