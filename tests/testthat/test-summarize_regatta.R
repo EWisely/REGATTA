@@ -7,11 +7,11 @@ global    <- read.csv(system.file("extdata", "mifish_obitools_example.csv", pack
 checklist <- readRDS(system.file("extdata", "galapagos_fish_checklist.rds", package = "REGATTA"))
 post      <- suppressMessages(reconcile_checklist(global, checklist, output_dir = NULL))
 
-test_that("summarize_regatta produces the 24-row table with real counts", {
+test_that("summarize_regatta produces the 27-row table with real counts", {
   s <- summarize_regatta(post_checklist = post)
   val <- function(label) s$regatta_result[s$row_names == label]
 
-  expect_equal(nrow(s), 24L)
+  expect_equal(nrow(s), 27L)
   expect_true(all(c("row_names", "regatta_result") %in% names(s)))
   expect_equal(val("total ASVs"), 12)
   expect_equal(val("assigned ASVs"), 12)
@@ -44,6 +44,24 @@ test_that("columns are the input(s) + regatta_result; single-DB input is 'input_
   expect_false("reconciled" %in% names(s2))   # merge intermediate is not a column
   s1 <- summarize_regatta(input_file = global, post_checklist = post)
   expect_identical(setdiff(names(s1), "row_names"), c("input_file", "regatta_result"))
+})
+
+test_that("transition rows sit in regatta_result with NA in the before column", {
+  s <- summarize_regatta(input_file = global, post_checklist = post)
+  tr <- function(lbl) s[s$row_names == lbl, c("input_file", "regatta_result")]
+  for (lbl in c("ASVs unchanged (specificity kept)",
+                "ASVs downgraded (specificity reduced)",
+                "no regional record (call dropped)")) {
+    row <- tr(lbl)
+    expect_true(is.na(row$input_file))       # NA in the "before" column
+    expect_false(is.na(row$regatta_result))  # the count is in regatta_result
+  }
+  # unchanged + downgraded + dropped == assigned (post-checklist), 12 here
+  vals <- vapply(c("ASVs unchanged (specificity kept)",
+                   "ASVs downgraded (specificity reduced)",
+                   "no regional record (call dropped)"),
+                 function(l) s$regatta_result[s$row_names == l], numeric(1))
+  expect_equal(sum(vals), 12)
 })
 
 test_that("summarize_regatta errors with no inputs and on a malformed list", {

@@ -2,7 +2,7 @@
 % Please edit documentation in R/summarize_regatta.R
 \name{summarize_regatta}
 \alias{summarize_regatta}
-\title{Summarize a REGATTA run as a 24-row stats table}
+\title{Summarize a REGATTA run as a 27-row stats table}
 \usage{
 summarize_regatta(
   reconciled = NULL,
@@ -40,7 +40,7 @@ data recovered). Otherwise those rows are \code{NA}. \code{\link[=run_regatta]{r
 run's checklist automatically.}
 }
 \value{
-A 24-row data.frame with one column per supplied stage.
+A 27-row data.frame with one column per supplied stage.
 }
 \description{
 Compares inputs and outputs across stages and produces Ella's summary:
