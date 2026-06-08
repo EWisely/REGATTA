@@ -28,10 +28,10 @@ input <- data.frame(
 
 result <- reconcile_checklist(input, checklist, output_dir = NULL)
 
-test_that("$result is strict 8-column shape", {
+test_that("$result is ASV_id + pct_id (input carries one) + 7 ranks, in that order", {
   expect_identical(
     names(result$result),
-    c("ASV_id","domain","phylum","class","order","family","genus","species")
+    c("ASV_id","pct_id","domain","phylum","class","order","family","genus","species")
   )
 })
 

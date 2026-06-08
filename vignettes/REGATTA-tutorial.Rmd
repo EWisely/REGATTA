@@ -50,6 +50,34 @@ calls are identical.
 
 ---
 
+## The taxonomy database — set this up first
+
+Before anything else, one piece of infrastructure underlies the whole workflow:
+a local NCBI taxonomy snapshot, built by `taxonomizr`. **Building the regional
+checklist** (next) and **resolving real classifier output** (taxIDs or
+scientific names) to lineages both run against it, so it is the true first step
+— not an afterthought. By default REGATTA keeps one in a **persistent per-user
+cache** (`tools::R_user_dir("REGATTA", "cache")`), shared across your projects
+and sessions, building only the lightweight names+nodes (a few hundred MB, a few
+minutes) on first use — not the multi-GB accession data. Point `sql_path` at an
+existing database to reuse one you already have.
+
+The database is a **snapshot**: REGATTA never rebuilds it silently (that would
+make results irreproducible), reports its build date, and records it in
+`cl$methods`, so the taxonomy version travels with your methods. Pass
+`overwrite_taxonomy_files = TRUE` to refresh it in place, or `sql_path = NULL` to
+skip taxonomizing at checklist-build time and defer it to `run_regatta()`.
+
+```{r show-cache, eval = FALSE}
+# Where the cache lives (built once on first use, reused across projects):
+tools::R_user_dir("REGATTA", "cache")
+```
+
+(The runnable demo at the end of this tutorial needs no database — it uses a
+pre-taxonomized checklist bundled with the package.)
+
+---
+
 ## `resolve_taxa()`
 
 **Why this matters:** every taxon your primer can amplify needs to be on the
@@ -165,20 +193,12 @@ cl <- build_regional_checklist(
 )
 ```
 
-> **The taxonomy database (`sql_path`).** Taxonomizing the checklist needs a
-> local NCBI snapshot. By default REGATTA keeps one in a **persistent per-user
-> cache** (`tools::R_user_dir("REGATTA","cache")`), shared across your projects
-> and sessions, building only the lightweight names+nodes (a few hundred MB, a
-> few minutes) on first use — not the multi-GB accession data. **Override** it
-> by pointing `sql_path` at an existing DB you already have (as in a reused
-> download). When a needed DB is missing, REGATTA prompts to build it
-> (interactive) or, in a script, errors with the one-line build command. The DB
-> is a **snapshot** of NCBI taxonomy: REGATTA never rebuilds it silently (that
-> would make results irreproducible) — it reports the snapshot's build date and
-> records it in `cl$methods`. When you want fresh taxonomy for a new analysis,
-> pass `overwrite_taxonomy_files = TRUE` to rebuild it in place (no need to hunt
-> down the cache file). Set `sql_path = NULL` to skip taxonomization here and
-> defer it to the reconcile step.
+> **The taxonomy database (`sql_path`).** This is the snapshot from the first
+> section above. The `sql_path` shown is the default cache; point it at an
+> existing DB to reuse one, pass `overwrite_taxonomy_files = TRUE` to refresh it,
+> or `sql_path = NULL` to skip taxonomizing here and defer it to the reconcile
+> step. When a needed DB is missing, REGATTA prompts to build it (interactive)
+> or, in a script, errors with the one-line build command.
 
 `build_regional_checklist()` **returns** a list (and writes the same outputs to
 a dated `<region>_<label>_<date>` subfolder of `output_dir`, so successive runs
@@ -220,8 +240,9 @@ you, and if you hand `run_regatta()` / `reconcile_checklist()` a checklist that
 *wasn't* taxonomized, they **warn and taxonomize it on the fly**.
 
 **How (advanced / direct use only):** call it yourself just to inspect or cache
-the lineage table. The first run builds the local `taxonomizr` database (~15
-min, several GB); later runs reuse it.
+the lineage table. The first run builds the local `taxonomizr` names+nodes
+database if it isn't already there (~a few hundred MB, a few minutes — see the
+first section); later runs reuse it.
 
 ```{r taxonomize, eval = FALSE}
 checklist <- taxonomize_checklist(
@@ -253,9 +274,9 @@ res <- run_regatta(
   region    = "galapagos", label = "fish"  # name the run subfolder (match build)
   # sql_path defaults to the cache; pass a path to override.
 )
-#> returns res$post_checklist (reconciled table) + res$summary (21-row), and
-#> writes reconcile_checklist/*, regatta_summary.csv, run_log.txt into
-#> regatta_out/galapagos_fish_<date>/
+#> returns res$post_checklist (reconciled table) + res$summary (per-stage
+#> stats), and writes reconcile_checklist/*, regatta_summary.csv, run_log.txt
+#> into regatta_out/galapagos_fish_<date>/
 ```
 
 On this dataset, of the 542 obitools-assigned ASVs (out of 1,438 total):
@@ -335,7 +356,8 @@ at 98.8% — drops to genus. The global database simply has no reference for som
 Galapagos species, so it names the nearest relative it has; REGATTA keeps the
 reliable genus and drops the unreliable species.
 
-`$stats` gives the match-rank distribution for this slice:
+`$stats` summarizes the before→after transition for this slice — how many calls
+were kept, downgraded, or dropped, with the downgrades broken down by rank pair:
 
 ```{r demo-stats}
 res$stats
@@ -359,9 +381,9 @@ CSVs per stage):
 
 | Element | Contents |
 |---|---|
-| `$result`   | The **exchange format**: exactly the id column + 7 lowercase ranks. Drop straight into a phyloseq `tax_table()` or a MetabaR MOTU table. |
+| `$result`   | The **exchange format**: the id column, then `pct_id` (when the input carries one, for downstream filtering), then the 7 lowercase ranks. For a phyloseq `tax_table()` or MetabaR MOTU table, drop the `pct_id` column first. |
 | `$tracking` | Per-ASV audit: before/after at each rank, `regatta_match_rank`, `regatta_reason` (`kept` / `non-local (geographic)` / `off-target (taxonomic)`, when the checklist carries a target group), and your passthrough columns. |
-| `$stats`    | Step-level counts — the match-rank distribution above. |
+| `$stats`    | Step-level counts — the before→after transition (kept / downgraded / dropped) plus the per-rank-pair downgrade breakdown above. |
 
 ## Where to go next
 

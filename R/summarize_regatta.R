@@ -25,11 +25,11 @@
 #                  (e.g. vsearch+SINTAX-derived). Used to populate
 #                  the "local" stage column.
 #
-# Columns are the raw input(s) + the final result. Two-DB runs name the
-# inputs `global`/`local`; a single-DB run names its one input `input_file`.
-# The final result column is always `regatta_result`. The reconciled
-# (global-vs-local merge) intermediate feeds the source-breakdown rows but is
-# not its own column.
+# Columns are the raw input(s) + one column per reconcile step that ran. A
+# two-DB run has `global` + `local` inputs, `regatta_global_local_result` (the
+# global-vs-local merge), and `regatta_checklist_result` (the checklist step);
+# a single-DB run has `input_file` + `regatta_checklist_result`. Each step's
+# transition stats sit in that step's own column.
 #
 # Row groups (Ella's layout, plus the checklist-membership pair):
 #   1-3   counts (total, assigned, % assigned)
@@ -48,22 +48,24 @@
 #   25+    transition headline (ASVs unchanged / downgraded / dropped) and the
 #          per-rank-pair downgrade breakdown ("downgraded: <from> -> <to>", one
 #          row per pair that occurred), placed in that step's result column (NA
-#          in the before columns). The checklist step fills `regatta_result`;
-#          the global-vs-local LCA step (its own column, two-DB) is added later.
-#          The total row count therefore varies with the breakdown.
+#          in the before columns). The checklist step fills
+#          `regatta_checklist_result`; the global-vs-local step's source
+#          breakdown fills `regatta_global_local_result` (two-DB). The total row
+#          count therefore varies with the breakdown.
 
 #' Summarize a REGATTA run as a multi-stage stats table
 #'
 #' Compares inputs and outputs across stages and produces Ella's summary:
 #' counts, source breakdown, checklist membership, ID'ed-to-rank specificity,
-#' and diversity. Columns are the raw input(s) plus the final result. A two-DB
-#' run names its inputs `global`/`local`; a single-DB run names its one input
-#' `input_file`; the result column is always `regatta_result`.
+#' and diversity. Columns are the raw input(s) plus one column per reconcile
+#' step that ran. A two-DB run has `global` + `local` inputs,
+#' `regatta_global_local_result`, and `regatta_checklist_result`; a single-DB
+#' run has `input_file` and `regatta_checklist_result`.
 #'
-#' @param reconciled Output list of [reconcile_global_local()]. Used for the
-#'   source-breakdown rows; it is not given its own column.
+#' @param reconciled Output list of [reconcile_global_local()]. Becomes the
+#'   `regatta_global_local_result` column and supplies the source-breakdown rows.
 #' @param post_checklist Output list of [reconcile_checklist()]. Becomes the
-#'   `regatta_result` column.
+#'   `regatta_checklist_result` column.
 #' @param global_input Raw global-DB classifier output taxonomy table
 #'   (`global` column).
 #' @param local_input Raw local-DB classifier output taxonomy table
@@ -80,11 +82,14 @@
 #'   data recovered). Otherwise those rows are `NA`. [run_regatta()] passes the
 #'   run's checklist automatically.
 #'
-#' @return A data.frame with one column per supplied stage: 24 fixed rows
-#'   (counts, source breakdown, checklist membership/recovery, specificity,
-#'   diversity) plus the checklist-step transition headline and one
-#'   `downgraded: <from> -> <to>` row per rank pair that occurred, so the total
-#'   row count varies with the data.
+#' @return A data.frame with one column per supplied stage. A fixed core of 24
+#'   rows (counts, source breakdown, checklist membership/recovery, specificity,
+#'   diversity) is followed by the checklist-step transition headline (the
+#'   `no regional record (call dropped)` row is omitted when zero, as it nearly
+#'   always is when the walk reaches domain), one `downgraded: <from> -> <to>`
+#'   row per rank pair that occurred, and (when the checklist carries a target
+#'   group) the off-target/non-local breakdown -- so the total row count is
+#'   dynamic, varying with the data.
 #'
 #' @export
 summarize_regatta <- function(reconciled     = NULL,
@@ -134,10 +139,11 @@ summarize_regatta <- function(reconciled     = NULL,
     100 * length(intersect(data_sp, cl_sets$species)) / length(cl_sets$species)
   }
 
-  # Stage columns: the raw input(s) + the final regatta result. Two-DB runs
-  # name the inputs `global`/`local` (roles are required up front); a single-DB
-  # run names its one input `input_file`. The reconciled (global-vs-local merge)
-  # intermediate is used for the source-breakdown rows but is NOT its own column.
+  # Stage columns, in pipeline order: the raw input(s), then one column per
+  # reconcile step that ran. A two-DB run has both steps -- `global` + `local`
+  # inputs, `regatta_global_local_result` (the global-vs-local merge), and
+  # `regatta_checklist_result` (the final checklist step). A single-DB run has
+  # only the checklist step -- `input_file` and `regatta_checklist_result`.
   if (!is.null(reconciled) && !"result" %in% names(reconciled)) {
     stop("`reconciled` must be the output of reconcile_global_local() (a list with $result).")
   }
@@ -147,11 +153,14 @@ summarize_regatta <- function(reconciled     = NULL,
   if (is.null(global_input) && is.null(local_input) && !is.null(input_file)) {
     stages[["input_file"]] <- input_file
   }
+  if (!is.null(reconciled)) {
+    stages[["regatta_global_local_result"]] <- reconciled$result
+  }
   if (!is.null(post_checklist)) {
     if (!"result" %in% names(post_checklist)) {
       stop("`post_checklist` must be the output of reconcile_checklist() (a list with $result).")
     }
-    stages[["regatta_result"]] <- post_checklist$result
+    stages[["regatta_checklist_result"]] <- post_checklist$result
   }
 
   if (length(stages) == 0) {
@@ -221,11 +230,14 @@ summarize_regatta <- function(reconciled     = NULL,
     n_global <- sum(tr$best_pctid_winner == "global" & have_g)
     denom    <- sum(have_g)
 
-    for (j in seq_along(out)) {
-      out[[j]][4] <- n_local
-      out[[j]][5] <- if (denom > 0) 100 * n_local  / denom else NA_real_
-      out[[j]][6] <- n_global
-      out[[j]][7] <- if (denom > 0) 100 * n_global / denom else NA_real_
+    # These describe the global-vs-local reconciliation, so they belong only in
+    # that step's column (NA in the raw inputs and the checklist column).
+    rc <- intersect("regatta_global_local_result", names(out))
+    if (length(rc)) {
+      out[[rc]][4] <- n_local
+      out[[rc]][5] <- if (denom > 0) 100 * n_local  / denom else NA_real_
+      out[[rc]][6] <- n_global
+      out[[rc]][7] <- if (denom > 0) 100 * n_global / denom else NA_real_
     }
   }
 
@@ -239,7 +251,8 @@ summarize_regatta <- function(reconciled     = NULL,
   if (!is.null(reconciled) && !is.null(global_input)) {
     n_global_assigned     <- n_assigned_any(global_input)
     n_reconciled_assigned <- n_assigned_any(reconciled$result)
-    for (j in seq_along(out)) out[[j]][8] <- n_reconciled_assigned - n_global_assigned
+    rc <- intersect("regatta_global_local_result", names(out))
+    if (length(rc)) out[[rc]][8] <- n_reconciled_assigned - n_global_assigned
   }
 
   row_labels <- c(
@@ -272,14 +285,12 @@ summarize_regatta <- function(reconciled     = NULL,
   base <- cbind(row_names = row_labels, out, stringsAsFactors = FALSE)
 
   # Transition headline + downgrade breakdown for the checklist step, taken
-  # from reconcile_checklist()'s $stats and placed in the `regatta_result`
-  # column (NA in the before columns -- a transition is a step property, not a
-  # per-stage value). The downgrade breakdown rows ("downgraded: <from> ->
-  # <to>") are however many pairs actually occurred. The same stats for the
-  # global-vs-local LCA step (its own column, two-DB) are added when that
-  # pipeline is built out.
+  # from reconcile_checklist()'s $stats and placed in the
+  # `regatta_checklist_result` column (NA in the before columns -- a transition
+  # is a step property, not a per-stage value). The downgrade breakdown rows
+  # ("downgraded: <from> -> <to>") are however many pairs actually occurred.
   if (!is.null(post_checklist) && "stats" %in% names(post_checklist) &&
-      "regatta_result" %in% names(base)) {
+      "regatta_checklist_result" %in% names(base)) {
     ps   <- post_checklist$stats
     # Surface everything from $stats except the bare counts already in the
     # report's own rows: the transition headline, the downgrade breakdown, and
@@ -287,11 +298,15 @@ summarize_regatta <- function(reconciled     = NULL,
     keep <- !(ps$metric %in% c("total ASVs",
                                "assigned before checklist-LCA",
                                "assigned after checklist-LCA"))
+    # The walk goes all the way to domain, so a call is almost never dropped
+    # outright. Hide that row when it's zero so the useful downgrade breakdown
+    # is what shows; keep it only when there genuinely are dropped calls.
+    keep <- keep & !(ps$metric == "no regional record (call dropped)" & ps$count == 0)
     ps <- ps[keep, , drop = FALSE]
     if (nrow(ps) > 0) {
       extra <- data.frame(row_names = ps$metric, stringsAsFactors = FALSE)
       for (cn in setdiff(names(base), "row_names")) {
-        extra[[cn]] <- if (cn == "regatta_result") as.numeric(ps$count) else NA_real_
+        extra[[cn]] <- if (cn == "regatta_checklist_result") as.numeric(ps$count) else NA_real_
       }
       base <- rbind(base, extra[, names(base), drop = FALSE])
       rownames(base) <- NULL

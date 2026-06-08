@@ -14,11 +14,11 @@ summarize_regatta(
 )
 }
 \arguments{
-\item{reconciled}{Output list of \code{\link[=reconcile_global_local]{reconcile_global_local()}}. Used for the
-source-breakdown rows; it is not given its own column.}
+\item{reconciled}{Output list of \code{\link[=reconcile_global_local]{reconcile_global_local()}}. Becomes the
+\code{regatta_global_local_result} column and supplies the source-breakdown rows.}
 
 \item{post_checklist}{Output list of \code{\link[=reconcile_checklist]{reconcile_checklist()}}. Becomes the
-\code{regatta_result} column.}
+\code{regatta_checklist_result} column.}
 
 \item{global_input}{Raw global-DB classifier output taxonomy table
 (\code{global} column).}
@@ -40,16 +40,20 @@ data recovered). Otherwise those rows are \code{NA}. \code{\link[=run_regatta]{r
 run's checklist automatically.}
 }
 \value{
-A data.frame with one column per supplied stage: 24 fixed rows
-(counts, source breakdown, checklist membership/recovery, specificity,
-diversity) plus the checklist-step transition headline and one
-\verb{downgraded: <from> -> <to>} row per rank pair that occurred, so the total
-row count varies with the data.
+A data.frame with one column per supplied stage. A fixed core of 24
+rows (counts, source breakdown, checklist membership/recovery, specificity,
+diversity) is followed by the checklist-step transition headline (the
+\verb{no regional record (call dropped)} row is omitted when zero, as it nearly
+always is when the walk reaches domain), one \verb{downgraded: <from> -> <to>}
+row per rank pair that occurred, and (when the checklist carries a target
+group) the off-target/non-local breakdown -- so the total row count is
+dynamic, varying with the data.
 }
 \description{
 Compares inputs and outputs across stages and produces Ella's summary:
 counts, source breakdown, checklist membership, ID'ed-to-rank specificity,
-and diversity. Columns are the raw input(s) plus the final result. A two-DB
-run names its inputs \code{global}/\code{local}; a single-DB run names its one input
-\code{input_file}; the result column is always \code{regatta_result}.
+and diversity. Columns are the raw input(s) plus one column per reconcile
+step that ran. A two-DB run has \code{global} + \code{local} inputs,
+\code{regatta_global_local_result}, and \code{regatta_checklist_result}; a single-DB
+run has \code{input_file} and \code{regatta_checklist_result}.
 }

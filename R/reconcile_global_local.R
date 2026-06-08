@@ -68,22 +68,25 @@
 
 # Output: a list with three elements.
 #
-#   $result    The reconciled per-ASV taxonomy table: id_col + the 7
-#              lowercase rank columns + `pct_id` (the winning database's
-#              percent identity, carried with the winning taxa so
-#              downstream percent-ID filtering still has it). Drop-in to
+#   $result    The reconciled per-ASV taxonomy table: id_col, then
+#              `pct_id` (the winning database's percent identity, carried
+#              right after the id so downstream percent-ID filtering still
+#              has it), then the 7 lowercase rank columns. Drop-in to
 #              any downstream REGATTA function (regatta_checklist_lca),
 #              into phyloseq tax_table(), or into a MetabaR MOTU
 #              table after joining read counts back. No bookkeeping
 #              columns. By design.
 #
-#   $tracking  best_ID_combined-style per-ASV decision record: every
-#              column from both inputs preserved with _global / _local
-#              suffixes; the best_pctid winner; whether
-#              global_lca_to_local was triggered; the preferred pct_id,
-#              database label, and scientific_name; the preferred
-#              lineage (preferred_<rank>). One row per ASV in the
-#              union of both inputs.
+#   $tracking  best_ID_combined-style per-ASV decision record, columns
+#              grouped per field as <field>_global / <field>_local /
+#              <field>_regatta (the reconciled/preferred value), so each
+#              of the 7 ranks and pct_id read global / local / regatta
+#              side by side. Then the decision columns -- best_pctid
+#              winner, preferred_database, preferred_scientific_name,
+#              global_lca_to_local_triggered -- followed by any remaining
+#              classifier columns from either input (also _global /
+#              _local suffixed). One row per ASV in the union of both
+#              inputs.
 #
 #   $stats    Counts of best_pctid winners, global_lca_to_local
 #              triggers, and final per-database categories. A small
@@ -97,9 +100,10 @@
 #' preferred lineage. The function compares percent identity across the two
 #' databases (the `best_pctid` step) and, when global wins but local also
 #' has an assignment, downgrades the preferred lineage to the LCA of the
-#' two (the `global_lca_to_local` step). Returns a strict 8-column
-#' `$result` (REGATTA exchange format), a per-ASV `$tracking` audit, and a
-#' step-level `$stats` summary; optionally writes those as three CSVs.
+#' two (the `global_lca_to_local` step). Returns a `$result` taxonomy table
+#' (`id_col` + the winning `pct_id` + the 7 ranks -- REGATTA exchange format), a
+#' per-ASV `$tracking` audit, and a step-level `$stats` summary; optionally
+#' writes those as three CSVs.
 #'
 #' @param global_table Taxonomy table from the global-DB classifier:
 #'   `id_col` + 7 lowercase rank columns + a percent-identity column.
@@ -128,11 +132,16 @@
 #'   `NUC_SEQ`, and `SCIENTIFIC_NAME`.
 #'
 #' @return A list with three elements:
-#'   * `result`: data.frame with `id_col` + 7 rank columns + `pct_id` (the
-#'     winning database's percent identity, kept with the winning taxa for
-#'     downstream filtering). Feeds straight into [reconcile_checklist()].
-#'   * `tracking`: per-ASV decision record (both inputs preserved with
-#'     `_global` / `_local` suffixes plus REGATTA bookkeeping).
+#'   * `result`: data.frame with `id_col`, then `pct_id` (the winning
+#'     database's percent identity, kept right after the id for downstream
+#'     filtering), then the 7 rank columns. Feeds straight into
+#'     [reconcile_checklist()].
+#'   * `tracking`: per-ASV decision record with columns grouped per field as
+#'     `<field>_global` / `<field>_local` / `<field>_regatta` (the reconciled
+#'     value) -- each of the 7 ranks and `pct_id` side by side -- then the
+#'     decision columns (`best_pctid_winner`, `preferred_database`,
+#'     `preferred_scientific_name`, `global_lca_to_local_triggered`) and any
+#'     remaining classifier columns.
 #'   * `stats`: (metric, count) data.frame.
 #'
 #' @importFrom utils write.csv
@@ -291,23 +300,43 @@ reconcile_global_local <- function(global_table,
     vals[max(which(non_na))]
   }, character(1))
 
-  # --- Build $result: ASV_id + 7 ranks + the winning pct_id ---
-  # The winning database's percent identity travels with the winning taxa, so
-  # downstream percent-ID filtering and reconcile_checklist() still have it.
+  # --- Build $result: ASV_id + the winning pct_id + 7 ranks ---
+  # The winning database's percent identity travels with the winning taxa (right
+  # after the id), so downstream percent-ID filtering and reconcile_checklist()
+  # still have it.
   result <- data.frame(placeholder = joined[[id_col]], stringsAsFactors = FALSE)
   names(result)[1] <- id_col
-  for (r in ranks) result[[r]] <- preferred_lineage[[r]]
   result$pct_id <- preferred_pctid
+  for (r in ranks) result[[r]] <- preferred_lineage[[r]]
   rownames(result) <- NULL
 
-  # --- Build $tracking: per-ASV audit ---
+  # --- Build $tracking: per-ASV audit, columns grouped per field as
+  # <field>_global / <field>_local / <field>_regatta (the reconciled value),
+  # so each rank and the pct_id read global / local / regatta side by side ---
   tracking <- joined
+  # canonical pct_id names (the merge leaves these unsuffixed if the two inputs
+  # used distinct pct_id column names)
+  if (!("pct_id_global" %in% names(tracking))) tracking$pct_id_global <- joined[[g_pct_col]]
+  if (!("pct_id_local"  %in% names(tracking))) tracking$pct_id_local  <- joined[[l_pct_col]]
+  tracking$pct_id_regatta <- preferred_pctid
+  for (r in ranks) tracking[[paste0(r, "_regatta")]] <- preferred_lineage[[r]]
+  # decision / audit columns
   tracking$best_pctid_winner             <- best_pctid_winner
-  tracking$global_lca_to_local_triggered <- global_lca_to_local_triggered
-  tracking$preferred_pctid               <- preferred_pctid
   tracking$preferred_database            <- database
   tracking$preferred_scientific_name     <- preferred_scientific_name
-  for (r in ranks) tracking[[paste0("preferred_", r)]] <- preferred_lineage[[r]]
+  tracking$global_lca_to_local_triggered <- global_lca_to_local_triggered
+
+  # Order: id, then each rank's global/local/regatta triple, then the pct_id
+  # triple, then the decision columns, then any remaining classifier columns.
+  rank_triples <- as.vector(rbind(paste0(ranks, "_global"),
+                                  paste0(ranks, "_local"),
+                                  paste0(ranks, "_regatta")))
+  front <- c(id_col, rank_triples,
+             "pct_id_global", "pct_id_local", "pct_id_regatta",
+             "best_pctid_winner", "preferred_database",
+             "preferred_scientific_name", "global_lca_to_local_triggered")
+  front <- front[front %in% names(tracking)]
+  tracking <- tracking[, c(front, setdiff(names(tracking), front)), drop = FALSE]
   rownames(tracking) <- NULL
 
   # --- Build $stats ---

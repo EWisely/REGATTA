@@ -24,23 +24,24 @@
 # (the tracking of a previous reconcile_global_local() run),
 # reconcile_checklist() READS it and writes an AUGMENTED tracking that combines
 # the reconcile_global_local decision columns with the post-checklist columns.
-# The taxonomy_table.csv is ALWAYS strict 8 columns (id_col + 7 ranks).
+# The taxonomy_table.csv is id_col + pct_id (when the input has one) + 7 ranks.
 # Defaults: prior_dir = "reconcile_global_local_out",
 #           prior_prefix = "reconcile_global_local".
 #
 # Accepts either:
-#   - the $result output of reconcile_global_local() (8 columns:
-#     id_col + 7 ranks), or
+#   - the $result output of reconcile_global_local() (id_col + pct_id +
+#     7 ranks), or
 #   - a standalone classifier output table from resolve_names,
 #     resolve_taxids, or parse_sintax (ASV_id + 7 ranks + optional
 #     extras -- extras are ignored for the LCA itself).
 #
 # Output: a list with three elements.
 #
-#   $result    The reconciled per-ASV taxonomy table. EXACTLY 8
-#              columns: id_col + the 7 lowercase rank columns. Same
-#              shape as reconcile_global_local()$result so REGATTA
-#              functions chain cleanly. Drop-in to phyloseq
+#   $result    The reconciled per-ASV taxonomy table: id_col, then
+#              pct_id (when the input carries a usable one), then the 7
+#              lowercase rank columns. Same shape as
+#              reconcile_global_local()$result so REGATTA functions
+#              chain cleanly. Drop-in to phyloseq (drop pct_id first)
 #              tax_table() or to a MetabaR MOTU table after joining
 #              read counts back.
 #
@@ -48,16 +49,17 @@
 #              after_<rank> at every rank, regatta_match_rank (the
 #              rank at which the input matched the checklist, or NA
 #              when nothing matched at any rank -- no regional record),
-#              regatta_reason (per-ASV "kept" / "non-local (geographic)"
-#              / "off-target (taxonomic)" when a target group is known),
-#              and any input metadata columns passed through. One row
-#              per ASV in the input.
+#              after_scientific_name (the lowest non-NA rank of the
+#              corrected lineage), regatta_reason (per-ASV "kept" /
+#              "non-local (geographic)" / "off-target (taxonomic)" when a
+#              target group is known), and any input metadata columns
+#              passed through. One row per ASV in the input.
 #
 #   $stats     A compact per-step transition headline: total ASVs,
 #              assigned before/after, and how many ASVs were unchanged
 #              vs downgraded (specificity reduced) vs dropped (no
 #              regional record). The per-rank before/after distribution
-#              is NOT here -- it is the input vs regatta_result columns
+#              is NOT here -- it is the input vs regatta_checklist_result columns
 #              of summarize_regatta()'s report.
 
 #' Reconcile a taxonomy table against a regional species checklist
@@ -69,11 +71,14 @@
 #' Accepts either the `$result` output of [reconcile_global_local()] or a
 #' standalone classifier-output taxonomy table.
 #'
-#' Returns a strict 8-column `$result` (REGATTA exchange format), a per-ASV
-#' `$tracking` before/after audit, and a `$stats` summary; optionally
-#' writes those as three CSVs. If a `reconcile_global_local` output folder
-#' is present, the `$tracking` and `$stats` written to disk are *augmented*
-#' versions combining both stages.
+#' Returns a `$result` taxonomy table (`id_col`, then `pct_id` when the input
+#' carries one, then the 7 ranks -- the REGATTA exchange format), a per-ASV
+#' `$tracking` before/after audit, and a `$stats` transition summary. With an
+#' `output_dir` it writes two CSVs -- the `$result` (`_taxonomy_table.csv`) and
+#' `$tracking` (`_tracking.csv`); no per-step summary file is written (the
+#' run-level `summarize_regatta()` report is the single summary). If a prior
+#' `reconcile_global_local` output folder is present, the `$tracking` written to
+#' disk is an *augmented* version combining both stages.
 #'
 #' @param taxonomy_table A data.frame with `id_col` + 7 lowercase rank
 #'   columns. Additional metadata columns are passed through to `$tracking`
@@ -113,8 +118,8 @@
 #' @param output_prefix Filename prefix for the output CSVs. Default
 #'   `"reconcile_checklist"`.
 #' @param prior_dir,prior_prefix Optional directory of a prior
-#'   [reconcile_global_local()] output to augment the tracking/summary CSVs
-#'   with. Default `prior_dir = NULL` (no augmentation); supply the directory
+#'   [reconcile_global_local()] output to augment the tracking CSV with.
+#'   Default `prior_dir = NULL` (no augmentation); supply the directory
 #'   to enable it (only relevant when `output_dir` is also set).
 #' @param tracking_drop_pattern Regex matched against input column names;
 #'   matching columns are dropped before they enter `$tracking`.
@@ -219,9 +224,13 @@ reconcile_checklist <- function(taxonomy_table,
 
   match_rank <- ifelse(is.na(match_idx), NA_character_, ranks[match_idx])
 
-  # --- Build $result: ASV_id + 7 ranks, nothing else ---
+  # --- Build $result: ASV_id, pct_id (when present), then the 7 ranks ---
   result <- data.frame(placeholder = corrected[[id_col]], stringsAsFactors = FALSE)
   names(result)[1] <- id_col
+  # Carry pct_id right after the id (for downstream percent-ID filtering) when
+  # the input has a usable one; never invent it when absent.
+  if ("pct_id" %in% names(corrected) && !all(is.na(corrected$pct_id)))
+    result$pct_id <- corrected$pct_id
   for (r in ranks) result[[r]] <- corrected[[r]]
   rownames(result) <- NULL
 
@@ -267,7 +276,7 @@ reconcile_checklist <- function(taxonomy_table,
 
   # Per-step transition headline + a breakdown of the downgrades by rank pair
   # (e.g. "downgraded: species -> genus"). The per-rank before/after
-  # *distribution* is NOT here -- it is read across the input vs regatta_result
+  # *distribution* is NOT here -- it is read across the input vs regatta_checklist_result
   # columns of summarize_regatta()'s report.
   stats <- data.frame(
     metric = c("total ASVs",

@@ -26,7 +26,8 @@ Defaults to the persistent per-user cache shared across REGATTA
 \item{output_dir}{Directory to write the CSV into.}
 }
 \value{
-A data.frame with \code{domain}-through-\code{species} columns.
+The input augmented with the 7 lowercase rank columns
+(\code{domain} through \code{species}); all original columns are preserved.
 }
 \description{
 Resolves a column of NCBI taxIDs into a full 7-rank lineage using

@@ -96,9 +96,10 @@ download restricted to the polygon. \strong{Returns} the species data frame;
 writes it to disk only if you supply \code{output_dir}.
 }
 \details{
-Takes ~15 minutes to run end to end. The function prints status
-("PREPARING" / "RUNNING") in the console while polling the GBIF
-download API; this is normal. GBIF coverage is uneven -- see the
+Blocks while polling GBIF's asynchronous download API, which typically
+takes several minutes (longer for large polygons or broad taxa). The
+function prints status ("PREPARING" / "RUNNING") in the console while
+polling; this is normal. GBIF coverage is uneven -- see the
 Common troubleshooting section of the README for known issues
 (Osteichthyes not recognized, occasional timeouts, etc.).
 }

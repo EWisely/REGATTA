@@ -68,8 +68,8 @@ vignette("REGATTA-two-database")   # optional global-vs-local reconciliation
 Building the vignettes needs `pandoc` (RStudio bundles it); from a plain R
 session without pandoc, drop `build_vignettes = TRUE`. The checklist-building
 steps additionally need a local NCBI taxonomy database built by `taxonomizr`
-(see [Setup](#setup)); the core reconciliation functions and the runnable
-vignette demos do not.
+— set that up first (see [Step 1 — the NCBI taxonomy database](#step-1--the-ncbi-taxonomy-database));
+the core reconciliation functions and the runnable vignette demos do not.
 
 ## Pipeline
 
@@ -108,7 +108,7 @@ flowchart TD
     F --> M[reconcile_checklist]
     L ==> M
     M --> S[summarize_regatta]
-    S --> T["21-row stats summary"]
+    S --> T["per-stage stats summary"]
 
     style L2 stroke-dasharray: 5 5
     style Q  stroke-dasharray: 5 5
@@ -125,7 +125,7 @@ a vsearch `lca + userout` pair, a folder of inputs, or an explicit
 auto-detected and the right preprocessor is dispatched. It **returns** the
 results and also writes them: `out_dir` is **required**, and each run lands in
 its own dated `<region>_<label>_<Date>` subfolder of it (the per-stage CSV
-triples, the 21-row summary, and a `run_log.txt` recording what was detected
+triples, the per-stage summary, and a `run_log.txt` recording what was detected
 and run). Pass the same `region`/`label` you gave `build_regional_checklist()`.
 
 ```r
@@ -159,9 +159,37 @@ For fine-grained control the lower-level `reconcile_global_local()`,
 `reconcile_checklist()`, and `summarize_regatta()` functions remain
 available; `run_regatta()` is a thin orchestrator on top of them.
 
+## Step 1 — the NCBI taxonomy database
+
+Build or locate this **first**: it underpins everything REGATTA does to a
+*name*. The regional-checklist build, resolving classifier output that arrives
+as NCBI taxIDs or scientific names, and updating older nomenclature to current
+canonical taxonomy all run against a local NCBI taxonomy snapshot built by
+`taxonomizr`. `build_regional_checklist()`, `taxonomize_checklist()`, and any
+`run_regatta()` run whose input isn't already resolved to the 7 ranks depend on
+it. (Only the pure-LCA core — `reconcile_checklist()` on a pre-taxonomized
+checklist and a pre-resolved table, as in the runnable vignette demo — needs no
+database.)
+
+`build_regional_checklist()`, `run_regatta()`, and `reconcile_checklist()`
+default `sql_path` to a **persistent per-user cache**
+(`tools::R_user_dir("REGATTA","cache")`), shared across projects/sessions, and
+build only the lightweight names+nodes (~a few hundred MB, a few minutes — not
+the multi-GB accession data) on first use. **Override** it by pointing
+`sql_path` at an existing DB you already have. When a needed DB is missing they
+prompt to build it (interactively) or, in a script, error with the one-line
+build command unless `overwrite_taxonomy_files = TRUE`. The cache is a
+**snapshot** of NCBI taxonomy and is never rebuilt silently (for
+reproducibility) — its build date is reported and recorded in `cl$methods`, so
+the taxonomy version travels with your methods; `overwrite_taxonomy_files = TRUE`
+refreshes it in place. Set `sql_path = NULL` in `build_regional_checklist()` to
+skip taxonomizing there and defer it to `run_regatta()`. (Accession-based input
+to `run_regatta()` is the only path that needs the full
+`taxonomizr::prepareDatabase()` build with `accession2taxid`.)
+
 ## Setup
 
-A few things to set up before building your own regional checklist.
+A few more things to set up before building your own regional checklist.
 
 **Output locations.** The two entry points — `build_regional_checklist()`
 (`output_dir`) and `run_regatta()` (`out_dir`) — **require** an output
@@ -182,22 +210,6 @@ with your account credentials — there is no separate "API key". Add
 asynchronous `occ_download` that **takes several minutes** while GBIF assembles
 it server-side.
 
-**Taxonomy database.** Taxonomizing needs a local NCBI snapshot built by
-`taxonomizr`. `build_regional_checklist()`, `run_regatta()`, and
-`reconcile_checklist()` default `sql_path` to a **persistent per-user cache**
-(`tools::R_user_dir("REGATTA","cache")`), shared across projects/sessions, and
-build only the lightweight names+nodes (~a few hundred MB, a few minutes — not
-the multi-GB accession data) on first use. **Override** it by pointing
-`sql_path` at an existing DB you already have. When a needed DB is missing they
-prompt to build it (interactively) or, in a script, error with the one-line
-build command unless `overwrite_taxonomy_files = TRUE`. The cache is a
-**snapshot** of NCBI taxonomy and is never rebuilt silently (for
-reproducibility) — its build date is reported and recorded in `cl$methods`;
-`overwrite_taxonomy_files = TRUE` refreshes it in place. (Set `sql_path = NULL`
-in `build_regional_checklist()` to skip taxonomizing there and defer it to
-`run_regatta()`. Accession-based input to `run_regatta()` is the only path that
-needs the full `taxonomizr::prepareDatabase()` build with `accession2taxid`.)
-
 **Draw your polygon** at [wktmap.com](https://wktmap.com) and copy the WKT
 `POLYGON ((long lat, long lat, ...))` string for the `regional_poly`
 argument.
@@ -212,7 +224,7 @@ argument.
 > `GBIF_download()` descends to order automatically — OBIS remains the more
 > complete fish source, with GBIF as a supplement.
 
-## Building the regional checklist (once per region × group)
+## Step 2 — build the regional checklist (once per region × group)
 
 ```r
 poly <- "POLYGON ((-117.4 32.0, -91.9 -6.3, -81.4 -6.3, -76.1 7.7, -82.1 8.6, -104.2 20.3, -112.5 32.2, -117.4 32.0))"
@@ -285,7 +297,7 @@ groups side-by-side in one project without naming collisions.
 
 | Function | Purpose |
 |---|---|
-| `run_regatta()` | **High-level wrapper / recommended entry point.** Auto-detects classifier format, dispatches the right preprocessor, runs the reconcile steps, and **returns** the reconciled tables + a 21-row summary. **`out_dir` is required**; the output triples + summary + `run_log.txt` are written into a dated `<region>_<label>_<Date>` subfolder of it (pass `region`/`label` to name it). |
+| `run_regatta()` | **High-level wrapper / recommended entry point.** Auto-detects classifier format, dispatches the right preprocessor, runs the reconcile steps, and **returns** the reconciled tables + a per-stage stats summary. **`out_dir` is required**; the output triples + summary + `run_log.txt` are written into a dated `<region>_<label>_<Date>` subfolder of it (pass `region`/`label` to name it). |
 | `resolve_taxa()` | Validate & disambiguate query taxon names against WoRMS (by kingdom); report GBIF backbone coverage. Run standalone to pre-check names. |
 | `GBIF_download()` | Pull a GBIF species list inside a WKT polygon for given taxa. |
 | `OBIS_download()` | Pull an OBIS species list, with optional marine/brackish/freshwater filters. |
@@ -298,22 +310,26 @@ groups side-by-side in one project without naming collisions.
 | `resolve_names()` | Convert mixed-rank scientific names (Kraken2 / BestTaxon style) to 7 rank columns; synonym-aware. |
 | `reconcile_checklist()` | **Core LCA step.** Reconcile a taxonomy table against the regional checklist. Returns `$result` / `$tracking` / `$stats`. |
 | `reconcile_global_local()` | Optional: reconcile two classifier outputs on the same ASVs (best percent-identity, falling back to the LCA of both when they disagree). Returns `$result` / `$tracking` / `$stats`. |
-| `summarize_regatta()` | The 21-row per-stage stats summary comparing inputs to outputs. |
+| `summarize_regatta()` | The per-stage stats summary comparing inputs to outputs (counts, source breakdown, checklist membership/recovery, specificity, diversity, plus the checklist step's transition + downgrade breakdown). |
 
 ## Output
 
 `reconcile_checklist()` and `reconcile_global_local()` each return a list of
-three data frames, and write them as three CSVs only when given an `output_dir`:
+three data frames, written as CSVs only when given an `output_dir`
+(`reconcile_global_local()` writes all three; `reconcile_checklist()` writes the
+`$result` and `$tracking` but not a per-step summary — the run-level
+`summarize_regatta()` report is the single summary):
 
 | Element | Contents |
 |---|---|
-| `$result` | The REGATTA exchange format — `ASV_id` + the 7 rank columns, with ranks rewritten by the reconciliation. |
+| `$result` | The REGATTA exchange format — `ASV_id`, then `pct_id` (when the input carries one), then the 7 rank columns, with ranks rewritten by the reconciliation. (For a phyloseq `tax_table()`, drop `pct_id` first.) |
 | `$tracking` | Per-ASV before/after audit trail (and, after `reconcile_global_local()`, the global-vs-local decision columns). |
 | `$stats` | Aggregate counts for that stage. |
 
-`run_regatta()` returns these and writes one such triple per stage — plus a
-top-level 21-row `summarize_regatta()` summary and a `run_log.txt` — into the
-dated run subfolder of `out_dir`.
+`run_regatta()` returns these and writes the per-stage `$result` + `$tracking`
+CSVs (no per-stage summary) — plus a single top-level `regatta_summary.csv` from
+`summarize_regatta()` and a `run_log.txt` — into the dated run subfolder of
+`out_dir`.
 
 ## Caveats
 

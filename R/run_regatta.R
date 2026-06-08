@@ -6,7 +6,7 @@
 # classifier outputs) or a folder of input files. Auto-detects file
 # formats, dispatches to the right preprocessor, runs the right
 # reconcile* steps, writes 3-CSV-per-stage output triples plus a
-# top-level 21-row summary, and emits a run_log.txt describing what
+# top-level regatta_summary.csv, and emits a run_log.txt describing what
 # was detected and run.
 
 # ---- internal: format detection ----------------------------------
@@ -307,7 +307,7 @@
 #' classifier format (obitools `.tab`, vsearch userout, vsearch LCA + userout,
 #' BestTaxon `.csv`), dispatches to the right preprocessor, runs the
 #' appropriate reconcile* steps, and writes the standard 3-CSVs-per-stage
-#' output triples plus a top-level 21-row summary and a `run_log.txt`
+#' output triples plus a top-level `regatta_summary.csv` and a `run_log.txt`
 #' describing what was detected.
 #'
 #' @param input One of:
@@ -328,8 +328,8 @@
 #'   `.csv`), or a data.frame with the 7 rank columns.
 #' @param out_dir **Required.** Output directory. Each run writes into its own
 #'   dated `<region>_<label>_<Date>` subfolder of it, so successive runs don't
-#'   pile up. That subfolder gets the per-stage CSV triples, the 21-row summary,
-#'   and `run_log.txt`. The results list is also returned.
+#'   pile up. That subfolder gets the per-stage CSV outputs, a single top-level
+#'   `regatta_summary.csv`, and `run_log.txt`. The results list is also returned.
 #' @param region,label **Required.** Region and taxon-group labels for this run.
 #'   REGATTA filters/adjusts the taxonomy against the regional checklist built
 #'   for that region x group, so the run is labeled by them -- pass the same

@@ -27,8 +27,10 @@ Defaults to the persistent per-user cache shared across REGATTA
 name plus recorded synonyms.}
 }
 \value{
-A data.frame with the 7 rank columns plus per-row resolution
-bookkeeping.
+A data.frame, one row per unique input name: \code{input_name},
+\code{resolution_status} (\code{"resolved"}/\code{"unresolved"}), \code{name_match_type}
+(\code{"scientific name"}/\code{"synonym"}/\code{NA}), \code{taxID}, and the 7 lowercase rank
+columns (\code{domain} through \code{species}, \code{NA} where unresolved).
 }
 \description{
 Cleans junk strings (\code{sp.}, \code{spp.}, \code{cf.}, etc.), looks each name up

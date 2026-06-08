@@ -58,11 +58,16 @@ preserves \verb{BEST_MATCH_*}, \code{COUNT}, \code{TAXID}, \code{BEST_IDENTITY},
 \value{
 A list with three elements:
 \itemize{
-\item \code{result}: data.frame with \code{id_col} + 7 rank columns + \code{pct_id} (the
-winning database's percent identity, kept with the winning taxa for
-downstream filtering). Feeds straight into \code{\link[=reconcile_checklist]{reconcile_checklist()}}.
-\item \code{tracking}: per-ASV decision record (both inputs preserved with
-\verb{_global} / \verb{_local} suffixes plus REGATTA bookkeeping).
+\item \code{result}: data.frame with \code{id_col}, then \code{pct_id} (the winning
+database's percent identity, kept right after the id for downstream
+filtering), then the 7 rank columns. Feeds straight into
+\code{\link[=reconcile_checklist]{reconcile_checklist()}}.
+\item \code{tracking}: per-ASV decision record with columns grouped per field as
+\verb{<field>_global} / \verb{<field>_local} / \verb{<field>_regatta} (the reconciled
+value) -- each of the 7 ranks and \code{pct_id} side by side -- then the
+decision columns (\code{best_pctid_winner}, \code{preferred_database},
+\code{preferred_scientific_name}, \code{global_lca_to_local_triggered}) and any
+remaining classifier columns.
 \item \code{stats}: (metric, count) data.frame.
 }
 }
@@ -73,7 +78,8 @@ curated database (e.g. vsearch + a regional reference) -- pick a per-ASV
 preferred lineage. The function compares percent identity across the two
 databases (the \code{best_pctid} step) and, when global wins but local also
 has an assignment, downgrades the preferred lineage to the LCA of the
-two (the \code{global_lca_to_local} step). Returns a strict 8-column
-\verb{$result} (REGATTA exchange format), a per-ASV \verb{$tracking} audit, and a
-step-level \verb{$stats} summary; optionally writes those as three CSVs.
+two (the \code{global_lca_to_local} step). Returns a \verb{$result} taxonomy table
+(\code{id_col} + the winning \code{pct_id} + the 7 ranks -- REGATTA exchange format), a
+per-ASV \verb{$tracking} audit, and a step-level \verb{$stats} summary; optionally
+writes those as three CSVs.
 }

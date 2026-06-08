@@ -9,7 +9,8 @@ parse_vsearch_userout(path, id_col = "ASV_id", first_hit_only = TRUE)
 \arguments{
 \item{path}{Path to the vsearch userout file.}
 
-\item{id_col}{Column name to use for the ASV identifier in the output.}
+\item{id_col}{Column name to use for the ASV identifier in the output
+(default \code{"ASV_id"}).}
 
 \item{first_hit_only}{If TRUE (default), take only the first row per
 ASV. If FALSE, returns every hit.}
