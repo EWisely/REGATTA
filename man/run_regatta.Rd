@@ -19,7 +19,13 @@ run_regatta(
 \arguments{
 \item{input}{One of:
 \itemize{
-\item a single file path (single-DB workflow);
+\item a single file path (single-DB workflow). The format is auto-detected:
+obitools \code{.tab} (TAXID + BEST_IDENTITY), a vsearch SINTAX \code{lca} file, a
+Kraken2/BestTaxon CSV (a \code{BestTaxon} column), or a \strong{pre-resolved
+taxonomy CSV} that already has the 7 rank columns (domain, phylum,
+class, order, family, genus, species; case-insensitive, with an optional
+id column -- a missing or empty one is synthesized). An unrecognized file
+errors with the columns it found and the formats accepted;
 \item a length-2 character vector of vsearch \code{lca} + \code{userout} paths
 (single-DB workflow using the LCA-resolved taxonomy);
 \item a folder path (the function scans the folder -- see Details for the

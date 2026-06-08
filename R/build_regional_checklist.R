@@ -113,19 +113,19 @@
 #'   taxa          = "fish",
 #'   regional_poly = "POLYGON ((-92 2, -89 2, -89 -2, -92 -2, -92 2))",
 #'   CSV           = "~/other_project/galapagos_fish_checklist.csv",
-#'   output_dir    = "my_checklists"
+#'   output_dir    = "local_database_checklist"
 #' )
 #' run_regatta(input = "MiFish_obitools.tab", checklist = cl$for_LCA)
 #'
 #' # Refresh a stale cached taxonomy snapshot in place:
 #' build_regional_checklist(region = "galapagos", label = "fish", taxa = "fish",
 #'   regional_poly = "POLYGON ((-92 2, -89 2, -89 -2, -92 -2, -92 2))",
-#'   output_dir = "my_checklists", overwrite_taxonomy_files = TRUE)
+#'   output_dir = "local_database_checklist", overwrite_taxonomy_files = TRUE)
 #'
 #' # Skip taxonomization now and defer it to the reconcile step:
 #' build_regional_checklist(region = "galapagos", label = "fish", taxa = "fish",
 #'   regional_poly = "POLYGON ((-92 2, -89 2, -89 -2, -92 -2, -92 2))",
-#'   output_dir = "my_checklists", sql_path = NULL)
+#'   output_dir = "local_database_checklist", sql_path = NULL)
 #' }
 #'
 #' @importFrom utils read.csv
@@ -157,7 +157,7 @@ build_regional_checklist <- function(region,
   if (missing(output_dir) || is.null(output_dir) || !is.character(output_dir) ||
       length(output_dir) != 1 || !nzchar(trimws(output_dir)))
     stop("`output_dir` is required: give a directory to write the checklist ",
-         'outputs into, e.g. output_dir = "my_checklists". The expensive ',
+         'outputs into, e.g. output_dir = "local_database_checklist". The expensive ',
          "artifacts (taxonomized checklist, source lists) are always saved so ",
          "you don't have to rebuild them.")
 
@@ -281,6 +281,27 @@ build_regional_checklist <- function(region,
     for_LCA <- lca_rows
   }
   lca_taxonomized <- all(ranks %in% names(for_LCA))
+
+  # Stamp the target group's defining RANK onto for_LCA so the downstream
+  # reconcile/summary can split downgrades into off-target vs non-local. We
+  # store only the rank (the coarsest rank the `taxa` query resolves to, e.g.
+  # "class" for vertebrates), NOT taxon names -- names diverge between WoRMS
+  # (resolve_taxa) and NCBI (the lineages), but the rank is shared. An ASV is
+  # then "in the group" iff it matched the checklist at or finer than this rank.
+  # Survives saveRDS().
+  if (!is.null(taxa)) {
+    tr_rank <- tryCatch({
+      rt <- resolve_taxa(taxa, kingdom = kingdom, check_gbif = FALSE,
+                         on_ambiguous = "warn")
+      rk <- intersect(tolower(rt$rank), ranks)
+      if (length(rk)) ranks[min(match(rk, ranks))] else NA_character_   # coarsest
+    }, error = function(e) NA_character_)
+    if (!is.na(tr_rank)) {
+      attr(for_LCA, "target_rank") <- tr_rank
+      message("Target group resolves at rank '", tr_rank, "' -- stamped on ",
+              "for_LCA for off-target/non-local classification.")
+    }
+  }
 
   # --- Methods sentence (real citations only -- pulled live, never invented) -
   # The GBIF download key + DOI + citation live here, not in a separate section.

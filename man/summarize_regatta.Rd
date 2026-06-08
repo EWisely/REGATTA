@@ -2,30 +2,54 @@
 % Please edit documentation in R/summarize_regatta.R
 \name{summarize_regatta}
 \alias{summarize_regatta}
-\title{Summarize a REGATTA run as a 21-row stats table}
+\title{Summarize a REGATTA run as a multi-stage stats table}
 \usage{
 summarize_regatta(
   reconciled = NULL,
   post_checklist = NULL,
   global_input = NULL,
-  local_input = NULL
+  local_input = NULL,
+  input_file = NULL,
+  checklist = NULL
 )
 }
 \arguments{
-\item{reconciled}{Output list of \code{\link[=reconcile_global_local]{reconcile_global_local()}}.}
+\item{reconciled}{Output list of \code{\link[=reconcile_global_local]{reconcile_global_local()}}. Used for the
+source-breakdown rows; it is not given its own column.}
 
-\item{post_checklist}{Output list of \code{\link[=reconcile_checklist]{reconcile_checklist()}}.}
+\item{post_checklist}{Output list of \code{\link[=reconcile_checklist]{reconcile_checklist()}}. Becomes the
+\code{regatta_result} column.}
 
-\item{global_input}{Raw global-DB classifier output taxonomy table.}
+\item{global_input}{Raw global-DB classifier output taxonomy table
+(\code{global} column).}
 
-\item{local_input}{Raw local-DB classifier output taxonomy table.}
+\item{local_input}{Raw local-DB classifier output taxonomy table
+(\code{local} column).}
+
+\item{input_file}{The single-DB classifier input taxonomy table. Becomes the
+\code{input_file} column -- used only when neither \code{global_input} nor
+\code{local_input} is supplied.}
+
+\item{checklist}{The taxonomized regional checklist (a data.frame with the
+7 rank columns -- e.g. \code{build_regional_checklist()$for_LCA}). When supplied,
+the checklist-comparison rows are filled per stage: the two "percent ... on
+regional checklist" rows (how much of the \emph{data} is on the checklist;
+global typically < 100\%, local and regatta = 100\%) and "percent of
+checklist species detected" (the reverse -- how much of the \emph{checklist} the
+data recovered). Otherwise those rows are \code{NA}. \code{\link[=run_regatta]{run_regatta()}} passes the
+run's checklist automatically.}
 }
 \value{
-A 21-row data.frame with one column per supplied stage.
+A data.frame with one column per supplied stage: 24 fixed rows
+(counts, source breakdown, checklist membership/recovery, specificity,
+diversity) plus the checklist-step transition headline and one
+\verb{downgraded: <from> -> <to>} row per rank pair that occurred, so the total
+row count varies with the data.
 }
 \description{
-Compares inputs and outputs across stages and produces Ella's 21-row
-summary: counts, source breakdown, ID'ed-to-rank specificity, and
-diversity. Each supplied input becomes its own column in the output.
-Stage columns are fixed: \code{global}, \code{local}, \code{reconciled}, \code{regatta}.
+Compares inputs and outputs across stages and produces Ella's summary:
+counts, source breakdown, checklist membership, ID'ed-to-rank specificity,
+and diversity. Columns are the raw input(s) plus the final result. A two-DB
+run names its inputs \code{global}/\code{local}; a single-DB run names its one input
+\code{input_file}; the result column is always \code{regatta_result}.
 }

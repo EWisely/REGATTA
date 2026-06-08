@@ -68,10 +68,11 @@
 
 # Output: a list with three elements.
 #
-#   $result    The reconciled per-ASV taxonomy table. EXACTLY 8
-#              columns: id_col + the 7 lowercase rank columns. This
-#              is the REGATTA exchange format -- drop-in to any
-#              downstream REGATTA function (regatta_checklist_lca),
+#   $result    The reconciled per-ASV taxonomy table: id_col + the 7
+#              lowercase rank columns + `pct_id` (the winning database's
+#              percent identity, carried with the winning taxa so
+#              downstream percent-ID filtering still has it). Drop-in to
+#              any downstream REGATTA function (regatta_checklist_lca),
 #              into phyloseq tax_table(), or into a MetabaR MOTU
 #              table after joining read counts back. No bookkeeping
 #              columns. By design.
@@ -114,8 +115,11 @@
 #' @param output_dir Directory path; default `NULL` writes nothing (the
 #'   `result`/`tracking`/`stats` list is returned). Supply a directory to also
 #'   write `<output_prefix>_taxonomy_table.csv`, `<output_prefix>_tracking.csv`,
-#'   and `<output_prefix>_summary.csv` there.
-#' @param output_prefix Filename prefix for the 3 CSVs. Default
+#'   and (unless `write_summary = FALSE`) `<output_prefix>_summary.csv` there.
+#' @param write_summary If `TRUE` (default), also write the `_summary.csv`.
+#'   [run_regatta()] sets this `FALSE` so a run writes only one top-level
+#'   summary (`regatta_summary.csv`).
+#' @param output_prefix Filename prefix for the output CSVs. Default
 #'   `"reconcile_global_local"`.
 #' @param tracking_drop_pattern Regex matched against input column names;
 #'   matching columns are dropped before they enter `$tracking`. Default
@@ -124,8 +128,9 @@
 #'   `NUC_SEQ`, and `SCIENTIFIC_NAME`.
 #'
 #' @return A list with three elements:
-#'   * `result`: data.frame with `id_col` + 7 rank columns (strict 8-col
-#'     REGATTA exchange format).
+#'   * `result`: data.frame with `id_col` + 7 rank columns + `pct_id` (the
+#'     winning database's percent identity, kept with the winning taxa for
+#'     downstream filtering). Feeds straight into [reconcile_checklist()].
 #'   * `tracking`: per-ASV decision record (both inputs preserved with
 #'     `_global` / `_local` suffixes plus REGATTA bookkeeping).
 #'   * `stats`: (metric, count) data.frame.
@@ -142,6 +147,7 @@ reconcile_global_local <- function(global_table,
                                    Local_advantage     = TRUE,
                                    output_dir          = NULL,
                                    output_prefix       = "reconcile_global_local",
+                                   write_summary       = TRUE,
                                    tracking_drop_pattern =
                                      "^(MERGED_sample:|obiclean_|seq_rank|ID_STATUS|DEFINITION)") {
   # tracking_drop_pattern is a regex matched against column names in the
@@ -285,10 +291,13 @@ reconcile_global_local <- function(global_table,
     vals[max(which(non_na))]
   }, character(1))
 
-  # --- Build $result: ASV_id + 7 ranks, nothing else ---
+  # --- Build $result: ASV_id + 7 ranks + the winning pct_id ---
+  # The winning database's percent identity travels with the winning taxa, so
+  # downstream percent-ID filtering and reconcile_checklist() still have it.
   result <- data.frame(placeholder = joined[[id_col]], stringsAsFactors = FALSE)
   names(result)[1] <- id_col
   for (r in ranks) result[[r]] <- preferred_lineage[[r]]
+  result$pct_id <- preferred_pctid
   rownames(result) <- NULL
 
   # --- Build $tracking: per-ASV audit ---
@@ -352,8 +361,9 @@ reconcile_global_local <- function(global_table,
     dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
     utils::write.csv(result,   file.path(output_dir, paste0(output_prefix, "_taxonomy_table.csv")), row.names = FALSE)
     utils::write.csv(tracking, file.path(output_dir, paste0(output_prefix, "_tracking.csv")),       row.names = FALSE)
-    utils::write.csv(stats,    file.path(output_dir, paste0(output_prefix, "_summary.csv")),        row.names = FALSE)
-    message("Wrote 3 CSVs to ", normalizePath(output_dir))
+    if (isTRUE(write_summary))
+      utils::write.csv(stats,  file.path(output_dir, paste0(output_prefix, "_summary.csv")),        row.names = FALSE)
+    message("Wrote ", if (isTRUE(write_summary)) "3" else "2", " CSVs to ", normalizePath(output_dir))
   }
 
   list(result = result, tracking = tracking, stats = stats)

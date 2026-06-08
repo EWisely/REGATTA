@@ -10,24 +10,21 @@
 # where the regional checklist supports it and downgrades where it
 # doesn't, without using percent-identity heuristics.
 #
-# By default, output_dir = "reconcile_checklist_out" and the three
-# return-list elements are written to disk there as CSVs named
+# When output_dir is given, TWO CSVs are written there:
 #   <output_prefix>_taxonomy_table.csv  (the reconciled $result, strict 8 cols)
 #   <output_prefix>_tracking.csv        (per-ASV before/after audit)
-#   <output_prefix>_summary.csv         (the stats data frame)
-# The directory is created if it doesn't exist. Pass output_dir = NULL
-# to disable file writing entirely. The function still returns the same
-# list(result, tracking, stats) regardless.
+# NO per-step summary file is written -- the run-level regatta_summary (from
+# summarize_regatta()) is the single report; $stats is still returned for
+# callers who want the per-step numbers programmatically.
+# The directory is created if it doesn't exist. Pass output_dir = NULL to
+# disable file writing. The function always returns list(result, tracking,
+# stats).
 #
-# prior_dir / prior_prefix: if a folder named prior_dir exists in the
-# working directory at call time AND contains both
-#   <prior_prefix>_tracking.csv  and  <prior_prefix>_summary.csv
-# (i.e. the outputs of a previous reconcile_global_local() run),
-# reconcile_checklist() will READ those files and write AUGMENTED
-# versions of tracking + summary into output_dir, combining the
-# reconcile_global_local stage columns/rows with the new
-# reconcile_checklist columns/rows. The taxonomy_table.csv is ALWAYS
-# strict 8 columns (id_col + 7 ranks), regardless of prior detection.
+# prior_dir / prior_prefix: if <prior_dir>/<prior_prefix>_tracking.csv exists
+# (the tracking of a previous reconcile_global_local() run),
+# reconcile_checklist() READS it and writes an AUGMENTED tracking that combines
+# the reconcile_global_local decision columns with the post-checklist columns.
+# The taxonomy_table.csv is ALWAYS strict 8 columns (id_col + 7 ranks).
 # Defaults: prior_dir = "reconcile_global_local_out",
 #           prior_prefix = "reconcile_global_local".
 #
@@ -51,12 +48,17 @@
 #              after_<rank> at every rank, regatta_match_rank (the
 #              rank at which the input matched the checklist, or NA
 #              when nothing matched at any rank -- no regional record),
-#              and any input metadata columns
-#              passed through. One row per ASV in the input.
+#              regatta_reason (per-ASV "kept" / "non-local (geographic)"
+#              / "off-target (taxonomic)" when a target group is known),
+#              and any input metadata columns passed through. One row
+#              per ASV in the input.
 #
-#   $stats     Match-rank distribution and per-rank specificity
-#              counts of the reconciled output, plus the change in
-#              number of ASVs assigned before vs. after.
+#   $stats     A compact per-step transition headline: total ASVs,
+#              assigned before/after, and how many ASVs were unchanged
+#              vs downgraded (specificity reduced) vs dropped (no
+#              regional record). The per-rank before/after distribution
+#              is NOT here -- it is the input vs regatta_result columns
+#              of summarize_regatta()'s report.
 
 #' Reconcile a taxonomy table against a regional species checklist
 #'
@@ -92,10 +94,23 @@
 #' @param overwrite_taxonomy_files If `TRUE`, (re)build the taxonomy DB at
 #'   `sql_path` even if one exists. Only consulted when a raw checklist needs
 #'   taxonomizing. Default `FALSE`. See [build_regional_checklist()].
+#' @param warn_pct_id If `TRUE` (default), warn when `taxonomy_table` has no
+#'   usable `pct_id` column -- percent-identity is optional for the geographic
+#'   LCA but enables percent-ID filtering of low-confidence (likelier-wrong)
+#'   calls, and is required for the two-DB [reconcile_global_local()] comparison.
+#'   [run_regatta()] sets this `FALSE` for its internal two-DB step, whose
+#'   intermediate result intentionally carries no `pct_id`.
+#' @param target_rank Optional single rank name (one of the 7 ranks) giving the
+#'   rank at which the queried group is defined (e.g. `"class"` for vertebrates).
+#'   Used to split downgraded/dropped ASVs into *non-local* (matched the
+#'   checklist at or finer than this rank -- in the group, off the regional
+#'   list) vs *off-target* (matched only coarser, or not at all -- not in the
+#'   group). Defaults to the `"target_rank"` attribute stamped on `checklist` by
+#'   [build_regional_checklist()]; `NULL` (and no attribute) skips the split.
 #' @param output_dir Directory path; default `NULL` writes nothing (the
 #'   `result`/`tracking`/`stats` list is returned). Supply a directory to also
 #'   write the 3 CSVs there.
-#' @param output_prefix Filename prefix for the 3 CSVs. Default
+#' @param output_prefix Filename prefix for the output CSVs. Default
 #'   `"reconcile_checklist"`.
 #' @param prior_dir,prior_prefix Optional directory of a prior
 #'   [reconcile_global_local()] output to augment the tracking/summary CSVs
@@ -113,12 +128,19 @@ reconcile_checklist <- function(taxonomy_table,
                                 id_col        = "ASV_id",
                                 sql_path      = .regatta_default_sql_path(),
                                 overwrite_taxonomy_files = FALSE,
+                                warn_pct_id   = TRUE,
+                                target_rank   = NULL,
                                 output_dir    = NULL,
                                 output_prefix = "reconcile_checklist",
                                 prior_dir     = NULL,
                                 prior_prefix  = "reconcile_global_local",
                                 tracking_drop_pattern =
                                   "^(MERGED_sample:|obiclean_|seq_rank|ID_STATUS|DEFINITION)") {
+  # The target group's defining rank (the rank the `taxa` query fed to
+  # build_regional_checklist resolves to, e.g. "class" for vertebrates) lets us
+  # split the downgrades into off-target vs non-local. It travels on the
+  # checklist as an attribute; capture it now, before `checklist` is reassigned.
+  if (is.null(target_rank)) target_rank <- attr(checklist, "target_rank")
   # tracking_drop_pattern is a regex matched against column names in
   # the input taxonomy_table BEFORE they get carried into $tracking.
   # Default strips obitools per-sample read-count matrices
@@ -136,6 +158,20 @@ reconcile_checklist <- function(taxonomy_table,
   if (length(missing_t) > 0) {
     stop("taxonomy_table is missing required columns: ",
          paste(missing_t, collapse = ", "))
+  }
+  # pct_id is optional for the geographic LCA, but its absence forecloses two
+  # useful things -- warn (suppressed by run_regatta on its two-DB rec$result,
+  # which legitimately carries no pct_id).
+  if (isTRUE(warn_pct_id) &&
+      (!("pct_id" %in% names(taxonomy_table)) || all(is.na(taxonomy_table$pct_id)))) {
+    warning(
+      "No usable `pct_id` (percent-identity) column in the taxonomy table. ",
+      "The geographic reconciliation still runs, but without percent identity ",
+      "you cannot apply percent-ID filtering -- which removes low-confidence ",
+      "assignments that are more likely to be the wrong species -- and the ",
+      "two-database global-vs-local comparison (reconcile_global_local() / the ",
+      "run_regatta() two-DB workflow) cannot run. Add a `pct_id` column to your ",
+      "taxonomy table where you can.", call. = FALSE)
   }
   # Accept a not-yet-taxonomized checklist: taxonomize on the fly (with a
   # warning) so the LCA still runs. A pre-taxonomized checklist is unchanged.
@@ -207,126 +243,121 @@ reconcile_checklist <- function(taxonomy_table,
   }, character(1))
   rownames(tracking) <- NULL
 
-  # --- Build $stats ---
-  kin_only <- sum(!is.na(corrected$domain)  & is.na(corrected$phylum))
-  phy_only <- sum(!is.na(corrected$phylum)  & is.na(corrected$class))
-  cla_only <- sum(!is.na(corrected$class)   & is.na(corrected$order))
-  ord_only <- sum(!is.na(corrected$order)   & is.na(corrected$family))
-  fam_only <- sum(!is.na(corrected$family)  & is.na(corrected$genus))
-  gen_only <- sum(!is.na(corrected$genus)   & is.na(corrected$species))
-  sp_ct    <- sum(!is.na(corrected$species))
+  # --- Build $stats: the before -> after specificity story ---
+  # Per-ASV "depth" = the index of its lowest (most specific) non-NA rank, NA
+  # if it has no rank at all. "Assigned" = any non-NA rank, so the counts are
+  # right even when a pre-resolved input has no `domain` column. The checklist
+  # LCA only ever removes specificity, so an ASV is either unchanged, downgraded
+  # to a coarser rank, or dropped entirely (no regional record).
+  depth_of <- function(df) {
+    m <- !is.na(as.matrix(df[, ranks, drop = FALSE]))
+    vapply(seq_len(nrow(m)),
+           function(i) if (any(m[i, ])) max(which(m[i, ])) else NA_integer_,
+           integer(1))
+  }
+  before_d <- depth_of(before)
+  after_d  <- depth_of(corrected)
+  asg_b <- !is.na(before_d)
+  asg_a <- !is.na(after_d)
+  n_before    <- sum(asg_b)
+  n_after     <- sum(asg_a)
+  n_unchanged <- sum(asg_b & asg_a & after_d == before_d)
+  n_downgrade <- sum(asg_b & asg_a & after_d <  before_d)
+  n_dropped   <- sum(asg_b & !asg_a)   # was assigned; no regional record at all
 
-  n_before <- sum(!is.na(before$domain))
-  n_after  <- sum(!is.na(corrected$domain))
-
+  # Per-step transition headline + a breakdown of the downgrades by rank pair
+  # (e.g. "downgraded: species -> genus"). The per-rank before/after
+  # *distribution* is NOT here -- it is read across the input vs regatta_result
+  # columns of summarize_regatta()'s report.
   stats <- data.frame(
     metric = c("total ASVs",
                "assigned before checklist-LCA",
                "assigned after checklist-LCA",
-               "change in number of ASVs assigned",
-               "matched at species",
-               "matched at genus",
-               "matched at family",
-               "matched at order",
-               "matched at class",
-               "matched at phylum",
-               "matched at domain",
-               "not matched (no regional record)",
-               "ID'ed to kingdom only",
-               "ID'ed to phylum only",
-               "ID'ed to class only",
-               "ID'ed to order only",
-               "ID'ed to family only",
-               "ID'ed to genus only",
-               "ID'ed to species"),
-    count  = c(nrow(corrected),
-               n_before,
-               n_after,
-               n_after - n_before,
-               sum(match_rank == "species", na.rm = TRUE),
-               sum(match_rank == "genus",   na.rm = TRUE),
-               sum(match_rank == "family",  na.rm = TRUE),
-               sum(match_rank == "order",   na.rm = TRUE),
-               sum(match_rank == "class",   na.rm = TRUE),
-               sum(match_rank == "phylum",  na.rm = TRUE),
-               sum(match_rank == "domain",  na.rm = TRUE),
-               sum(is.na(match_rank)),
-               kin_only, phy_only, cla_only, ord_only, fam_only, gen_only, sp_ct),
+               "ASVs unchanged (specificity kept)",
+               "ASVs downgraded (specificity reduced)",
+               "no regional record (call dropped)"),
+    count  = c(nrow(corrected), n_before, n_after,
+               n_unchanged, n_downgrade, n_dropped),
     stringsAsFactors = FALSE
   )
+  dn <- which(asg_b & asg_a & after_d < before_d)
+  if (length(dn)) {
+    pairs <- paste0("downgraded: ", ranks[before_d[dn]], " -> ", ranks[after_d[dn]])
+    pt    <- sort(table(pairs), decreasing = TRUE)
+    stats <- rbind(stats, data.frame(metric = names(pt),
+                                     count  = as.integer(pt),
+                                     stringsAsFactors = FALSE))
+  }
+
+  # WHY the affected ASVs (downgraded or dropped) lost specificity. An ASV is
+  # "in the target group" iff it matched the regional checklist at, or finer
+  # than, the group's defining rank (e.g. matched at class/order/family/...
+  # when the query was vertebrates, defined at class). Matching only at a
+  # COARSER rank (e.g. an invertebrate caught at domain, a non-vertebrate
+  # chordate caught at phylum) or not at all means it is not in the group:
+  #   - in group, off the checklist  -> non-local (geographic)
+  #   - not in the group at all       -> off-target (taxonomic)
+  # We key off the matched rank (after_d) rather than taxon names, since names
+  # diverge between WoRMS and NCBI but the rank the LCA matched at does not.
+  # Needs the target rank (stamped on the checklist). Recorded per-ASV in
+  # $tracking$regatta_reason and as summary counts in $stats.
+  affected <- asg_b & ((asg_a & after_d < before_d) | !asg_a)
+  reason <- rep(NA_character_, nrow(before))
+  reason[asg_b & asg_a & after_d == before_d] <- "kept"
+  thr <- if (!is.null(target_rank) && length(target_rank) == 1 &&
+             target_rank %in% ranks) match(target_rank, ranks) else NA_integer_
+  if (!is.na(thr)) {
+    in_tg <- affected & !is.na(after_d) & after_d >= thr   # matched at/finer than target rank
+    reason[affected &  in_tg] <- "non-local (geographic)"
+    reason[affected & !in_tg] <- "off-target (taxonomic)"
+    if (any(affected)) {
+      stats <- rbind(stats, data.frame(
+        metric = c("downgraded/dropped -- non-local (geographic)",
+                   "downgraded/dropped -- off-target (taxonomic)"),
+        count  = c(sum(affected & in_tg), sum(affected & !in_tg)),
+        stringsAsFactors = FALSE))
+    }
+  } else {
+    reason[affected] <- "specificity reduced (target group not available)"
+  }
+  tracking$regatta_reason <- reason
 
   if (!is.null(output_dir)) {
     dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 
-    # taxonomy_table is ALWAYS the strict 8-column result.
     utils::write.csv(result,
                      file.path(output_dir, paste0(output_prefix, "_taxonomy_table.csv")),
                      row.names = FALSE)
 
-    # Default behavior for tracking + summary: just write the reconcile_checklist
-    # versions. But if a prior reconcile_global_local output folder is present,
-    # read its tracking + summary and AUGMENT before writing.
-    tracking_to_write <- tracking
-    summary_to_write  <- stats
-
-    prior_tracking_path <- if (!is.null(prior_dir)) file.path(prior_dir, paste0(prior_prefix, "_tracking.csv")) else NULL
-    prior_summary_path  <- if (!is.null(prior_dir)) file.path(prior_dir, paste0(prior_prefix, "_summary.csv"))  else NULL
-    prior_detected <- !is.null(prior_dir) && dir.exists(prior_dir) &&
-                      !is.null(prior_tracking_path) && file.exists(prior_tracking_path) &&
-                      !is.null(prior_summary_path)  && file.exists(prior_summary_path)
-
+    # No per-step summary is written -- the run-level regatta_summary (from
+    # summarize_regatta()) is the single report; $stats is returned for callers
+    # who want the per-step numbers programmatically. Tracking is still written,
+    # and augmented with the prior reconcile_global_local tracking if present.
+    tracking_to_write   <- tracking
+    prior_tracking_path <- if (!is.null(prior_dir))
+      file.path(prior_dir, paste0(prior_prefix, "_tracking.csv")) else NULL
+    prior_detected <- !is.null(prior_tracking_path) && file.exists(prior_tracking_path)
     if (prior_detected) {
-      message("Detected prior reconcile_global_local output at ", normalizePath(prior_dir),
-              "; augmenting tracking + summary.")
+      message("Detected prior reconcile_global_local tracking at ",
+              normalizePath(prior_tracking_path), "; augmenting tracking.")
       prior_tracking <- utils::read.csv(prior_tracking_path, stringsAsFactors = FALSE)
-      prior_summary  <- utils::read.csv(prior_summary_path,  stringsAsFactors = FALSE)
-
-      # Pull the new (post-checklist) columns from the freshly-built tracking.
-      # Only the columns that are NEW relative to the prior stage:
-      new_cols <- c(id_col,
-                    paste0("after_",  ranks),
-                    "regatta_match_rank",
-                    "after_scientific_name")
-      new_cols <- intersect(new_cols, names(tracking))
+      new_cols <- intersect(c(id_col, paste0("after_", ranks), "regatta_match_rank",
+                              "after_scientific_name", "regatta_reason"), names(tracking))
       addons   <- tracking[, new_cols, drop = FALSE]
-      # Rename "after_*" to "post_checklist_*" in the augmented view so the
-      # two stages are unambiguous when read alongside preferred_* columns
-      # from reconcile_global_local.
-      rename_map <- c(paste0("after_", ranks),
-                      "after_scientific_name")
-      new_names  <- c(paste0("post_checklist_", ranks),
-                      "post_checklist_scientific_name")
+      rename_map <- c(paste0("after_", ranks), "after_scientific_name")
+      new_names  <- c(paste0("post_checklist_", ranks), "post_checklist_scientific_name")
       for (i in seq_along(rename_map)) {
         hit <- which(names(addons) == rename_map[i])
         if (length(hit) == 1) names(addons)[hit] <- new_names[i]
       }
       tracking_to_write <- merge(prior_tracking, addons, by = id_col, all.x = TRUE)
-
-      # Augmented summary: stack reconcile_global_local stats rows on top of
-      # reconcile_checklist stats rows, with a stage label so each row is
-      # clearly attributed.
-      if (all(c("metric", "count") %in% names(prior_summary)) &&
-          all(c("metric", "count") %in% names(stats))) {
-        summary_to_write <- rbind(
-          data.frame(stage = "reconcile_global_local",
-                     metric = prior_summary$metric,
-                     count  = prior_summary$count,
-                     stringsAsFactors = FALSE),
-          data.frame(stage = "reconcile_checklist",
-                     metric = stats$metric,
-                     count  = stats$count,
-                     stringsAsFactors = FALSE)
-        )
-      }
     }
 
     utils::write.csv(tracking_to_write,
                      file.path(output_dir, paste0(output_prefix, "_tracking.csv")),
                      row.names = FALSE)
-    utils::write.csv(summary_to_write,
-                     file.path(output_dir, paste0(output_prefix, "_summary.csv")),
-                     row.names = FALSE)
-    message("Wrote 3 CSVs to ", normalizePath(output_dir))
+    message("Wrote taxonomy_table + ", if (prior_detected) "augmented " else "",
+            "tracking to ", normalizePath(output_dir))
   }
 
   list(result = result, tracking = tracking, stats = stats)

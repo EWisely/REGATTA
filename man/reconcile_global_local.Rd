@@ -15,6 +15,7 @@ reconcile_global_local(
   Local_advantage = TRUE,
   output_dir = NULL,
   output_prefix = "reconcile_global_local",
+  write_summary = TRUE,
   tracking_drop_pattern = "^(MERGED_sample:|obiclean_|seq_rank|ID_STATUS|DEFINITION)"
 )
 }
@@ -39,10 +40,14 @@ input max is <= 1 and rescales to 0-100 with \code{signif(x, 3) * 100}.}
 \item{output_dir}{Directory path; default \code{NULL} writes nothing (the
 \code{result}/\code{tracking}/\code{stats} list is returned). Supply a directory to also
 write \verb{<output_prefix>_taxonomy_table.csv}, \verb{<output_prefix>_tracking.csv},
-and \verb{<output_prefix>_summary.csv} there.}
+and (unless \code{write_summary = FALSE}) \verb{<output_prefix>_summary.csv} there.}
 
-\item{output_prefix}{Filename prefix for the 3 CSVs. Default
+\item{output_prefix}{Filename prefix for the output CSVs. Default
 \code{"reconcile_global_local"}.}
+
+\item{write_summary}{If \code{TRUE} (default), also write the \verb{_summary.csv}.
+\code{\link[=run_regatta]{run_regatta()}} sets this \code{FALSE} so a run writes only one top-level
+summary (\code{regatta_summary.csv}).}
 
 \item{tracking_drop_pattern}{Regex matched against input column names;
 matching columns are dropped before they enter \verb{$tracking}. Default
@@ -53,8 +58,9 @@ preserves \verb{BEST_MATCH_*}, \code{COUNT}, \code{TAXID}, \code{BEST_IDENTITY},
 \value{
 A list with three elements:
 \itemize{
-\item \code{result}: data.frame with \code{id_col} + 7 rank columns (strict 8-col
-REGATTA exchange format).
+\item \code{result}: data.frame with \code{id_col} + 7 rank columns + \code{pct_id} (the
+winning database's percent identity, kept with the winning taxa for
+downstream filtering). Feeds straight into \code{\link[=reconcile_checklist]{reconcile_checklist()}}.
 \item \code{tracking}: per-ASV decision record (both inputs preserved with
 \verb{_global} / \verb{_local} suffixes plus REGATTA bookkeeping).
 \item \code{stats}: (metric, count) data.frame.

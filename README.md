@@ -235,7 +235,7 @@ cl <- build_regional_checklist(
   CSV           = NULL,          # optional: path(s) to YOUR local checklist CSV(s),
                                  # ideally a citable published list (for reproducibility)
   marine        = TRUE, terrestrial = FALSE,
-  output_dir    = "my_checklists",  # REQUIRED: outputs go in a dated
+  output_dir    = "local_database_checklist",  # REQUIRED: outputs go in a dated
                                     # <region>_<label>_<date> subfolder here
   sql_path      = file.path(tools::R_user_dir("REGATTA", "cache"), "accessionTaxa.sql")
   # ^ this IS the default (a persistent cache, built on first use). Replace it

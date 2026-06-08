@@ -37,8 +37,12 @@ test_that("run_regatta dispatches a vsearch lca+userout pair through to the chec
   expect_true(is.na(rr$species[rr$ASV_id == "ASV_2"]))
   expect_equal(rr$genus[rr$ASV_id == "ASV_2"], "Sebastes")
 
-  # 21-row summary returned
-  expect_equal(nrow(res$summary), 21L)
+  # summary returned: base rows + transition headline + downgrade breakdown.
+  # ASV_2 was downgraded species -> genus, so that breakdown row appears.
+  s <- res$summary
+  expect_gte(nrow(s), 27L)
+  expect_equal(s$regatta_result[s$row_names == "ASVs downgraded (specificity reduced)"], 1)
+  expect_equal(s$regatta_result[s$row_names == "downgraded: species -> genus"], 1)
 
   # output bundle written under a dated run subfolder of out_dir
   run <- file.path(out, paste0("testreg_fish_", Sys.Date()))
@@ -47,6 +51,12 @@ test_that("run_regatta dispatches a vsearch lca+userout pair through to the chec
   expect_true(file.exists(file.path(run, "run_log.txt")))
   expect_true(file.exists(file.path(run, "reconcile_checklist",
                                     "reconcile_checklist_taxonomy_table.csv")))
+  # only ONE summary file: the top-level regatta_summary.csv, not a per-step one
+  expect_false(file.exists(file.path(run, "reconcile_checklist",
+                                     "reconcile_checklist_summary.csv")))
+  # single-DB report columns: input_file + regatta_result
+  expect_identical(setdiff(names(res$summary), "row_names"),
+                   c("input_file", "regatta_result"))
 })
 
 test_that("run_regatta rejects an unsupported checklist argument", {
@@ -66,4 +76,44 @@ test_that("run_regatta requires out_dir, region, and label", {
     suppressMessages(run_regatta(input = "x.tab", checklist = 42,
                                  out_dir = tempfile(), label = "l")),
     "region")
+})
+
+test_that("a pre-resolved rank CSV (empty-header id col, six ranks, no domain) is detected and run", {
+  tmp <- tempfile(); dir.create(tmp)
+  csv <- file.path(tmp, "merged_taxa_table.csv")
+  # Mirrors a real file: an unnamed/empty first column (read as ""), the six
+  # lower ranks, and NO domain column.
+  writeLines(c(
+    ",phylum,class,order,family,genus,species",
+    ",Chordata,Actinopterygii,Scorpaeniformes,Sebastidae,Sebastes,Sebastes mystinus",
+    ",Chordata,Actinopterygii,Scorpaeniformes,Sebastidae,Sebastes,Sebastes goodei"),
+    csv)
+
+  expect_equal(names(read.csv(csv, check.names = FALSE))[1], "")  # empty header
+  expect_equal(REGATTA:::.regatta_detect_format(csv), "ranks_csv")
+
+  checklist <- data.frame(
+    domain = "Eukaryota", phylum = "Chordata", class = "Actinopterygii",
+    order = "Scorpaeniformes", family = "Sebastidae", genus = "Sebastes",
+    species = "Sebastes mystinus", stringsAsFactors = FALSE)
+
+  res <- suppressMessages(suppressWarnings(run_regatta(
+    input = csv, checklist = checklist, out_dir = file.path(tmp, "out"),
+    region = "r", label = "l")))
+  rr <- res$post_checklist$result
+  expect_equal(nrow(rr), 2L)
+  expect_true(all(nzchar(names(rr))))                 # empty-named col dropped
+  expect_true(all(nzchar(rr$ASV_id)))                 # ids synthesized
+  expect_true("domain" %in% names(rr))                # missing rank added
+  expect_false(is.na(rr$species[1]))                  # mystinus on checklist
+  expect_true(is.na(rr$species[2]) && rr$genus[2] == "Sebastes")  # goodei -> genus
+})
+
+test_that("an unrecognized CSV gives an informative error listing columns + formats", {
+  bad <- tempfile(fileext = ".csv")
+  utils::write.csv(data.frame(foo = 1, bar = 2), bad, row.names = FALSE)
+  err <- tryCatch(REGATTA:::.regatta_read_input(bad, NULL, "ASV_id"),
+                  error = function(e) conditionMessage(e))
+  expect_match(err, "Columns found: foo, bar")
+  expect_match(err, "pre-resolved taxonomy CSV")
 })

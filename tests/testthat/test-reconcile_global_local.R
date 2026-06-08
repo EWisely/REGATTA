@@ -17,9 +17,10 @@ asv  <- function(sp) global$ASV_id[match(sp, global$species)]
 rrow <- function(sp) which(r$ASV_id  == asv(sp))
 trow <- function(sp) which(tr$ASV_id == asv(sp))
 
-test_that("$result is the strict 8-column exchange format for all 12 ASVs", {
-  expect_identical(names(r), c("ASV_id", ranks))
+test_that("$result is id + 7 ranks + the winning pct_id, for all 12 ASVs", {
+  expect_identical(names(r), c("ASV_id", ranks, "pct_id"))
   expect_equal(nrow(r), 12L)
+  expect_type(r$pct_id, "double")
 })
 
 test_that("a global-only ASV keeps the global call (local made none)", {

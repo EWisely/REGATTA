@@ -7,21 +7,65 @@ global    <- read.csv(system.file("extdata", "mifish_obitools_example.csv", pack
 checklist <- readRDS(system.file("extdata", "galapagos_fish_checklist.rds", package = "REGATTA"))
 post      <- suppressMessages(reconcile_checklist(global, checklist, output_dir = NULL))
 
-test_that("summarize_regatta produces the 21-row table with real counts", {
+test_that("summarize_regatta produces the report with real counts + downgrade breakdown", {
   s <- summarize_regatta(post_checklist = post)
-  val <- function(label) s$regatta[s$row_names == label]
+  val <- function(label) s$regatta_result[s$row_names == label]
 
-  expect_equal(nrow(s), 21L)
-  expect_true(all(c("row_names", "regatta") %in% names(s)))
+  expect_gte(nrow(s), 27L)   # 24 base rows + transition headline + breakdown
+  expect_true(all(c("row_names", "regatta_result") %in% names(s)))
   expect_equal(val("total ASVs"), 12)
   expect_equal(val("assigned ASVs"), 12)
   expect_equal(val("ID'ed to species"), 6)        # 6 of the 12 stay at species
   expect_equal(val("ID'ed to genus only"), 4)
+  # transition headline + per-rank-pair downgrade breakdown
+  expect_equal(val("ASVs downgraded (specificity reduced)"), 6)
+  expect_equal(val("downgraded: species -> genus"), 4)
+  expect_equal(val("downgraded: species -> family"), 2)
+  # checklist-membership rows present but NA without a checklist
+  expect_true(is.na(val("percent of ASVs on regional checklist")))
+  expect_true(is.na(val("percent of distinct taxa on regional checklist")))
 })
 
-test_that("each supplied input becomes its own stage column", {
-  s <- summarize_regatta(global_input = global, post_checklist = post)
-  expect_true(all(c("global", "regatta") %in% names(s)))
+test_that("checklist membership: input < 100% on the checklist, regatta_result = 100%", {
+  s <- summarize_regatta(global_input = global, post_checklist = post,
+                         checklist = checklist)
+  asv <- function(col) s[[col]][s$row_names == "percent of ASVs on regional checklist"]
+  tax <- function(col) s[[col]][s$row_names == "percent of distinct taxa on regional checklist"]
+  expect_lt(asv("global"), 100)              # some global species aren't on the checklist
+  expect_equal(asv("regatta_result"), 100)   # every reconciled call is on the checklist
+  expect_equal(tax("regatta_result"), 100)
+
+  # The reverse direction: checklist recovery. Identical before/after at species
+  # level (REGATTA never drops a true regional detection), and > 0 here.
+  rec <- function(col) s[[col]][s$row_names == "percent of checklist species detected"]
+  expect_gt(rec("global"), 0)
+  expect_equal(rec("global"), rec("regatta_result"))
+})
+
+test_that("columns are the input(s) + regatta_result; single-DB input is 'input_file'", {
+  s2 <- summarize_regatta(global_input = global, post_checklist = post)
+  expect_true(all(c("global", "regatta_result") %in% names(s2)))
+  expect_false("reconciled" %in% names(s2))   # merge intermediate is not a column
+  s1 <- summarize_regatta(input_file = global, post_checklist = post)
+  expect_identical(setdiff(names(s1), "row_names"), c("input_file", "regatta_result"))
+})
+
+test_that("transition rows sit in regatta_result with NA in the before column", {
+  s <- summarize_regatta(input_file = global, post_checklist = post)
+  tr <- function(lbl) s[s$row_names == lbl, c("input_file", "regatta_result")]
+  for (lbl in c("ASVs unchanged (specificity kept)",
+                "ASVs downgraded (specificity reduced)",
+                "no regional record (call dropped)")) {
+    row <- tr(lbl)
+    expect_true(is.na(row$input_file))       # NA in the "before" column
+    expect_false(is.na(row$regatta_result))  # the count is in regatta_result
+  }
+  # unchanged + downgraded + dropped == assigned (post-checklist), 12 here
+  vals <- vapply(c("ASVs unchanged (specificity kept)",
+                   "ASVs downgraded (specificity reduced)",
+                   "no regional record (call dropped)"),
+                 function(l) s$regatta_result[s$row_names == l], numeric(1))
+  expect_equal(sum(vals), 12)
 })
 
 test_that("summarize_regatta errors with no inputs and on a malformed list", {

@@ -10,6 +10,8 @@ reconcile_checklist(
   id_col = "ASV_id",
   sql_path = .regatta_default_sql_path(),
   overwrite_taxonomy_files = FALSE,
+  warn_pct_id = TRUE,
+  target_rank = NULL,
   output_dir = NULL,
   output_prefix = "reconcile_checklist",
   prior_dir = NULL,
@@ -42,11 +44,26 @@ or errors with the build command (non-interactive) unless
 \code{sql_path} even if one exists. Only consulted when a raw checklist needs
 taxonomizing. Default \code{FALSE}. See \code{\link[=build_regional_checklist]{build_regional_checklist()}}.}
 
+\item{warn_pct_id}{If \code{TRUE} (default), warn when \code{taxonomy_table} has no
+usable \code{pct_id} column -- percent-identity is optional for the geographic
+LCA but enables percent-ID filtering of low-confidence (likelier-wrong)
+calls, and is required for the two-DB \code{\link[=reconcile_global_local]{reconcile_global_local()}} comparison.
+\code{\link[=run_regatta]{run_regatta()}} sets this \code{FALSE} for its internal two-DB step, whose
+intermediate result intentionally carries no \code{pct_id}.}
+
+\item{target_rank}{Optional single rank name (one of the 7 ranks) giving the
+rank at which the queried group is defined (e.g. \code{"class"} for vertebrates).
+Used to split downgraded/dropped ASVs into \emph{non-local} (matched the
+checklist at or finer than this rank -- in the group, off the regional
+list) vs \emph{off-target} (matched only coarser, or not at all -- not in the
+group). Defaults to the \code{"target_rank"} attribute stamped on \code{checklist} by
+\code{\link[=build_regional_checklist]{build_regional_checklist()}}; \code{NULL} (and no attribute) skips the split.}
+
 \item{output_dir}{Directory path; default \code{NULL} writes nothing (the
 \code{result}/\code{tracking}/\code{stats} list is returned). Supply a directory to also
 write the 3 CSVs there.}
 
-\item{output_prefix}{Filename prefix for the 3 CSVs. Default
+\item{output_prefix}{Filename prefix for the output CSVs. Default
 \code{"reconcile_checklist"}.}
 
 \item{prior_dir, prior_prefix}{Optional directory of a prior
