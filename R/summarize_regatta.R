@@ -82,10 +82,12 @@
 #'
 #' @return A data.frame with one column per supplied stage. A fixed core of 24
 #'   rows (counts, source breakdown, checklist membership/recovery, specificity,
-#'   diversity) is followed by the checklist-step transition headline, one
-#'   `downgraded: <from> -> <to>` row per rank pair that occurred, and (when the
-#'   checklist carries a target group) the off-target/non-local breakdown -- so
-#'   the total row count is dynamic, varying with the data.
+#'   diversity) is followed by the checklist-step transition headline (the
+#'   `no regional record (call dropped)` row is omitted when zero, as it nearly
+#'   always is when the walk reaches domain), one `downgraded: <from> -> <to>`
+#'   row per rank pair that occurred, and (when the checklist carries a target
+#'   group) the off-target/non-local breakdown -- so the total row count is
+#'   dynamic, varying with the data.
 #'
 #' @export
 summarize_regatta <- function(reconciled     = NULL,
@@ -292,6 +294,10 @@ summarize_regatta <- function(reconciled     = NULL,
     keep <- !(ps$metric %in% c("total ASVs",
                                "assigned before checklist-LCA",
                                "assigned after checklist-LCA"))
+    # The walk goes all the way to domain, so a call is almost never dropped
+    # outright. Hide that row when it's zero so the useful downgrade breakdown
+    # is what shows; keep it only when there genuinely are dropped calls.
+    keep <- keep & !(ps$metric == "no regional record (call dropped)" & ps$count == 0)
     ps <- ps[keep, , drop = FALSE]
     if (nrow(ps) > 0) {
       extra <- data.frame(row_names = ps$metric, stringsAsFactors = FALSE)

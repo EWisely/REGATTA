@@ -54,18 +54,30 @@ test_that("transition rows sit in regatta_result with NA in the before column", 
   s <- summarize_regatta(input_file = global, post_checklist = post)
   tr <- function(lbl) s[s$row_names == lbl, c("input_file", "regatta_result")]
   for (lbl in c("ASVs unchanged (specificity kept)",
-                "ASVs downgraded (specificity reduced)",
-                "no regional record (call dropped)")) {
+                "ASVs downgraded (specificity reduced)")) {
     row <- tr(lbl)
     expect_true(is.na(row$input_file))       # NA in the "before" column
     expect_false(is.na(row$regatta_result))  # the count is in regatta_result
   }
-  # unchanged + downgraded + dropped == assigned (post-checklist), 12 here
+  # nothing was dropped here (the walk reaches domain), so that row is suppressed
+  expect_false(any(s$row_names == "no regional record (call dropped)"))
+  # unchanged + downgraded == assigned (post-checklist), 12 here (0 dropped)
   vals <- vapply(c("ASVs unchanged (specificity kept)",
-                   "ASVs downgraded (specificity reduced)",
-                   "no regional record (call dropped)"),
+                   "ASVs downgraded (specificity reduced)"),
                  function(l) s$regatta_result[s$row_names == l], numeric(1))
   expect_equal(sum(vals), 12)
+})
+
+test_that("the 'call dropped' row appears only when a call really is dropped", {
+  # an off-target ASV (Bacteria) that matches the fish checklist at no rank
+  drop_in <- rbind(global, transform(global[1, ], ASV_id = "BACT_1",
+    domain = "Bacteria", phylum = "Firmicutes", class = "Bacilli",
+    order = "Bacillales", family = "Bacillaceae", genus = "Bacillus",
+    species = "Bacillus subtilis"))
+  pdrop <- suppressMessages(reconcile_checklist(drop_in, checklist, output_dir = NULL))
+  s <- summarize_regatta(input_file = drop_in, post_checklist = pdrop)
+  expect_true(any(s$row_names == "no regional record (call dropped)"))
+  expect_equal(s$regatta_result[s$row_names == "no regional record (call dropped)"], 1)
 })
 
 # helper mirroring summarize_regatta's "assigned = any non-NA rank"
