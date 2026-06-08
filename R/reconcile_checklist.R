@@ -100,11 +100,12 @@
 #'   calls, and is required for the two-DB [reconcile_global_local()] comparison.
 #'   [run_regatta()] sets this `FALSE` for its internal two-DB step, whose
 #'   intermediate result intentionally carries no `pct_id`.
-#' @param target_group Optional data.frame with `rank` + `name` columns naming
-#'   the taxa that define the queried group (e.g. the vertebrate classes), used
-#'   to split downgraded/dropped ASVs into *non-local* (in the group, off the
-#'   regional checklist) vs *off-target* (not even in the group). Defaults to the
-#'   `"target_group"` attribute stamped on `checklist` by
+#' @param target_rank Optional single rank name (one of the 7 ranks) giving the
+#'   rank at which the queried group is defined (e.g. `"class"` for vertebrates).
+#'   Used to split downgraded/dropped ASVs into *non-local* (matched the
+#'   checklist at or finer than this rank -- in the group, off the regional
+#'   list) vs *off-target* (matched only coarser, or not at all -- not in the
+#'   group). Defaults to the `"target_rank"` attribute stamped on `checklist` by
 #'   [build_regional_checklist()]; `NULL` (and no attribute) skips the split.
 #' @param output_dir Directory path; default `NULL` writes nothing (the
 #'   `result`/`tracking`/`stats` list is returned). Supply a directory to also
@@ -128,17 +129,18 @@ reconcile_checklist <- function(taxonomy_table,
                                 sql_path      = .regatta_default_sql_path(),
                                 overwrite_taxonomy_files = FALSE,
                                 warn_pct_id   = TRUE,
-                                target_group  = NULL,
+                                target_rank   = NULL,
                                 output_dir    = NULL,
                                 output_prefix = "reconcile_checklist",
                                 prior_dir     = NULL,
                                 prior_prefix  = "reconcile_global_local",
                                 tracking_drop_pattern =
                                   "^(MERGED_sample:|obiclean_|seq_rank|ID_STATUS|DEFINITION)") {
-  # The target group (taxa fed to build_regional_checklist) lets us split the
-  # downgrades into off-target vs non-local. It travels on the checklist as an
-  # attribute; capture it now, before `checklist` is reassigned below.
-  if (is.null(target_group)) target_group <- attr(checklist, "target_group")
+  # The target group's defining rank (the rank the `taxa` query fed to
+  # build_regional_checklist resolves to, e.g. "class" for vertebrates) lets us
+  # split the downgrades into off-target vs non-local. It travels on the
+  # checklist as an attribute; capture it now, before `checklist` is reassigned.
+  if (is.null(target_rank)) target_rank <- attr(checklist, "target_rank")
   # tracking_drop_pattern is a regex matched against column names in
   # the input taxonomy_table BEFORE they get carried into $tracking.
   # Default strips obitools per-sample read-count matrices
@@ -287,25 +289,25 @@ reconcile_checklist <- function(taxonomy_table,
                                      stringsAsFactors = FALSE))
   }
 
-  # WHY the affected ASVs (downgraded or dropped) lost specificity: off-target
-  # (their original call isn't even in the target group fed to
-  # build_regional_checklist) vs non-local (in the target group, but not on the
-  # regional checklist). Needs the target group (stamped on the checklist). The
-  # per-ASV reason is also recorded in $tracking$regatta_reason.
-  have_tg <- is.data.frame(target_group) &&
-    all(c("rank", "name") %in% names(target_group)) && nrow(target_group) > 0
-  in_tg <- rep(FALSE, nrow(before))
-  if (have_tg) {
-    for (k in seq_len(nrow(target_group))) {
-      r <- target_group$rank[k]; n <- target_group$name[k]
-      if (r %in% names(before))
-        in_tg <- in_tg | (!is.na(before[[r]]) & before[[r]] == n)
-    }
-  }
+  # WHY the affected ASVs (downgraded or dropped) lost specificity. An ASV is
+  # "in the target group" iff it matched the regional checklist at, or finer
+  # than, the group's defining rank (e.g. matched at class/order/family/...
+  # when the query was vertebrates, defined at class). Matching only at a
+  # COARSER rank (e.g. an invertebrate caught at domain, a non-vertebrate
+  # chordate caught at phylum) or not at all means it is not in the group:
+  #   - in group, off the checklist  -> non-local (geographic)
+  #   - not in the group at all       -> off-target (taxonomic)
+  # We key off the matched rank (after_d) rather than taxon names, since names
+  # diverge between WoRMS and NCBI but the rank the LCA matched at does not.
+  # Needs the target rank (stamped on the checklist). Recorded per-ASV in
+  # $tracking$regatta_reason and as summary counts in $stats.
   affected <- asg_b & ((asg_a & after_d < before_d) | !asg_a)
   reason <- rep(NA_character_, nrow(before))
   reason[asg_b & asg_a & after_d == before_d] <- "kept"
-  if (have_tg) {
+  thr <- if (!is.null(target_rank) && length(target_rank) == 1 &&
+             target_rank %in% ranks) match(target_rank, ranks) else NA_integer_
+  if (!is.na(thr)) {
+    in_tg <- affected & !is.na(after_d) & after_d >= thr   # matched at/finer than target rank
     reason[affected &  in_tg] <- "non-local (geographic)"
     reason[affected & !in_tg] <- "off-target (taxonomic)"
     if (any(affected)) {

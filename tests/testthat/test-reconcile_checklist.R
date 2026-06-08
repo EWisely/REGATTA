@@ -105,31 +105,40 @@ test_that("assigned-before/after count any non-NA rank (not just domain)", {
   expect_equal(s2$count[s2$metric == "assigned before checklist-LCA"], 3)
 })
 
-test_that("target_group splits downgrades into non-local vs off-target", {
+test_that("target_rank splits downgrades into non-local vs off-target", {
   ck <- data.frame(domain = "Eukaryota", phylum = "Chordata", class = "Actinopterygii",
                    order = "Scorpaeniformes", family = "Sebastidae", genus = "Sebastes",
                    species = "Sebastes mystinus", stringsAsFactors = FALSE)
-  # target group = the fishes (class Actinopterygii), stamped as an attribute
-  attr(ck, "target_group") <- data.frame(rank = "class", name = "Actinopterygii",
-                                         stringsAsFactors = FALSE)
+  # the queried group (fishes) is defined at class rank; stamped as an attribute
+  attr(ck, "target_rank") <- "class"
   tax <- data.frame(
-    ASV_id = c("A1", "A2"), domain = "Eukaryota", phylum = "Chordata",
-    class  = c("Actinopterygii", "Mammalia"),         # A1 fish, A2 mammal
-    order  = c("Scorpaeniformes", "Cetacea"),
-    family = c("Sebastidae", "Delphinidae"),
-    genus  = c("Sebastes", "Tursiops"),
-    species = c("Sebastes goodei", "Tursiops truncatus"),  # both off the checklist
-    pct_id = c(98, 99), stringsAsFactors = FALSE)
-  res <- suppressMessages(suppressWarnings(reconcile_checklist(tax, ck, output_dir = NULL)))
+    ASV_id = c("A1", "A2", "A3"), domain = "Eukaryota", phylum = "Chordata",
+    # A1 a fish off the list (downgrades to genus); A2 a mammal (matches only at
+    # phylum -- above the class target rank); A3 an anchovy with class/order NA,
+    # genus off-list but family on-list -- it downgrades genus->family, and the
+    # name-free rank test must still call it non-local despite the NA class.
+    class  = c("Actinopterygii", "Mammalia", NA),
+    order  = c("Scorpaeniformes", "Cetacea", NA),
+    family = c("Sebastidae", "Delphinidae", "Engraulidae"),
+    genus  = c("Sebastes", "Tursiops", "Anchoa"),
+    species = c("Sebastes goodei", "Tursiops truncatus", NA),
+    pct_id = c(98, 99, 95), stringsAsFactors = FALSE)
+  # checklist needs Engraulidae for A3 to match at family
+  ck2 <- rbind(ck, data.frame(domain = "Eukaryota", phylum = "Chordata",
+    class = "Actinopterygii", order = "Clupeiformes", family = "Engraulidae",
+    genus = "Engraulis", species = "Engraulis mordax", stringsAsFactors = FALSE))
+  attr(ck2, "target_rank") <- "class"
+  res <- suppressMessages(suppressWarnings(reconcile_checklist(tax, ck2, output_dir = NULL)))
   s <- res$stats
   g <- function(m) s$count[s$metric == m]
-  expect_equal(g("downgraded/dropped -- non-local (geographic)"), 1)  # the fish
+  expect_equal(g("downgraded/dropped -- non-local (geographic)"), 2)  # the two fish
   expect_equal(g("downgraded/dropped -- off-target (taxonomic)"), 1)  # the mammal
   # the per-ASV reason is recorded in $tracking too
   tr <- res$tracking
   expect_true("regatta_reason" %in% names(tr))
-  expect_equal(tr$regatta_reason[tr$ASV_id == "A1"], "non-local (geographic)")  # fish
-  expect_equal(tr$regatta_reason[tr$ASV_id == "A2"], "off-target (taxonomic)")  # mammal
+  expect_equal(tr$regatta_reason[tr$ASV_id == "A1"], "non-local (geographic)")  # fish (genus)
+  expect_equal(tr$regatta_reason[tr$ASV_id == "A2"], "off-target (taxonomic)")  # mammal (phylum)
+  expect_equal(tr$regatta_reason[tr$ASV_id == "A3"], "non-local (geographic)")  # anchovy, class NA
 })
 
 test_that("missing pct_id warns (mentions filtering + two-DB), suppressible via warn_pct_id", {

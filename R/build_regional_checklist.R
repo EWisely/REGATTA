@@ -282,22 +282,24 @@ build_regional_checklist <- function(region,
   }
   lca_taxonomized <- all(ranks %in% names(for_LCA))
 
-  # Stamp the target group (the resolved `taxa` query) onto for_LCA so the
-  # downstream reconcile/summary can split downgrades into off-target (not in
-  # this group) vs non-local (in the group, off the regional checklist). Stored
-  # as a (rank, name) data.frame restricted to the 7 ranks; survives saveRDS().
+  # Stamp the target group's defining RANK onto for_LCA so the downstream
+  # reconcile/summary can split downgrades into off-target vs non-local. We
+  # store only the rank (the coarsest rank the `taxa` query resolves to, e.g.
+  # "class" for vertebrates), NOT taxon names -- names diverge between WoRMS
+  # (resolve_taxa) and NCBI (the lineages), but the rank is shared. An ASV is
+  # then "in the group" iff it matched the checklist at or finer than this rank.
+  # Survives saveRDS().
   if (!is.null(taxa)) {
-    tg <- tryCatch({
+    tr_rank <- tryCatch({
       rt <- resolve_taxa(taxa, kingdom = kingdom, check_gbif = FALSE,
                          on_ambiguous = "warn")
-      d  <- data.frame(rank = tolower(rt$rank), name = rt$valid_name,
-                       stringsAsFactors = FALSE)
-      d[d$rank %in% ranks & !is.na(d$name), , drop = FALSE]
-    }, error = function(e) NULL)
-    if (!is.null(tg) && nrow(tg) > 0) {
-      attr(for_LCA, "target_group") <- tg
-      message("Target group stamped on for_LCA: ",
-              paste0(tg$name, " (", tg$rank, ")", collapse = ", "))
+      rk <- intersect(tolower(rt$rank), ranks)
+      if (length(rk)) ranks[min(match(rk, ranks))] else NA_character_   # coarsest
+    }, error = function(e) NA_character_)
+    if (!is.na(tr_rank)) {
+      attr(for_LCA, "target_rank") <- tr_rank
+      message("Target group resolves at rank '", tr_rank, "' -- stamped on ",
+              "for_LCA for off-target/non-local classification.")
     }
   }
 
