@@ -39,8 +39,8 @@ where each entry is a single path or a length-2 vsearch pair.
 
 \item{out_dir}{\strong{Required.} Output directory. Each run writes into its own
 dated \verb{<region>_<label>_<Date>} subfolder of it, so successive runs don't
-pile up. That subfolder gets the per-stage CSV triples, the 21-row summary,
-and \code{run_log.txt}. The results list is also returned.}
+pile up. That subfolder gets the per-stage CSV triples, the per-stage
+summary, and \code{run_log.txt}. The results list is also returned.}
 
 \item{region, label}{\strong{Required.} Region and taxon-group labels for this run.
 REGATTA filters/adjusts the taxonomy against the regional checklist built
@@ -88,7 +88,7 @@ and \code{\link[=summarize_regatta]{summarize_regatta()}}. Accepts file paths or
 classifier format (obitools \code{.tab}, vsearch userout, vsearch LCA + userout,
 BestTaxon \code{.csv}), dispatches to the right preprocessor, runs the
 appropriate reconcile* steps, and writes the standard 3-CSVs-per-stage
-output triples plus a top-level 21-row summary and a \code{run_log.txt}
+output triples plus a top-level per-stage summary and a \code{run_log.txt}
 describing what was detected.
 }
 \details{
