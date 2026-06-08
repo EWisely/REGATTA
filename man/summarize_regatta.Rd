@@ -40,11 +40,12 @@ data recovered). Otherwise those rows are \code{NA}. \code{\link[=run_regatta]{r
 run's checklist automatically.}
 }
 \value{
-A data.frame with one column per supplied stage: 24 fixed rows
-(counts, source breakdown, checklist membership/recovery, specificity,
-diversity) plus the checklist-step transition headline and one
-\verb{downgraded: <from> -> <to>} row per rank pair that occurred, so the total
-row count varies with the data.
+A data.frame with one column per supplied stage. A fixed core of 24
+rows (counts, source breakdown, checklist membership/recovery, specificity,
+diversity) is followed by the checklist-step transition headline, one
+\verb{downgraded: <from> -> <to>} row per rank pair that occurred, and (when the
+checklist carries a target group) the off-target/non-local breakdown -- so
+the total row count is dynamic, varying with the data.
 }
 \description{
 Compares inputs and outputs across stages and produces Ella's summary:

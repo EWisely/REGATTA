@@ -55,7 +55,8 @@
 #' userout file is available.
 #'
 #' @param path Path to the vsearch userout file.
-#' @param id_col Column name to use for the ASV identifier in the output.
+#' @param id_col Column name to use for the ASV identifier in the output
+#'   (default `"ASV_id"`).
 #' @param first_hit_only If TRUE (default), take only the first row per
 #'   ASV. If FALSE, returns every hit.
 #'

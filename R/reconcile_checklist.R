@@ -48,10 +48,11 @@
 #              after_<rank> at every rank, regatta_match_rank (the
 #              rank at which the input matched the checklist, or NA
 #              when nothing matched at any rank -- no regional record),
-#              regatta_reason (per-ASV "kept" / "non-local (geographic)"
-#              / "off-target (taxonomic)" when a target group is known),
-#              and any input metadata columns passed through. One row
-#              per ASV in the input.
+#              after_scientific_name (the lowest non-NA rank of the
+#              corrected lineage), regatta_reason (per-ASV "kept" /
+#              "non-local (geographic)" / "off-target (taxonomic)" when a
+#              target group is known), and any input metadata columns
+#              passed through. One row per ASV in the input.
 #
 #   $stats     A compact per-step transition headline: total ASVs,
 #              assigned before/after, and how many ASVs were unchanged
@@ -70,10 +71,12 @@
 #' standalone classifier-output taxonomy table.
 #'
 #' Returns a strict 8-column `$result` (REGATTA exchange format), a per-ASV
-#' `$tracking` before/after audit, and a `$stats` summary; optionally
-#' writes those as three CSVs. If a `reconcile_global_local` output folder
-#' is present, the `$tracking` and `$stats` written to disk are *augmented*
-#' versions combining both stages.
+#' `$tracking` before/after audit, and a `$stats` transition summary. With an
+#' `output_dir` it writes two CSVs -- the `$result` (`_taxonomy_table.csv`) and
+#' `$tracking` (`_tracking.csv`); no per-step summary file is written (the
+#' run-level `summarize_regatta()` report is the single summary). If a prior
+#' `reconcile_global_local` output folder is present, the `$tracking` written to
+#' disk is an *augmented* version combining both stages.
 #'
 #' @param taxonomy_table A data.frame with `id_col` + 7 lowercase rank
 #'   columns. Additional metadata columns are passed through to `$tracking`
@@ -113,8 +116,8 @@
 #' @param output_prefix Filename prefix for the output CSVs. Default
 #'   `"reconcile_checklist"`.
 #' @param prior_dir,prior_prefix Optional directory of a prior
-#'   [reconcile_global_local()] output to augment the tracking/summary CSVs
-#'   with. Default `prior_dir = NULL` (no augmentation); supply the directory
+#'   [reconcile_global_local()] output to augment the tracking CSV with.
+#'   Default `prior_dir = NULL` (no augmentation); supply the directory
 #'   to enable it (only relevant when `output_dir` is also set).
 #' @param tracking_drop_pattern Regex matched against input column names;
 #'   matching columns are dropped before they enter `$tracking`.

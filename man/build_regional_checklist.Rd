@@ -97,9 +97,12 @@ Invisibly, a list with \code{for_making_localdb} (a bare character vector
 of unique species binomials, for a reference-database builder),
 \code{checklist_summary} (the full taxonomized table with per-name resolution
 status, or \code{NULL} if no DB was available), \code{for_LCA} (\code{taxID} + the 7
-ranks, ready for the LCA step), and \code{methods} (a citations-included
-provenance sentence -- the home for any GBIF download key/DOI/citation).
-Pass \code{for_LCA} straight to \code{\link[=run_regatta]{run_regatta()}} / \code{\link[=reconcile_checklist]{reconcile_checklist()}}.
+ranks, ready for the LCA step; carries a \code{target_rank} attribute -- the
+rank the \code{taxa} query resolves to -- which \code{\link[=reconcile_checklist]{reconcile_checklist()}} uses to
+split downgrades into off-target vs non-local), and \code{methods} (a
+citations-included provenance sentence -- the home for any GBIF download
+key/DOI/citation). Pass \code{for_LCA} straight to \code{\link[=run_regatta]{run_regatta()}} /
+\code{\link[=reconcile_checklist]{reconcile_checklist()}}.
 }
 \description{
 The basic entry point for the checklist-building stage. Pulls regional

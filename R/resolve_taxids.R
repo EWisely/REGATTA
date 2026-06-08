@@ -29,7 +29,8 @@
 #' @param output_prefix If non-NULL, writes a CSV with this prefix.
 #' @param output_dir Directory to write the CSV into.
 #'
-#' @return A data.frame with `domain`-through-`species` columns.
+#' @return The input augmented with the 7 lowercase rank columns
+#'   (`domain` through `species`); all original columns are preserved.
 #'
 #' @importFrom utils write.csv
 #' @export

@@ -3,8 +3,8 @@
 
 ## Imports used across the checklist-building helpers (GBIF_download,
 ## OBIS_download, build_regional_checklist). The heavy biodiversity packages
-## (rgbif, robis, worrms, taxize) are Suggests and are called via `pkg::fn`
-## behind requireNamespace() guards, so they are not imported here.
+## (rgbif, robis, worrms, taxize) are in Imports but called via `pkg::fn`
+## behind requireNamespace() guards, so they are not @importFrom'd here.
 #' @importFrom dplyr %>% filter select rename mutate pull bind_rows
 #' @importFrom readr write_delim
 #' @importFrom utils read.csv read.delim write.csv head

@@ -67,8 +67,8 @@ write the 3 CSVs there.}
 \code{"reconcile_checklist"}.}
 
 \item{prior_dir, prior_prefix}{Optional directory of a prior
-\code{\link[=reconcile_global_local]{reconcile_global_local()}} output to augment the tracking/summary CSVs
-with. Default \code{prior_dir = NULL} (no augmentation); supply the directory
+\code{\link[=reconcile_global_local]{reconcile_global_local()}} output to augment the tracking CSV with.
+Default \code{prior_dir = NULL} (no augmentation); supply the directory
 to enable it (only relevant when \code{output_dir} is also set).}
 
 \item{tracking_drop_pattern}{Regex matched against input column names;
@@ -87,8 +87,10 @@ standalone classifier-output taxonomy table.
 }
 \details{
 Returns a strict 8-column \verb{$result} (REGATTA exchange format), a per-ASV
-\verb{$tracking} before/after audit, and a \verb{$stats} summary; optionally
-writes those as three CSVs. If a \code{reconcile_global_local} output folder
-is present, the \verb{$tracking} and \verb{$stats} written to disk are \emph{augmented}
-versions combining both stages.
+\verb{$tracking} before/after audit, and a \verb{$stats} transition summary. With an
+\code{output_dir} it writes two CSVs -- the \verb{$result} (\verb{_taxonomy_table.csv}) and
+\verb{$tracking} (\verb{_tracking.csv}); no per-step summary file is written (the
+run-level \code{summarize_regatta()} report is the single summary). If a prior
+\code{reconcile_global_local} output folder is present, the \verb{$tracking} written to
+disk is an \emph{augmented} version combining both stages.
 }

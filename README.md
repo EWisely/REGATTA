@@ -315,7 +315,10 @@ groups side-by-side in one project without naming collisions.
 ## Output
 
 `reconcile_checklist()` and `reconcile_global_local()` each return a list of
-three data frames, and write them as three CSVs only when given an `output_dir`:
+three data frames, written as CSVs only when given an `output_dir`
+(`reconcile_global_local()` writes all three; `reconcile_checklist()` writes the
+`$result` and `$tracking` but not a per-step summary — the run-level
+`summarize_regatta()` report is the single summary):
 
 | Element | Contents |
 |---|---|
@@ -323,9 +326,10 @@ three data frames, and write them as three CSVs only when given an `output_dir`:
 | `$tracking` | Per-ASV before/after audit trail (and, after `reconcile_global_local()`, the global-vs-local decision columns). |
 | `$stats` | Aggregate counts for that stage. |
 
-`run_regatta()` returns these and writes one such triple per stage — plus a
-top-level `summarize_regatta()` summary and a `run_log.txt` — into the
-dated run subfolder of `out_dir`.
+`run_regatta()` returns these and writes the per-stage `$result` + `$tracking`
+CSVs (no per-stage summary) — plus a single top-level `regatta_summary.csv` from
+`summarize_regatta()` and a `run_log.txt` — into the dated run subfolder of
+`out_dir`.
 
 ## Caveats
 

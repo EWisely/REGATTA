@@ -37,8 +37,10 @@
 #' @param accept_types NCBI name types to accept; default is scientific
 #'   name plus recorded synonyms.
 #'
-#' @return A data.frame with the 7 rank columns plus per-row resolution
-#'   bookkeeping.
+#' @return A data.frame, one row per unique input name: `input_name`,
+#'   `resolution_status` (`"resolved"`/`"unresolved"`), `name_match_type`
+#'   (`"scientific name"`/`"synonym"`/`NA`), `taxID`, and the 7 lowercase rank
+#'   columns (`domain` through `species`, `NA` where unresolved).
 #'
 #' @importFrom utils read.delim
 #' @export

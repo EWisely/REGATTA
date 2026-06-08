@@ -99,9 +99,12 @@
 #'   of unique species binomials, for a reference-database builder),
 #'   `checklist_summary` (the full taxonomized table with per-name resolution
 #'   status, or `NULL` if no DB was available), `for_LCA` (`taxID` + the 7
-#'   ranks, ready for the LCA step), and `methods` (a citations-included
-#'   provenance sentence -- the home for any GBIF download key/DOI/citation).
-#'   Pass `for_LCA` straight to [run_regatta()] / [reconcile_checklist()].
+#'   ranks, ready for the LCA step; carries a `target_rank` attribute -- the
+#'   rank the `taxa` query resolves to -- which [reconcile_checklist()] uses to
+#'   split downgrades into off-target vs non-local), and `methods` (a
+#'   citations-included provenance sentence -- the home for any GBIF download
+#'   key/DOI/citation). Pass `for_LCA` straight to [run_regatta()] /
+#'   [reconcile_checklist()].
 #'
 #' @examples
 #' \dontrun{

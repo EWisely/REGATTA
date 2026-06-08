@@ -158,14 +158,19 @@ the same inputs and compare the final call:
 ```{r compare}
 single <- reconcile_checklist(global, checklist, output_dir = NULL)
 
-lowest <- function(r) {            # the most specific non-NA rank per ASV
+# the most specific non-NA rank per ASV, named by ASV_id (the reconcile steps
+# may reorder rows, so we key on the id rather than trusting row position)
+lowest <- function(r) {
   ranks <- c("domain","phylum","class","order","family","genus","species")
-  apply(r$result[, ranks], 1, function(x) {nz <- which(!is.na(x)); if (length(nz)) x[max(nz)] else NA})
+  v <- apply(r$result[, ranks], 1, function(x) {nz <- which(!is.na(x)); if (length(nz)) x[max(nz)] else NA})
+  stats::setNames(v, r$result$ASV_id)
 }
+ids <- global$ASV_id
 data.frame(
   obitools_call = global$species,
-  single_db     = lowest(single),
-  two_db        = lowest(post)
+  single_db     = lowest(single)[ids],
+  two_db        = lowest(post)[ids],
+  row.names     = NULL
 )
 ```
 
