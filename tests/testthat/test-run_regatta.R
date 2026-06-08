@@ -117,3 +117,13 @@ test_that("an unrecognized CSV gives an informative error listing columns + form
   expect_match(err, "Columns found: foo, bar")
   expect_match(err, "pre-resolved taxonomy CSV")
 })
+
+test_that("a vsearch lca with many leading unassigned rows is still detected", {
+  # real datasets can have hundreds of unassigned ASVs (blank col 2) before the
+  # first assignment -- detection must not give up after a small fixed window.
+  f <- tempfile(fileext = ".txt")
+  unassigned <- paste0("ASV_", sprintf("%04d", 1:50), "\t")          # blank col 2
+  assigned   <- "ASV_0051\td:Eukaryota,p:Arthropoda,c:Malacostraca,o:Decapoda,f:Palaemonidae,g:Palaemon,s:Palaemon_sp"
+  writeLines(c(unassigned, assigned), f)
+  expect_equal(REGATTA:::.regatta_detect_format(f), "vsearch_lca")
+})
