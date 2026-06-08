@@ -63,6 +63,9 @@ summarize_regatta <- function(reconciled     = NULL,
   #   summarize_regatta(rec, post, g, l)      full audit including raw inputs
   # All four arguments are still accepted by name in any order.
   ranks <- c("domain", "phylum", "class", "order", "family", "genus", "species")
+  # "Assigned" = any non-NA rank, so the count is right even for inputs that
+  # carry no `domain` column (e.g. a pre-resolved phylum..species table).
+  n_assigned_any <- function(t) sum(rowSums(!is.na(t[, ranks, drop = FALSE])) > 0)
 
   # Collect stage tables in fixed order
   stages <- list()
@@ -94,7 +97,7 @@ summarize_regatta <- function(reconciled     = NULL,
 
   per_stage <- function(t) {
     n_total      <- nrow(t)
-    n_assigned   <- sum(!is.na(t$domain))
+    n_assigned   <- n_assigned_any(t)
     pct_assigned <- if (n_total > 0) 100 * n_assigned / n_total else NA_real_
 
     kin_only <- sum(!is.na(t$domain)  & is.na(t$phylum))
@@ -160,8 +163,8 @@ summarize_regatta <- function(reconciled     = NULL,
   # DB missed. Matches original Validate_local_assignments.R semantics
   # (post_asg - obi_assigned).
   if (!is.null(reconciled) && !is.null(global_input)) {
-    n_global_assigned     <- sum(!is.na(global_input$domain))
-    n_reconciled_assigned <- sum(!is.na(reconciled$result$domain))
+    n_global_assigned     <- n_assigned_any(global_input)
+    n_reconciled_assigned <- n_assigned_any(reconciled$result)
     for (j in seq_along(out)) out[[j]][8] <- n_reconciled_assigned - n_global_assigned
   }
 

@@ -66,10 +66,23 @@ test_that("$tracking carries regatta_match_rank + before/after", {
   expect_true(is.na(result$tracking$regatta_match_rank[5]))
 })
 
-test_that("$stats has expected counts", {
-  expect_equal(result$stats$count[result$stats$metric == "total ASVs"], 6)
-  expect_equal(result$stats$count[result$stats$metric == "matched at species"], 2)
-  expect_equal(result$stats$count[result$stats$metric == "not matched (no regional record)"], 1)
+test_that("$stats captures the before -> after specificity story", {
+  s <- result$stats; g <- function(m) s$count[s$metric == m]
+  expect_equal(g("total ASVs"), 6)
+  expect_equal(g("assigned before checklist-LCA"), 6)
+  expect_equal(g("assigned after checklist-LCA"), 5)        # ASV_5 (Bacillus) dropped
+  # unchanged + downgraded + dropped partition the assigned-before set
+  expect_equal(g("ASVs unchanged (specificity kept)"), 3)   # ASV_1, ASV_4, ASV_6
+  expect_equal(g("ASVs downgraded (specificity reduced)"), 2) # ASV_2 -> genus, ASV_3 -> order
+  expect_equal(g("no regional record (call dropped)"), 1)   # ASV_5
+  expect_equal(g("ASVs unchanged (specificity kept)") +
+               g("ASVs downgraded (specificity reduced)") +
+               g("no regional record (call dropped)"),
+               g("assigned before checklist-LCA"))
+  # before -> after specificity shift
+  expect_equal(g("before: ID'ed to species"), 5)            # all but ASV_6 (order)
+  expect_equal(g("after: ID'ed to species"), 2)             # ASV_1, ASV_4
+  expect_equal(g("after: ID'ed to order"), 2)               # ASV_3, ASV_6
 })
 
 test_that("assigned-before/after count any non-NA rank (not just domain)", {

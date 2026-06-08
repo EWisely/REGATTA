@@ -54,9 +54,11 @@
 #              and any input metadata columns
 #              passed through. One row per ASV in the input.
 #
-#   $stats     Match-rank distribution and per-rank specificity
-#              counts of the reconciled output, plus the change in
-#              number of ASVs assigned before vs. after.
+#   $stats     The before -> after specificity story: total ASVs,
+#              assigned before/after, how many ASVs were unchanged vs
+#              downgraded (specificity reduced) vs dropped (no regional
+#              record), and the per-rank lowest-rank distribution both
+#              before and after the checklist LCA.
 
 #' Reconcile a taxonomy table against a regional species checklist
 #'
@@ -228,55 +230,46 @@ reconcile_checklist <- function(taxonomy_table,
   }, character(1))
   rownames(tracking) <- NULL
 
-  # --- Build $stats ---
-  kin_only <- sum(!is.na(corrected$domain)  & is.na(corrected$phylum))
-  phy_only <- sum(!is.na(corrected$phylum)  & is.na(corrected$class))
-  cla_only <- sum(!is.na(corrected$class)   & is.na(corrected$order))
-  ord_only <- sum(!is.na(corrected$order)   & is.na(corrected$family))
-  fam_only <- sum(!is.na(corrected$family)  & is.na(corrected$genus))
-  gen_only <- sum(!is.na(corrected$genus)   & is.na(corrected$species))
-  sp_ct    <- sum(!is.na(corrected$species))
+  # --- Build $stats: the before -> after specificity story ---
+  # Per-ASV "depth" = the index of its lowest (most specific) non-NA rank, NA
+  # if it has no rank at all. "Assigned" = any non-NA rank, so the counts are
+  # right even when a pre-resolved input has no `domain` column. The checklist
+  # LCA only ever removes specificity, so an ASV is either unchanged, downgraded
+  # to a coarser rank, or dropped entirely (no regional record).
+  depth_of <- function(df) {
+    m <- !is.na(as.matrix(df[, ranks, drop = FALSE]))
+    vapply(seq_len(nrow(m)),
+           function(i) if (any(m[i, ])) max(which(m[i, ])) else NA_integer_,
+           integer(1))
+  }
+  before_d <- depth_of(before)
+  after_d  <- depth_of(corrected)
+  asg_b <- !is.na(before_d)
+  asg_a <- !is.na(after_d)
+  n_before    <- sum(asg_b)
+  n_after     <- sum(asg_a)
+  n_unchanged <- sum(asg_b & asg_a & after_d == before_d)
+  n_downgrade <- sum(asg_b & asg_a & after_d <  before_d)
+  n_dropped   <- sum(asg_b & !asg_a)   # was assigned; no regional record at all
 
-  # "Assigned" = the ASV has any non-NA rank (not just a domain). Keying on
-  # domain alone undercounts inputs that lack a domain column (e.g. a
-  # pre-resolved table with only phylum..species).
-  any_rank <- function(df) rowSums(!is.na(df[, ranks, drop = FALSE])) > 0
-  n_before <- sum(any_rank(before))
-  n_after  <- sum(any_rank(corrected))
+  rr <- rev(ranks)   # species, genus, ..., domain (most specific first)
+  before_dist <- vapply(rr, function(r) sum(before_d == match(r, ranks), na.rm = TRUE),
+                        integer(1))
+  after_dist  <- vapply(rr, function(r) sum(after_d  == match(r, ranks), na.rm = TRUE),
+                        integer(1))
 
   stats <- data.frame(
     metric = c("total ASVs",
                "assigned before checklist-LCA",
                "assigned after checklist-LCA",
-               "change in number of ASVs assigned",
-               "matched at species",
-               "matched at genus",
-               "matched at family",
-               "matched at order",
-               "matched at class",
-               "matched at phylum",
-               "matched at domain",
-               "not matched (no regional record)",
-               "ID'ed to kingdom only",
-               "ID'ed to phylum only",
-               "ID'ed to class only",
-               "ID'ed to order only",
-               "ID'ed to family only",
-               "ID'ed to genus only",
-               "ID'ed to species"),
-    count  = c(nrow(corrected),
-               n_before,
-               n_after,
-               n_after - n_before,
-               sum(match_rank == "species", na.rm = TRUE),
-               sum(match_rank == "genus",   na.rm = TRUE),
-               sum(match_rank == "family",  na.rm = TRUE),
-               sum(match_rank == "order",   na.rm = TRUE),
-               sum(match_rank == "class",   na.rm = TRUE),
-               sum(match_rank == "phylum",  na.rm = TRUE),
-               sum(match_rank == "domain",  na.rm = TRUE),
-               sum(is.na(match_rank)),
-               kin_only, phy_only, cla_only, ord_only, fam_only, gen_only, sp_ct),
+               "ASVs unchanged (specificity kept)",
+               "ASVs downgraded (specificity reduced)",
+               "no regional record (call dropped)",
+               paste0("before: ID'ed to ", rr),
+               paste0("after: ID'ed to ",  rr)),
+    count  = c(nrow(corrected), n_before, n_after,
+               n_unchanged, n_downgrade, n_dropped,
+               unname(before_dist), unname(after_dist)),
     stringsAsFactors = FALSE
   )
 
