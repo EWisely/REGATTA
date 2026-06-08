@@ -54,11 +54,12 @@
 #              and any input metadata columns
 #              passed through. One row per ASV in the input.
 #
-#   $stats     The before -> after specificity story: total ASVs,
-#              assigned before/after, how many ASVs were unchanged vs
-#              downgraded (specificity reduced) vs dropped (no regional
-#              record), and the per-rank lowest-rank distribution both
-#              before and after the checklist LCA.
+#   $stats     A compact per-step transition headline: total ASVs,
+#              assigned before/after, and how many ASVs were unchanged
+#              vs downgraded (specificity reduced) vs dropped (no
+#              regional record). The per-rank before/after distribution
+#              is NOT here -- it is the input vs regatta_result columns
+#              of summarize_regatta()'s report.
 
 #' Reconcile a taxonomy table against a regional species checklist
 #'
@@ -256,24 +257,19 @@ reconcile_checklist <- function(taxonomy_table,
   n_downgrade <- sum(asg_b & asg_a & after_d <  before_d)
   n_dropped   <- sum(asg_b & !asg_a)   # was assigned; no regional record at all
 
-  rr <- rev(ranks)   # species, genus, ..., domain (most specific first)
-  before_dist <- vapply(rr, function(r) sum(before_d == match(r, ranks), na.rm = TRUE),
-                        integer(1))
-  after_dist  <- vapply(rr, function(r) sum(after_d  == match(r, ranks), na.rm = TRUE),
-                        integer(1))
-
+  # A compact per-step transition headline. The per-rank before/after
+  # *distribution* is NOT duplicated here -- it is read across the input vs
+  # regatta_result columns of summarize_regatta()'s report (e.g. the
+  # "ID'ed to species" row). This keeps one authoritative report.
   stats <- data.frame(
     metric = c("total ASVs",
                "assigned before checklist-LCA",
                "assigned after checklist-LCA",
                "ASVs unchanged (specificity kept)",
                "ASVs downgraded (specificity reduced)",
-               "no regional record (call dropped)",
-               paste0("before: ID'ed to ", rr),
-               paste0("after: ID'ed to ",  rr)),
+               "no regional record (call dropped)"),
     count  = c(nrow(corrected), n_before, n_after,
-               n_unchanged, n_downgrade, n_dropped,
-               unname(before_dist), unname(after_dist)),
+               n_unchanged, n_downgrade, n_dropped),
     stringsAsFactors = FALSE
   )
 

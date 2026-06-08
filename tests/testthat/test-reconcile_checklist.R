@@ -79,10 +79,9 @@ test_that("$stats captures the before -> after specificity story", {
                g("ASVs downgraded (specificity reduced)") +
                g("no regional record (call dropped)"),
                g("assigned before checklist-LCA"))
-  # before -> after specificity shift
-  expect_equal(g("before: ID'ed to species"), 5)            # all but ASV_6 (order)
-  expect_equal(g("after: ID'ed to species"), 2)             # ASV_1, ASV_4
-  expect_equal(g("after: ID'ed to order"), 2)               # ASV_3, ASV_6
+  # the per-rank before/after distribution is NOT in $stats anymore -- it lives
+  # in summarize_regatta()'s input/regatta_result columns.
+  expect_false(any(grepl("ID'ed to", s$metric)))
 })
 
 test_that("assigned-before/after count any non-NA rank (not just domain)", {
