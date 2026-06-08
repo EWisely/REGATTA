@@ -67,3 +67,39 @@ test_that("run_regatta requires out_dir, region, and label", {
                                  out_dir = tempfile(), label = "l")),
     "region")
 })
+
+test_that("a pre-resolved 7-rank CSV (capitalized ranks, empty id) is detected and run", {
+  tmp <- tempfile(); dir.create(tmp)
+  csv <- file.path(tmp, "ranks.csv")
+  utils::write.csv(data.frame(
+    ASV_id  = c("", ""),                     # empty id column -> synthesized
+    Domain = "Eukaryota", Phylum = "Chordata", Class = "Actinopterygii",
+    Order = "Scorpaeniformes", Family = "Sebastidae", Genus = "Sebastes",
+    Species = c("Sebastes mystinus", "Sebastes goodei"),
+    pct_id = c(99.5, 97.2), stringsAsFactors = FALSE), csv, row.names = FALSE)
+
+  expect_equal(REGATTA:::.regatta_detect_format(csv), "ranks_csv")
+
+  checklist <- data.frame(
+    domain = "Eukaryota", phylum = "Chordata", class = "Actinopterygii",
+    order = "Scorpaeniformes", family = "Sebastidae", genus = "Sebastes",
+    species = "Sebastes mystinus", stringsAsFactors = FALSE)
+
+  res <- suppressMessages(suppressWarnings(run_regatta(
+    input = csv, checklist = checklist, out_dir = file.path(tmp, "out"),
+    region = "r", label = "l")))
+  rr <- res$post_checklist$result
+  expect_equal(nrow(rr), 2L)
+  expect_true(all(nzchar(rr$ASV_id)))                 # ids were synthesized
+  expect_false(is.na(rr$species[1]))                  # mystinus on checklist
+  expect_true(is.na(rr$species[2]) && rr$genus[2] == "Sebastes")  # goodei -> genus
+})
+
+test_that("an unrecognized CSV gives an informative error listing columns + formats", {
+  bad <- tempfile(fileext = ".csv")
+  utils::write.csv(data.frame(foo = 1, bar = 2), bad, row.names = FALSE)
+  err <- tryCatch(REGATTA:::.regatta_read_input(bad, NULL, "ASV_id"),
+                  error = function(e) conditionMessage(e))
+  expect_match(err, "Columns found: foo, bar")
+  expect_match(err, "pre-resolved taxonomy CSV")
+})

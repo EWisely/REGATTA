@@ -113,19 +113,19 @@
 #'   taxa          = "fish",
 #'   regional_poly = "POLYGON ((-92 2, -89 2, -89 -2, -92 -2, -92 2))",
 #'   CSV           = "~/other_project/galapagos_fish_checklist.csv",
-#'   output_dir    = "my_checklists"
+#'   output_dir    = "local_database_checklist"
 #' )
 #' run_regatta(input = "MiFish_obitools.tab", checklist = cl$for_LCA)
 #'
 #' # Refresh a stale cached taxonomy snapshot in place:
 #' build_regional_checklist(region = "galapagos", label = "fish", taxa = "fish",
 #'   regional_poly = "POLYGON ((-92 2, -89 2, -89 -2, -92 -2, -92 2))",
-#'   output_dir = "my_checklists", overwrite_taxonomy_files = TRUE)
+#'   output_dir = "local_database_checklist", overwrite_taxonomy_files = TRUE)
 #'
 #' # Skip taxonomization now and defer it to the reconcile step:
 #' build_regional_checklist(region = "galapagos", label = "fish", taxa = "fish",
 #'   regional_poly = "POLYGON ((-92 2, -89 2, -89 -2, -92 -2, -92 2))",
-#'   output_dir = "my_checklists", sql_path = NULL)
+#'   output_dir = "local_database_checklist", sql_path = NULL)
 #' }
 #'
 #' @importFrom utils read.csv
@@ -157,7 +157,7 @@ build_regional_checklist <- function(region,
   if (missing(output_dir) || is.null(output_dir) || !is.character(output_dir) ||
       length(output_dir) != 1 || !nzchar(trimws(output_dir)))
     stop("`output_dir` is required: give a directory to write the checklist ",
-         'outputs into, e.g. output_dir = "my_checklists". The expensive ',
+         'outputs into, e.g. output_dir = "local_database_checklist". The expensive ',
          "artifacts (taxonomized checklist, source lists) are always saved so ",
          "you don't have to rebuild them.")
 

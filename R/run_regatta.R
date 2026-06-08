@@ -20,7 +20,15 @@
   if (ext == "rds") return("rds")
   if (ext == "csv") {
     headers <- strsplit(readLines(path, n = 1), ",", fixed = TRUE)[[1]]
+    headers <- trimws(gsub('^"|"$', "", headers))   # strip surrounding quotes
     if ("BestTaxon" %in% headers) return("besttaxon")
+    # A pre-resolved taxonomy table: already carries the rank columns, so no
+    # name/taxID lookup is needed. Detect on the six unambiguous lower ranks
+    # (case-insensitive); the top rank (domain/kingdom/superkingdom) and an id
+    # column are normalized/synthesized downstream.
+    low <- tolower(headers)
+    if (all(c("phylum", "class", "order", "family", "genus", "species") %in% low))
+      return("ranks_csv")
     return("unknown_csv")
   }
   if (ext %in% c("tab", "txt")) {
@@ -139,25 +147,53 @@
   unique(df[, keep, drop = FALSE])
 }
 
-#' Ensure a per-ASV id column exists (internal)
+#' Normalize taxonomy rank column names to the canonical lowercase 7 (internal)
 #'
-#' Fallback for classifier outputs that carry no `id_col` and where the user
-#' did not name one: synthesize an id from the NCBI taxID that resolve_names /
-#' resolve_taxids attach (`taxID_<id>`), falling back to a row index
-#' (`row_<n>`) only where the taxID is NA (unresolved). When `id_col` already
-#' exists (the common case -- obitools `ID`, vsearch `ASV_id`, or a user
-#' `Hash`), the table is returned unchanged.
+#' Renames case-variant rank columns (e.g. `Class`) to lowercase, maps a
+#' `kingdom`/`superkingdom` column to `domain` when no `domain` is present, and
+#' adds any of the 7 ranks that are missing as all-NA, so a pre-resolved
+#' taxonomy CSV drops straight into [reconcile_checklist()].
+#' @keywords internal
+#' @noRd
+.regatta_normalize_rank_cols <- function(df) {
+  ranks <- c("domain", "phylum", "class", "order", "family", "genus", "species")
+  low <- tolower(trimws(names(df)))
+  if (!("domain" %in% low)) {
+    alt <- which(low %in% c("kingdom", "superkingdom"))
+    if (length(alt)) low[alt[1]] <- "domain"
+  }
+  for (r in ranks) {
+    hit <- which(low == r)
+    if (length(hit)) names(df)[hit[1]] <- r
+  }
+  for (r in ranks) if (!(r %in% names(df))) df[[r]] <- NA_character_
+  df
+}
+
+#' Ensure a per-ASV id column exists and is populated (internal)
+#'
+#' Synthesizes an id when `id_col` is absent OR present-but-empty (all NA/blank
+#' -- e.g. an empty `ASV_id`/`MOTU` column): an id from the NCBI taxID when one
+#' is attached (`taxID_<id>`), else a row index (`row_<n>`). A populated
+#' `id_col` (the common case -- obitools `ID`, vsearch `ASV_id`, a user `Hash`)
+#' is returned unchanged.
 #' @keywords internal
 #' @noRd
 .regatta_ensure_id_col <- function(tax, id_col = "ASV_id") {
-  if (id_col %in% names(tax)) return(tax)
+  present  <- id_col %in% names(tax)
+  populated <- present &&
+    !all(is.na(tax[[id_col]]) | !nzchar(trimws(as.character(tax[[id_col]]))))
+  if (populated) return(tax)
   new_id <- if ("taxID" %in% names(tax)) {
     ifelse(is.na(tax$taxID), paste0("row_", seq_len(nrow(tax))),
            paste0("taxID_", tax$taxID))
   } else {
     paste0("row_", seq_len(nrow(tax)))
   }
-  cbind(stats::setNames(list(new_id), id_col), tax, stringsAsFactors = FALSE)
+  message("No usable '", id_col, "' values found; synthesized per-ASV ids ",
+          "(", if ("taxID" %in% names(tax)) "taxID_*/row_*" else "row_*", ").")
+  if (present) { tax[[id_col]] <- new_id; tax }   # fill the empty column in place
+  else cbind(stats::setNames(list(new_id), id_col), tax, stringsAsFactors = FALSE)
 }
 
 #' Read a classifier file or vsearch pair into a tax table (internal)
@@ -207,7 +243,34 @@
       tax <- resolve_names(raw, name_col = "BestTaxon", sql_path = sql_path)
       return(list(table = .regatta_ensure_id_col(tax, id_col), format = fmt))
     }
-    stop("Could not detect format of input file: ", paths)
+    if (fmt == "ranks_csv") {
+      # Already-resolved taxonomy table: normalize the rank column names to the
+      # canonical lowercase 7, keep any pct_id/passthrough columns, and ensure a
+      # per-ASV id (synthesized if the id column is missing or empty). No DB.
+      raw <- utils::read.csv(paths, stringsAsFactors = FALSE, check.names = FALSE)
+      tax <- .regatta_normalize_rank_cols(raw)
+      return(list(table = .regatta_ensure_id_col(tax, id_col),
+                  format = "ranks_csv"))
+    }
+    # Unrecognized: tell the user exactly what we saw and what we accept.
+    hdr <- tryCatch(
+      trimws(gsub('^"|"$', "",
+                  strsplit(readLines(paths, n = 1),
+                           if (tolower(tools::file_ext(paths)) == "csv") "," else "\t",
+                           fixed = TRUE)[[1]])),
+      error = function(e) character(0))
+    stop("Could not detect the format of '", paths, "'.\n",
+         if (length(hdr)) paste0("  Columns found: ", paste(hdr, collapse = ", "), "\n") else "",
+         "  REGATTA accepts:\n",
+         "    - obitools .tab (a TAXID + BEST_IDENTITY column),\n",
+         "    - a vsearch SINTAX lca file, or an lca + userout pair,\n",
+         "    - a Kraken2/BestTaxon CSV (a 'BestTaxon' column),\n",
+         "    - a pre-resolved taxonomy CSV with the 7 rank columns ",
+         "(domain, phylum, class, order, family, genus, species; ",
+         "case-insensitive, plus an optional id column).\n",
+         "  This looks like a rank table missing one or more of phylum/class/",
+         "order/family/genus/species -- check those column names.",
+         call. = FALSE)
   }
   if (length(paths) == 2) {
     fmts <- vapply(paths, .regatta_detect_format, character(1))
@@ -238,7 +301,13 @@
 #' describing what was detected.
 #'
 #' @param input One of:
-#'   * a single file path (single-DB workflow);
+#'   * a single file path (single-DB workflow). The format is auto-detected:
+#'     obitools `.tab` (TAXID + BEST_IDENTITY), a vsearch SINTAX `lca` file, a
+#'     Kraken2/BestTaxon CSV (a `BestTaxon` column), or a **pre-resolved
+#'     taxonomy CSV** that already has the 7 rank columns (domain, phylum,
+#'     class, order, family, genus, species; case-insensitive, with an optional
+#'     id column -- a missing or empty one is synthesized). An unrecognized file
+#'     errors with the columns it found and the formats accepted;
 #'   * a length-2 character vector of vsearch `lca` + `userout` paths
 #'     (single-DB workflow using the LCA-resolved taxonomy);
 #'   * a folder path (the function scans the folder -- see Details for the
