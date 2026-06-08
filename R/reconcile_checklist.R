@@ -98,6 +98,12 @@
 #'   calls, and is required for the two-DB [reconcile_global_local()] comparison.
 #'   [run_regatta()] sets this `FALSE` for its internal two-DB step, whose
 #'   intermediate result intentionally carries no `pct_id`.
+#' @param target_group Optional data.frame with `rank` + `name` columns naming
+#'   the taxa that define the queried group (e.g. the vertebrate classes), used
+#'   to split downgraded/dropped ASVs into *non-local* (in the group, off the
+#'   regional checklist) vs *off-target* (not even in the group). Defaults to the
+#'   `"target_group"` attribute stamped on `checklist` by
+#'   [build_regional_checklist()]; `NULL` (and no attribute) skips the split.
 #' @param output_dir Directory path; default `NULL` writes nothing (the
 #'   `result`/`tracking`/`stats` list is returned). Supply a directory to also
 #'   write the 3 CSVs there.
@@ -120,12 +126,17 @@ reconcile_checklist <- function(taxonomy_table,
                                 sql_path      = .regatta_default_sql_path(),
                                 overwrite_taxonomy_files = FALSE,
                                 warn_pct_id   = TRUE,
+                                target_group  = NULL,
                                 output_dir    = NULL,
                                 output_prefix = "reconcile_checklist",
                                 prior_dir     = NULL,
                                 prior_prefix  = "reconcile_global_local",
                                 tracking_drop_pattern =
                                   "^(MERGED_sample:|obiclean_|seq_rank|ID_STATUS|DEFINITION)") {
+  # The target group (taxa fed to build_regional_checklist) lets us split the
+  # downgrades into off-target vs non-local. It travels on the checklist as an
+  # attribute; capture it now, before `checklist` is reassigned below.
+  if (is.null(target_group)) target_group <- attr(checklist, "target_group")
   # tracking_drop_pattern is a regex matched against column names in
   # the input taxonomy_table BEFORE they get carried into $tracking.
   # Default strips obitools per-sample read-count matrices
@@ -272,6 +283,28 @@ reconcile_checklist <- function(taxonomy_table,
     stats <- rbind(stats, data.frame(metric = names(pt),
                                      count  = as.integer(pt),
                                      stringsAsFactors = FALSE))
+  }
+
+  # WHY the affected ASVs (downgraded or dropped) lost specificity: off-target
+  # (their original call isn't even in the target group fed to
+  # build_regional_checklist) vs non-local (in the target group, but not on the
+  # regional checklist). Needs the target group (stamped on the checklist).
+  if (is.data.frame(target_group) && all(c("rank", "name") %in% names(target_group)) &&
+      nrow(target_group) > 0) {
+    affected <- asg_b & ((asg_a & after_d < before_d) | !asg_a)
+    if (any(affected)) {
+      in_tg <- rep(FALSE, nrow(before))
+      for (k in seq_len(nrow(target_group))) {
+        r <- target_group$rank[k]; n <- target_group$name[k]
+        if (r %in% names(before))
+          in_tg <- in_tg | (!is.na(before[[r]]) & before[[r]] == n)
+      }
+      stats <- rbind(stats, data.frame(
+        metric = c("downgraded/dropped -- non-local (geographic)",
+                   "downgraded/dropped -- off-target (taxonomic)"),
+        count  = c(sum(affected & in_tg), sum(affected & !in_tg)),
+        stringsAsFactors = FALSE))
+    }
   }
 
   if (!is.null(output_dir)) {

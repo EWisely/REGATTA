@@ -282,6 +282,25 @@ build_regional_checklist <- function(region,
   }
   lca_taxonomized <- all(ranks %in% names(for_LCA))
 
+  # Stamp the target group (the resolved `taxa` query) onto for_LCA so the
+  # downstream reconcile/summary can split downgrades into off-target (not in
+  # this group) vs non-local (in the group, off the regional checklist). Stored
+  # as a (rank, name) data.frame restricted to the 7 ranks; survives saveRDS().
+  if (!is.null(taxa)) {
+    tg <- tryCatch({
+      rt <- resolve_taxa(taxa, kingdom = kingdom, check_gbif = FALSE,
+                         on_ambiguous = "warn")
+      d  <- data.frame(rank = tolower(rt$rank), name = rt$valid_name,
+                       stringsAsFactors = FALSE)
+      d[d$rank %in% ranks & !is.na(d$name), , drop = FALSE]
+    }, error = function(e) NULL)
+    if (!is.null(tg) && nrow(tg) > 0) {
+      attr(for_LCA, "target_group") <- tg
+      message("Target group stamped on for_LCA: ",
+              paste0(tg$name, " (", tg$rank, ")", collapse = ", "))
+    }
+  }
+
   # --- Methods sentence (real citations only -- pulled live, never invented) -
   # The GBIF download key + DOI + citation live here, not in a separate section.
   methods <- .regatta_methods(region, label, taxa, sources_used, regional_poly,

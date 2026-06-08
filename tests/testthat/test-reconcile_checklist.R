@@ -105,6 +105,27 @@ test_that("assigned-before/after count any non-NA rank (not just domain)", {
   expect_equal(s2$count[s2$metric == "assigned before checklist-LCA"], 3)
 })
 
+test_that("target_group splits downgrades into non-local vs off-target", {
+  ck <- data.frame(domain = "Eukaryota", phylum = "Chordata", class = "Actinopterygii",
+                   order = "Scorpaeniformes", family = "Sebastidae", genus = "Sebastes",
+                   species = "Sebastes mystinus", stringsAsFactors = FALSE)
+  # target group = the fishes (class Actinopterygii), stamped as an attribute
+  attr(ck, "target_group") <- data.frame(rank = "class", name = "Actinopterygii",
+                                         stringsAsFactors = FALSE)
+  tax <- data.frame(
+    ASV_id = c("A1", "A2"), domain = "Eukaryota", phylum = "Chordata",
+    class  = c("Actinopterygii", "Mammalia"),         # A1 fish, A2 mammal
+    order  = c("Scorpaeniformes", "Cetacea"),
+    family = c("Sebastidae", "Delphinidae"),
+    genus  = c("Sebastes", "Tursiops"),
+    species = c("Sebastes goodei", "Tursiops truncatus"),  # both off the checklist
+    pct_id = c(98, 99), stringsAsFactors = FALSE)
+  s <- suppressMessages(suppressWarnings(reconcile_checklist(tax, ck, output_dir = NULL)))$stats
+  g <- function(m) s$count[s$metric == m]
+  expect_equal(g("downgraded/dropped -- non-local (geographic)"), 1)  # the fish
+  expect_equal(g("downgraded/dropped -- off-target (taxonomic)"), 1)  # the mammal
+})
+
 test_that("missing pct_id warns (mentions filtering + two-DB), suppressible via warn_pct_id", {
   no_pct <- input[, setdiff(names(input), "pct_id")]
   expect_warning(

@@ -281,10 +281,12 @@ summarize_regatta <- function(reconciled     = NULL,
   if (!is.null(post_checklist) && "stats" %in% names(post_checklist) &&
       "regatta_result" %in% names(base)) {
     ps   <- post_checklist$stats
-    keep <- ps$metric %in% c("ASVs unchanged (specificity kept)",
-                             "ASVs downgraded (specificity reduced)",
-                             "no regional record (call dropped)") |
-            grepl("^downgraded: ", ps$metric)
+    # Surface everything from $stats except the bare counts already in the
+    # report's own rows: the transition headline, the downgrade breakdown, and
+    # the off-target/non-local "why" rows.
+    keep <- !(ps$metric %in% c("total ASVs",
+                               "assigned before checklist-LCA",
+                               "assigned after checklist-LCA"))
     ps <- ps[keep, , drop = FALSE]
     if (nrow(ps) > 0) {
       extra <- data.frame(row_names = ps$metric, stringsAsFactors = FALSE)

@@ -11,6 +11,7 @@ reconcile_checklist(
   sql_path = .regatta_default_sql_path(),
   overwrite_taxonomy_files = FALSE,
   warn_pct_id = TRUE,
+  target_group = NULL,
   output_dir = NULL,
   output_prefix = "reconcile_checklist",
   prior_dir = NULL,
@@ -49,6 +50,13 @@ LCA but enables percent-ID filtering of low-confidence (likelier-wrong)
 calls, and is required for the two-DB \code{\link[=reconcile_global_local]{reconcile_global_local()}} comparison.
 \code{\link[=run_regatta]{run_regatta()}} sets this \code{FALSE} for its internal two-DB step, whose
 intermediate result intentionally carries no \code{pct_id}.}
+
+\item{target_group}{Optional data.frame with \code{rank} + \code{name} columns naming
+the taxa that define the queried group (e.g. the vertebrate classes), used
+to split downgraded/dropped ASVs into \emph{non-local} (in the group, off the
+regional checklist) vs \emph{off-target} (not even in the group). Defaults to the
+\code{"target_group"} attribute stamped on \code{checklist} by
+\code{\link[=build_regional_checklist]{build_regional_checklist()}}; \code{NULL} (and no attribute) skips the split.}
 
 \item{output_dir}{Directory path; default \code{NULL} writes nothing (the
 \code{result}/\code{tracking}/\code{stats} list is returned). Supply a directory to also
