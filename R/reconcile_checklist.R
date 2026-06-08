@@ -237,8 +237,12 @@ reconcile_checklist <- function(taxonomy_table,
   gen_only <- sum(!is.na(corrected$genus)   & is.na(corrected$species))
   sp_ct    <- sum(!is.na(corrected$species))
 
-  n_before <- sum(!is.na(before$domain))
-  n_after  <- sum(!is.na(corrected$domain))
+  # "Assigned" = the ASV has any non-NA rank (not just a domain). Keying on
+  # domain alone undercounts inputs that lack a domain column (e.g. a
+  # pre-resolved table with only phylum..species).
+  any_rank <- function(df) rowSums(!is.na(df[, ranks, drop = FALSE])) > 0
+  n_before <- sum(any_rank(before))
+  n_after  <- sum(any_rank(corrected))
 
   stats <- data.frame(
     metric = c("total ASVs",

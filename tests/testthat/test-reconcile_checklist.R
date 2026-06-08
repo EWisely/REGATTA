@@ -72,6 +72,27 @@ test_that("$stats has expected counts", {
   expect_equal(result$stats$count[result$stats$metric == "not matched (no regional record)"], 1)
 })
 
+test_that("assigned-before/after count any non-NA rank (not just domain)", {
+  # A pre-resolved table with NO domain column-equivalent (domain all NA) but
+  # populated phylum..species: these ASVs are assigned and must be counted.
+  nodomain <- data.frame(
+    ASV_id = paste0("A", 1:3), domain = NA_character_, phylum = "Chordata",
+    class = "Actinopterygii", order = "Scorpaeniformes", family = "Sebastidae",
+    genus = "Sebastes",
+    species = c("Sebastes mystinus", "Sebastes paucispinis", "Engraulis mordax"),
+    pct_id = c(99, 98, 97), stringsAsFactors = FALSE)
+  s <- suppressMessages(reconcile_checklist(nodomain, checklist, output_dir = NULL))$stats
+  expect_equal(s$count[s$metric == "assigned before checklist-LCA"], 3)
+  expect_equal(s$count[s$metric == "assigned after checklist-LCA"], 3)
+  # an all-NA row is not counted as assigned
+  with_blank <- rbind(nodomain, data.frame(
+    ASV_id = "A4", domain = NA, phylum = NA, class = NA, order = NA,
+    family = NA, genus = NA, species = NA, pct_id = NA))
+  s2 <- suppressMessages(reconcile_checklist(with_blank, checklist, output_dir = NULL))$stats
+  expect_equal(s2$count[s2$metric == "total ASVs"], 4)
+  expect_equal(s2$count[s2$metric == "assigned before checklist-LCA"], 3)
+})
+
 test_that("missing pct_id warns (mentions filtering + two-DB), suppressible via warn_pct_id", {
   no_pct <- input[, setdiff(names(input), "pct_id")]
   expect_warning(
