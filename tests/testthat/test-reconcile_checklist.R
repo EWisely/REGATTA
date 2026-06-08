@@ -35,14 +35,21 @@ test_that("$result is ASV_id + pct_id (input carries one) + 7 ranks, in that ord
   )
 })
 
-test_that("a 0-1 pct_id input is normalized to a 0-100 scale in result + tracking", {
+test_that("pct_id is normalized to 0-100: a 0-1 input is scaled, a 0-100 input is left alone", {
+  # raw obitools BEST_IDENTITY arrives on a 0-1 scale (0.95-1.0) -> scaled x100
   in01 <- input
-  in01$pct_id <- input$pct_id / 100        # the same values, on a 0-1 scale
+  in01$pct_id <- input$pct_id / 100
   r01 <- reconcile_checklist(in01, checklist, output_dir = NULL)
   expect_equal(r01$result$pct_id, input$pct_id)      # rescaled back to 0-100
   expect_equal(r01$tracking$pct_id, input$pct_id)
-  # an already-0-100 input is left alone
-  expect_equal(result$result$pct_id, input$pct_id)
+
+  # a real vsearch table already carries pct_id on 0-100 -> passed through as-is
+  vs <- read.csv(system.file("extdata", "mifish_vsearch_example.csv", package = "REGATTA"),
+                 stringsAsFactors = FALSE)
+  ck <- readRDS(system.file("extdata", "galapagos_fish_checklist.rds", package = "REGATTA"))
+  expect_gt(max(vs$pct_id, na.rm = TRUE), 1)          # the fixture is on 0-100
+  rv <- suppressMessages(reconcile_checklist(vs, ck, output_dir = NULL))
+  expect_equal(as.numeric(rv$result$pct_id), as.numeric(vs$pct_id))   # unchanged
 })
 
 test_that("species-level match (ASV_1) is kept", {
