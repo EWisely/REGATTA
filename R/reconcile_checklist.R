@@ -38,10 +38,10 @@
 # Output: a list with three elements.
 #
 #   $result    The reconciled per-ASV taxonomy table: id_col, then
-#              pct_id (when the input carries a usable one), then the 7
-#              lowercase rank columns. Same shape as
-#              reconcile_global_local()$result so REGATTA functions
-#              chain cleanly. Drop-in to phyloseq (drop pct_id first)
+#              pct_id (when the input carries a usable one, normalized to
+#              a 0-100 percent scale), then the 7 lowercase rank columns.
+#              Same shape as reconcile_global_local()$result so REGATTA
+#              functions chain cleanly. Drop-in to phyloseq (drop pct_id first)
 #              tax_table() or to a MetabaR MOTU table after joining
 #              read counts back.
 #
@@ -72,7 +72,8 @@
 #' standalone classifier-output taxonomy table.
 #'
 #' Returns a `$result` taxonomy table (`id_col`, then `pct_id` when the input
-#' carries one, then the 7 ranks -- the REGATTA exchange format), a per-ASV
+#' carries one -- normalized to a 0-100 percent scale -- then the 7 ranks; the
+#' REGATTA exchange format), a per-ASV
 #' `$tracking` before/after audit, and a `$stats` transition summary. With an
 #' `output_dir` it writes two CSVs -- the `$result` (`_taxonomy_table.csv`) and
 #' `$tracking` (`_tracking.csv`); no per-step summary file is written (the
@@ -202,6 +203,16 @@ reconcile_checklist <- function(taxonomy_table,
 
   checklist_sets <- lapply(ranks, function(r) unique(stats::na.omit(checklist[[r]])))
   names(checklist_sets) <- ranks
+
+  # Normalize pct_id to a 0-100 percent scale (obitools BEST_IDENTITY arrives on
+  # 0-1) so every REGATTA output table carries pct_id on one scale. Auto-detected
+  # the same way as reconcile_global_local(): a max <= 1 means a 0-1 input.
+  if ("pct_id" %in% names(taxonomy_table)) {
+    pid <- suppressWarnings(as.numeric(taxonomy_table$pct_id))
+    mx  <- suppressWarnings(max(pid, na.rm = TRUE))
+    if (is.finite(mx) && mx <= 1) pid <- pid * 100
+    taxonomy_table$pct_id <- pid
+  }
 
   before    <- taxonomy_table
   corrected <- taxonomy_table

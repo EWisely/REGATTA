@@ -322,7 +322,7 @@ three data frames, written as CSVs only when given an `output_dir`
 
 | Element | Contents |
 |---|---|
-| `$result` | The REGATTA exchange format — `ASV_id`, then `pct_id` (when the input carries one), then the 7 rank columns, with ranks rewritten by the reconciliation. (For a phyloseq `tax_table()`, drop `pct_id` first.) |
+| `$result` | The REGATTA exchange format — `ASV_id`, then `pct_id` (when the input carries one, normalized to a 0–100 percent scale), then the 7 rank columns, with ranks rewritten by the reconciliation. (For a phyloseq `tax_table()`, drop `pct_id` first.) |
 | `$tracking` | Per-ASV before/after audit trail (and, after `reconcile_global_local()`, the global-vs-local decision columns). |
 | `$stats` | Aggregate counts for that stage. |
 

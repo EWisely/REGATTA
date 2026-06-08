@@ -35,6 +35,16 @@ test_that("$result is ASV_id + pct_id (input carries one) + 7 ranks, in that ord
   )
 })
 
+test_that("a 0-1 pct_id input is normalized to a 0-100 scale in result + tracking", {
+  in01 <- input
+  in01$pct_id <- input$pct_id / 100        # the same values, on a 0-1 scale
+  r01 <- reconcile_checklist(in01, checklist, output_dir = NULL)
+  expect_equal(r01$result$pct_id, input$pct_id)      # rescaled back to 0-100
+  expect_equal(r01$tracking$pct_id, input$pct_id)
+  # an already-0-100 input is left alone
+  expect_equal(result$result$pct_id, input$pct_id)
+})
+
 test_that("species-level match (ASV_1) is kept", {
   expect_equal(result$result$species[1], "Sebastes mystinus")
 })
