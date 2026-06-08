@@ -58,7 +58,7 @@
 #              assigned before/after, and how many ASVs were unchanged
 #              vs downgraded (specificity reduced) vs dropped (no
 #              regional record). The per-rank before/after distribution
-#              is NOT here -- it is the input vs regatta_result columns
+#              is NOT here -- it is the input vs regatta_checklist_result columns
 #              of summarize_regatta()'s report.
 
 #' Reconcile a taxonomy table against a regional species checklist
@@ -270,7 +270,7 @@ reconcile_checklist <- function(taxonomy_table,
 
   # Per-step transition headline + a breakdown of the downgrades by rank pair
   # (e.g. "downgraded: species -> genus"). The per-rank before/after
-  # *distribution* is NOT here -- it is read across the input vs regatta_result
+  # *distribution* is NOT here -- it is read across the input vs regatta_checklist_result
   # columns of summarize_regatta()'s report.
   stats <- data.frame(
     metric = c("total ASVs",

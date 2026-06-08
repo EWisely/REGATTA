@@ -41,8 +41,8 @@ test_that("run_regatta dispatches a vsearch lca+userout pair through to the chec
   # ASV_2 was downgraded species -> genus, so that breakdown row appears.
   s <- res$summary
   expect_gte(nrow(s), 27L)
-  expect_equal(s$regatta_result[s$row_names == "ASVs downgraded (specificity reduced)"], 1)
-  expect_equal(s$regatta_result[s$row_names == "downgraded: species -> genus"], 1)
+  expect_equal(s$regatta_checklist_result[s$row_names == "ASVs downgraded (specificity reduced)"], 1)
+  expect_equal(s$regatta_checklist_result[s$row_names == "downgraded: species -> genus"], 1)
 
   # output bundle written under a dated run subfolder of out_dir
   run <- file.path(out, paste0("testreg_fish_", Sys.Date()))
@@ -54,9 +54,9 @@ test_that("run_regatta dispatches a vsearch lca+userout pair through to the chec
   # only ONE summary file: the top-level regatta_summary.csv, not a per-step one
   expect_false(file.exists(file.path(run, "reconcile_checklist",
                                      "reconcile_checklist_summary.csv")))
-  # single-DB report columns: input_file + regatta_result
+  # single-DB report columns: input_file + regatta_checklist_result
   expect_identical(setdiff(names(res$summary), "row_names"),
-                   c("input_file", "regatta_result"))
+                   c("input_file", "regatta_checklist_result"))
 })
 
 test_that("run_regatta rejects an unsupported checklist argument", {
