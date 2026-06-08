@@ -458,7 +458,7 @@ run_regatta <- function(input,
       prior_prefix  = "reconcile_global_local")
     log_lines <- c(log_lines, "reconcile_checklist done")
 
-    summ <- summarize_regatta(rec, post, g$table, l$table)
+    summ <- summarize_regatta(rec, post, g$table, l$table, checklist = cl)
     result <- list(global_tax = g$table, local_tax = l$table,
                    reconciled = rec, post_checklist = post, summary = summ)
   } else {
@@ -473,7 +473,7 @@ run_regatta <- function(input,
       prior_dir     = NULL)
     log_lines <- c(log_lines, "reconcile_checklist done")
 
-    summ <- summarize_regatta(post_checklist = post)
+    summ <- summarize_regatta(post_checklist = post, checklist = cl)
     result <- list(input_tax = c1$table, post_checklist = post, summary = summ)
   }
 

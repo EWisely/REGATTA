@@ -4,7 +4,7 @@
 # Summary-table layout designed by Ella Crotty.
 
 # Compare the input(s) and output(s) of a REGATTA run and produce
-# Ella's 21-row stats summary -- one column per stage, capturing how
+# Ella's 23-row stats summary -- one column per stage, capturing how
 # taxonomic specificity and diversity shifted as the data flowed
 # through reconciliation and the regional checklist filter.
 #
@@ -28,35 +28,44 @@
 # Each supplied input becomes its own column. Stage column names are
 # fixed: global, local, reconciled, regatta.
 #
-# Row groups (the 21 rows are Ella's layout):
+# Row groups (Ella's layout, plus the checklist-membership pair):
 #   1-3   counts (total, assigned, % assigned)
 #   4-7   source breakdown (local-preferred and global-preferred from
 #         the best_pctid step -- only populated when `reconciled` is
 #         supplied)
 #   8     change in number of ASVs assigned through the checklist
 #         step (only populated when `post_checklist` is supplied)
-#   9-15  ID'ed-to-<rank>-only specificity counts
-#   16-21 diversity counts (distinct phyla, classes, ..., species)
+#   9-10  checklist membership -- % of a stage's calls on the regional
+#         checklist, per ASV and per distinct taxon (only when `checklist`
+#         is supplied; global < 100%, local & regatta = 100%)
+#   11-17 ID'ed-to-<rank>-only specificity counts
+#   18-23 diversity counts (distinct phyla, classes, ..., species)
 
-#' Summarize a REGATTA run as a 21-row stats table
+#' Summarize a REGATTA run as a 23-row stats table
 #'
-#' Compares inputs and outputs across stages and produces Ella's 21-row
-#' summary: counts, source breakdown, ID'ed-to-rank specificity, and
-#' diversity. Each supplied input becomes its own column in the output.
+#' Compares inputs and outputs across stages and produces Ella's summary:
+#' counts, source breakdown, checklist membership, ID'ed-to-rank specificity,
+#' and diversity. Each supplied input becomes its own column in the output.
 #' Stage columns are fixed: `global`, `local`, `reconciled`, `regatta`.
 #'
 #' @param reconciled Output list of [reconcile_global_local()].
 #' @param post_checklist Output list of [reconcile_checklist()].
 #' @param global_input Raw global-DB classifier output taxonomy table.
 #' @param local_input Raw local-DB classifier output taxonomy table.
+#' @param checklist The taxonomized regional checklist (a data.frame with the
+#'   7 rank columns -- e.g. `build_regional_checklist()$for_LCA`). When supplied,
+#'   the two "percent ... on regional checklist" rows are filled per stage
+#'   (global typically < 100%; local and regatta = 100%); otherwise they are
+#'   `NA`. [run_regatta()] passes the run's checklist automatically.
 #'
-#' @return A 21-row data.frame with one column per supplied stage.
+#' @return A 23-row data.frame with one column per supplied stage.
 #'
 #' @export
 summarize_regatta <- function(reconciled     = NULL,
                               post_checklist = NULL,
                               global_input   = NULL,
-                              local_input    = NULL) {
+                              local_input    = NULL,
+                              checklist      = NULL) {
   # Argument order is tuned for the common call patterns:
   #   summarize_regatta(post)                 single-DB workflow
   #   summarize_regatta(rec, post)            two-DB workflow
@@ -66,6 +75,30 @@ summarize_regatta <- function(reconciled     = NULL,
   # "Assigned" = any non-NA rank, so the count is right even for inputs that
   # carry no `domain` column (e.g. a pre-resolved phylum..species table).
   n_assigned_any <- function(t) sum(rowSums(!is.na(t[, ranks, drop = FALSE])) > 0)
+
+  # Checklist membership: the fraction of a stage's calls that are on the
+  # regional checklist (global < 100%; local and regatta = 100% by
+  # construction). Needs the taxonomized checklist; NA when it isn't supplied
+  # or lacks rank columns. Computed two ways: per ASV, and per distinct taxon.
+  cl_sets <- NULL
+  if (!is.null(checklist) && is.data.frame(checklist) &&
+      all(ranks %in% names(checklist))) {
+    cl_sets <- lapply(ranks, function(r) unique(stats::na.omit(checklist[[r]])))
+    names(cl_sets) <- ranks
+  }
+  pct_on_checklist <- function(t) {
+    if (is.null(cl_sets)) return(c(asv = NA_real_, taxon = NA_real_))
+    M    <- as.matrix(t[, ranks, drop = FALSE])
+    low  <- apply(!is.na(M), 1, function(r) if (any(r)) max(which(r)) else NA_integer_)
+    keep <- !is.na(low)
+    if (!any(keep)) return(c(asv = NA_real_, taxon = NA_real_))
+    low <- low[keep]; Mk <- M[keep, , drop = FALSE]
+    vals <- vapply(seq_along(low), function(i) Mk[i, low[i]], character(1))
+    on   <- vapply(seq_along(low), function(i) vals[i] %in% cl_sets[[low[i]]], logical(1))
+    dup  <- !duplicated(paste(low, vals, sep = "\r"))   # distinct (rank, taxon)
+    c(asv   = 100 * sum(on)      / length(on),
+      taxon = 100 * sum(on[dup]) / sum(dup))
+  }
 
   # Collect stage tables in fixed order
   stages <- list()
@@ -111,8 +144,11 @@ summarize_regatta <- function(reconciled     = NULL,
     n_distinct <- function(x) length(unique(x[!is.na(x)]))
     div <- vapply(ranks[-1], function(r) n_distinct(t[[r]]), integer(1))
 
+    pc <- pct_on_checklist(t)
+
     c(n_total, n_assigned, pct_assigned,
       NA, NA, NA, NA, NA,                                # rows 4-8 fill below
+      pc[["asv"]], pc[["taxon"]],                        # rows 9-10 checklist membership
       kin_only, phy_only, cla_only, ord_only, fam_only, gen_only, sp_count,
       div["phylum"], div["class"], div["order"],
       div["family"], div["genus"], div["species"])
@@ -177,6 +213,8 @@ summarize_regatta <- function(reconciled     = NULL,
     "count of global assignment preferred",
     "percent global assignments",
     "change in number of ASVs assigned",
+    "percent of ASVs on regional checklist",
+    "percent of distinct taxa on regional checklist",
     "ID'ed to kingdom only",
     "ID'ed to phylum only",
     "ID'ed to class only",

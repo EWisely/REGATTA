@@ -2,13 +2,14 @@
 % Please edit documentation in R/summarize_regatta.R
 \name{summarize_regatta}
 \alias{summarize_regatta}
-\title{Summarize a REGATTA run as a 21-row stats table}
+\title{Summarize a REGATTA run as a 23-row stats table}
 \usage{
 summarize_regatta(
   reconciled = NULL,
   post_checklist = NULL,
   global_input = NULL,
-  local_input = NULL
+  local_input = NULL,
+  checklist = NULL
 )
 }
 \arguments{
@@ -19,13 +20,19 @@ summarize_regatta(
 \item{global_input}{Raw global-DB classifier output taxonomy table.}
 
 \item{local_input}{Raw local-DB classifier output taxonomy table.}
+
+\item{checklist}{The taxonomized regional checklist (a data.frame with the
+7 rank columns -- e.g. \code{build_regional_checklist()$for_LCA}). When supplied,
+the two "percent ... on regional checklist" rows are filled per stage
+(global typically < 100\%; local and regatta = 100\%); otherwise they are
+\code{NA}. \code{\link[=run_regatta]{run_regatta()}} passes the run's checklist automatically.}
 }
 \value{
-A 21-row data.frame with one column per supplied stage.
+A 23-row data.frame with one column per supplied stage.
 }
 \description{
-Compares inputs and outputs across stages and produces Ella's 21-row
-summary: counts, source breakdown, ID'ed-to-rank specificity, and
-diversity. Each supplied input becomes its own column in the output.
+Compares inputs and outputs across stages and produces Ella's summary:
+counts, source breakdown, checklist membership, ID'ed-to-rank specificity,
+and diversity. Each supplied input becomes its own column in the output.
 Stage columns are fixed: \code{global}, \code{local}, \code{reconciled}, \code{regatta}.
 }
