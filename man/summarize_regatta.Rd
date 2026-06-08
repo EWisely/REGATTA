@@ -2,7 +2,7 @@
 % Please edit documentation in R/summarize_regatta.R
 \name{summarize_regatta}
 \alias{summarize_regatta}
-\title{Summarize a REGATTA run as a 23-row stats table}
+\title{Summarize a REGATTA run as a 24-row stats table}
 \usage{
 summarize_regatta(
   reconciled = NULL,
@@ -23,12 +23,15 @@ summarize_regatta(
 
 \item{checklist}{The taxonomized regional checklist (a data.frame with the
 7 rank columns -- e.g. \code{build_regional_checklist()$for_LCA}). When supplied,
-the two "percent ... on regional checklist" rows are filled per stage
-(global typically < 100\%; local and regatta = 100\%); otherwise they are
-\code{NA}. \code{\link[=run_regatta]{run_regatta()}} passes the run's checklist automatically.}
+the checklist-comparison rows are filled per stage: the two "percent ... on
+regional checklist" rows (how much of the \emph{data} is on the checklist;
+global typically < 100\%, local and regatta = 100\%) and "percent of
+checklist species detected" (the reverse -- how much of the \emph{checklist} the
+data recovered). Otherwise those rows are \code{NA}. \code{\link[=run_regatta]{run_regatta()}} passes the
+run's checklist automatically.}
 }
 \value{
-A 23-row data.frame with one column per supplied stage.
+A 24-row data.frame with one column per supplied stage.
 }
 \description{
 Compares inputs and outputs across stages and produces Ella's summary:

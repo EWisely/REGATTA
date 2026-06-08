@@ -4,7 +4,7 @@
 # Summary-table layout designed by Ella Crotty.
 
 # Compare the input(s) and output(s) of a REGATTA run and produce
-# Ella's 23-row stats summary -- one column per stage, capturing how
+# Ella's 24-row stats summary -- one column per stage, capturing how
 # taxonomic specificity and diversity shifted as the data flowed
 # through reconciliation and the regional checklist filter.
 #
@@ -35,13 +35,15 @@
 #         supplied)
 #   8     change in number of ASVs assigned through the checklist
 #         step (only populated when `post_checklist` is supplied)
-#   9-10  checklist membership -- % of a stage's calls on the regional
+#   9-10  data -> checklist membership -- % of a stage's calls on the regional
 #         checklist, per ASV and per distinct taxon (only when `checklist`
 #         is supplied; global < 100%, local & regatta = 100%)
-#   11-17 ID'ed-to-<rank>-only specificity counts
-#   18-23 diversity counts (distinct phyla, classes, ..., species)
+#   11    checklist -> data recovery -- % of checklist species detected in the
+#         stage's data (survey completeness; only when `checklist` is supplied)
+#   12-18 ID'ed-to-<rank>-only specificity counts
+#   19-24 diversity counts (distinct phyla, classes, ..., species)
 
-#' Summarize a REGATTA run as a 23-row stats table
+#' Summarize a REGATTA run as a 24-row stats table
 #'
 #' Compares inputs and outputs across stages and produces Ella's summary:
 #' counts, source breakdown, checklist membership, ID'ed-to-rank specificity,
@@ -54,11 +56,14 @@
 #' @param local_input Raw local-DB classifier output taxonomy table.
 #' @param checklist The taxonomized regional checklist (a data.frame with the
 #'   7 rank columns -- e.g. `build_regional_checklist()$for_LCA`). When supplied,
-#'   the two "percent ... on regional checklist" rows are filled per stage
-#'   (global typically < 100%; local and regatta = 100%); otherwise they are
-#'   `NA`. [run_regatta()] passes the run's checklist automatically.
+#'   the checklist-comparison rows are filled per stage: the two "percent ... on
+#'   regional checklist" rows (how much of the *data* is on the checklist;
+#'   global typically < 100%, local and regatta = 100%) and "percent of
+#'   checklist species detected" (the reverse -- how much of the *checklist* the
+#'   data recovered). Otherwise those rows are `NA`. [run_regatta()] passes the
+#'   run's checklist automatically.
 #'
-#' @return A 23-row data.frame with one column per supplied stage.
+#' @return A 24-row data.frame with one column per supplied stage.
 #'
 #' @export
 summarize_regatta <- function(reconciled     = NULL,
@@ -98,6 +103,13 @@ summarize_regatta <- function(reconciled     = NULL,
     dup  <- !duplicated(paste(low, vals, sep = "\r"))   # distinct (rank, taxon)
     c(asv   = 100 * sum(on)      / length(on),
       taxon = 100 * sum(on[dup]) / sum(dup))
+  }
+  # The other direction: of the checklist's species, how many did this stage's
+  # data detect? (Survey recovery / completeness against the regional list.)
+  recovery_species <- function(t) {
+    if (is.null(cl_sets) || !length(cl_sets$species)) return(NA_real_)
+    data_sp <- unique(stats::na.omit(t$species))
+    100 * length(intersect(data_sp, cl_sets$species)) / length(cl_sets$species)
   }
 
   # Collect stage tables in fixed order
@@ -148,7 +160,8 @@ summarize_regatta <- function(reconciled     = NULL,
 
     c(n_total, n_assigned, pct_assigned,
       NA, NA, NA, NA, NA,                                # rows 4-8 fill below
-      pc[["asv"]], pc[["taxon"]],                        # rows 9-10 checklist membership
+      pc[["asv"]], pc[["taxon"]],                        # rows 9-10 data -> checklist
+      recovery_species(t),                              # row 11 checklist -> data
       kin_only, phy_only, cla_only, ord_only, fam_only, gen_only, sp_count,
       div["phylum"], div["class"], div["order"],
       div["family"], div["genus"], div["species"])
@@ -215,6 +228,7 @@ summarize_regatta <- function(reconciled     = NULL,
     "change in number of ASVs assigned",
     "percent of ASVs on regional checklist",
     "percent of distinct taxa on regional checklist",
+    "percent of checklist species detected",
     "ID'ed to kingdom only",
     "ID'ed to phylum only",
     "ID'ed to class only",

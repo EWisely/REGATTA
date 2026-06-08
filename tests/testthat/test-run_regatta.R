@@ -37,8 +37,8 @@ test_that("run_regatta dispatches a vsearch lca+userout pair through to the chec
   expect_true(is.na(rr$species[rr$ASV_id == "ASV_2"]))
   expect_equal(rr$genus[rr$ASV_id == "ASV_2"], "Sebastes")
 
-  # 23-row summary returned
-  expect_equal(nrow(res$summary), 23L)
+  # 24-row summary returned
+  expect_equal(nrow(res$summary), 24L)
 
   # output bundle written under a dated run subfolder of out_dir
   run <- file.path(out, paste0("testreg_fish_", Sys.Date()))
