@@ -48,8 +48,10 @@
 #              after_<rank> at every rank, regatta_match_rank (the
 #              rank at which the input matched the checklist, or NA
 #              when nothing matched at any rank -- no regional record),
-#              and any input metadata columns
-#              passed through. One row per ASV in the input.
+#              regatta_reason (per-ASV "kept" / "non-local (geographic)"
+#              / "off-target (taxonomic)" when a target group is known),
+#              and any input metadata columns passed through. One row
+#              per ASV in the input.
 #
 #   $stats     A compact per-step transition headline: total ASVs,
 #              assigned before/after, and how many ASVs were unchanged
@@ -288,24 +290,35 @@ reconcile_checklist <- function(taxonomy_table,
   # WHY the affected ASVs (downgraded or dropped) lost specificity: off-target
   # (their original call isn't even in the target group fed to
   # build_regional_checklist) vs non-local (in the target group, but not on the
-  # regional checklist). Needs the target group (stamped on the checklist).
-  if (is.data.frame(target_group) && all(c("rank", "name") %in% names(target_group)) &&
-      nrow(target_group) > 0) {
-    affected <- asg_b & ((asg_a & after_d < before_d) | !asg_a)
+  # regional checklist). Needs the target group (stamped on the checklist). The
+  # per-ASV reason is also recorded in $tracking$regatta_reason.
+  have_tg <- is.data.frame(target_group) &&
+    all(c("rank", "name") %in% names(target_group)) && nrow(target_group) > 0
+  in_tg <- rep(FALSE, nrow(before))
+  if (have_tg) {
+    for (k in seq_len(nrow(target_group))) {
+      r <- target_group$rank[k]; n <- target_group$name[k]
+      if (r %in% names(before))
+        in_tg <- in_tg | (!is.na(before[[r]]) & before[[r]] == n)
+    }
+  }
+  affected <- asg_b & ((asg_a & after_d < before_d) | !asg_a)
+  reason <- rep(NA_character_, nrow(before))
+  reason[asg_b & asg_a & after_d == before_d] <- "kept"
+  if (have_tg) {
+    reason[affected &  in_tg] <- "non-local (geographic)"
+    reason[affected & !in_tg] <- "off-target (taxonomic)"
     if (any(affected)) {
-      in_tg <- rep(FALSE, nrow(before))
-      for (k in seq_len(nrow(target_group))) {
-        r <- target_group$rank[k]; n <- target_group$name[k]
-        if (r %in% names(before))
-          in_tg <- in_tg | (!is.na(before[[r]]) & before[[r]] == n)
-      }
       stats <- rbind(stats, data.frame(
         metric = c("downgraded/dropped -- non-local (geographic)",
                    "downgraded/dropped -- off-target (taxonomic)"),
         count  = c(sum(affected & in_tg), sum(affected & !in_tg)),
         stringsAsFactors = FALSE))
     }
+  } else {
+    reason[affected] <- "specificity reduced (target group not available)"
   }
+  tracking$regatta_reason <- reason
 
   if (!is.null(output_dir)) {
     dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
@@ -327,7 +340,7 @@ reconcile_checklist <- function(taxonomy_table,
               normalizePath(prior_tracking_path), "; augmenting tracking.")
       prior_tracking <- utils::read.csv(prior_tracking_path, stringsAsFactors = FALSE)
       new_cols <- intersect(c(id_col, paste0("after_", ranks), "regatta_match_rank",
-                              "after_scientific_name"), names(tracking))
+                              "after_scientific_name", "regatta_reason"), names(tracking))
       addons   <- tracking[, new_cols, drop = FALSE]
       rename_map <- c(paste0("after_", ranks), "after_scientific_name")
       new_names  <- c(paste0("post_checklist_", ranks), "post_checklist_scientific_name")
