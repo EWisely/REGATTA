@@ -14,3 +14,7 @@ CLAUDE.local.md
 # GBIF/OBIS download artifacts (regenerable via GBIF_download(); keep out of the repo)
 *.zip
 [0-9]*-[0-9]*.csv
+
+# Unpublished datasets for local testing/validation ONLY — never commit
+# (full Galapagos fish + crustacean datasets; not ours to publish here)
+data/
