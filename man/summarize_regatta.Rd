@@ -9,17 +9,26 @@ summarize_regatta(
   post_checklist = NULL,
   global_input = NULL,
   local_input = NULL,
+  input_file = NULL,
   checklist = NULL
 )
 }
 \arguments{
-\item{reconciled}{Output list of \code{\link[=reconcile_global_local]{reconcile_global_local()}}.}
+\item{reconciled}{Output list of \code{\link[=reconcile_global_local]{reconcile_global_local()}}. Used for the
+source-breakdown rows; it is not given its own column.}
 
-\item{post_checklist}{Output list of \code{\link[=reconcile_checklist]{reconcile_checklist()}}.}
+\item{post_checklist}{Output list of \code{\link[=reconcile_checklist]{reconcile_checklist()}}. Becomes the
+\code{regatta_result} column.}
 
-\item{global_input}{Raw global-DB classifier output taxonomy table.}
+\item{global_input}{Raw global-DB classifier output taxonomy table
+(\code{global} column).}
 
-\item{local_input}{Raw local-DB classifier output taxonomy table.}
+\item{local_input}{Raw local-DB classifier output taxonomy table
+(\code{local} column).}
+
+\item{input_file}{The single-DB classifier input taxonomy table. Becomes the
+\code{input_file} column -- used only when neither \code{global_input} nor
+\code{local_input} is supplied.}
 
 \item{checklist}{The taxonomized regional checklist (a data.frame with the
 7 rank columns -- e.g. \code{build_regional_checklist()$for_LCA}). When supplied,
@@ -36,6 +45,7 @@ A 24-row data.frame with one column per supplied stage.
 \description{
 Compares inputs and outputs across stages and produces Ella's summary:
 counts, source breakdown, checklist membership, ID'ed-to-rank specificity,
-and diversity. Each supplied input becomes its own column in the output.
-Stage columns are fixed: \code{global}, \code{local}, \code{reconciled}, \code{regatta}.
+and diversity. Columns are the raw input(s) plus the final result. A two-DB
+run names its inputs \code{global}/\code{local}; a single-DB run names its one input
+\code{input_file}; the result column is always \code{regatta_result}.
 }

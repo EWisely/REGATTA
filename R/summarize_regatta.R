@@ -25,8 +25,11 @@
 #                  (e.g. vsearch+SINTAX-derived). Used to populate
 #                  the "local" stage column.
 #
-# Each supplied input becomes its own column. Stage column names are
-# fixed: global, local, reconciled, regatta.
+# Columns are the raw input(s) + the final result. Two-DB runs name the
+# inputs `global`/`local`; a single-DB run names its one input `input_file`.
+# The final result column is always `regatta_result`. The reconciled
+# (global-vs-local merge) intermediate feeds the source-breakdown rows but is
+# not its own column.
 #
 # Row groups (Ella's layout, plus the checklist-membership pair):
 #   1-3   counts (total, assigned, % assigned)
@@ -47,13 +50,21 @@
 #'
 #' Compares inputs and outputs across stages and produces Ella's summary:
 #' counts, source breakdown, checklist membership, ID'ed-to-rank specificity,
-#' and diversity. Each supplied input becomes its own column in the output.
-#' Stage columns are fixed: `global`, `local`, `reconciled`, `regatta`.
+#' and diversity. Columns are the raw input(s) plus the final result. A two-DB
+#' run names its inputs `global`/`local`; a single-DB run names its one input
+#' `input_file`; the result column is always `regatta_result`.
 #'
-#' @param reconciled Output list of [reconcile_global_local()].
-#' @param post_checklist Output list of [reconcile_checklist()].
-#' @param global_input Raw global-DB classifier output taxonomy table.
-#' @param local_input Raw local-DB classifier output taxonomy table.
+#' @param reconciled Output list of [reconcile_global_local()]. Used for the
+#'   source-breakdown rows; it is not given its own column.
+#' @param post_checklist Output list of [reconcile_checklist()]. Becomes the
+#'   `regatta_result` column.
+#' @param global_input Raw global-DB classifier output taxonomy table
+#'   (`global` column).
+#' @param local_input Raw local-DB classifier output taxonomy table
+#'   (`local` column).
+#' @param input_file The single-DB classifier input taxonomy table. Becomes the
+#'   `input_file` column -- used only when neither `global_input` nor
+#'   `local_input` is supplied.
 #' @param checklist The taxonomized regional checklist (a data.frame with the
 #'   7 rank columns -- e.g. `build_regional_checklist()$for_LCA`). When supplied,
 #'   the checklist-comparison rows are filled per stage: the two "percent ... on
@@ -70,6 +81,7 @@ summarize_regatta <- function(reconciled     = NULL,
                               post_checklist = NULL,
                               global_input   = NULL,
                               local_input    = NULL,
+                              input_file     = NULL,
                               checklist      = NULL) {
   # Argument order is tuned for the common call patterns:
   #   summarize_regatta(post)                 single-DB workflow
@@ -112,25 +124,28 @@ summarize_regatta <- function(reconciled     = NULL,
     100 * length(intersect(data_sp, cl_sets$species)) / length(cl_sets$species)
   }
 
-  # Collect stage tables in fixed order
+  # Stage columns: the raw input(s) + the final regatta result. Two-DB runs
+  # name the inputs `global`/`local` (roles are required up front); a single-DB
+  # run names its one input `input_file`. The reconciled (global-vs-local merge)
+  # intermediate is used for the source-breakdown rows but is NOT its own column.
+  if (!is.null(reconciled) && !"result" %in% names(reconciled)) {
+    stop("`reconciled` must be the output of reconcile_global_local() (a list with $result).")
+  }
   stages <- list()
-  if (!is.null(global_input))   stages[["global"]]     <- global_input
-  if (!is.null(local_input))    stages[["local"]]      <- local_input
-  if (!is.null(reconciled)) {
-    if (!"result" %in% names(reconciled)) {
-      stop("`reconciled` must be the output of reconcile_global_local() (a list with $result).")
-    }
-    stages[["reconciled"]] <- reconciled$result
+  if (!is.null(global_input)) stages[["global"]] <- global_input
+  if (!is.null(local_input))  stages[["local"]]  <- local_input
+  if (is.null(global_input) && is.null(local_input) && !is.null(input_file)) {
+    stages[["input_file"]] <- input_file
   }
   if (!is.null(post_checklist)) {
     if (!"result" %in% names(post_checklist)) {
-      stop("`post_checklist` must be the output of regatta_checklist_lca() (a list with $result).")
+      stop("`post_checklist` must be the output of reconcile_checklist() (a list with $result).")
     }
-    stages[["regatta"]] <- post_checklist$result
+    stages[["regatta_result"]] <- post_checklist$result
   }
 
   if (length(stages) == 0) {
-    stop("Supply at least one of global_input, local_input, reconciled, post_checklist.")
+    stop("Supply at least one of global_input, local_input, input_file, post_checklist.")
   }
   for (nm in names(stages)) {
     missing_cols <- setdiff(ranks, names(stages[[nm]]))

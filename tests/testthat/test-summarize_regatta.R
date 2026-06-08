@@ -9,10 +9,10 @@ post      <- suppressMessages(reconcile_checklist(global, checklist, output_dir 
 
 test_that("summarize_regatta produces the 24-row table with real counts", {
   s <- summarize_regatta(post_checklist = post)
-  val <- function(label) s$regatta[s$row_names == label]
+  val <- function(label) s$regatta_result[s$row_names == label]
 
   expect_equal(nrow(s), 24L)
-  expect_true(all(c("row_names", "regatta") %in% names(s)))
+  expect_true(all(c("row_names", "regatta_result") %in% names(s)))
   expect_equal(val("total ASVs"), 12)
   expect_equal(val("assigned ASVs"), 12)
   expect_equal(val("ID'ed to species"), 6)        # 6 of the 12 stay at species
@@ -22,25 +22,28 @@ test_that("summarize_regatta produces the 24-row table with real counts", {
   expect_true(is.na(val("percent of distinct taxa on regional checklist")))
 })
 
-test_that("checklist membership: global < 100% on the checklist, regatta = 100%", {
+test_that("checklist membership: input < 100% on the checklist, regatta_result = 100%", {
   s <- summarize_regatta(global_input = global, post_checklist = post,
                          checklist = checklist)
   asv <- function(col) s[[col]][s$row_names == "percent of ASVs on regional checklist"]
   tax <- function(col) s[[col]][s$row_names == "percent of distinct taxa on regional checklist"]
-  expect_lt(asv("global"), 100)        # some global species aren't on the checklist
-  expect_equal(asv("regatta"), 100)    # every reconciled call is on the checklist
-  expect_equal(tax("regatta"), 100)
+  expect_lt(asv("global"), 100)              # some global species aren't on the checklist
+  expect_equal(asv("regatta_result"), 100)   # every reconciled call is on the checklist
+  expect_equal(tax("regatta_result"), 100)
 
   # The reverse direction: checklist recovery. Identical before/after at species
   # level (REGATTA never drops a true regional detection), and > 0 here.
   rec <- function(col) s[[col]][s$row_names == "percent of checklist species detected"]
   expect_gt(rec("global"), 0)
-  expect_equal(rec("global"), rec("regatta"))
+  expect_equal(rec("global"), rec("regatta_result"))
 })
 
-test_that("each supplied input becomes its own stage column", {
-  s <- summarize_regatta(global_input = global, post_checklist = post)
-  expect_true(all(c("global", "regatta") %in% names(s)))
+test_that("columns are the input(s) + regatta_result; single-DB input is 'input_file'", {
+  s2 <- summarize_regatta(global_input = global, post_checklist = post)
+  expect_true(all(c("global", "regatta_result") %in% names(s2)))
+  expect_false("reconciled" %in% names(s2))   # merge intermediate is not a column
+  s1 <- summarize_regatta(input_file = global, post_checklist = post)
+  expect_identical(setdiff(names(s1), "row_names"), c("input_file", "regatta_result"))
 })
 
 test_that("summarize_regatta errors with no inputs and on a malformed list", {

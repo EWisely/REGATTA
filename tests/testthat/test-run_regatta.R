@@ -47,6 +47,12 @@ test_that("run_regatta dispatches a vsearch lca+userout pair through to the chec
   expect_true(file.exists(file.path(run, "run_log.txt")))
   expect_true(file.exists(file.path(run, "reconcile_checklist",
                                     "reconcile_checklist_taxonomy_table.csv")))
+  # only ONE summary file: the top-level regatta_summary.csv, not a per-step one
+  expect_false(file.exists(file.path(run, "reconcile_checklist",
+                                     "reconcile_checklist_summary.csv")))
+  # single-DB report columns: input_file + regatta_result
+  expect_identical(setdiff(names(res$summary), "row_names"),
+                   c("input_file", "regatta_result"))
 })
 
 test_that("run_regatta rejects an unsupported checklist argument", {

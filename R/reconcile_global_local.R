@@ -115,8 +115,11 @@
 #' @param output_dir Directory path; default `NULL` writes nothing (the
 #'   `result`/`tracking`/`stats` list is returned). Supply a directory to also
 #'   write `<output_prefix>_taxonomy_table.csv`, `<output_prefix>_tracking.csv`,
-#'   and `<output_prefix>_summary.csv` there.
-#' @param output_prefix Filename prefix for the 3 CSVs. Default
+#'   and (unless `write_summary = FALSE`) `<output_prefix>_summary.csv` there.
+#' @param write_summary If `TRUE` (default), also write the `_summary.csv`.
+#'   [run_regatta()] sets this `FALSE` so a run writes only one top-level
+#'   summary (`regatta_summary.csv`).
+#' @param output_prefix Filename prefix for the output CSVs. Default
 #'   `"reconcile_global_local"`.
 #' @param tracking_drop_pattern Regex matched against input column names;
 #'   matching columns are dropped before they enter `$tracking`. Default
@@ -144,6 +147,7 @@ reconcile_global_local <- function(global_table,
                                    Local_advantage     = TRUE,
                                    output_dir          = NULL,
                                    output_prefix       = "reconcile_global_local",
+                                   write_summary       = TRUE,
                                    tracking_drop_pattern =
                                      "^(MERGED_sample:|obiclean_|seq_rank|ID_STATUS|DEFINITION)") {
   # tracking_drop_pattern is a regex matched against column names in the
@@ -357,8 +361,9 @@ reconcile_global_local <- function(global_table,
     dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
     utils::write.csv(result,   file.path(output_dir, paste0(output_prefix, "_taxonomy_table.csv")), row.names = FALSE)
     utils::write.csv(tracking, file.path(output_dir, paste0(output_prefix, "_tracking.csv")),       row.names = FALSE)
-    utils::write.csv(stats,    file.path(output_dir, paste0(output_prefix, "_summary.csv")),        row.names = FALSE)
-    message("Wrote 3 CSVs to ", normalizePath(output_dir))
+    if (isTRUE(write_summary))
+      utils::write.csv(stats,  file.path(output_dir, paste0(output_prefix, "_summary.csv")),        row.names = FALSE)
+    message("Wrote ", if (isTRUE(write_summary)) "3" else "2", " CSVs to ", normalizePath(output_dir))
   }
 
   list(result = result, tracking = tracking, stats = stats)

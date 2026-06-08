@@ -103,8 +103,11 @@
 #' @param output_dir Directory path; default `NULL` writes nothing (the
 #'   `result`/`tracking`/`stats` list is returned). Supply a directory to also
 #'   write the 3 CSVs there.
-#' @param output_prefix Filename prefix for the 3 CSVs. Default
+#' @param output_prefix Filename prefix for the output CSVs. Default
 #'   `"reconcile_checklist"`.
+#' @param write_summary If `TRUE` (default), also write the `_summary.csv`
+#'   alongside the taxonomy-table and tracking CSVs. [run_regatta()] sets this
+#'   `FALSE` so a run writes only one top-level summary (`regatta_summary.csv`).
 #' @param prior_dir,prior_prefix Optional directory of a prior
 #'   [reconcile_global_local()] output to augment the tracking/summary CSVs
 #'   with. Default `prior_dir = NULL` (no augmentation); supply the directory
@@ -124,6 +127,7 @@ reconcile_checklist <- function(taxonomy_table,
                                 warn_pct_id   = TRUE,
                                 output_dir    = NULL,
                                 output_prefix = "reconcile_checklist",
+                                write_summary = TRUE,
                                 prior_dir     = NULL,
                                 prior_prefix  = "reconcile_global_local",
                                 tracking_drop_pattern =
@@ -341,10 +345,13 @@ reconcile_checklist <- function(taxonomy_table,
     utils::write.csv(tracking_to_write,
                      file.path(output_dir, paste0(output_prefix, "_tracking.csv")),
                      row.names = FALSE)
-    utils::write.csv(summary_to_write,
-                     file.path(output_dir, paste0(output_prefix, "_summary.csv")),
-                     row.names = FALSE)
-    message("Wrote 3 CSVs to ", normalizePath(output_dir))
+    if (isTRUE(write_summary)) {
+      utils::write.csv(summary_to_write,
+                       file.path(output_dir, paste0(output_prefix, "_summary.csv")),
+                       row.names = FALSE)
+    }
+    message("Wrote ", if (isTRUE(write_summary)) "3" else "2",
+            " CSVs to ", normalizePath(output_dir))
   }
 
   list(result = result, tracking = tracking, stats = stats)
