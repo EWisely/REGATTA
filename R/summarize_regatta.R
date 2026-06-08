@@ -4,7 +4,7 @@
 # Summary-table layout designed by Ella Crotty.
 
 # Compare the input(s) and output(s) of a REGATTA run and produce
-# Ella's 27-row stats summary -- one column per stage, capturing how
+# Ella's stats summary -- one column per stage, capturing how
 # taxonomic specificity and diversity shifted as the data flowed
 # through reconciliation and the regional checklist filter.
 #
@@ -45,12 +45,14 @@
 #         stage's data (survey completeness; only when `checklist` is supplied)
 #   12-18 ID'ed-to-<rank>-only specificity counts
 #   19-24 diversity counts (distinct phyla, classes, ..., species)
-#   25-27 transition headline -- ASVs unchanged / downgraded / dropped by the
-#         LCA step, placed in that step's result column (NA in the before
-#         columns). The checklist step fills `regatta_result`; the global-vs-
-#         local LCA step (the `reconciled` column, two-DB) is added later.
+#   25+    transition headline (ASVs unchanged / downgraded / dropped) and the
+#          per-rank-pair downgrade breakdown ("downgraded: <from> -> <to>", one
+#          row per pair that occurred), placed in that step's result column (NA
+#          in the before columns). The checklist step fills `regatta_result`;
+#          the global-vs-local LCA step (its own column, two-DB) is added later.
+#          The total row count therefore varies with the breakdown.
 
-#' Summarize a REGATTA run as a 27-row stats table
+#' Summarize a REGATTA run as a multi-stage stats table
 #'
 #' Compares inputs and outputs across stages and produces Ella's summary:
 #' counts, source breakdown, checklist membership, ID'ed-to-rank specificity,
@@ -78,7 +80,11 @@
 #'   data recovered). Otherwise those rows are `NA`. [run_regatta()] passes the
 #'   run's checklist automatically.
 #'
-#' @return A 27-row data.frame with one column per supplied stage.
+#' @return A data.frame with one column per supplied stage: 24 fixed rows
+#'   (counts, source breakdown, checklist membership/recovery, specificity,
+#'   diversity) plus the checklist-step transition headline and one
+#'   `downgraded: <from> -> <to>` row per rank pair that occurred, so the total
+#'   row count varies with the data.
 #'
 #' @export
 summarize_regatta <- function(reconciled     = NULL,
@@ -183,8 +189,7 @@ summarize_regatta <- function(reconciled     = NULL,
       recovery_species(t),                              # row 11 checklist -> data
       kin_only, phy_only, cla_only, ord_only, fam_only, gen_only, sp_count,
       div["phylum"], div["class"], div["order"],
-      div["family"], div["genus"], div["species"],
-      NA, NA, NA)                                       # rows 25-27 transition, filled below
+      div["family"], div["genus"], div["species"])
   }
 
   cols <- lapply(stages, per_stage)
@@ -237,22 +242,6 @@ summarize_regatta <- function(reconciled     = NULL,
     for (j in seq_along(out)) out[[j]][8] <- n_reconciled_assigned - n_global_assigned
   }
 
-  # Transition headline (rows 25-27): what the checklist step did, from
-  # reconcile_checklist()'s $stats. A property of the input -> regatta_result
-  # transition, so the values sit in the `regatta_result` column (NA in the
-  # before columns). The same stats for the global-vs-local LCA step (the
-  # `reconciled` column, two-DB) are added when that pipeline is built out.
-  if (!is.null(post_checklist) && "stats" %in% names(post_checklist) &&
-      "regatta_result" %in% names(out)) {
-    ps <- post_checklist$stats
-    getv <- function(m) { v <- ps$count[ps$metric == m]; if (length(v)) v[1] else NA_real_ }
-    nr <- nrow(out)
-    out[["regatta_result"]][(nr - 2):nr] <- c(
-      getv("ASVs unchanged (specificity kept)"),
-      getv("ASVs downgraded (specificity reduced)"),
-      getv("no regional record (call dropped)"))
-  }
-
   row_labels <- c(
     "total ASVs",
     "assigned ASVs",
@@ -277,11 +266,34 @@ summarize_regatta <- function(reconciled     = NULL,
     "Number of orders",
     "Number of families",
     "Number of genera",
-    "Number of species",
-    "ASVs unchanged (specificity kept)",
-    "ASVs downgraded (specificity reduced)",
-    "no regional record (call dropped)"
+    "Number of species"
   )
 
-  cbind(row_names = row_labels, out, stringsAsFactors = FALSE)
+  base <- cbind(row_names = row_labels, out, stringsAsFactors = FALSE)
+
+  # Transition headline + downgrade breakdown for the checklist step, taken
+  # from reconcile_checklist()'s $stats and placed in the `regatta_result`
+  # column (NA in the before columns -- a transition is a step property, not a
+  # per-stage value). The downgrade breakdown rows ("downgraded: <from> ->
+  # <to>") are however many pairs actually occurred. The same stats for the
+  # global-vs-local LCA step (its own column, two-DB) are added when that
+  # pipeline is built out.
+  if (!is.null(post_checklist) && "stats" %in% names(post_checklist) &&
+      "regatta_result" %in% names(base)) {
+    ps   <- post_checklist$stats
+    keep <- ps$metric %in% c("ASVs unchanged (specificity kept)",
+                             "ASVs downgraded (specificity reduced)",
+                             "no regional record (call dropped)") |
+            grepl("^downgraded: ", ps$metric)
+    ps <- ps[keep, , drop = FALSE]
+    if (nrow(ps) > 0) {
+      extra <- data.frame(row_names = ps$metric, stringsAsFactors = FALSE)
+      for (cn in setdiff(names(base), "row_names")) {
+        extra[[cn]] <- if (cn == "regatta_result") as.numeric(ps$count) else NA_real_
+      }
+      base <- rbind(base, extra[, names(base), drop = FALSE])
+      rownames(base) <- NULL
+    }
+  }
+  return(base)
 }

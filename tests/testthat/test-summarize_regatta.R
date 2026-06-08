@@ -7,16 +7,20 @@ global    <- read.csv(system.file("extdata", "mifish_obitools_example.csv", pack
 checklist <- readRDS(system.file("extdata", "galapagos_fish_checklist.rds", package = "REGATTA"))
 post      <- suppressMessages(reconcile_checklist(global, checklist, output_dir = NULL))
 
-test_that("summarize_regatta produces the 27-row table with real counts", {
+test_that("summarize_regatta produces the report with real counts + downgrade breakdown", {
   s <- summarize_regatta(post_checklist = post)
   val <- function(label) s$regatta_result[s$row_names == label]
 
-  expect_equal(nrow(s), 27L)
+  expect_gte(nrow(s), 27L)   # 24 base rows + transition headline + breakdown
   expect_true(all(c("row_names", "regatta_result") %in% names(s)))
   expect_equal(val("total ASVs"), 12)
   expect_equal(val("assigned ASVs"), 12)
   expect_equal(val("ID'ed to species"), 6)        # 6 of the 12 stay at species
   expect_equal(val("ID'ed to genus only"), 4)
+  # transition headline + per-rank-pair downgrade breakdown
+  expect_equal(val("ASVs downgraded (specificity reduced)"), 6)
+  expect_equal(val("downgraded: species -> genus"), 4)
+  expect_equal(val("downgraded: species -> family"), 2)
   # checklist-membership rows present but NA without a checklist
   expect_true(is.na(val("percent of ASVs on regional checklist")))
   expect_true(is.na(val("percent of distinct taxa on regional checklist")))

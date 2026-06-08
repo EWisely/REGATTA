@@ -37,8 +37,12 @@ test_that("run_regatta dispatches a vsearch lca+userout pair through to the chec
   expect_true(is.na(rr$species[rr$ASV_id == "ASV_2"]))
   expect_equal(rr$genus[rr$ASV_id == "ASV_2"], "Sebastes")
 
-  # 27-row summary returned
-  expect_equal(nrow(res$summary), 27L)
+  # summary returned: base rows + transition headline + downgrade breakdown.
+  # ASV_2 was downgraded species -> genus, so that breakdown row appears.
+  s <- res$summary
+  expect_gte(nrow(s), 27L)
+  expect_equal(s$regatta_result[s$row_names == "ASVs downgraded (specificity reduced)"], 1)
+  expect_equal(s$regatta_result[s$row_names == "downgraded: species -> genus"], 1)
 
   # output bundle written under a dated run subfolder of out_dir
   run <- file.path(out, paste0("testreg_fish_", Sys.Date()))

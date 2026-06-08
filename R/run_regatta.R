@@ -444,8 +444,9 @@ run_regatta <- function(input,
     log_lines <- c(log_lines, paste0("local  (", l$format, "): ",
                                      nrow(l$table), " ASVs"))
 
-    # write_summary = FALSE: the run writes ONE summary (regatta_summary.csv,
-    # below), not a per-step _summary.csv in each stage folder.
+    # Per-step summaries are not written (reconcile_global_local via write_summary
+    # = FALSE; reconcile_checklist never writes one). The run's single report is
+    # the regatta_summary written below.
     rec <- reconcile_global_local(
       g$table, l$table, id_col = id_col, Local_advantage = Local_advantage,
       output_dir    = .sub("reconcile_global_local"),
@@ -455,7 +456,7 @@ run_regatta <- function(input,
     post <- reconcile_checklist(
       rec$result, cl, id_col = id_col,   # rec$result now carries the winning pct_id
       output_dir    = .sub("reconcile_checklist"),
-      output_prefix = "reconcile_checklist", write_summary = FALSE,
+      output_prefix = "reconcile_checklist",
       prior_dir     = .sub("reconcile_global_local"),
       prior_prefix  = "reconcile_global_local")
     log_lines <- c(log_lines, "reconcile_checklist done")
@@ -471,7 +472,7 @@ run_regatta <- function(input,
     post <- reconcile_checklist(
       c1$table, cl, id_col = id_col,
       output_dir    = .sub("reconcile_checklist"),
-      output_prefix = "reconcile_checklist", write_summary = FALSE,
+      output_prefix = "reconcile_checklist",
       prior_dir     = NULL)
     log_lines <- c(log_lines, "reconcile_checklist done")
 

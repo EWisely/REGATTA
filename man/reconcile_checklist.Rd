@@ -13,7 +13,6 @@ reconcile_checklist(
   warn_pct_id = TRUE,
   output_dir = NULL,
   output_prefix = "reconcile_checklist",
-  write_summary = TRUE,
   prior_dir = NULL,
   prior_prefix = "reconcile_global_local",
   tracking_drop_pattern = "^(MERGED_sample:|obiclean_|seq_rank|ID_STATUS|DEFINITION)"
@@ -57,10 +56,6 @@ write the 3 CSVs there.}
 
 \item{output_prefix}{Filename prefix for the output CSVs. Default
 \code{"reconcile_checklist"}.}
-
-\item{write_summary}{If \code{TRUE} (default), also write the \verb{_summary.csv}
-alongside the taxonomy-table and tracking CSVs. \code{\link[=run_regatta]{run_regatta()}} sets this
-\code{FALSE} so a run writes only one top-level summary (\code{regatta_summary.csv}).}
 
 \item{prior_dir, prior_prefix}{Optional directory of a prior
 \code{\link[=reconcile_global_local]{reconcile_global_local()}} output to augment the tracking/summary CSVs
