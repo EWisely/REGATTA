@@ -10,6 +10,7 @@ reconcile_checklist(
   id_col = "ASV_id",
   sql_path = .regatta_default_sql_path(),
   overwrite_taxonomy_files = FALSE,
+  warn_pct_id = TRUE,
   output_dir = NULL,
   output_prefix = "reconcile_checklist",
   prior_dir = NULL,
@@ -41,6 +42,13 @@ or errors with the build command (non-interactive) unless
 \item{overwrite_taxonomy_files}{If \code{TRUE}, (re)build the taxonomy DB at
 \code{sql_path} even if one exists. Only consulted when a raw checklist needs
 taxonomizing. Default \code{FALSE}. See \code{\link[=build_regional_checklist]{build_regional_checklist()}}.}
+
+\item{warn_pct_id}{If \code{TRUE} (default), warn when \code{taxonomy_table} has no
+usable \code{pct_id} column -- percent-identity is optional for the geographic
+LCA but enables percent-ID filtering of low-confidence (likelier-wrong)
+calls, and is required for the two-DB \code{\link[=reconcile_global_local]{reconcile_global_local()}} comparison.
+\code{\link[=run_regatta]{run_regatta()}} sets this \code{FALSE} for its internal two-DB step, whose
+intermediate result intentionally carries no \code{pct_id}.}
 
 \item{output_dir}{Directory path; default \code{NULL} writes nothing (the
 \code{result}/\code{tracking}/\code{stats} list is returned). Supply a directory to also

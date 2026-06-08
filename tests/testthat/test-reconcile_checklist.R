@@ -71,3 +71,20 @@ test_that("$stats has expected counts", {
   expect_equal(result$stats$count[result$stats$metric == "matched at species"], 2)
   expect_equal(result$stats$count[result$stats$metric == "not matched (no regional record)"], 1)
 })
+
+test_that("missing pct_id warns (mentions filtering + two-DB), suppressible via warn_pct_id", {
+  no_pct <- input[, setdiff(names(input), "pct_id")]
+  expect_warning(
+    suppressMessages(reconcile_checklist(no_pct, checklist, output_dir = NULL)),
+    "pct_id")
+  # and the message points at both consequences
+  w <- tryCatch(suppressMessages(reconcile_checklist(no_pct, checklist, output_dir = NULL)),
+                warning = function(w) conditionMessage(w))
+  expect_match(w, "filtering")
+  expect_match(w, "two-database")
+  # suppressed (run_regatta's two-DB step passes warn_pct_id = FALSE)
+  expect_warning(
+    suppressMessages(reconcile_checklist(no_pct, checklist, output_dir = NULL,
+                                         warn_pct_id = FALSE)),
+    regexp = NA)
+})

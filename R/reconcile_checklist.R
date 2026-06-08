@@ -92,6 +92,12 @@
 #' @param overwrite_taxonomy_files If `TRUE`, (re)build the taxonomy DB at
 #'   `sql_path` even if one exists. Only consulted when a raw checklist needs
 #'   taxonomizing. Default `FALSE`. See [build_regional_checklist()].
+#' @param warn_pct_id If `TRUE` (default), warn when `taxonomy_table` has no
+#'   usable `pct_id` column -- percent-identity is optional for the geographic
+#'   LCA but enables percent-ID filtering of low-confidence (likelier-wrong)
+#'   calls, and is required for the two-DB [reconcile_global_local()] comparison.
+#'   [run_regatta()] sets this `FALSE` for its internal two-DB step, whose
+#'   intermediate result intentionally carries no `pct_id`.
 #' @param output_dir Directory path; default `NULL` writes nothing (the
 #'   `result`/`tracking`/`stats` list is returned). Supply a directory to also
 #'   write the 3 CSVs there.
@@ -113,6 +119,7 @@ reconcile_checklist <- function(taxonomy_table,
                                 id_col        = "ASV_id",
                                 sql_path      = .regatta_default_sql_path(),
                                 overwrite_taxonomy_files = FALSE,
+                                warn_pct_id   = TRUE,
                                 output_dir    = NULL,
                                 output_prefix = "reconcile_checklist",
                                 prior_dir     = NULL,
@@ -136,6 +143,20 @@ reconcile_checklist <- function(taxonomy_table,
   if (length(missing_t) > 0) {
     stop("taxonomy_table is missing required columns: ",
          paste(missing_t, collapse = ", "))
+  }
+  # pct_id is optional for the geographic LCA, but its absence forecloses two
+  # useful things -- warn (suppressed by run_regatta on its two-DB rec$result,
+  # which legitimately carries no pct_id).
+  if (isTRUE(warn_pct_id) &&
+      (!("pct_id" %in% names(taxonomy_table)) || all(is.na(taxonomy_table$pct_id)))) {
+    warning(
+      "No usable `pct_id` (percent-identity) column in the taxonomy table. ",
+      "The geographic reconciliation still runs, but without percent identity ",
+      "you cannot apply percent-ID filtering -- which removes low-confidence ",
+      "assignments that are more likely to be the wrong species -- and the ",
+      "two-database global-vs-local comparison (reconcile_global_local() / the ",
+      "run_regatta() two-DB workflow) cannot run. Add a `pct_id` column to your ",
+      "taxonomy table where you can.", call. = FALSE)
   }
   # Accept a not-yet-taxonomized checklist: taxonomize on the fly (with a
   # warning) so the LCA still runs. A pre-taxonomized checklist is unchanged.
