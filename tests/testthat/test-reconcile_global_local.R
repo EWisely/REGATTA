@@ -17,8 +17,8 @@ asv  <- function(sp) global$ASV_id[match(sp, global$species)]
 rrow <- function(sp) which(r$ASV_id  == asv(sp))
 trow <- function(sp) which(tr$ASV_id == asv(sp))
 
-test_that("$result is id + 7 ranks + the winning pct_id, for all 12 ASVs", {
-  expect_identical(names(r), c("ASV_id", ranks, "pct_id"))
+test_that("$result is ASV_id + the winning pct_id + 7 ranks, for all 12 ASVs", {
+  expect_identical(names(r), c("ASV_id", "pct_id", ranks))
   expect_equal(nrow(r), 12L)
   expect_type(r$pct_id, "double")
 })

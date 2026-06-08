@@ -86,7 +86,8 @@ Accepts either the \verb{$result} output of \code{\link[=reconcile_global_local]
 standalone classifier-output taxonomy table.
 }
 \details{
-Returns a strict 8-column \verb{$result} (REGATTA exchange format), a per-ASV
+Returns a \verb{$result} taxonomy table (\code{id_col}, then \code{pct_id} when the input
+carries one, then the 7 ranks -- the REGATTA exchange format), a per-ASV
 \verb{$tracking} before/after audit, and a \verb{$stats} transition summary. With an
 \code{output_dir} it writes two CSVs -- the \verb{$result} (\verb{_taxonomy_table.csv}) and
 \verb{$tracking} (\verb{_tracking.csv}); no per-step summary file is written (the

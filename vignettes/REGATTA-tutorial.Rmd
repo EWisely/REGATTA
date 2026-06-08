@@ -381,7 +381,7 @@ CSVs per stage):
 
 | Element | Contents |
 |---|---|
-| `$result`   | The **exchange format**: exactly the id column + 7 lowercase ranks. Drop straight into a phyloseq `tax_table()` or a MetabaR MOTU table. |
+| `$result`   | The **exchange format**: the id column, then `pct_id` (when the input carries one, for downstream filtering), then the 7 lowercase ranks. For a phyloseq `tax_table()` or MetabaR MOTU table, drop the `pct_id` column first. |
 | `$tracking` | Per-ASV audit: before/after at each rank, `regatta_match_rank`, `regatta_reason` (`kept` / `non-local (geographic)` / `off-target (taxonomic)`, when the checklist carries a target group), and your passthrough columns. |
 | `$stats`    | Step-level counts — the before→after transition (kept / downgraded / dropped) plus the per-rank-pair downgrade breakdown above. |
 
