@@ -451,8 +451,7 @@ run_regatta <- function(input,
     log_lines <- c(log_lines, "reconcile_global_local done")
 
     post <- reconcile_checklist(
-      rec$result, cl, id_col = id_col,
-      warn_pct_id   = FALSE,  # rec$result is the 8-col reconciled table (no pct_id)
+      rec$result, cl, id_col = id_col,   # rec$result now carries the winning pct_id
       output_dir    = .sub("reconcile_checklist"),
       output_prefix = "reconcile_checklist",
       prior_dir     = .sub("reconcile_global_local"),

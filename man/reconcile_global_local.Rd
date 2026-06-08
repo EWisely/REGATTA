@@ -53,8 +53,9 @@ preserves \verb{BEST_MATCH_*}, \code{COUNT}, \code{TAXID}, \code{BEST_IDENTITY},
 \value{
 A list with three elements:
 \itemize{
-\item \code{result}: data.frame with \code{id_col} + 7 rank columns (strict 8-col
-REGATTA exchange format).
+\item \code{result}: data.frame with \code{id_col} + 7 rank columns + \code{pct_id} (the
+winning database's percent identity, kept with the winning taxa for
+downstream filtering). Feeds straight into \code{\link[=reconcile_checklist]{reconcile_checklist()}}.
 \item \code{tracking}: per-ASV decision record (both inputs preserved with
 \verb{_global} / \verb{_local} suffixes plus REGATTA bookkeeping).
 \item \code{stats}: (metric, count) data.frame.

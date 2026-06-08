@@ -68,10 +68,11 @@
 
 # Output: a list with three elements.
 #
-#   $result    The reconciled per-ASV taxonomy table. EXACTLY 8
-#              columns: id_col + the 7 lowercase rank columns. This
-#              is the REGATTA exchange format -- drop-in to any
-#              downstream REGATTA function (regatta_checklist_lca),
+#   $result    The reconciled per-ASV taxonomy table: id_col + the 7
+#              lowercase rank columns + `pct_id` (the winning database's
+#              percent identity, carried with the winning taxa so
+#              downstream percent-ID filtering still has it). Drop-in to
+#              any downstream REGATTA function (regatta_checklist_lca),
 #              into phyloseq tax_table(), or into a MetabaR MOTU
 #              table after joining read counts back. No bookkeeping
 #              columns. By design.
@@ -124,8 +125,9 @@
 #'   `NUC_SEQ`, and `SCIENTIFIC_NAME`.
 #'
 #' @return A list with three elements:
-#'   * `result`: data.frame with `id_col` + 7 rank columns (strict 8-col
-#'     REGATTA exchange format).
+#'   * `result`: data.frame with `id_col` + 7 rank columns + `pct_id` (the
+#'     winning database's percent identity, kept with the winning taxa for
+#'     downstream filtering). Feeds straight into [reconcile_checklist()].
 #'   * `tracking`: per-ASV decision record (both inputs preserved with
 #'     `_global` / `_local` suffixes plus REGATTA bookkeeping).
 #'   * `stats`: (metric, count) data.frame.
@@ -285,10 +287,13 @@ reconcile_global_local <- function(global_table,
     vals[max(which(non_na))]
   }, character(1))
 
-  # --- Build $result: ASV_id + 7 ranks, nothing else ---
+  # --- Build $result: ASV_id + 7 ranks + the winning pct_id ---
+  # The winning database's percent identity travels with the winning taxa, so
+  # downstream percent-ID filtering and reconcile_checklist() still have it.
   result <- data.frame(placeholder = joined[[id_col]], stringsAsFactors = FALSE)
   names(result)[1] <- id_col
   for (r in ranks) result[[r]] <- preferred_lineage[[r]]
+  result$pct_id <- preferred_pctid
   rownames(result) <- NULL
 
   # --- Build $tracking: per-ASV audit ---
