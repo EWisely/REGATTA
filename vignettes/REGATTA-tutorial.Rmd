@@ -205,13 +205,11 @@ a dated `<region>_<label>_<date>` subfolder of `output_dir`, so successive runs
 don't pile up — the GBIF `.zip` is kept there too):
 
 * `cl$for_making_localdb` — a bare character vector of the unique species
-  binomials (no columns). This is the input for FASTA-building tools like
+  binomials (no columns), **also written one-per-line** to
+  `<region>_<label>_list_for_making_localdb.txt` in the output folder. That file
+  is the ready-to-use input for FASTA-building tools like
   [CRABS](https://github.com/gjeunen/reference_database_creator), which expect
-  one scientific name per line. Write it out with:
-
-    ```{r write-localdb, eval = FALSE}
-    writeLines(cl$for_making_localdb, "galapagos_fish_for_crabs.txt")
-    ```
+  one scientific name per line — no need to write it out yourself.
 
 * `cl$checklist_summary` — the full taxonomized table, including how each name
   resolved (scientific name / synonym / unresolved). Use it to audit the

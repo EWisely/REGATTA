@@ -254,13 +254,15 @@ cl <- build_regional_checklist(
   #   with "/path/to/your/accessionTaxa.sql" to reuse an existing DB.
   #   overwrite_taxonomy_files = TRUE refreshes a stale one; sql_path = NULL skips it.
 )
-# cl$for_making_localdb     bare vector of unique species names; write one-per-line
-#                           for a reference-DB builder like CRABS:
-#                           writeLines(cl$for_making_localdb, "fish_for_crabs.txt")
+# cl$for_making_localdb     bare vector of unique species names, also written
+#                           one-per-line to <region>_<label>_list_for_making_localdb.txt
+#                           -- the ready-to-use input for a reference-DB builder like CRABS
 # cl$checklist_summary      full taxonomized table with per-name resolution status (audit)
 # cl$for_LCA                taxID + the 7 ranks, ready for run_regatta(checklist = cl$for_LCA)
 # cl$methods                methods/provenance sentence with live citations,
 #                           incl. any GBIF download key + DOI + citation (verify them)
+#
+# All four are returned AND written into output_dir/<region>_<label>_<date>/.
 ```
 
 > **GBIF (`GBIF = TRUE`) takes several minutes** — it submits an `occ_download`
