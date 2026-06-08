@@ -68,16 +68,18 @@ test_that("run_regatta requires out_dir, region, and label", {
     "region")
 })
 
-test_that("a pre-resolved 7-rank CSV (capitalized ranks, empty id) is detected and run", {
+test_that("a pre-resolved rank CSV (empty-header id col, six ranks, no domain) is detected and run", {
   tmp <- tempfile(); dir.create(tmp)
-  csv <- file.path(tmp, "ranks.csv")
-  utils::write.csv(data.frame(
-    ASV_id  = c("", ""),                     # empty id column -> synthesized
-    Domain = "Eukaryota", Phylum = "Chordata", Class = "Actinopterygii",
-    Order = "Scorpaeniformes", Family = "Sebastidae", Genus = "Sebastes",
-    Species = c("Sebastes mystinus", "Sebastes goodei"),
-    pct_id = c(99.5, 97.2), stringsAsFactors = FALSE), csv, row.names = FALSE)
+  csv <- file.path(tmp, "merged_taxa_table.csv")
+  # Mirrors a real file: an unnamed/empty first column (read as ""), the six
+  # lower ranks, and NO domain column.
+  writeLines(c(
+    ",phylum,class,order,family,genus,species",
+    ",Chordata,Actinopterygii,Scorpaeniformes,Sebastidae,Sebastes,Sebastes mystinus",
+    ",Chordata,Actinopterygii,Scorpaeniformes,Sebastidae,Sebastes,Sebastes goodei"),
+    csv)
 
+  expect_equal(names(read.csv(csv, check.names = FALSE))[1], "")  # empty header
   expect_equal(REGATTA:::.regatta_detect_format(csv), "ranks_csv")
 
   checklist <- data.frame(
@@ -90,7 +92,9 @@ test_that("a pre-resolved 7-rank CSV (capitalized ranks, empty id) is detected a
     region = "r", label = "l")))
   rr <- res$post_checklist$result
   expect_equal(nrow(rr), 2L)
-  expect_true(all(nzchar(rr$ASV_id)))                 # ids were synthesized
+  expect_true(all(nzchar(names(rr))))                 # empty-named col dropped
+  expect_true(all(nzchar(rr$ASV_id)))                 # ids synthesized
+  expect_true("domain" %in% names(rr))                # missing rank added
   expect_false(is.na(rr$species[1]))                  # mystinus on checklist
   expect_true(is.na(rr$species[2]) && rr$genus[2] == "Sebastes")  # goodei -> genus
 })

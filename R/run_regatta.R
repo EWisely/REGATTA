@@ -248,6 +248,16 @@
       # canonical lowercase 7, keep any pct_id/passthrough columns, and ensure a
       # per-ASV id (synthesized if the id column is missing or empty). No DB.
       raw <- utils::read.csv(paths, stringsAsFactors = FALSE, check.names = FALSE)
+      # A leading unnamed column (e.g. a written row-index, which read.csv names
+      # ""): drop it if it's empty, or recover it as the id if it carries values
+      # and no id column is named -- so it doesn't ride along as a junk column.
+      blank <- !nzchar(trimws(names(raw)))
+      empty <- vapply(raw, function(v)
+        all(is.na(v) | !nzchar(trimws(as.character(v)))), logical(1))
+      if (any(blank & empty)) raw <- raw[, !(blank & empty), drop = FALSE]
+      blank <- !nzchar(trimws(names(raw)))
+      if (!(id_col %in% names(raw)) && any(blank))
+        names(raw)[which(blank)[1]] <- id_col
       tax <- .regatta_normalize_rank_cols(raw)
       return(list(table = .regatta_ensure_id_col(tax, id_col),
                   format = "ranks_csv"))
