@@ -30,9 +30,13 @@ test_that("run_regatta dispatches a vsearch lca+userout pair through to the chec
                 region = "testreg", label = "fish")
   ))
 
+  # the final taxonomy table + tracking are returned as top-level objects
+  expect_identical(res$taxonomy_table, res$post_checklist$result)
+  expect_identical(res$tracking,       res$post_checklist$tracking)
+
   # ASV_1 on the checklist -> kept at species; ASV_2 species off, genus on
   # -> downgraded to genus.
-  rr <- res$post_checklist$result
+  rr <- res$taxonomy_table
   expect_equal(rr$species[rr$ASV_id == "ASV_1"], "Sebastes mystinus")
   expect_true(is.na(rr$species[rr$ASV_id == "ASV_2"]))
   expect_equal(rr$genus[rr$ASV_id == "ASV_2"], "Sebastes")

@@ -65,8 +65,9 @@ res <- run_regatta(
   region    = "galapagos", label = "fish"            # name the run subfolder
   # sql_path defaults to the cache; pass a path to override.
 )
-#> returns res$reconciled, res$post_checklist, res$summary, and writes
-#> reconcile_global_local/*, reconcile_checklist/*, regatta_summary.csv,
+#> returns res$taxonomy_table (final reconciled table), res$tracking (per-ASV
+#> audit, both stages combined), res$summary, plus res$reconciled / res$post_checklist;
+#> writes reconcile_global_local/*, reconcile_checklist/*, regatta_summary.csv,
 #> run_log.txt into regatta_out/galapagos_fish_<date>/
 ```
 

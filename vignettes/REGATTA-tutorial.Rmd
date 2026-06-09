@@ -272,9 +272,9 @@ res <- run_regatta(
   region    = "galapagos", label = "fish"  # name the run subfolder (match build)
   # sql_path defaults to the cache; pass a path to override.
 )
-#> returns res$post_checklist (reconciled table) + res$summary (per-stage
-#> stats), and writes reconcile_checklist/*, regatta_summary.csv, run_log.txt
-#> into regatta_out/galapagos_fish_<date>/
+#> returns res$taxonomy_table (the final reconciled table), res$tracking (the
+#> per-ASV audit), and res$summary (per-stage stats); writes reconcile_checklist/*,
+#> regatta_summary.csv, run_log.txt into regatta_out/galapagos_fish_<date>/
 ```
 
 On this dataset, of the 542 obitools-assigned ASVs (out of 1,438 total):

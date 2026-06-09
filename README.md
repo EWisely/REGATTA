@@ -328,9 +328,11 @@ three data frames, written as CSVs only when given an `output_dir`
 | `$tracking` | Per-ASV before/after audit trail (and, after `reconcile_global_local()`, the global-vs-local decision columns). |
 | `$stats` | Aggregate counts for that stage. |
 
-`run_regatta()` returns these and writes the per-stage `$result` + `$tracking`
-CSVs (no per-stage summary) — plus a single top-level `regatta_summary.csv` from
-`summarize_regatta()` and a `run_log.txt` — into the dated run subfolder of
+`run_regatta()` returns a list whose primary elements are `$taxonomy_table` (the
+final reconciled table), `$tracking` (the per-ASV audit — the augmented
+both-stages version for a two-DB run), and `$summary`. It writes the per-stage
+`$result` + `$tracking` CSVs (no per-stage summary) — plus a single top-level
+`regatta_summary.csv` and a `run_log.txt` — into the dated run subfolder of
 `out_dir`.
 
 ## Caveats
