@@ -258,10 +258,12 @@ res$summary          # per-stage stats summary
 
 When you have the same ASVs classified two ways, pass them as a named
 `list(global =, local =)`. `run_regatta()` runs `reconcile_global_local()` first
-(percent-identity-based winner selection, falling back to the LCA of the two when
-they disagree), then the Module 2 checklist reconciliation — in one call. Roles
-are declared explicitly via the list, never inferred from filenames; either side
-may be a vsearch `lca + userout` pair.
+— per ASV it keeps the call with the higher percent identity, but when the
+**global** call wins yet the **local** database disagrees, it downgrades to the
+lowest common ancestor of the two (a local win is kept outright) — then the
+Module 2 checklist reconciliation, in one call. Roles are declared explicitly via
+the list, never inferred from filenames; either side may be a vsearch
+`lca + userout` pair.
 
 ```r
 res <- run_regatta(
@@ -294,7 +296,7 @@ For fine-grained control the lower-level `reconcile_global_local()`,
 | `taxonomize_checklist()` | 1 | Resolve a regional list to a 7-rank NCBI taxonomy table (synonym-aware). Runs in the background from `build_regional_checklist()`; call directly only for inspection/caching. |
 | `run_regatta()` | 2 / 3 | **High-level entry point for Modules 2 & 3.** Auto-detects classifier format, dispatches the preprocessor, runs the reconcile step(s), and returns `taxonomy_table` + `tracking` + `summary`. `out_dir`/`region`/`label` required. |
 | `reconcile_checklist()` | 2 | **Core LCA step.** Reconcile one taxonomy table against the regional checklist. Returns `$result` / `$tracking` / `$stats`. |
-| `reconcile_global_local()` | 3 | Reconcile two classifier outputs on the same ASVs (best percent-identity, falling back to the LCA of both when they disagree). Returns `$result` / `$tracking` / `$stats`. |
+| `reconcile_global_local()` | 3 | Reconcile two classifier outputs on the same ASVs: keep the higher-percent-identity call, but when the global call wins yet the local one disagrees, downgrade to the LCA of the two (a local win is kept outright). Returns `$result` / `$tracking` / `$stats`. |
 | `summarize_regatta()` | 2 / 3 | The per-stage stats summary comparing inputs to outputs (counts, source breakdown, checklist membership/recovery, specificity, diversity, per-step transition + downgrade breakdown). |
 | `parse_vsearch_results()` | 2 / 3 | Canonical vsearch preprocessor: join a vsearch `lca` (taxonomy) + `--userout` (pct_id) by ASV id. |
 | `parse_vsearch_userout()` | 2 / 3 | Fallback parser when only a vsearch `--userout` file is available. |
