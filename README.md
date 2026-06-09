@@ -363,7 +363,7 @@ is heading toward a CRAN submission and a companion methods paper.
 
 Eldridge Wisely (Scripps Institution of Oceanography, UC San Diego), developer
 and maintainer, with contributions from Ella Crotty (OBIS and GBIF
-generalizations and summary output format).
+download function generalizations and summary output formatting).
 
 ## License
 
