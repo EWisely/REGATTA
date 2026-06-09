@@ -29,10 +29,12 @@ Module 3 lets you combine two classifiers — one run against a global reference
 database and one run against a local database — into a single taxonomy table that
 keeps the advantages of both.
 
-A global reference database (here, obitools against sequences from EMBL) contains
-species from all over the world. A local reference database (here, vsearch against
-a regional reference curated from NCBI sequences) contains only the species that
-occur in your region, so it is a subset of the global one.
+A global reference database (for this tutorial, we used a MiFish obitools database
+made with all vertebrate sequences from EMBL) contains species from all over the
+world. A local reference database (here, vsearch assignments against a regional
+reference database created by downloading mitochondrial sequences from NCBI for
+the local checklist of species produced in Module 1) contains only the species
+that occur in your region, so it is a subset of the global one.
 
 The local database has two advantages:
 
