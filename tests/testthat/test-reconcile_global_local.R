@@ -58,6 +58,33 @@ test_that("a 0-1 global pct_id is auto-rescaled before comparison", {
   expect_equal(rec2$tracking$preferred_database[i], "global_lca_to_local")
 })
 
+test_that("global winning %ID while local agrees is a plain global win, not global_lca_to_local", {
+  mk <- function(id, lin, pid) {
+    d <- as.data.frame(as.list(stats::setNames(lin, ranks)), stringsAsFactors = FALSE)
+    d$ASV_id <- id; d$pct_id <- pid; d
+  }
+  ep <- function(sp) c("Eukaryota","Chordata","Actinopteri","Perciformes",
+                       "Serranidae","Epinephelus", sp)
+  # AGREE: both call the same species, global has the higher %ID -> no downgrade
+  # DOWNGRADE: disagree at species (same genus), global higher -> LCA to genus
+  g <- rbind(mk("agree", ep("Epinephelus merra"),     99),
+             mk("downg", ep("Epinephelus bontoides"), 99))
+  l <- rbind(mk("agree", ep("Epinephelus merra"),     98),
+             mk("downg", ep("Epinephelus merra"),     98))
+  rec4 <- suppressMessages(reconcile_global_local(
+    g, l, global_pct_id_scale = "0-100", local_pct_id_scale = "0-100"))
+  tr <- rec4$tracking
+  # the agreement keeps the species and is labeled a plain "global" win
+  expect_equal(tr$preferred_database[tr$ASV_id == "agree"], "global")
+  expect_false(tr$global_lca_to_local_triggered[tr$ASV_id == "agree"])
+  expect_equal(rec4$result$species[rec4$result$ASV_id == "agree"], "Epinephelus merra")
+  # the real disagreement is the one that counts as global_lca_to_local
+  expect_equal(tr$preferred_database[tr$ASV_id == "downg"], "global_lca_to_local")
+  expect_true(tr$global_lca_to_local_triggered[tr$ASV_id == "downg"])
+  expect_true(is.na(rec4$result$species[rec4$result$ASV_id == "downg"]))
+  expect_equal(rec4$stats$count[rec4$stats$metric == "global_lca_to_local triggered"], 1)
+})
+
 test_that("global_lca_to_local with no shared rank is consistently unassigned", {
   # global wins %ID but local disagrees at EVERY rank (cross-domain) -> the LCA
   # is empty. The row must be unassigned everywhere consistently, not counted as
