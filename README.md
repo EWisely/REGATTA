@@ -15,15 +15,26 @@ specificity as the regional evidence supports.
 ## The problem
 
 Global reference databases (NCBI, EMBL, etc.) confidently assign eDNA reads to
-species that don't actually live in your study area — within the group your
-primer targets (e.g. a freshwater fish called from marine fish-primer data).
-This is **not** off-target amplification: the read is still a fish, but the
-species-level *name* is geographically implausible. It typically happens because
-the true local species is absent from the database, so the read matches its
-nearest sequenced relative at the amplified region; lab contamination or
-degraded input DNA can contribute too. The usual fixes — hand-curating a local
-reference database, or applying a flat percent-identity cutoff — are either
+species that don't actually live in your study area, even within the group your
+primer targets (for example, a freshwater fish called from marine fish-primer
+data). This is **not** off-target amplification: the read is still a fish, but
+the species-level *name* is geographically implausible. It typically happens
+because the true local species is absent from the database, so the read matches
+its nearest sequenced relative at the amplified region. Lab contamination or
+degraded input DNA can contribute too. The usual fixes, hand-curating a local
+reference database or applying a flat percent-identity cutoff, are either
 non-reproducible or sacrifice specificity unnecessarily.
+
+## How REGATTA helps
+
+REGATTA compares each classifier assignment against a checklist of the species
+known from your region, which it assembles automatically from public
+biodiversity databases. When an assigned species has a regional record, REGATTA
+keeps the species-level call. When it does not, REGATTA walks the assignment up
+the taxonomic tree only as far as the regional evidence requires, downgrading to
+genus, family, or a higher rank instead of discarding the read. The result is
+reproducible, needs no hand-curated reference database, and keeps as much
+taxonomic specificity as the regional checklist can support.
 
 ## The three modules
 
