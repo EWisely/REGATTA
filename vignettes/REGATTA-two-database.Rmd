@@ -129,20 +129,20 @@ rec$tracking[, c("ASV_id",
 There are four per-ASV outcomes, with two genera shown for each:
 
 - **Global only** (the local database made no call, so the global call is kept):
-  the six checklist-demo genera from the main tutorial, `Abudefduf saxatilis` /
-  `taurus`, `Prionurus laticlavius` / `biafraensis`, `Archosargus rhomboidalis`,
-  and `Conodon nobilis`. With nothing to reconcile, they pass through unchanged.
-- **Both agree, so the call is kept**: `Lutjanus kasmira` and `Caranx
-  melampygus`. Both databases name the same species, and with `Local_advantage =
+  the six checklist-demo genera from the main tutorial, *Abudefduf saxatilis* /
+  *taurus*, *Prionurus laticlavius* / *biafraensis*, *Archosargus rhomboidalis*,
+  and *Conodon nobilis*. With nothing to reconcile, they pass through unchanged.
+- **Both agree, so the call is kept**: *Lutjanus kasmira* and *Caranx
+  melampygus*. Both databases name the same species, and with `Local_advantage =
   TRUE` (the default) the tie goes to local. The species is kept.
 - **Disagree and the global percent identity wins, so REGATTA downgrades to the
-  LCA** (`global_lca_to_local`): `Epinephelus bontoides` (global) vs. `E. merra`
-  (local), and `Mugil curema` (global) vs. `M. thoburni` (local). The global call
+  LCA** (`global_lca_to_local`): *Epinephelus bontoides* (global) vs. *E. merra*
+  (local), and *Mugil curema* (global) vs. *M. thoburni* (local). The global call
   has the higher identity, but because the two conflict at species, REGATTA
-  reports the lowest common ancestor, genus `Epinephelus` and genus `Mugil`.
+  reports the lowest common ancestor, genus *Epinephelus* and genus *Mugil*.
 - **Disagree and the local percent identity wins, so the local call is kept**:
-  `Etrumeus teres` (local, 99.4%) over `E. micropus` (global, 98.9%), and
-  `Cubiceps pauciradiatus` (local) over `C. squamiceps` (global). Here the
+  *Etrumeus teres* (local, 99.4%) over *E. micropus* (global, 98.9%), and
+  *Cubiceps pauciradiatus* (local) over *C. squamiceps* (global). Here the
   locally curated database has the better match, so its call is trusted outright.
 
 Feed the reconciled result straight into the checklist step, exactly as in the
@@ -186,14 +186,14 @@ data.frame(
 Nine of the twelve land in the same place, but three change, each in a different
 way:
 
-- `Mugil curema`: single-DB keeps the species (`M. curema` is on the checklist);
-  two-DB drops to genus `Mugil` because the local database's `M. thoburni`
+- *Mugil curema*: single-DB keeps the species (*M. curema* is on the checklist);
+  two-DB drops to genus *Mugil* because the local database's *M. thoburni*
   contradicts it. Two databases caught a conflict one could not.
-- `Etrumeus micropus`: single-DB keeps the global species; two-DB replaces it
-  with `Etrumeus teres`, the local database's higher-identity, regionally curated
+- *Etrumeus micropus*: single-DB keeps the global species; two-DB replaces it
+  with *Etrumeus teres*, the local database's higher-identity, regionally curated
   call.
-- `Cubiceps squamiceps`: single-DB downgrades to genus `Cubiceps` (`squamiceps`
-  is not on the checklist); two-DB keeps the species `Cubiceps pauciradiatus`,
+- *Cubiceps squamiceps*: single-DB downgrades to genus *Cubiceps* (`squamiceps`
+  is not on the checklist); two-DB keeps the species *Cubiceps pauciradiatus*,
   because the local database's call is on the checklist. Here the second database
   makes the result more specific, not less.
 

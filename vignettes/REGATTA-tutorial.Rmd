@@ -381,21 +381,21 @@ The checklist step can produce three outcomes:
 
 In the example:
 
-- **Kept at species:** `Abudefduf saxatilis`, `Prionurus laticlavius`,
-  `Lutjanus kasmira`, `Caranx melampygus`, `Mugil curema`, and
-  `Etrumeus micropus`.
-- **Downgraded to genus:** `Abudefduf taurus`, `Prionurus biafraensis`,
-  `Epinephelus bontoides`, and `Cubiceps squamiceps`.
-- **Downgraded to family:** `Archosargus rhomboidalis` and `Conodon nobilis`.
+- **Kept at species:** *Abudefduf saxatilis*, *Prionurus laticlavius*,
+  *Lutjanus kasmira*, *Caranx melampygus*, *Mugil curema*, and
+  *Etrumeus micropus*.
+- **Downgraded to genus:** *Abudefduf taurus*, *Prionurus biafraensis*,
+  *Epinephelus bontoides*, and *Cubiceps squamiceps*.
+- **Downgraded to family:** *Archosargus rhomboidalis* and *Conodon nobilis*.
 
 These examples show why regional reconciliation can outperform a flat
-percent-identity cutoff. `Abudefduf saxatilis` and `Abudefduf taurus` both
-matched the global database at 100% identity, but only `A. saxatilis` is on the
-Galapagos checklist. REGATTA therefore keeps `A. saxatilis` at species and
-downgrades `A. taurus` to genus.
+percent-identity cutoff. *Abudefduf saxatilis* and *Abudefduf taurus* both
+matched the global database at 100% identity, but only *A. saxatilis* is on the
+Galapagos checklist. REGATTA therefore keeps *A. saxatilis* at species and
+downgrades *A. taurus* to genus.
 
-Similarly, `Prionurus laticlavius` is retained at species, while
-`Prionurus biafraensis`, a West African congener assigned at 98.8% identity, is
+Similarly, *Prionurus laticlavius* is retained at species, while
+*Prionurus biafraensis*, a West African congener assigned at 98.8% identity, is
 downgraded to genus. The global database may be naming the closest sequenced
 relative rather than the true local species. REGATTA keeps the reliable
 genus-level information and removes the unsupported species-level specificity.
