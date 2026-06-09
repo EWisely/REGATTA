@@ -74,9 +74,13 @@ test_that("global_lca_to_local counts all LCA applications; breakdown counts the
   rec4 <- suppressMessages(reconcile_global_local(
     g, l, global_pct_id_scale = "0-100", local_pct_id_scale = "0-100"))
   tr <- rec4$tracking; s <- rec4$stats
-  # BOTH are global_lca_to_local (the LCA was applied to both)
+  # BOTH are global_lca_to_local (the LCA was applied to both); the tracking
+  # flag is TRUE for every global-%ID-win that had a local call to LCA against,
+  # whether or not they agreed at species level
   expect_equal(tr$preferred_database[tr$ASV_id == "agree"], "global_lca_to_local")
   expect_equal(tr$preferred_database[tr$ASV_id == "downg"], "global_lca_to_local")
+  expect_true(tr$global_lca_to_local_triggered[tr$ASV_id == "agree"])   # the agreement counts too
+  expect_true(tr$global_lca_to_local_triggered[tr$ASV_id == "downg"])
   expect_true(all(tr$global_lca_to_local_triggered))
   expect_equal(s$count[s$metric == "global_lca_to_local triggered"], 2)
   # the agreement keeps the species; the disagreement downgrades to genus
