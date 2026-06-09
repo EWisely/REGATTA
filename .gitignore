@@ -21,3 +21,8 @@ data/
 
 # Generated analysis/comparison write-ups (kept locally, not in the repo)
 REGATTA_*.txt
+
+# Local working data: checklist source CSVs and build outputs (already in
+# .Rbuildignore; kept on disk for validation, not in the repo)
+checklist_sources/
+local_database_checklist/
