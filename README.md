@@ -104,6 +104,8 @@ flowchart TD
         C["local CSV(s)"] --> D
         D --> F[("Regional checklist<br/>7 ranks, taxonomized")]
         H1 ~~~ A
+        H1 ~~~ B
+        H1 ~~~ C
     end
 
     F ==> M[reconcile_checklist]
