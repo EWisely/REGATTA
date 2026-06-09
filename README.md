@@ -92,13 +92,14 @@ flowchart TD
         Q[reconcile_global_local]
     end
 
-    G ==> M[reconcile_checklist]
-    F ==> M
+    %% edges into reconcile_checklist declared M1, M2, M3 so they read left-to-right
+    F ==> M[reconcile_checklist]
+    G ==> M
+    Q -.-> M
     M ==> RES[("taxonomy_table<br/>tracking · summary")]
 
     GL -.-> Q
     G -.-> Q
-    Q -.-> M
 ```
 
 The solid path (one classifier → `reconcile_checklist`) is **Module 2**. **Module
