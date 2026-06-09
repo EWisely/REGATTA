@@ -11,56 +11,69 @@ vignette: >
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 ```
 
-This vignette covers **Module 3** of REGATTA: reconciling **the same ASVs
-classified against two reference databases** — a broad global one and a
-locally-curated one — to keep the benefits of both, then polishing the result
-against the regional checklist. It builds on `vignette("REGATTA-tutorial")`,
-which covers Module 1 (building and taxonomizing the regional checklist) and
-Module 2 (reconciling one classifier against it); start there first. Module 3
-inserts one extra step (`reconcile_global_local()`) ahead of the Module 2
-checklist reconciliation — and `run_regatta()` runs both in a single call.
+This vignette covers Module 3 of REGATTA: reconciling the same ASVs classified
+against two reference databases, a broad global one and a locally curated one,
+to keep the benefits of both, then reconciling the result against the regional
+checklist.
+
+It builds on `vignette("REGATTA-tutorial")`, which covers Module 1 (building and
+taxonomizing the regional checklist) and Module 2 (reconciling one classifier
+against it). Start there first. Module 3 inserts one extra step,
+`reconcile_global_local()`, ahead of the Module 2 checklist reconciliation, and
+`run_regatta()` runs both in a single call.
 
 ## When you'd use this
 
-**Why this matters:** a second, locally-curated database earns its keep two
-ways — it catches species-level conflicts the global database would hide, and
-it recovers regional species the global database has no reference for. But you
-only get those gains if the two classifications are reconciled *honestly*
-before the checklist step, rather than silently trusting whichever ran last.
+Module 2 reconciles the output of one classifier against the regional checklist.
+Module 3 lets you combine two classifiers — one run against a global reference
+database and one run against a local database — into a single taxonomy table that
+keeps the advantages of both.
 
-A common eDNA setup classifies each ASV twice:
+A global reference database (for this tutorial, we used a MiFish obitools database
+made with all vertebrate sequences from EMBL) contains species from all over the
+world. A local reference database (here, vsearch assignments against a regional
+reference database created by downloading mitochondrial sequences from NCBI for
+the local checklist of species produced in Module 1) contains only the species
+that occur in your region, so it is a subset of the global one.
 
-- against a **global** reference database (e.g. obitools + NCBI/EMBL), which has
-  broad coverage but confidently names species from anywhere in the world, and
-- against a **locally-curated** database (e.g. vsearch+SINTAX + a regional
-  reference), which is sparser but regionally trustworthy.
+The local database has two advantages:
 
-`reconcile_global_local()` combines the two **before** the checklist step: per
-ASV it keeps the call with the higher percent identity, and when the global
-call wins but the local database disagrees, it downgrades to the lowest common
-ancestor of the two — so a species-level conflict becomes an honest
-genus-level call instead of a silent guess.
+- It does not assign a sequence to a species that does not occur in your region.
+- When several species share the same sequence at the barcode region and one of
+  them is the local species, it does not downgrade the assignment to a higher
+  taxonomic level unnecessarily — it can keep the local species.
 
-It's the **same Galapagos MiFish dataset** as the main tutorial: the identical
-1,438 ASVs, now classified a second way.
+The local database also has one drawback. When the local species is missing from
+it, the sequence is left completely unassigned. A global database behaves
+differently in that case: it can match the sequence to a non-local species that
+has an identical barcode sequence, and Module 2 then downgrades that call to a
+taxonomic level that does occur in the region.
+
+`reconcile_global_local()` lets you compare the assignments made for the same
+ASVs with a global and a local database, and merges them so you keep the
+advantages of both. For each ASV it keeps the call with the higher percent
+identity. When the global call wins but disagrees with the local one, it reports
+the lowest common ancestor of the two.
+
+This vignette uses the same Galapagos MiFish dataset as the main tutorial: the
+identical 1,438 ASVs, classified a second time against a local database.
 
 ## `run_regatta()`
 
-**Why this matters:** adding a second database doesn't mean running a second
-pipeline. `run_regatta()` runs `reconcile_global_local()` and then
-`reconcile_checklist()` for you, in one call — so the two-database workflow is
-still a single line.
+Use `run_regatta()` to run the two-database workflow in one call. It runs
+`reconcile_global_local()` and then `reconcile_checklist()` for you, so adding a
+second database does not mean running a second pipeline.
 
-**How:** pass both results as a named `list(global =, local =)`. Formats are
-auto-detected (here the local side is a vsearch `lca` taxonomy file plus a
-`--userout` file carrying the percent identities).
+Pass both results as a named `list(global =, local =)`. Formats are
+auto-detected. Here the local side is a vsearch `lca` taxonomy file plus a
+`--userout` file carrying the percent identities.
 
 ```{r run, eval = FALSE}
 library(REGATTA)
 
 res <- run_regatta(
   input = list(
-    global = "MiFish_obitools.tab",                 # obitools (global NCBI DB)
+    global = "MiFish_obitools.tab",                 # obitools (global EMBL DB)
     local  = c("MiFish_vsearch_lca.txt",            # vsearch LCA taxonomy
                "MiFish_vsearch_userout.txt")        # vsearch %ID
   ),
@@ -75,8 +88,8 @@ res <- run_regatta(
 #> run_log.txt into regatta_out/galapagos_fish_<date>/
 ```
 
-On the full dataset, of the 1,438 ASVs, 892 were unassigned by both
-classifiers and 546 were assigned by at least one. Stage 1 resolved those:
+On the full dataset, of the 1,438 ASVs, 892 were unassigned by both classifiers
+and 546 were assigned by at least one. Stage 1 resolved those:
 
 | | ASVs |
 |---|---|
@@ -84,23 +97,23 @@ classifiers and 546 were assigned by at least one. Stage 1 resolved those:
 | best %ID: local won | 143 |
 | global downgraded to global∩local LCA | 45 |
 
-and Stage 2 (checklist) then gave 295 species / 231 genus / 19 family / 1 order
-among the 546 assigned (the checklist dropped none — every reconciled call had a
-regional record; the other 892 ASVs were simply unassigned by both classifiers).
-Versus the main tutorial's single-classifier obitools run (287 species), those
-extra species-level calls are the local database's contribution.
+Stage 2 (the checklist) then gave 295 species, 231 genus, 19 family, and 1 order
+among the 546 assigned. The checklist dropped none, because every reconciled call
+had a regional record; the other 892 ASVs were simply unassigned by both
+classifiers. Compared with the main tutorial's single-classifier obitools run
+(287 species), those extra species-level calls are the local database's
+contribution.
 
 ## `reconcile_global_local()`
 
-**Why this matters:** `run_regatta()` calls this for you, but running it
-directly shows exactly how each ASV's two calls were reconciled — which won on
-percent identity, and what REGATTA preferred. It runs live here, with no
-internet and no database.
+`reconcile_global_local()` is the Stage 1 step that `run_regatta()` calls for
+you. Running it directly shows how each ASV's two calls were reconciled: which
+won on percent identity, and what REGATTA preferred. It runs with no internet and
+no taxonomy database.
 
-**How:** pass the two classifier tables. The demo uses **real slices of the
-Galapagos MiFish dataset** bundled with the package — 12 real ASVs classified
-both ways, chosen to show each decision (you would normally pass the whole
-tables).
+The demo uses real slices of the Galapagos MiFish dataset bundled with the
+package: 12 real ASVs classified both ways, chosen to show each decision. You
+would normally pass the whole tables.
 
 ```{r demo}
 library(REGATTA)
@@ -124,24 +137,24 @@ rec$tracking[, c("ASV_id",
                  "best_pctid_winner", "preferred_database")]
 ```
 
-There are **four** per-ASV outcomes, two genera each here:
+There are four per-ASV outcomes, with two genera shown for each:
 
-* **Global only** (the local database made no call → keep global): the six
-  checklist-demo genera from the main tutorial — *Abudefduf saxatilis* /
+- **Global only** (the local database made no call, so the global call is kept):
+  the six checklist-demo genera from the main tutorial, *Abudefduf saxatilis* /
   *taurus*, *Prionurus laticlavius* / *biafraensis*, *Archosargus rhomboidalis*,
-  *Conodon nobilis*. With nothing to reconcile, they pass through unchanged.
-* **Both agree → kept** — *Lutjanus kasmira* and *Caranx melampygus*: both
-  databases name the same species (with `Local_advantage = TRUE`, the default,
-  the tie goes to local). The species is kept.
-* **Disagree, global %ID wins → LCA downgrade** (`global_lca_to_local`) —
-  *Epinephelus bontoides* (global) vs. *E. merra* (local), and *Mugil curema*
-  (global) vs. *M. thoburni* (local): the global call has the higher identity,
-  but because the two conflict at species, REGATTA reports the lowest common
-  ancestor — genus ***Epinephelus*** and genus ***Mugil***.
-* **Disagree, local %ID wins → local kept** — *Etrumeus teres* (local, 99.4%)
-  over *E. micropus* (global, 98.9%), and *Cubiceps pauciradiatus* (local) over
-  *C. squamiceps* (global): here the locally-curated database has the better
-  match, so its call is trusted outright.
+  and *Conodon nobilis*. With nothing to reconcile, they pass through unchanged.
+- **Both agree, so the call is kept**: *Lutjanus kasmira* and *Caranx
+  melampygus*. Both databases name the same species, and with `Local_advantage =
+  TRUE` (the default) the tie goes to local. The species is kept.
+- **Disagree and the global percent identity wins, so REGATTA downgrades to the
+  LCA** (`global_lca_to_local`): *Epinephelus bontoides* (global) vs. *E. merra*
+  (local), and *Mugil curema* (global) vs. *M. thoburni* (local). The global call
+  has the higher identity, but because the two conflict at species, REGATTA
+  reports the lowest common ancestor, genus *Epinephelus* and genus *Mugil*.
+- **Disagree and the local percent identity wins, so the local call is kept**:
+  *Etrumeus teres* (local, 99.4%) over *E. micropus* (global, 98.9%), and
+  *Cubiceps pauciradiatus* (local) over *C. squamiceps* (global). Here the
+  locally curated database has the better match, so its call is trusted outright.
 
 Feed the reconciled result straight into the checklist step, exactly as in the
 single-classifier workflow:
@@ -154,13 +167,13 @@ post <- reconcile_checklist(rec$result, checklist, output_dir = NULL)
 
 ## Same 12 ASVs, both methods, side by side
 
-**Why this matters:** whether a second database is worth it comes down to what
-actually changes versus the single-classifier run — and the changes go both
-ways: some calls become *less* specific (a conflict caught), some become *more*
-specific (a regional species recovered).
+Whether a second database is worth it comes down to what changes versus the
+single-classifier run, and the changes go both ways: some calls become less
+specific (a conflict caught), and some become more specific (a regional species
+recovered).
 
-**How:** run the main-tutorial method (obitools straight to the checklist) on
-the same inputs and compare the final call:
+Run the main-tutorial method (obitools straight to the checklist) on the same
+inputs and compare the final call:
 
 ```{r compare}
 single <- reconcile_checklist(global, checklist, output_dir = NULL)
@@ -181,38 +194,35 @@ data.frame(
 )
 ```
 
-Nine of the twelve land in the same place — but **three change**, and each in a
-different, instructive way:
+Nine of the twelve land in the same place, but three change, each in a different
+way:
 
-* **Mugil curema** — single-DB keeps the species (*M. curema* is on the
-  checklist); two-DB drops to genus ***Mugil*** because the local database's
-  *M. thoburni* contradicts it. Two databases caught a conflict one couldn't.
-* **Etrumeus micropus** — single-DB keeps the global species; two-DB replaces it
-  with ***Etrumeus teres***, the local database's higher-identity (and
-  regionally-curated) call.
-* **Cubiceps squamiceps** — single-DB has to downgrade to genus *Cubiceps*
-  (*squamiceps* isn't on the checklist); two-DB keeps the **species**
-  ***Cubiceps pauciradiatus***, because the local database's call *is* on the
-  checklist. Here the second database makes the result **more** specific, not
-  less.
+- *Mugil curema*: single-DB keeps the species (*M. curema* is on the checklist);
+  two-DB drops to genus *Mugil* because the local database's *M. thoburni*
+  contradicts it. Two databases caught a conflict one could not.
+- *Etrumeus micropus*: single-DB keeps the global species; two-DB replaces it
+  with *Etrumeus teres*, the local database's higher-identity, regionally curated
+  call.
+- *Cubiceps squamiceps*: single-DB downgrades to genus *Cubiceps* (`squamiceps`
+  is not on the checklist); two-DB keeps the species *Cubiceps pauciradiatus*,
+  because the local database's call is on the checklist. Here the second database
+  makes the result more specific, not less.
 
 ## Inspecting and tuning
 
-**Why this matters:** the reconciliation is fully auditable and adjustable — you
-can see why each ASV got its call, and change how ties and percent-identity
-scales are handled to fit your databases.
-
-**How:**
+The reconciliation is fully auditable and adjustable. You can see why each ASV
+got its call, and change how ties and percent-identity scales are handled to fit
+your databases.
 
 - The full Stage 1 audit (`reconcile_global_local/` on disk, or `rec$tracking`)
   groups its columns per field as `<field>_global` / `<field>_local` /
-  `<field>_regatta` (the reconciled value) — each of the 7 ranks and `pct_id`
-  read global / local / regatta side by side — followed by the decision columns
-  (`best_pctid_winner`, `preferred_database`, …) and any remaining classifier
-  columns, so you can see exactly why each ASV got its call.
+  `<field>_regatta` (the reconciled value). Each of the seven ranks and `pct_id`
+  read global / local / regatta side by side, followed by the decision columns
+  (`best_pctid_winner`, `preferred_database`, and so on) and any remaining
+  classifier columns.
 - `Local_advantage = FALSE` makes ties go to the global database instead.
 - Percent-identity scales are auto-detected per input (obitools' 0–1
-  `BEST_IDENTITY` is rescaled to 0–100 to match vsearch); override with
+  `BEST_IDENTITY` is rescaled to 0–100 to match vsearch). Override with
   `global_pct_id_scale` / `local_pct_id_scale` if needed.
 
 See `?reconcile_global_local` for the full argument list, and
