@@ -118,6 +118,27 @@ test_that("an unrecognized CSV gives an informative error listing columns + form
   expect_match(err, "pre-resolved taxonomy CSV")
 })
 
+test_that("run_regatta clobbers the same-day run folder by default, numbers it when overwrite=FALSE", {
+  tmp  <- tempfile(); dir.create(tmp)
+  base <- file.path(tmp, paste0("r_l_", Sys.Date()))
+
+  d1 <- REGATTA:::.regatta_resolve_run_dir(tmp, "r", "l")   # default overwrite=TRUE
+  expect_equal(normalizePath(d1), normalizePath(base))
+  writeLines("old", file.path(base, "old.txt"))            # a marker from the "prior run"
+
+  # default (overwrite=TRUE): clear the old folder and reuse the same path, so
+  # the new run never mixes with the old outputs
+  d2 <- suppressMessages(REGATTA:::.regatta_resolve_run_dir(tmp, "r", "l"))
+  expect_equal(normalizePath(d2), normalizePath(base))
+  expect_false(file.exists(file.path(base, "old.txt")))    # old run wiped, not mixed
+  expect_false(dir.exists(paste0(base, "_2")))
+
+  # overwrite=FALSE: keep the old run, write this one to a new numbered folder
+  d3 <- suppressMessages(REGATTA:::.regatta_resolve_run_dir(tmp, "r", "l", overwrite = FALSE))
+  expect_equal(basename(d3), paste0("r_l_", Sys.Date(), "_2"))
+  expect_true(dir.exists(base))                            # base preserved
+})
+
 test_that("a vsearch lca with many leading unassigned rows is still detected", {
   # real datasets can have hundreds of unassigned ASVs (blank col 2) before the
   # first assignment -- detection must not give up after a small fixed window.

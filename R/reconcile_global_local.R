@@ -22,8 +22,11 @@
 #   global_lca_to_local     For ASVs where global won best_pctid AND
 #                           the local DB also returned an assignment,
 #                           replace the preferred lineage with the LCA
-#                           of the two and label the database column
-#                           "global_lca_to_local".
+#                           of the two. Only when that LCA actually
+#                           reduces specificity is the database column
+#                           labeled "global_lca_to_local"; if local merely
+#                           agreed down to global's own deepest rank (no
+#                           downgrade), it stays a plain "global" win.
 #
 # (The original Validate_local_assignments.R called these Pass 1 and
 # Pass 2. The descriptive names make the methods write-up cleaner.)
@@ -99,8 +102,10 @@
 #' curated database (e.g. vsearch + a regional reference) -- pick a per-ASV
 #' preferred lineage. The function compares percent identity across the two
 #' databases (the `best_pctid` step) and, when global wins but local also
-#' has an assignment, downgrades the preferred lineage to the LCA of the
-#' two (the `global_lca_to_local` step). Returns a `$result` taxonomy table
+#' has an assignment, takes the LCA of the two -- labeling it
+#' `global_lca_to_local` only when that LCA actually downgrades the call (if
+#' local just agreed to global's depth, it stays a plain global win). Returns a
+#' `$result` taxonomy table
 #' (`id_col` + the winning `pct_id` + the 7 ranks -- REGATTA exchange format), a
 #' per-ASV `$tracking` audit, and a step-level `$stats` summary; optionally
 #' writes those as three CSVs.
@@ -287,10 +292,30 @@ reconcile_global_local <- function(global_table,
     }
 
     database[global_lca_to_local_triggered] <- "global_lca_to_local"
+
+    # Only count it as global_lca_to_local when the LCA actually reduced
+    # specificity. If local merely agreed all the way down to global's own
+    # deepest rank (no downgrade), it's a plain global win -- relabel it
+    # "global" and don't count it as a triggered LCA.
+    depth_of <- function(M) vapply(seq_len(nrow(M)), function(i) {
+      nz <- which(!is.na(M[i, ])); if (length(nz)) max(nz) else 0L
+    }, integer(1))
+    g_depth <- depth_of(as.matrix(joined[, g_rank_cols, drop = FALSE]))
+    p_depth <- depth_of(as.matrix(preferred_lineage[, ranks, drop = FALSE]))
+    agreed  <- global_lca_to_local_triggered & p_depth == g_depth
+    database[agreed]                      <- "global"
+    global_lca_to_local_triggered[agreed] <- FALSE
   }
 
-  database[both_unassigned]        <- NA_character_
-  preferred_pctid[both_unassigned] <- NA_real_
+  # An ASV whose preferred lineage came out entirely empty is not assigned --
+  # either both DBs were unassigned, or a global_lca_to_local row where global
+  # and local share no rank at all (empty LCA, e.g. a cross-domain
+  # disagreement). Mark it unassigned so the database label, pct_id, and the
+  # "assigned" count stay consistent with the (empty) lineage.
+  empty_lineage <- rowSums(!is.na(as.matrix(preferred_lineage[, ranks]))) == 0
+  database[empty_lineage]                      <- NA_character_
+  preferred_pctid[empty_lineage]               <- NA_real_
+  global_lca_to_local_triggered[empty_lineage] <- FALSE
 
   # Lowest non-NA rank in the preferred lineage
   preferred_scientific_name <- vapply(seq_len(nrow(joined)), function(i) {

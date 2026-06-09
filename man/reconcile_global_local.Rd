@@ -77,8 +77,10 @@ reference database (e.g. obitools + NCBI/EMBL) and one from a local
 curated database (e.g. vsearch + a regional reference) -- pick a per-ASV
 preferred lineage. The function compares percent identity across the two
 databases (the \code{best_pctid} step) and, when global wins but local also
-has an assignment, downgrades the preferred lineage to the LCA of the
-two (the \code{global_lca_to_local} step). Returns a \verb{$result} taxonomy table
+has an assignment, takes the LCA of the two -- labeling it
+\code{global_lca_to_local} only when that LCA actually downgrades the call (if
+local just agreed to global's depth, it stays a plain global win). Returns a
+\verb{$result} taxonomy table
 (\code{id_col} + the winning \code{pct_id} + the 7 ranks -- REGATTA exchange format), a
 per-ASV \verb{$tracking} audit, and a step-level \verb{$stats} summary; optionally
 writes those as three CSVs.

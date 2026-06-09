@@ -300,6 +300,38 @@
   stop("Unsupported number of paths: ", length(paths))
 }
 
+#' Resolve this run's output folder, never mixing into an existing one
+#'
+#' Each run targets `out_dir/<region>_<label>_<Date>`. If that folder already
+#' exists (e.g. a second run of the same region/label on the same day), we never
+#' write into it on top of the old outputs. By default (`overwrite = TRUE`) we
+#' delete the old folder and start fresh; with `overwrite = FALSE` we leave it
+#' alone and write this run to a new numbered (`_2`, `_3`, ...) folder. No prompt.
+#' @keywords internal
+#' @noRd
+.regatta_resolve_run_dir <- function(out_dir, region, label, overwrite = TRUE) {
+  base <- file.path(out_dir, paste0(trimws(region), "_", trimws(label), "_", Sys.Date()))
+  if (!dir.exists(base)) {
+    dir.create(base, recursive = TRUE, showWarnings = FALSE)
+    return(base)
+  }
+  if (isTRUE(overwrite)) {
+    message("Run folder already exists; clearing it and starting fresh: ",
+            normalizePath(base))
+    unlink(base, recursive = TRUE)
+    dir.create(base, recursive = TRUE, showWarnings = FALSE)
+    return(base)
+  }
+  # overwrite = FALSE: keep the old run, write this one to a new numbered folder.
+  i <- 2L
+  while (dir.exists(paste0(base, "_", i))) i <- i + 1L
+  nd <- paste0(base, "_", i)
+  dir.create(nd, recursive = TRUE, showWarnings = FALSE)
+  message("Run folder already exists; writing this run to a new folder: ",
+          normalizePath(nd))
+  nd
+}
+
 # ---- public: run_regatta --------------------------------------------
 
 #' Run the full REGATTA pipeline from file paths
@@ -350,6 +382,12 @@
 #' @param overwrite_taxonomy_files If `TRUE`, (re)build the taxonomy DB at
 #'   `sql_path` even if one exists. Default `FALSE`. See
 #'   [build_regional_checklist()].
+#' @param overwrite Controls what happens when this run's dated
+#'   `<region>_<label>_<Date>` folder already exists (e.g. a second run of the
+#'   same region/label the same day). `TRUE` (default): delete that folder and
+#'   start fresh, so the new run never mixes with the old one. `FALSE`: leave the
+#'   old folder alone and write this run to a new numbered (`_2`, `_3`, ...)
+#'   folder. Either way the existing run is never written into on top of.
 #' @param id_col Name of the per-ASV identifier column. Default
 #'   `"ASV_id"` (matches the obitools and vsearch preprocessors). For
 #'   BestTaxon/Kraken2-style CSVs whose identifier is named differently
@@ -392,6 +430,7 @@ run_regatta <- function(input,
                         label,
                         sql_path        = .regatta_default_sql_path(),
                         overwrite_taxonomy_files = FALSE,
+                        overwrite       = TRUE,
                         id_col          = "ASV_id",
                         Local_advantage = TRUE) {
   t_start <- Sys.time()
@@ -410,10 +449,9 @@ run_regatta <- function(input,
          "<region>_<label>_<Date> subfolder of it.")
   norm <- .regatta_normalize_input(input)
 
-  # Each run lands in its own dated <region>_<label>_<Date> subfolder.
-  run_dir <- file.path(out_dir,
-                       paste0(trimws(region), "_", trimws(label), "_", Sys.Date()))
-  dir.create(run_dir, recursive = TRUE, showWarnings = FALSE)
+  # Each run lands in its own dated <region>_<label>_<Date> subfolder; never
+  # silently reuse/overwrite an existing one (ask, or write to a new folder).
+  run_dir <- .regatta_resolve_run_dir(out_dir, region, label, overwrite)
   .sub <- function(name) file.path(run_dir, name)
 
   if (is.character(checklist) && length(checklist) == 1) {
