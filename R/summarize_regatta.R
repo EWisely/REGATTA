@@ -89,7 +89,10 @@
 #'   always is when the walk reaches domain), one `downgraded: <from> -> <to>`
 #'   row per rank pair that occurred, and (when the checklist carries a target
 #'   group) the off-target/non-local breakdown -- so the total row count is
-#'   dynamic, varying with the data.
+#'   dynamic, varying with the data. The transition headline rows (`ASVs
+#'   unchanged`/`downgraded`) and the per-rank-pair `downgraded: <from> -> <to>`
+#'   rows are shared across steps: each carries the global-local count and the
+#'   checklist count in their respective columns.
 #'
 #' @export
 summarize_regatta <- function(reconciled     = NULL,
@@ -283,34 +286,61 @@ summarize_regatta <- function(reconciled     = NULL,
   )
 
   base <- cbind(row_names = row_labels, out, stringsAsFactors = FALSE)
+  stage_cols <- setdiff(names(base), "row_names")
 
-  # Transition headline + downgrade breakdown for the checklist step, taken
-  # from reconcile_checklist()'s $stats and placed in the
-  # `regatta_checklist_result` column (NA in the before columns -- a transition
-  # is a step property, not a per-stage value). The downgrade breakdown rows
-  # ("downgraded: <from> -> <to>") are however many pairs actually occurred.
-  if (!is.null(post_checklist) && "stats" %in% names(post_checklist) &&
-      "regatta_checklist_result" %in% names(base)) {
-    ps   <- post_checklist$stats
-    # Surface everything from $stats except the bare counts already in the
-    # report's own rows: the transition headline, the downgrade breakdown, and
-    # the off-target/non-local "why" rows.
-    keep <- !(ps$metric %in% c("total ASVs",
-                               "assigned before checklist-LCA",
-                               "assigned after checklist-LCA"))
-    # The walk goes all the way to domain, so a call is almost never dropped
-    # outright. Hide that row when it's zero so the useful downgrade breakdown
-    # is what shows; keep it only when there genuinely are dropped calls.
-    keep <- keep & !(ps$metric == "no regional record (call dropped)" & ps$count == 0)
-    ps <- ps[keep, , drop = FALSE]
-    if (nrow(ps) > 0) {
-      extra <- data.frame(row_names = ps$metric, stringsAsFactors = FALSE)
-      for (cn in setdiff(names(base), "row_names")) {
-        extra[[cn]] <- if (cn == "regatta_checklist_result") as.numeric(ps$count) else NA_real_
-      }
-      base <- rbind(base, extra[, names(base), drop = FALSE])
-      rownames(base) <- NULL
+  # Surface each reconcile step's transition stats into ITS result column.
+  # Step-specific rows (the global-local "triggered" headline; the checklist
+  # unchanged/downgraded/dropped headline and off-target/non-local "why") land
+  # in one column. The per-rank-pair "downgraded: <from> -> <to>" rows are
+  # SHARED across steps -- the column already tells you which step, so a single
+  # row carries the global-local count and the checklist count side by side.
+  extra_order <- character(0)
+  extra_vals  <- list()
+  add <- function(rowname, col, val) {
+    if (!(rowname %in% extra_order)) {
+      extra_order[[length(extra_order) + 1L]] <<- rowname
+      extra_vals[[rowname]] <<- stats::setNames(rep(NA_real_, length(stage_cols)), stage_cols)
     }
+    extra_vals[[rowname]][[col]] <<- as.numeric(val)
+  }
+  has_stats <- function(x) !is.null(x) && "stats" %in% names(x)
+  gl_ok <- has_stats(reconciled)     && "regatta_global_local_result" %in% stage_cols
+  ck_ok <- has_stats(post_checklist) && "regatta_checklist_result"     %in% stage_cols
+
+  # (The per-ASV global_lca_to_local_triggered flag lives in the tracking file,
+  # not the summary.)
+  # Shared transition headline -- unchanged / downgraded from EACH step into
+  # its own column (both steps downgrade); plus the checklist-only "dropped"
+  # row when nonzero
+  hl <- function(st, col) for (m in c("ASVs unchanged (specificity kept)",
+                                      "ASVs downgraded (specificity reduced)")) {
+    v <- st$count[st$metric == m]; if (length(v)) add(m, col, v[1])
+  }
+  if (gl_ok) hl(reconciled$stats,     "regatta_global_local_result")
+  if (ck_ok) hl(post_checklist$stats, "regatta_checklist_result")
+  if (ck_ok) {
+    d <- post_checklist$stats$count[post_checklist$stats$metric == "no regional record (call dropped)"]
+    if (length(d) && d[1] > 0) add("no regional record (call dropped)", "regatta_checklist_result", d[1])
+  }
+  # 3. shared per-rank-pair downgrade breakdown -- each step into its own column
+  pair_into <- function(st, col) {
+    dn <- st[grepl("^downgraded: ", st$metric), , drop = FALSE]
+    for (i in seq_len(nrow(dn))) add(dn$metric[i], col, dn$count[i])
+  }
+  if (gl_ok) pair_into(reconciled$stats,     "regatta_global_local_result")
+  if (ck_ok) pair_into(post_checklist$stats, "regatta_checklist_result")
+  # 4. checklist off-target / non-local "why"
+  if (ck_ok) {
+    why <- post_checklist$stats[grepl("^downgraded/dropped -- ", post_checklist$stats$metric), , drop = FALSE]
+    for (i in seq_len(nrow(why))) add(why$metric[i], "regatta_checklist_result", why$count[i])
+  }
+
+  if (length(extra_order)) {
+    em <- do.call(rbind, lapply(extra_order, function(rn)
+      data.frame(c(list(row_names = rn), as.list(extra_vals[[rn]])),
+                 check.names = FALSE, stringsAsFactors = FALSE)))
+    base <- rbind(base, em[, names(base), drop = FALSE])
+    rownames(base) <- NULL
   }
   return(base)
 }

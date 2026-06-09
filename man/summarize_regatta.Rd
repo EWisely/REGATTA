@@ -47,7 +47,9 @@ diversity) is followed by the checklist-step transition headline (the
 always is when the walk reaches domain), one \verb{downgraded: <from> -> <to>}
 row per rank pair that occurred, and (when the checklist carries a target
 group) the off-target/non-local breakdown -- so the total row count is
-dynamic, varying with the data.
+dynamic, varying with the data. The transition headline rows (\verb{ASVs unchanged}/\code{downgraded}) and the per-rank-pair \verb{downgraded: <from> -> <to>}
+rows are shared across steps: each carries the global-local count and the
+checklist count in their respective columns.
 }
 \description{
 Compares inputs and outputs across stages and produces Ella's summary:
