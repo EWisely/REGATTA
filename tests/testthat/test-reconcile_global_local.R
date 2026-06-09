@@ -58,14 +58,14 @@ test_that("a 0-1 global pct_id is auto-rescaled before comparison", {
   expect_equal(rec2$tracking$preferred_database[i], "global_lca_to_local")
 })
 
-test_that("global winning %ID while local agrees is a plain global win, not global_lca_to_local", {
+test_that("global_lca_to_local counts all LCA applications; breakdown counts the real downgrades", {
   mk <- function(id, lin, pid) {
     d <- as.data.frame(as.list(stats::setNames(lin, ranks)), stringsAsFactors = FALSE)
     d$ASV_id <- id; d$pct_id <- pid; d
   }
   ep <- function(sp) c("Eukaryota","Chordata","Actinopteri","Perciformes",
                        "Serranidae","Epinephelus", sp)
-  # AGREE: both call the same species, global has the higher %ID -> no downgrade
+  # AGREE: both call the same species, global higher %ID -> triggered, no downgrade
   # DOWNGRADE: disagree at species (same genus), global higher -> LCA to genus
   g <- rbind(mk("agree", ep("Epinephelus merra"),     99),
              mk("downg", ep("Epinephelus bontoides"), 99))
@@ -73,16 +73,18 @@ test_that("global winning %ID while local agrees is a plain global win, not glob
              mk("downg", ep("Epinephelus merra"),     98))
   rec4 <- suppressMessages(reconcile_global_local(
     g, l, global_pct_id_scale = "0-100", local_pct_id_scale = "0-100"))
-  tr <- rec4$tracking
-  # the agreement keeps the species and is labeled a plain "global" win
-  expect_equal(tr$preferred_database[tr$ASV_id == "agree"], "global")
-  expect_false(tr$global_lca_to_local_triggered[tr$ASV_id == "agree"])
-  expect_equal(rec4$result$species[rec4$result$ASV_id == "agree"], "Epinephelus merra")
-  # the real disagreement is the one that counts as global_lca_to_local
+  tr <- rec4$tracking; s <- rec4$stats
+  # BOTH are global_lca_to_local (the LCA was applied to both)
+  expect_equal(tr$preferred_database[tr$ASV_id == "agree"], "global_lca_to_local")
   expect_equal(tr$preferred_database[tr$ASV_id == "downg"], "global_lca_to_local")
-  expect_true(tr$global_lca_to_local_triggered[tr$ASV_id == "downg"])
+  expect_true(all(tr$global_lca_to_local_triggered))
+  expect_equal(s$count[s$metric == "global_lca_to_local triggered"], 2)
+  # the agreement keeps the species; the disagreement downgrades to genus
+  expect_equal(rec4$result$species[rec4$result$ASV_id == "agree"], "Epinephelus merra")
   expect_true(is.na(rec4$result$species[rec4$result$ASV_id == "downg"]))
-  expect_equal(rec4$stats$count[rec4$stats$metric == "global_lca_to_local triggered"], 1)
+  # the downgrade breakdown counts ONLY the real downgrade (the agreement adds none)
+  expect_equal(s$count[s$metric == "downgraded: species -> genus"], 1)
+  expect_equal(sum(s$count[grepl("^downgraded:", s$metric)]), 1)
 })
 
 test_that("global_lca_to_local with no shared rank is consistently unassigned", {

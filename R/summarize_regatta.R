@@ -89,7 +89,10 @@
 #'   always is when the walk reaches domain), one `downgraded: <from> -> <to>`
 #'   row per rank pair that occurred, and (when the checklist carries a target
 #'   group) the off-target/non-local breakdown -- so the total row count is
-#'   dynamic, varying with the data.
+#'   dynamic, varying with the data. A two-DB run also gets the global-vs-local
+#'   step's `global_lca_to_local triggered` row and its
+#'   `global_lca_to_local: <from> -> <to>` downgrade breakdown in the
+#'   `regatta_global_local_result` column.
 #'
 #' @export
 summarize_regatta <- function(reconciled     = NULL,
@@ -283,6 +286,27 @@ summarize_regatta <- function(reconciled     = NULL,
   )
 
   base <- cbind(row_names = row_labels, out, stringsAsFactors = FALSE)
+
+  # Transition headline + downgrade breakdown for the global-vs-local step, from
+  # reconcile_global_local()'s $stats, into the regatta_global_local_result
+  # column. The downgrade rows are renamed "global_lca_to_local: <from> -> <to>"
+  # so they don't collide with the checklist step's "downgraded:" rows below.
+  if (!is.null(reconciled) && "stats" %in% names(reconciled) &&
+      "regatta_global_local_result" %in% names(base)) {
+    rs <- reconciled$stats
+    rs <- rs[rs$metric == "global_lca_to_local triggered" |
+             grepl("^downgraded: ", rs$metric), , drop = FALSE]
+    if (nrow(rs) > 0) {
+      labels <- ifelse(grepl("^downgraded: ", rs$metric),
+                       sub("^downgraded: ", "global_lca_to_local: ", rs$metric),
+                       rs$metric)
+      extra <- data.frame(row_names = labels, stringsAsFactors = FALSE)
+      for (cn in setdiff(names(base), "row_names"))
+        extra[[cn]] <- if (cn == "regatta_global_local_result") as.numeric(rs$count) else NA_real_
+      base <- rbind(base, extra[, names(base), drop = FALSE])
+      rownames(base) <- NULL
+    }
+  }
 
   # Transition headline + downgrade breakdown for the checklist step, taken
   # from reconcile_checklist()'s $stats and placed in the

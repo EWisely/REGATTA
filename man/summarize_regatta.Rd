@@ -47,7 +47,10 @@ diversity) is followed by the checklist-step transition headline (the
 always is when the walk reaches domain), one \verb{downgraded: <from> -> <to>}
 row per rank pair that occurred, and (when the checklist carries a target
 group) the off-target/non-local breakdown -- so the total row count is
-dynamic, varying with the data.
+dynamic, varying with the data. A two-DB run also gets the global-vs-local
+step's \verb{global_lca_to_local triggered} row and its
+\verb{global_lca_to_local: <from> -> <to>} downgrade breakdown in the
+\code{regatta_global_local_result} column.
 }
 \description{
 Compares inputs and outputs across stages and produces Ella's summary:

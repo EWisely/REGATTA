@@ -22,11 +22,11 @@
 #   global_lca_to_local     For ASVs where global won best_pctid AND
 #                           the local DB also returned an assignment,
 #                           replace the preferred lineage with the LCA
-#                           of the two. Only when that LCA actually
-#                           reduces specificity is the database column
-#                           labeled "global_lca_to_local"; if local merely
-#                           agreed down to global's own deepest rank (no
-#                           downgrade), it stays a plain "global" win.
+#                           of the two and label the database column
+#                           "global_lca_to_local". $stats reports how many
+#                           were triggered, and -- of those that actually
+#                           reduced rank -- a "downgraded: <from> -> <to>"
+#                           breakdown (the rest agreed to global's depth).
 #
 # (The original Validate_local_assignments.R called these Pass 1 and
 # Pass 2. The descriptive names make the methods write-up cleaner.)
@@ -102,10 +102,10 @@
 #' curated database (e.g. vsearch + a regional reference) -- pick a per-ASV
 #' preferred lineage. The function compares percent identity across the two
 #' databases (the `best_pctid` step) and, when global wins but local also
-#' has an assignment, takes the LCA of the two -- labeling it
-#' `global_lca_to_local` only when that LCA actually downgrades the call (if
-#' local just agreed to global's depth, it stays a plain global win). Returns a
-#' `$result` taxonomy table
+#' has an assignment, takes the LCA of the two (the `global_lca_to_local` step);
+#' `$stats` reports how many were triggered and, of those, a
+#' `downgraded: <from> -> <to>` breakdown of the ones that actually reduced rank.
+#' Returns a `$result` taxonomy table
 #' (`id_col` + the winning `pct_id` + the 7 ranks -- REGATTA exchange format), a
 #' per-ASV `$tracking` audit, and a step-level `$stats` summary; optionally
 #' writes those as three CSVs.
@@ -292,19 +292,6 @@ reconcile_global_local <- function(global_table,
     }
 
     database[global_lca_to_local_triggered] <- "global_lca_to_local"
-
-    # Only count it as global_lca_to_local when the LCA actually reduced
-    # specificity. If local merely agreed all the way down to global's own
-    # deepest rank (no downgrade), it's a plain global win -- relabel it
-    # "global" and don't count it as a triggered LCA.
-    depth_of <- function(M) vapply(seq_len(nrow(M)), function(i) {
-      nz <- which(!is.na(M[i, ])); if (length(nz)) max(nz) else 0L
-    }, integer(1))
-    g_depth <- depth_of(as.matrix(joined[, g_rank_cols, drop = FALSE]))
-    p_depth <- depth_of(as.matrix(preferred_lineage[, ranks, drop = FALSE]))
-    agreed  <- global_lca_to_local_triggered & p_depth == g_depth
-    database[agreed]                      <- "global"
-    global_lca_to_local_triggered[agreed] <- FALSE
   }
 
   # An ASV whose preferred lineage came out entirely empty is not assigned --
@@ -316,6 +303,19 @@ reconcile_global_local <- function(global_table,
   database[empty_lineage]                      <- NA_character_
   preferred_pctid[empty_lineage]               <- NA_real_
   global_lca_to_local_triggered[empty_lineage] <- FALSE
+
+  # Downgrade breakdown for the global_lca_to_local step: of the triggered rows,
+  # which actually reduced rank, and from which rank to which (global's deepest
+  # rank -> the LCA rank). The rows where local merely agreed to global's depth
+  # are triggered but contribute no downgrade pair.
+  .depth_of <- function(M) vapply(seq_len(nrow(M)), function(i) {
+    nz <- which(!is.na(M[i, ])); if (length(nz)) max(nz) else 0L
+  }, integer(1))
+  g_depth <- .depth_of(as.matrix(joined[, g_rank_cols, drop = FALSE]))
+  p_depth <- .depth_of(as.matrix(preferred_lineage[, ranks, drop = FALSE]))
+  glc_dn  <- global_lca_to_local_triggered & p_depth > 0 & p_depth < g_depth
+  glc_pairs <- if (any(glc_dn))
+    paste0("downgraded: ", ranks[g_depth[glc_dn]], " -> ", ranks[p_depth[glc_dn]]) else character(0)
 
   # Lowest non-NA rank in the preferred lineage
   preferred_scientific_name <- vapply(seq_len(nrow(joined)), function(i) {
@@ -387,6 +387,16 @@ reconcile_global_local <- function(global_table,
                sum(database == "global_lca_to_local",  na.rm = TRUE)),
     stringsAsFactors = FALSE
   )
+
+  # Of the global_lca_to_local rows that actually downgraded, the rank-pair
+  # breakdown (global's call rank -> the LCA rank). Sums to <= the triggered
+  # count; the rest were triggered but agreed to global's depth (no downgrade).
+  if (length(glc_pairs)) {
+    pt <- sort(table(glc_pairs), decreasing = TRUE)
+    stats <- rbind(stats, data.frame(metric = names(pt),
+                                     count  = as.integer(pt),
+                                     stringsAsFactors = FALSE))
+  }
 
   # Per-rank specificity counts: how far down each ASV's preferred
   # lineage actually goes. Useful when this function is run standalone.
