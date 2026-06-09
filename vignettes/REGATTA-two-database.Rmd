@@ -11,10 +11,14 @@ vignette: >
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 ```
 
-This vignette is the optional add-on to `vignette("REGATTA-tutorial")`. Start
-there for building and taxonomizing the regional checklist and the basic
-single-classifier workflow; here we cover the extra step for when you have
-**the same ASVs classified against two reference databases**.
+This vignette covers **Module 3** of REGATTA: reconciling **the same ASVs
+classified against two reference databases** — a broad global one and a
+locally-curated one — to keep the benefits of both, then polishing the result
+against the regional checklist. It builds on `vignette("REGATTA-tutorial")`,
+which covers Module 1 (building and taxonomizing the regional checklist) and
+Module 2 (reconciling one classifier against it); start there first. Module 3
+inserts one extra step (`reconcile_global_local()`) ahead of the Module 2
+checklist reconciliation — and `run_regatta()` runs both in a single call.
 
 ## When you'd use this
 

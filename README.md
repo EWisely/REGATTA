@@ -6,47 +6,89 @@
 
 **Reconciling eDNA Geographic Assignments via Taxonomy Table Adjustment**
 
-An R package for reconciling eDNA metabarcoding taxonomic assignments against
-a regional species checklist — downgrading the taxonomic specificity of
+An R package that reconciles eDNA metabarcoding taxonomic assignments against a
+regional species checklist — downgrading the taxonomic specificity of
 species-level calls to taxa with no records in the study area, rather than
 discarding them — without manual curation, and preserving as much taxonomic
 specificity as the regional evidence supports.
 
 ## The problem
 
-Global reference databases (NCBI, EMBL, etc.) confidently assign eDNA reads
-to species that don't actually live in your study area — within the group
-your primer targets (e.g. a freshwater fish called from marine fish-primer
-data). This is **not** off-target amplification: the read is still a fish, but
-the species-level *name* is geographically implausible. It typically happens
-because the true local species is absent from the database, so the read
-matches its nearest sequenced relative at the amplified region; lab
-contamination or degraded input DNA can contribute too. The usual fixes —
-hand-curating a local reference database, or applying a flat percent-identity
-cutoff — are either non-reproducible or sacrifice specificity unnecessarily.
+Global reference databases (NCBI, EMBL, etc.) confidently assign eDNA reads to
+species that don't actually live in your study area — within the group your
+primer targets (e.g. a freshwater fish called from marine fish-primer data).
+This is **not** off-target amplification: the read is still a fish, but the
+species-level *name* is geographically implausible. It typically happens because
+the true local species is absent from the database, so the read matches its
+nearest sequenced relative at the amplified region; lab contamination or
+degraded input DNA can contribute too. The usual fixes — hand-curating a local
+reference database, or applying a flat percent-identity cutoff — are either
+non-reproducible or sacrifice specificity unnecessarily.
 
-## The fix
+## The three modules
 
-REGATTA pulls a regional species list from public biodiversity sources
-(GBIF, OBIS, plus any local CSVs you have), resolves it to NCBI taxonomy,
-and uses it as a sanity filter on each ASV's classification. For each
-assigned ASV, REGATTA finds the **lowest taxonomic rank shared between the
-assignment and the regional checklist** and downgrades only that far.
+REGATTA is organized as three modules. You can run **Module 1 on its own**, or
+chain **1 → 2** (one classifier) or **1 → 3** (two classifiers). Modules 2 and 3
+are both driven by the single `run_regatta()` entry point.
 
-A *Sebastes mystinus* call in a region that has *S. mystinus* on the
-checklist stays at species. A call to *S. goodei* (a Pacific rockfish) in a
-region whose checklist has other *Sebastes* but not *S. goodei* is
-downgraded to genus *Sebastes* and flagged. A call to a tropical species in
-a temperate-region checklist with no *Sebastes* at all gets walked up the
-tree until something matches, or flagged as having no regional record if
-nothing does.
+**Module 1 — Build the regional species checklist.** Pull a regional species
+list from public biodiversity databases (OBIS, GBIF) plus any local checklists
+you supply, and resolve it to NCBI taxonomy. Run it on its own if you just want
+a clean, taxonomized species list for a region × group — or as the prequel that
+feeds Modules 2 and 3.
+→ `build_regional_checklist()`
+
+**Module 2 — Reconcile one classifier against the checklist.** Take the output
+of your taxonomy-assignment software (obitools, vsearch, Kraken2, BLAST+LCA, …)
+and reconcile it against the Module 1 checklist, walking each call up the
+taxonomic tree only as far as needed for the eDNA assignment **and** the regional
+range limits to agree.
+→ `run_regatta(input = <one classifier output>)`
+
+**Module 3 — Reconcile a global + a local database, then the checklist.** When
+you've classified the same ASVs against both a broad global reference database
+**and** a locally-curated one, reconcile the two against each other first —
+keeping the coverage of the global DB and the regional fidelity of the local one
+— then run that result through the Module 2 checklist reconciliation to polish
+the final call.
+→ `run_regatta(input = list(global = …, local = …))`
+
+### How the reconciliation works (Modules 2 & 3)
+
+For each assigned ASV, REGATTA finds the **lowest taxonomic rank shared between
+the assignment and the regional checklist** and downgrades only that far. A
+*Sebastes mystinus* call in a region that has *S. mystinus* on the checklist
+stays at species. A call to *S. goodei* (a Pacific rockfish) in a region whose
+checklist has other *Sebastes* but not *S. goodei* is downgraded to genus
+*Sebastes* and flagged. A call to a tropical species in a temperate-region
+checklist with no *Sebastes* at all is walked up the tree until something
+matches, or flagged as having no regional record if nothing does.
 
 Names on both sides — classifier output and checklist — are routed through a
 **synonym-aware NCBI lookup**, so older nomenclature is updated to current
-canonical taxonomy before the comparison (e.g. *Lagenorhynchus obliquidens*
-→ *Sagmatias obliquidens*). A synonym on either side still matches in the
-LCA walk, and each row records whether it resolved as a scientific name or
-via a synonym.
+canonical taxonomy before the comparison (e.g. *Lagenorhynchus obliquidens* →
+*Sagmatias obliquidens*). A synonym on either side still matches in the LCA walk.
+
+```mermaid
+flowchart TD
+    subgraph M1["MODULE 1 · Build the regional species checklist"]
+        A[OBIS_download] --> D[build_regional_checklist]
+        B[GBIF_download] --> D
+        C["local CSV(s)"] --> D
+        D --> E[taxonomize_checklist] --> F[("Regional checklist<br/>7 ranks, taxonomized")]
+    end
+
+    G["One classifier output<br/>obitools / vsearch / Kraken2 / BLAST / …"] ==> M[reconcile_checklist]
+    F ==> M
+    M ==> RES[("taxonomy_table<br/>tracking · summary")]
+
+    GL["Second classifier output<br/>(same ASVs, second DB)"] -. "MODULE 3" .-> Q[reconcile_global_local]
+    G -. "MODULE 3" .-> Q
+    Q -. "MODULE 3" .-> M
+```
+
+The solid path (one classifier → `reconcile_checklist`) is **Module 2**; the
+dashed branch through `reconcile_global_local` is **Module 3**.
 
 ## Installation
 
@@ -61,182 +103,78 @@ library(REGATTA)
 Then read the worked examples:
 
 ```r
-vignette("REGATTA-tutorial")       # single-classifier workflow
-vignette("REGATTA-two-database")   # optional global-vs-local reconciliation
+vignette("REGATTA-tutorial")       # Modules 1 + 2 (one classifier)
+vignette("REGATTA-two-database")   # Module 3 (global + local)
 ```
 
 Building the vignettes needs `pandoc` (RStudio bundles it); from a plain R
-session without pandoc, drop `build_vignettes = TRUE`. The checklist-building
-steps additionally need a local NCBI taxonomy database built by `taxonomizr`
-— set that up first (see [Step 1 — the NCBI taxonomy database](#step-1--the-ncbi-taxonomy-database));
-the core reconciliation functions and the runnable vignette demos do not.
-
-## Pipeline
-
-The **core workflow** (solid arrows) runs one classifier output through
-`reconcile_checklist()`. The **optional `reconcile_global_local()` branch**
-(dashed) is a side-path you take only if you also have a second classifier
-output for the same ASVs (e.g. one against a global DB and one against a
-locally-curated DB); its `$result` slots in as a preprocessing step before
-`reconcile_checklist()`.
-
-```mermaid
-flowchart TD
-    A[GBIF_download] --> D[build_regional_checklist]
-    B[OBIS_download] --> D
-    C["local CSV(s)<br/>Genus + Species"] --> D
-    D --> E[taxonomize_checklist]
-    E --> F[("Regional checklist<br/>7 ranks, taxonomized")]
-
-    G["Classifier output<br/>obitools / vsearch / Kraken2 /<br/>BestTaxon / BLAST / etc."] --> H{Input shape?}
-    H -->|SINTAX strings| I[parse_sintax]
-    H -->|"vsearch lca + userout"| I2[parse_vsearch_results]
-    H -->|NCBI taxIDs| J[resolve_taxids]
-    H -->|mixed-rank names| N1[resolve_names]
-    H -->|already 7 ranks| K[no preprocessing]
-    I --> L[("Taxonomy table<br/>ASV_id + 7 ranks + pct_id")]
-    I2 --> L
-    J --> L
-    N1 --> L
-    K --> L
-
-    L2["Second classifier output<br/>(same ASVs, second DB)"] -.-> Q[reconcile_global_local]
-    L -.-> Q
-    Q -.-> R1[("$result + $tracking + $stats")]
-    R1 -.-> M
-
-    F --> M[reconcile_checklist]
-    L ==> M
-    M --> S[summarize_regatta]
-    S --> T["per-stage stats summary"]
-
-    style L2 stroke-dasharray: 5 5
-    style Q  stroke-dasharray: 5 5
-    style R1 stroke-dasharray: 5 5
-    style M  stroke-width:4px
-```
-
-## Quick-start — the one-call path
-
-For most users the whole pipeline collapses to a single `run_regatta()`
-call once you have a taxonomized regional checklist. It accepts file paths,
-a vsearch `lca + userout` pair, a folder of inputs, or an explicit
-`list(global =, local =)` for the two-DB workflow; file formats are
-auto-detected and the right preprocessor is dispatched. It **returns** the
-results and also writes them: `out_dir` is **required**, and each run lands in
-its own dated `<region>_<label>_<Date>` subfolder of it (the per-stage CSV
-triples, the per-stage summary, and a `run_log.txt` recording what was detected
-and run). Pass the same `region`/`label` you gave `build_regional_checklist()`.
-
-```r
-# Single-DB workflow (one classifier output, any tool)
-run_regatta(
-  input     = "data/MiFish_obi.tab",                              # obitools .tab
-  checklist = "local_database_checklist/my_regional_checklist.rds",
-  out_dir   = "regatta_out", region = "galapagos", label = "fish"
-)
-
-# Single-DB with a vsearch lca + userout pair (LCA taxonomy + userout pct_id)
-run_regatta(
-  input     = c("data/vs_lca.txt", "data/vs_userout.txt"),
-  checklist = "local_database_checklist/my_regional_checklist.rds",
-  out_dir   = "regatta_out", region = "galapagos", label = "fish"
-)
-
-# Two-DB workflow. Roles are declared explicitly via the named list,
-# never inferred from filenames. Either side may be a vsearch lca+userout pair.
-run_regatta(
-  input = list(
-    global = "data/obi.tab",
-    local  = c("data/vs_lca.txt", "data/vs_userout.txt")
-  ),
-  checklist = "local_database_checklist/my_regional_checklist.rds",
-  out_dir   = "regatta_out", region = "galapagos", label = "fish"
-)
-```
-
-For fine-grained control the lower-level `reconcile_global_local()`,
-`reconcile_checklist()`, and `summarize_regatta()` functions remain
-available; `run_regatta()` is a thin orchestrator on top of them.
-
-## Step 1 — the NCBI taxonomy database
-
-Build or locate this **first**: it underpins everything REGATTA does to a
-*name*. The regional-checklist build, resolving classifier output that arrives
-as NCBI taxIDs or scientific names, and updating older nomenclature to current
-canonical taxonomy all run against a local NCBI taxonomy snapshot built by
-`taxonomizr`. `build_regional_checklist()`, `taxonomize_checklist()`, and any
-`run_regatta()` run whose input isn't already resolved to the 7 ranks depend on
-it. (Only the pure-LCA core — `reconcile_checklist()` on a pre-taxonomized
-checklist and a pre-resolved table, as in the runnable vignette demo — needs no
-database.)
-
-`build_regional_checklist()`, `run_regatta()`, and `reconcile_checklist()`
-default `sql_path` to a **persistent per-user cache**
-(`tools::R_user_dir("REGATTA","cache")`), shared across projects/sessions, and
-build only the lightweight names+nodes (~a few hundred MB, a few minutes — not
-the multi-GB accession data) on first use. **Override** it by pointing
-`sql_path` at an existing DB you already have. When a needed DB is missing they
-prompt to build it (interactively) or, in a script, error with the one-line
-build command unless `overwrite_taxonomy_files = TRUE`. The cache is a
-**snapshot** of NCBI taxonomy and is never rebuilt silently (for
-reproducibility) — its build date is reported and recorded in `cl$methods`, so
-the taxonomy version travels with your methods; `overwrite_taxonomy_files = TRUE`
-refreshes it in place. Set `sql_path = NULL` in `build_regional_checklist()` to
-skip taxonomizing there and defer it to `run_regatta()`. (Accession-based input
-to `run_regatta()` is the only path that needs the full
-`taxonomizr::prepareDatabase()` build with `accession2taxid`.)
+session without pandoc, drop `build_vignettes = TRUE`. Module 1 (and resolving
+classifier output that isn't already in the 7 ranks) needs a local NCBI taxonomy
+database — set that up first (see [Setup](#setup)); the core reconciliation on a
+pre-taxonomized checklist and a pre-resolved table does not.
 
 ## Setup
 
-A few more things to set up before building your own regional checklist.
+A few one-time things before Module 1.
+
+**The NCBI taxonomy database.** Everything REGATTA does to a *name* — building
+the regional checklist, resolving classifier output that arrives as NCBI taxIDs
+or scientific names, and updating older nomenclature to current canonical
+taxonomy — runs against a local NCBI taxonomy snapshot built by `taxonomizr`.
+`build_regional_checklist()`, `taxonomize_checklist()`, and any `run_regatta()`
+run whose input isn't already resolved to the 7 ranks default `sql_path` to a
+**persistent per-user cache** (`tools::R_user_dir("REGATTA","cache")`), shared
+across projects/sessions, and build only the lightweight names+nodes (~a few
+hundred MB, a few minutes — not the multi-GB accession data) on first use.
+**Override** it by pointing `sql_path` at an existing DB you already have. When a
+needed DB is missing they prompt to build it (interactively) or, in a script,
+error with the one-line build command unless `overwrite_taxonomy_files = TRUE`.
+The cache is a **snapshot** of NCBI taxonomy and is never rebuilt silently (for
+reproducibility) — its build date is reported and recorded in `cl$methods`;
+`overwrite_taxonomy_files = TRUE` refreshes it. Set `sql_path = NULL` in
+`build_regional_checklist()` to skip taxonomizing there and defer it to
+`run_regatta()`. (Only accession-based input needs the full
+`taxonomizr::prepareDatabase()` build with `accession2taxid`.)
+
+**GBIF credentials** (only if you turn GBIF on in Module 1). `GBIF_download()`
+and `build_regional_checklist(GBIF = TRUE)` need a free
+[GBIF account](https://www.gbif.org/user/profile) and authenticate with your
+account credentials — there is no separate "API key". Add `GBIF_USER` /
+`GBIF_PWD` / `GBIF_EMAIL` to your `.Renviron` (`usethis::edit_r_environ()`, then
+restart R). A fresh GBIF download is an asynchronous `occ_download` that **takes
+several minutes** while GBIF assembles it server-side.
 
 **Output locations.** The two entry points — `build_regional_checklist()`
-(`output_dir`) and `run_regatta()` (`out_dir`) — **require** an output
-directory and write each run into its own dated `<region>_<label>_<Date>`
-subfolder of it, so successive runs don't pile up. The results are also
-returned. The lower-level building blocks (`reconcile_checklist()`,
-`reconcile_global_local()`, `OBIS_download()`, `GBIF_download()`, `resolve_*()`)
-keep their output dir **optional** (default: return only, write nothing) so they
-compose cleanly. Local checklist CSVs (each with `Genus` and `Species` columns)
-can live anywhere; pass their paths to `build_regional_checklist(CSV = ...)`, no
-copying required.
+(`output_dir`) and `run_regatta()` (`out_dir`) — **require** an output directory
+and write each run into its own dated `<region>_<label>_<Date>` subfolder of it,
+so successive runs don't pile up. The results are also returned as R objects. The
+lower-level building blocks keep their output dir **optional** so they compose
+cleanly. Local checklist CSVs (each with `Genus` and `Species` columns) can live
+anywhere; pass their paths to `build_regional_checklist(CSV = ...)`.
 
-**GBIF credentials.** `GBIF_download()` (and `build_regional_checklist(GBIF = TRUE)`)
-needs a free [GBIF account](https://www.gbif.org/user/profile) and authenticates
-with your account credentials — there is no separate "API key". Add
-`GBIF_USER` / `GBIF_PWD` / `GBIF_EMAIL` to your `.Renviron`
-(`usethis::edit_r_environ()`, then restart R). A fresh GBIF download is an
-asynchronous `occ_download` that **takes several minutes** while GBIF assembles
-it server-side.
-
-**Draw your polygon** at [wktmap.com](https://wktmap.com) and copy the WKT
-`POLYGON ((long lat, long lat, ...))` string for the `regional_poly`
+**Draw your polygon** (Module 1) at [wktmap.com](https://wktmap.com) and copy the
+WKT `POLYGON ((long lat, long lat, ...))` string for the `regional_poly`
 argument.
 
-> **Tip:** check group names with `resolve_taxa()` before a long download —
-> it disambiguates names against WoRMS by kingdom and flags GBIF backbone
-> coverage. The shorthand `"fish"` expands to ray-finned fishes + sharks &
-> rays + hagfishes + lampreys (the typical MiFish target), and `"vertebrates"`
-> to those plus mammals, birds, reptiles, and amphibians (all the vertebrate
-> classes, so it works in both OBIS and GBIF). GBIF's backbone has no usable
-> class node for bony fish, so
-> `GBIF_download()` descends to order automatically — OBIS remains the more
-> complete fish source, with GBIF as a supplement.
+> **Tip:** check group names with `resolve_taxa()` before a long download — it
+> disambiguates names against WoRMS by kingdom and flags GBIF backbone coverage.
+> The shorthand `"fish"` expands to ray-finned fishes + sharks & rays + hagfishes
+> + lampreys (the typical MiFish target), and `"vertebrates"` to those plus
+> mammals, birds, reptiles, and amphibians (all the vertebrate classes, so it
+> works in both OBIS and GBIF). GBIF's backbone has no usable class node for bony
+> fish, so `GBIF_download()` descends to order automatically — OBIS remains the
+> more complete fish source, with GBIF as a supplement.
 
-## Step 2 — build the regional checklist (once per region × group)
+## Module 1 — Build the regional species checklist
+
+Run once per region × group. One call downloads OBIS (default on) and/or GBIF
+(default off), folds in any local CSV, taxonomizes the list, and **returns**
+everything (also writing it to the required `output_dir`). Run it on its own for
+a clean regional species list, or hand `cl$for_LCA` to Module 2 / Module 3.
 
 ```r
 poly <- "POLYGON ((-117.4 32.0, -91.9 -6.3, -81.4 -6.3, -76.1 7.7, -82.1 8.6, -104.2 20.3, -112.5 32.2, -117.4 32.0))"
 
-# Where the taxonomy cache lives (built once on first use, reused across
-# projects) -- run this to see the path; pass your own path to sql_path to
-# override it:
-tools::R_user_dir("REGATTA", "cache")
-
-# One call: downloads OBIS (default on) and/or GBIF (default off), folds in
-# any local CSV, and taxonomizes the LCA list. It RETURNS everything AND writes
-# it to the required output_dir.
 cl <- build_regional_checklist(
   region        = "galapagos",   # names the output files
   label         = "fish",        # short filename label (kept separate from taxa)
@@ -266,98 +204,133 @@ cl <- build_regional_checklist(
 ```
 
 > **GBIF (`GBIF = TRUE`) takes several minutes** — it submits an `occ_download`
-> job and waits for GBIF to build it. GBIF needs a free account and authenticates
-> with your account **credentials** (no separate "API key"): register at
-> [gbif.org](https://www.gbif.org/user/profile), then add `GBIF_USER`, `GBIF_PWD`,
-> and `GBIF_EMAIL` to your `~/.Renviron` (`usethis::edit_r_environ()`, then restart
-> R). Reuse a finished download by passing its key/object to `GBIF =`.
->
-> Whenever GBIF is used (a fresh download **or** a reused key), its download
-> **key + DOI + citation** are folded into `cl$methods` — the DOI is fetched
-> from the key via `rgbif::occ_download_meta()`, so it's recorded for reused
-> downloads too. `cl$methods` is the single provenance home; always verify the
-> citations against your reference manager.
+> job and waits for GBIF to build it (see [Setup](#setup) for credentials). Reuse
+> a finished download by passing its key/object to `GBIF =`. Whenever GBIF is
+> used (fresh or reused), its **key + DOI + citation** are folded into
+> `cl$methods` — the single provenance home; always verify the citations against
+> your reference manager.
 
-## Per-taxonomic-group separation
+**One pass per taxonomic group.** Build a separate checklist for each group your
+primers target — fish with a fish-only list, crustaceans with a crustacean-only
+list, and so on. This also keeps genuine *off-target amplifications* visible: a
+crustacean picked up by a fish primer stands out against a fish-only checklist
+instead of passing silently through a mixed megalist. Nothing in the pipeline is
+fish-, marine-, or Galapagos-specific.
 
-Run the pipeline **once per taxonomic group** your primer targets — one pass
-for fish (with a fish-only checklist), a separate pass for crustaceans, and
-so on. This also keeps genuine *off-target amplifications* visible — a
-non-target group (e.g. a crustacean picked up by a fish-targeting MiFish
-primer). Mixing groups into one megalist hides them: that crustacean would
-pass through a fish+crustacean checklist instead of standing out against a
-fish-only one.
+## Module 2 — Reconcile one classifier against the checklist
 
-Nothing in the pipeline is fish-, marine-, or Galapagos-specific — the
-examples use Galapagos fish only because that's what the package was
-developed against. The only per-region work is building and taxonomizing the
-checklist; every downstream function is taxonomy- and geography-agnostic,
-and the function defaults carry no group label, so you can run multiple
-groups side-by-side in one project without naming collisions.
+For most users the rest of the pipeline collapses to a single `run_regatta()`
+call. Point it at your classifier results file and the Module 1 checklist; it
+auto-detects the format, dispatches the right preprocessor, runs the checklist
+reconciliation, and **returns** the final tables (also writing them under a dated
+`<region>_<label>_<Date>` subfolder of `out_dir`). Pass the same `region`/`label`
+you gave Module 1.
+
+```r
+# One classifier output, any tool (here an obitools .tab)
+res <- run_regatta(
+  input     = "data/MiFish_obi.tab",
+  checklist = "local_database_checklist/my_regional_checklist.rds",
+  out_dir   = "regatta_out", region = "galapagos", label = "fish"
+)
+
+# Or a vsearch lca + userout pair (LCA taxonomy + userout pct_id)
+run_regatta(
+  input     = c("data/vs_lca.txt", "data/vs_userout.txt"),
+  checklist = "local_database_checklist/my_regional_checklist.rds",
+  out_dir   = "regatta_out", region = "galapagos", label = "fish"
+)
+
+res$taxonomy_table   # final reconciled table: ASV_id, pct_id, the 7 ranks
+res$tracking         # per-ASV before/after audit
+res$summary          # per-stage stats summary
+```
+
+## Module 3 — Reconcile a global + a local database, then the checklist
+
+When you have the same ASVs classified two ways, pass them as a named
+`list(global =, local =)`. `run_regatta()` runs `reconcile_global_local()` first
+(percent-identity-based winner selection, falling back to the LCA of the two when
+they disagree), then the Module 2 checklist reconciliation — in one call. Roles
+are declared explicitly via the list, never inferred from filenames; either side
+may be a vsearch `lca + userout` pair.
+
+```r
+res <- run_regatta(
+  input = list(
+    global = "data/obi.tab",                          # broad global DB
+    local  = c("data/vs_lca.txt", "data/vs_userout.txt")  # locally-curated DB
+  ),
+  checklist = "local_database_checklist/my_regional_checklist.rds",
+  out_dir   = "regatta_out", region = "galapagos", label = "fish"
+)
+```
+
+A two-DB run's `res$summary` has four stage columns (`global`, `local`,
+`regatta_global_local_result`, `regatta_checklist_result`) so you can see what
+each step changed, and `res$tracking` carries every field's global / local /
+reconciled value side by side.
+
+For fine-grained control the lower-level `reconcile_global_local()`,
+`reconcile_checklist()`, and `summarize_regatta()` functions remain available;
+`run_regatta()` is a thin orchestrator on top of them.
 
 ## Functions
 
-| Function | Purpose |
-|---|---|
-| `run_regatta()` | **High-level wrapper / recommended entry point.** Auto-detects classifier format, dispatches the right preprocessor, runs the reconcile steps, and **returns** the reconciled tables + a per-stage stats summary. **`out_dir` is required**; the output triples + summary + `run_log.txt` are written into a dated `<region>_<label>_<Date>` subfolder of it (pass `region`/`label` to name it). |
-| `resolve_taxa()` | Validate & disambiguate query taxon names against WoRMS (by kingdom); report GBIF backbone coverage. Run standalone to pre-check names. |
-| `GBIF_download()` | Pull a GBIF species list inside a WKT polygon for given taxa. |
-| `OBIS_download()` | Pull an OBIS species list, with optional marine/brackish/freshwater filters. |
-| `build_regional_checklist()` | **Checklist-building entry point.** Runs OBIS (default) and/or GBIF (off by default; `TRUE` for a fresh download or a key/object to reuse one), folds in any local `Genus`+`Species` CSVs (optional, default `NULL`; prefer a citable list), optionally taxonomizes the LCA list, and **returns** `for_making_localdb` (a bare vector of unique species names, for a reference-DB builder), `checklist_summary` (the full taxonomized table with per-name resolution status), and `for_LCA` (`taxID` + the 7 ranks, ready for the LCA step), plus `methods` (the provenance sentence, which also carries any GBIF download key/DOI/citation). **`output_dir` is required** — outputs go in a dated `<region>_<label>_<date>` subfolder. `sql_path` defaults to a persistent per-user cache (built on first use, overridable with an existing DB path); `sql_path = NULL` skips taxonomizing here. A fresh `GBIF = TRUE` download takes several minutes and needs GBIF account credentials in `~/.Renviron`. |
-| `taxonomize_checklist()` | Resolve a regional list to a 7-rank NCBI taxonomy table (synonym-aware). Runs **in the background** from `build_regional_checklist()`; `reconcile_checklist()`/`run_regatta()` also taxonomize on the fly (with a warning) if handed a raw checklist. Call directly only for inspection/caching. |
-| `parse_sintax()` | Convert vsearch SINTAX taxonomy strings to 7 rank columns. |
-| `parse_vsearch_results()` | Canonical vsearch preprocessor: join a vsearch `lca` (taxonomy) + `--userout` (pct_id) by ASV id. |
-| `parse_vsearch_userout()` | Fallback parser when only a vsearch `--userout` file is available (best-hit taxonomy + pct_id). |
-| `resolve_taxids()` | Convert NCBI taxIDs to 7 rank columns (e.g. obitools output). |
-| `resolve_names()` | Convert mixed-rank scientific names (Kraken2 / BestTaxon style) to 7 rank columns; synonym-aware. |
-| `reconcile_checklist()` | **Core LCA step.** Reconcile a taxonomy table against the regional checklist. Returns `$result` / `$tracking` / `$stats`. |
-| `reconcile_global_local()` | Optional: reconcile two classifier outputs on the same ASVs (best percent-identity, falling back to the LCA of both when they disagree). Returns `$result` / `$tracking` / `$stats`. |
-| `summarize_regatta()` | The per-stage stats summary comparing inputs to outputs (counts, source breakdown, checklist membership/recovery, specificity, diversity, plus the checklist step's transition + downgrade breakdown). |
+| Function | Module | Purpose |
+|---|---|---|
+| `resolve_taxa()` | 1 | Validate & disambiguate query taxon names against WoRMS (by kingdom); report GBIF backbone coverage. Run standalone to pre-check names. |
+| `OBIS_download()` | 1 | Pull an OBIS species list, with optional marine/brackish/freshwater filters. |
+| `GBIF_download()` | 1 | Pull a GBIF species list inside a WKT polygon for given taxa. |
+| `build_regional_checklist()` | 1 | **Checklist-building entry point.** Runs OBIS/GBIF + any local CSVs, taxonomizes the list, and returns `for_making_localdb` (a bare species vector + CRABS-ready file), `checklist_summary` (the full taxonomized audit table), `for_LCA` (`taxID` + 7 ranks, for Modules 2/3), and `methods` (a provenance sentence with live citations + any GBIF key/DOI). `output_dir` required. |
+| `taxonomize_checklist()` | 1 | Resolve a regional list to a 7-rank NCBI taxonomy table (synonym-aware). Runs in the background from `build_regional_checklist()`; call directly only for inspection/caching. |
+| `run_regatta()` | 2 / 3 | **High-level entry point for Modules 2 & 3.** Auto-detects classifier format, dispatches the preprocessor, runs the reconcile step(s), and returns `taxonomy_table` + `tracking` + `summary`. `out_dir`/`region`/`label` required. |
+| `reconcile_checklist()` | 2 | **Core LCA step.** Reconcile one taxonomy table against the regional checklist. Returns `$result` / `$tracking` / `$stats`. |
+| `reconcile_global_local()` | 3 | Reconcile two classifier outputs on the same ASVs (best percent-identity, falling back to the LCA of both when they disagree). Returns `$result` / `$tracking` / `$stats`. |
+| `summarize_regatta()` | 2 / 3 | The per-stage stats summary comparing inputs to outputs (counts, source breakdown, checklist membership/recovery, specificity, diversity, per-step transition + downgrade breakdown). |
+| `parse_vsearch_results()` | 2 / 3 | Canonical vsearch preprocessor: join a vsearch `lca` (taxonomy) + `--userout` (pct_id) by ASV id. |
+| `parse_vsearch_userout()` | 2 / 3 | Fallback parser when only a vsearch `--userout` file is available. |
+| `parse_sintax()` | 2 / 3 | Convert vsearch SINTAX taxonomy strings to 7 rank columns. |
+| `resolve_taxids()` | 2 / 3 | Convert NCBI taxIDs to 7 rank columns (e.g. obitools output). |
+| `resolve_names()` | 2 / 3 | Convert mixed-rank scientific names (Kraken2 / BestTaxon style) to 7 rank columns; synonym-aware. |
 
 ## Output
 
-`reconcile_checklist()` and `reconcile_global_local()` each return a list of
-three data frames, written as CSVs only when given an `output_dir`
-(`reconcile_global_local()` writes all three; `reconcile_checklist()` writes the
-`$result` and `$tracking` but not a per-step summary — the run-level
-`summarize_regatta()` report is the single summary):
-
-| Element | Contents |
-|---|---|
-| `$result` | The REGATTA exchange format — `ASV_id`, then `pct_id` (when the input carries one, normalized to a 0–100 percent scale), then the 7 rank columns, with ranks rewritten by the reconciliation. (For a phyloseq `tax_table()`, drop `pct_id` first.) |
-| `$tracking` | Per-ASV before/after audit trail (and, after `reconcile_global_local()`, the global-vs-local decision columns). |
-| `$stats` | Aggregate counts for that stage. |
-
 `run_regatta()` returns a list whose primary elements are `$taxonomy_table` (the
 final reconciled table), `$tracking` (the per-ASV audit — the augmented
-both-stages version for a two-DB run), and `$summary`. It writes the per-stage
+both-stages version for a Module 3 run), and `$summary`. It writes the per-stage
 `$result` + `$tracking` CSVs (no per-stage summary) — plus a single top-level
 `regatta_summary.csv` and a `run_log.txt` — into the dated run subfolder of
 `out_dir`.
 
+The reconcile steps each return a list of three data frames (written as CSVs only
+when given an `output_dir`):
+
+| Element | Contents |
+|---|---|
+| `$result` | The REGATTA exchange format — `ASV_id`, then `pct_id` (when the input carries one, normalized to a 0–100 percent scale), then the 7 rank columns, rewritten by the reconciliation. (For a phyloseq `tax_table()`, drop `pct_id` first.) |
+| `$tracking` | Per-ASV before/after audit trail (after `reconcile_global_local()`, each field's global / local / reconciled value side by side). |
+| `$stats` | Aggregate counts for that stage. |
+
 ## Caveats
 
-- **The regional checklist is only as good as its sources.** Names in your
-  local CSVs that don't resolve in NCBI become inert (they can never match
-  classifier output, which is also NCBI-canonical) — but they don't degrade
-  correctness.
-- **Two reconciliation jobs are distinct.** `reconcile_checklist()`
-  validates an assignment against the *region*. `reconcile_global_local()`
-  reconciles *two classifier runs* against each other. Use the latter only
-  when you have a second classifier output for the same ASVs.
+- **The regional checklist is only as good as its sources.** Names in your local
+  CSVs that don't resolve in NCBI become inert (they can never match classifier
+  output, which is also NCBI-canonical) — but they don't degrade correctness.
 - **Rank set is fixed at 7 levels:** `domain`, `phylum`, `class`, `order`,
   `family`, `genus`, `species`. Subspecies and superkingdom are not used.
 
 ## Status
 
 In development, heading toward a CRAN release and a companion methods paper.
-Function names and signatures are stabilizing but may still change before
-the first stable release.
+Function names and signatures are stabilizing but may still change before the
+first stable release.
 
 ## Authors
 
-Eldridge Wisely (Scripps Institution of Oceanography, UC San Diego),
-developer and maintainer, with contributions from Ella Crotty (OBIS and GBIF generalizations and summary output format).
+Eldridge Wisely (Scripps Institution of Oceanography, UC San Diego), developer
+and maintainer, with contributions from Ella Crotty (OBIS and GBIF
+generalizations and summary output format).
 
 ## License
 
