@@ -18,3 +18,6 @@ CLAUDE.local.md
 # Unpublished datasets for local testing/validation ONLY — never commit
 # (full Galapagos fish + crustacean datasets; not ours to publish here)
 data/
+
+# Generated analysis/comparison write-ups (kept locally, not in the repo)
+REGATTA_*.txt

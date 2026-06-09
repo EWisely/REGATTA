@@ -37,19 +37,21 @@
     if ("TAXID" %in% headers && "BEST_IDENTITY" %in% headers) {
       return("obitools_tab")
     }
-    # Scan a window of lines to find the first non-empty col 2 -- the
-    # LCA file has many rows where unassigned ASVs leave col 2 blank.
-    lines <- readLines(path, n = 30)
-    for (ln in lines) {
-      fields <- strsplit(ln, "\t", fixed = TRUE)[[1]]
-      if (length(fields) >= 2 && nzchar(fields[2])) {
-        if (length(fields) == 6 && grepl(";tax=", fields[2])) {
-          return("vsearch_userout")
+    # Find the FIRST row with a non-empty col 2 to classify on -- an LCA file
+    # leaves col 2 blank for every unassigned ASV, and there can be many such
+    # rows (hundreds) before the first assignment, so a fixed small window
+    # misses it. Read in blocks until the first assigned row (or EOF).
+    con <- file(path, "r"); on.exit(close(con), add = TRUE)
+    repeat {
+      block <- readLines(con, n = 2000, warn = FALSE)
+      if (length(block) == 0) break                       # EOF: no assigned row
+      for (ln in block) {
+        fields <- strsplit(ln, "\t", fixed = TRUE)[[1]]
+        if (length(fields) >= 2 && nzchar(fields[2])) {
+          if (length(fields) == 6 && grepl(";tax=", fields[2])) return("vsearch_userout")
+          if (length(fields) == 2 && grepl("^[dpcofgs]:", fields[2])) return("vsearch_lca")
+          return("unknown")                               # first assigned row fits neither
         }
-        if (length(fields) == 2 && grepl("^[dpcofgs]:", fields[2])) {
-          return("vsearch_lca")
-        }
-        break
       }
     }
   }
