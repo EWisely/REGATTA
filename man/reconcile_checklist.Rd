@@ -93,6 +93,6 @@ REGATTA exchange format), a per-ASV
 \code{output_dir} it writes two CSVs -- the \verb{$result} (\verb{_taxonomy_table.csv}) and
 \verb{$tracking} (\verb{_tracking.csv}); no per-step summary file is written (the
 run-level \code{summarize_regatta()} report is the single summary). If a prior
-\code{reconcile_global_local} output folder is present, the \verb{$tracking} written to
-disk is an \emph{augmented} version combining both stages.
+\code{reconcile_global_local} output folder is present, the returned (and written)
+\verb{$tracking} is an \emph{augmented} version combining both stages.
 }

@@ -86,9 +86,14 @@ when one exists, since only that path collapses long tables.}
 \code{best_pctid} step in \code{\link[=reconcile_global_local]{reconcile_global_local()}}.}
 }
 \value{
-Invisibly a list with the final tables and the
-\code{\link[=summarize_regatta]{summarize_regatta()}} data.frame. Always also writes the CSV outputs and
-\code{run_log.txt} into the dated run subfolder of \code{out_dir}.
+Invisibly, a list whose primary elements are \code{taxonomy_table} (the
+final reconciled per-ASV taxonomy table -- the same data as
+\code{reconcile_checklist/..._taxonomy_table.csv}), \code{tracking} (the per-ASV audit
+-- the augmented both-stages version for a two-DB run, matching
+\code{..._tracking.csv}), and \code{summary} (the \code{\link[=summarize_regatta]{summarize_regatta()}} data.frame).
+It also carries the per-step objects (\code{post_checklist}, and for a two-DB run
+\code{reconciled}) and the parsed input table(s). The same outputs are written as
+CSVs plus \code{run_log.txt} into the dated run subfolder of \code{out_dir}.
 }
 \description{
 One-call wrapper around \code{\link[=reconcile_global_local]{reconcile_global_local()}}, \code{\link[=reconcile_checklist]{reconcile_checklist()}},

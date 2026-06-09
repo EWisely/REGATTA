@@ -417,9 +417,14 @@
 #'     `global_lca*` + `global_userout*` etc.).
 #' }
 #'
-#' @return Invisibly a list with the final tables and the
-#'   [summarize_regatta()] data.frame. Always also writes the CSV outputs and
-#'   `run_log.txt` into the dated run subfolder of `out_dir`.
+#' @return Invisibly, a list whose primary elements are `taxonomy_table` (the
+#'   final reconciled per-ASV taxonomy table -- the same data as
+#'   `reconcile_checklist/..._taxonomy_table.csv`), `tracking` (the per-ASV audit
+#'   -- the augmented both-stages version for a two-DB run, matching
+#'   `..._tracking.csv`), and `summary` (the [summarize_regatta()] data.frame).
+#'   It also carries the per-step objects (`post_checklist`, and for a two-DB run
+#'   `reconciled`) and the parsed input table(s). The same outputs are written as
+#'   CSVs plus `run_log.txt` into the dated run subfolder of `out_dir`.
 #'
 #' @importFrom utils read.csv read.delim write.csv
 #' @export
@@ -502,8 +507,10 @@ run_regatta <- function(input,
     log_lines <- c(log_lines, "reconcile_checklist done")
 
     summ <- summarize_regatta(rec, post, g$table, l$table, checklist = cl)
-    result <- list(global_tax = g$table, local_tax = l$table,
-                   reconciled = rec, post_checklist = post, summary = summ)
+    result <- list(taxonomy_table = post$result, tracking = post$tracking,
+                   summary = summ,
+                   reconciled = rec, post_checklist = post,
+                   global_tax = g$table, local_tax = l$table)
   } else {
     c1 <- .regatta_read_input(norm$classifier[[1]], sql_path, id_col = id_col,
                               overwrite_taxonomy_files = overwrite_taxonomy_files)
@@ -518,7 +525,9 @@ run_regatta <- function(input,
 
     summ <- summarize_regatta(post_checklist = post, input_file = c1$table,
                               checklist = cl)
-    result <- list(input_tax = c1$table, post_checklist = post, summary = summ)
+    result <- list(taxonomy_table = post$result, tracking = post$tracking,
+                   summary = summ,
+                   post_checklist = post, input_tax = c1$table)
   }
 
   log_lines <- c(log_lines,

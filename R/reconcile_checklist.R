@@ -78,8 +78,8 @@
 #' `output_dir` it writes two CSVs -- the `$result` (`_taxonomy_table.csv`) and
 #' `$tracking` (`_tracking.csv`); no per-step summary file is written (the
 #' run-level `summarize_regatta()` report is the single summary). If a prior
-#' `reconcile_global_local` output folder is present, the `$tracking` written to
-#' disk is an *augmented* version combining both stages.
+#' `reconcile_global_local` output folder is present, the returned (and written)
+#' `$tracking` is an *augmented* version combining both stages.
 #'
 #' @param taxonomy_table A data.frame with `id_col` + 7 lowercase rank
 #'   columns. Additional metadata columns are passed through to `$tracking`
@@ -342,6 +342,12 @@ reconcile_checklist <- function(taxonomy_table,
   }
   tracking$regatta_reason <- reason
 
+  # The returned (and written) $tracking is augmented with the prior
+  # reconcile_global_local tracking when one is present, so the in-memory object
+  # matches the reconcile_checklist_tracking.csv on disk. Without a prior it is
+  # the plain checklist-step tracking.
+  tracking_to_write <- tracking
+
   if (!is.null(output_dir)) {
     dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 
@@ -351,9 +357,7 @@ reconcile_checklist <- function(taxonomy_table,
 
     # No per-step summary is written -- the run-level regatta_summary (from
     # summarize_regatta()) is the single report; $stats is returned for callers
-    # who want the per-step numbers programmatically. Tracking is still written,
-    # and augmented with the prior reconcile_global_local tracking if present.
-    tracking_to_write   <- tracking
+    # who want the per-step numbers programmatically.
     prior_tracking_path <- if (!is.null(prior_dir))
       file.path(prior_dir, paste0(prior_prefix, "_tracking.csv")) else NULL
     prior_detected <- !is.null(prior_tracking_path) && file.exists(prior_tracking_path)
@@ -380,5 +384,5 @@ reconcile_checklist <- function(taxonomy_table,
             "tracking to ", normalizePath(output_dir))
   }
 
-  list(result = result, tracking = tracking, stats = stats)
+  list(result = result, tracking = tracking_to_write, stats = stats)
 }
