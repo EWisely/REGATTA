@@ -76,27 +76,27 @@ canonical taxonomy before the comparison (e.g. *Lagenorhynchus obliquidens* →
 
 ```mermaid
 flowchart TD
-    subgraph M1["MODULE 1 · Build the regional species checklist"]
+    %% Subgraphs declared in REVERSE (3, 2, 1): the render mirrors the
+    %% declaration order, so this lays them out Module 1 (left) -> 2 -> 3 (right).
+    subgraph MOD3["MODULE 3 (optional)<br/>Reconcile alternate-database<br/>results, then the checklist"]
+        GL["Second classifier output<br/>(same ASVs, second DB)"]
+        Q[reconcile_global_local]
+    end
+
+    subgraph MOD2["MODULE 2<br/>Reconcile eDNA taxa<br/>with the regional checklist"]
+        G["One classifier output<br/>obitools / vsearch / Kraken2 / BLAST / …"]
+    end
+
+    subgraph M1["MODULE 1<br/>Build the regional species checklist"]
         A[OBIS_download] --> D[build_regional_checklist]
         B[GBIF_download] --> D
         C["local CSV(s)"] --> D
         D --> E[taxonomize_checklist] --> F[("Regional checklist<br/>7 ranks, taxonomized")]
     end
 
-    subgraph MOD2["MODULE 2 · Reconcile eDNA taxa with the regional checklist"]
-        G["One classifier output<br/>obitools / vsearch / Kraken2 / BLAST / …"]
-    end
-
-    subgraph MOD3["MODULE 3 (optional) · Reconcile alternate-database results, then the checklist"]
-        GL["Second classifier output<br/>(same ASVs, second DB)"]
-        Q[reconcile_global_local]
-    end
-
-    %% edges into reconcile_checklist declared M3, M2, M1 -- the first-declared
-    %% edge lands rightmost, so this reads Module 1 (left) -> 2 -> 3 (right)
-    Q -.-> M[reconcile_checklist]
+    F ==> M[reconcile_checklist]
     G ==> M
-    F ==> M
+    Q -.-> M
     M ==> RES[("taxonomy_table<br/>tracking · summary")]
 
     GL -.-> Q
