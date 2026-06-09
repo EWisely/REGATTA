@@ -78,29 +78,34 @@ canonical taxonomy before the comparison (e.g. *Lagenorhynchus obliquidens* →
 flowchart TD
     %% Subgraphs declared in REVERSE (3, 2, 1): the render mirrors the
     %% declaration order, so this lays them out Module 1 (left) -> 2 -> 3 (right).
-    subgraph MOD3["MODULE 3 (optional)<br/>Reconcile alternate-database<br/>results, then the checklist"]
+    %% (Multi-line subgraph titles render below the box on GitHub's mermaid, so
+    %% the titles are kept to one line; full descriptions are in the text above.)
+    subgraph MOD3["MODULE 3 (optional) · Reconcile two databases, then the checklist"]
         GL["Second classifier output<br/>(same ASVs, second DB)"]
+        RR3["run_regatta(list(global=, local=))"]
         Q[reconcile_global_local]
+        GL --> RR3 --> Q
     end
 
-    subgraph MOD2["MODULE 2<br/>Reconcile eDNA taxa<br/>with the regional checklist"]
+    subgraph MOD2["MODULE 2 · Reconcile eDNA taxa with the regional checklist"]
         G["One classifier output<br/>obitools / vsearch / Kraken2 / BLAST / …"]
+        RR2["run_regatta(input = one output)"]
+        G --> RR2
     end
 
-    subgraph M1["MODULE 1<br/>Build the regional species checklist"]
+    subgraph M1["MODULE 1 · Build the regional species checklist"]
         A[OBIS_download] --> D[build_regional_checklist]
         B[GBIF_download] --> D
         C["local CSV(s)"] --> D
-        D --> E[taxonomize_checklist] --> F[("Regional checklist<br/>7 ranks, taxonomized")]
+        D --> F[("Regional checklist<br/>7 ranks, taxonomized")]
     end
 
     F ==> M[reconcile_checklist]
-    G ==> M
+    RR2 ==> M
     Q -.-> M
     M ==> RES[("taxonomy_table<br/>tracking · summary")]
 
-    GL -.-> Q
-    G -.-> Q
+    G -. "global" .-> RR3
 ```
 
 The solid path (one classifier → `reconcile_checklist`) is **Module 2**. **Module
