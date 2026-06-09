@@ -30,10 +30,12 @@ before the checklist step, rather than silently trusting whichever ran last.
 
 A common eDNA setup classifies each ASV twice:
 
-- against a **global** reference database (e.g. obitools + NCBI/EMBL), which has
-  broad coverage but confidently names species from anywhere in the world, and
-- against a **locally-curated** database (e.g. vsearch+SINTAX + a regional
-  reference), which is sparser but regionally trustworthy.
+- against a **global** reference database (here, obitools against sequences from
+  EMBL), which has broad coverage but confidently names species from anywhere in
+  the world, and
+- against a **locally-curated** database (here, vsearch against a regional
+  reference curated from NCBI sequences), which is sparser but regionally
+  trustworthy.
 
 `reconcile_global_local()` combines the two **before** the checklist step: per
 ASV it keeps the call with the higher percent identity, and when the global
@@ -60,7 +62,7 @@ library(REGATTA)
 
 res <- run_regatta(
   input = list(
-    global = "MiFish_obitools.tab",                 # obitools (global NCBI DB)
+    global = "MiFish_obitools.tab",                 # obitools (global EMBL DB)
     local  = c("MiFish_vsearch_lca.txt",            # vsearch LCA taxonomy
                "MiFish_vsearch_userout.txt")        # vsearch %ID
   ),

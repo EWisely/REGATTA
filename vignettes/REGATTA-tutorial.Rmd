@@ -242,7 +242,7 @@ The main returned elements are:
 | `cl$for_making_localdb` | A character vector of unique species binomials. This is also written one name per line for use with FASTA-building tools such as CRABS. |
 | `cl$checklist_summary` | The full taxonomized checklist, including how each name resolved. This is useful for auditing. It is `NULL` if no taxonomy database was available. |
 | `cl$for_LCA` | The taxID column plus seven taxonomic ranks, cleaned and ready to pass to `run_regatta(checklist = cl$for_LCA)`. |
-| `cl$methods` | A ready-to-adapt methods and provenance record, including region, label, queried taxa, sources, date, WKT polygon, taxonomy snapshot date, and relevant citations. |
+| `cl$methods` | A ready-to-adapt methods and provenance record, including region, label, queried taxa, sources, date, WKT polygon, taxonomy snapshot date, and relevant citations. Verify each reference against your own reference manager before submission. |
 
 ---
 
