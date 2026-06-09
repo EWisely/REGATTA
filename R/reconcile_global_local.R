@@ -388,9 +388,21 @@ reconcile_global_local <- function(global_table,
     stringsAsFactors = FALSE
   )
 
+  # This step's transition headline: of the assigned ASVs, how many kept the
+  # winning DB's full specificity vs were downgraded by the global_lca_to_local
+  # LCA. Shares row labels with reconcile_checklist()'s transition so the report
+  # can show both steps' counts side by side.
+  n_downgraded <- length(glc_pairs)
+  n_assigned   <- sum(!is.na(database))
+  stats <- rbind(stats, data.frame(
+    metric = c("ASVs unchanged (specificity kept)",
+               "ASVs downgraded (specificity reduced)"),
+    count  = c(n_assigned - n_downgraded, n_downgraded),
+    stringsAsFactors = FALSE))
+
   # Of the global_lca_to_local rows that actually downgraded, the rank-pair
-  # breakdown (global's call rank -> the LCA rank). Sums to <= the triggered
-  # count; the rest were triggered but agreed to global's depth (no downgrade).
+  # breakdown (global's call rank -> the LCA rank). Sums to the downgraded count
+  # above; the rest were triggered but agreed to global's depth (no downgrade).
   if (length(glc_pairs)) {
     pt <- sort(table(glc_pairs), decreasing = TRUE)
     stats <- rbind(stats, data.frame(metric = names(pt),

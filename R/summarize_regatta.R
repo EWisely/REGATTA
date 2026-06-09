@@ -312,13 +312,17 @@ summarize_regatta <- function(reconciled     = NULL,
     v <- reconciled$stats$count[reconciled$stats$metric == "global_lca_to_local triggered"]
     if (length(v)) add("global_lca_to_local triggered", "regatta_global_local_result", v[1])
   }
-  # 2. checklist transition headline (drop the always-zero "dropped" row)
+  # 2. shared transition headline -- unchanged / downgraded from EACH step into
+  #    its own column (both steps downgrade); plus the checklist-only "dropped"
+  #    row when nonzero
+  hl <- function(st, col) for (m in c("ASVs unchanged (specificity kept)",
+                                      "ASVs downgraded (specificity reduced)")) {
+    v <- st$count[st$metric == m]; if (length(v)) add(m, col, v[1])
+  }
+  if (gl_ok) hl(reconciled$stats,     "regatta_global_local_result")
+  if (ck_ok) hl(post_checklist$stats, "regatta_checklist_result")
   if (ck_ok) {
-    ps <- post_checklist$stats
-    for (m in c("ASVs unchanged (specificity kept)", "ASVs downgraded (specificity reduced)")) {
-      v <- ps$count[ps$metric == m]; if (length(v)) add(m, "regatta_checklist_result", v[1])
-    }
-    d <- ps$count[ps$metric == "no regional record (call dropped)"]
+    d <- post_checklist$stats$count[post_checklist$stats$metric == "no regional record (call dropped)"]
     if (length(d) && d[1] > 0) add("no regional record (call dropped)", "regatta_checklist_result", d[1])
   }
   # 3. shared per-rank-pair downgrade breakdown -- each step into its own column

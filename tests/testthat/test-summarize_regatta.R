@@ -104,10 +104,15 @@ test_that("two-DB has four columns; source-breakdown lives only in the global_lo
     expect_false(is.na(row$regatta_global_local_result))   # value here
     expect_true(is.na(row$regatta_checklist_result))       # NA in the checklist column
   }
-  # the checklist transition lands in the checklist column, NA in the global_local one
+  # the transition headline is SHARED: both steps downgrade, so the row carries
+  # a count in each step's column
   dn <- s[s$row_names == "ASVs downgraded (specificity reduced)", ]
-  expect_true(is.na(dn$regatta_global_local_result))
-  expect_false(is.na(dn$regatta_checklist_result))
+  expect_false(is.na(dn$regatta_global_local_result))   # the LCA downgraded some
+  expect_false(is.na(dn$regatta_checklist_result))       # the checklist downgraded some
+  # the global-local-only headline stays in its own column
+  tg <- s[s$row_names == "global_lca_to_local triggered", ]
+  expect_false(is.na(tg$regatta_global_local_result))
+  expect_true(is.na(tg$regatta_checklist_result))
   # local-preferred + global-preferred = ASVs the global DB assigned (denominator)
   lp <- s$regatta_global_local_result[s$row_names == "count of local assignment preferred"]
   gp <- s$regatta_global_local_result[s$row_names == "count of global assignment preferred"]
