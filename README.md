@@ -356,9 +356,8 @@ when given an `output_dir`):
 
 ## Status
 
-In development, heading toward a CRAN release and a companion methods paper.
-Function names and signatures are stabilizing but may still change before the
-first stable release.
+Ready for release. Function names and signatures are stable, and the package
+is heading toward a CRAN submission and a companion methods paper.
 
 ## Authors
 
