@@ -118,6 +118,26 @@ test_that("an unrecognized CSV gives an informative error listing columns + form
   expect_match(err, "pre-resolved taxonomy CSV")
 })
 
+test_that("run_regatta never silently reuses an existing run folder", {
+  tmp  <- tempfile(); dir.create(tmp)
+  base <- file.path(tmp, paste0("r_l_", Sys.Date()))
+
+  d1 <- REGATTA:::.regatta_resolve_run_dir(tmp, "r", "l")
+  expect_equal(normalizePath(d1), normalizePath(base))   # first run: the base folder
+
+  # a second run the same day must NOT reuse base: non-interactively it warns and
+  # writes to a new (_2) folder, leaving the existing outputs untouched
+  expect_warning(d2 <- REGATTA:::.regatta_resolve_run_dir(tmp, "r", "l"),
+                 "already exists")
+  expect_equal(basename(d2), paste0("r_l_", Sys.Date(), "_2"))
+  expect_true(dir.exists(d2))
+
+  # overwrite = TRUE replaces the base folder (no new _3)
+  d3 <- REGATTA:::.regatta_resolve_run_dir(tmp, "r", "l", overwrite = TRUE)
+  expect_equal(normalizePath(d3), normalizePath(base))
+  expect_false(dir.exists(paste0(base, "_3")))
+})
+
 test_that("a vsearch lca with many leading unassigned rows is still detected", {
   # real datasets can have hundreds of unassigned ASVs (blank col 2) before the
   # first assignment -- detection must not give up after a small fixed window.

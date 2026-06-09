@@ -12,6 +12,7 @@ run_regatta(
   label,
   sql_path = .regatta_default_sql_path(),
   overwrite_taxonomy_files = FALSE,
+  overwrite = FALSE,
   id_col = "ASV_id",
   Local_advantage = TRUE
 )
@@ -62,6 +63,13 @@ names+nodes only.)}
 \item{overwrite_taxonomy_files}{If \code{TRUE}, (re)build the taxonomy DB at
 \code{sql_path} even if one exists. Default \code{FALSE}. See
 \code{\link[=build_regional_checklist]{build_regional_checklist()}}.}
+
+\item{overwrite}{Controls what happens when this run's dated
+\verb{<region>_<label>_<Date>} folder already exists (e.g. a second run of the
+same region/label the same day). \code{FALSE} (default): never silently reuse it
+-- interactively you are asked to overwrite or write to a new (\verb{_2}, \verb{_3},
+...) folder; non-interactively a new folder is created with a warning.
+\code{TRUE}: replace the existing folder.}
 
 \item{id_col}{Name of the per-ASV identifier column. Default
 \code{"ASV_id"} (matches the obitools and vsearch preprocessors). For
