@@ -17,13 +17,19 @@ specificity as the regional evidence supports.
 Global reference databases (NCBI, EMBL, etc.) confidently assign eDNA reads to
 species that don't actually live in your study area, even within the group your
 primer targets (for example, a freshwater fish called from marine fish-primer
-data). This is **not** off-target amplification: the read is still a fish, but
-the species-level *name* is geographically implausible. It typically happens
+data). This is not off-target amplification: the read is still a fish, but the
+species-level assignment is geographically implausible. It typically happens
 because the true local species is absent from the database, so the read matches
 its nearest sequenced relative at the amplified region. Lab contamination or
-degraded input DNA can contribute too. The usual fixes, hand-curating a local
-reference database or applying a flat percent-identity cutoff, are either
-non-reproducible or sacrifice specificity unnecessarily.
+degraded input DNA can contribute too.
+
+Two common alternatives have drawbacks of their own. Classifying against a local,
+region-specific reference database does make non-local assignments impossible,
+but that database is only a subset of the global one, so it classifies far fewer
+reads, giving up any assignment at all for reads whose local species is not in
+it. Hand-curating a reference database is less flexible, and less reproducible
+and citeable, than a date-stamped download from public biodiversity databases,
+which carries a persistent DOI in the case of GBIF.
 
 ## How REGATTA helps
 
