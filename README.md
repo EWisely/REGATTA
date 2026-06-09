@@ -75,7 +75,7 @@ canonical taxonomy before the comparison (e.g. *Lagenorhynchus obliquidens* →
 *Sagmatias obliquidens*). A synonym on either side still matches in the LCA walk.
 
 ```mermaid
-%%{init: {"flowchart": {"rankSpacing": 30}}}%%
+%%{init: {"flowchart": {"rankSpacing": 20}}}%%
 flowchart TD
     %% Subgraphs declared 3, 2, 1 so the render (its mirror) reads 1 -> 2 -> 3.
     %% Module titles are borderless header NODES: multi-line node labels render
@@ -98,7 +98,7 @@ flowchart TD
     end
 
     subgraph M1[" "]
-        H1["<b>MODULE 1</b><br/>Build the regional species checklist"]:::modtitle
+        H1["<b>MODULE 1</b> Build the regional species checklist"]:::modtitle
         A[OBIS_download] --> D[build_regional_checklist]
         B[GBIF_download] --> D
         C["local CSV(s)"] --> D
