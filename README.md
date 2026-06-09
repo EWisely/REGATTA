@@ -14,33 +14,37 @@ specificity as the regional evidence supports.
 
 ## The problem
 
-Global reference databases (NCBI, EMBL, etc.) confidently assign eDNA reads to
-species that don't actually live in your study area, even within the group your
-primer targets (for example, a freshwater fish called from marine fish-primer
-data). This is not off-target amplification: the read is still a fish, but the
-species-level assignment is geographically implausible. It typically happens
-because the true local species is absent from the database, so the read matches
-its nearest sequenced relative at the amplified region. Lab contamination or
-degraded input DNA can contribute too.
+Global reference databases such as NCBI and EMBL are broad, but they are not
+geographically constrained. As a result, they can confidently assign eDNA reads
+to species that do not occur in the study region, even when the read belongs to
+the taxonomic group targeted by the primer. For example, a fish primer may return
+a confident species-level fish assignment for a species that is freshwater,
+non-local, or otherwise implausible in a marine study area. This is different from
+off-target amplification: the read is still within the target group, but the
+species-level assignment is geographically unsupported. These calls often arise
+when the true local species is absent from the reference database and the read
+matches the closest sequenced relative available at the amplified marker. Lab
+contamination, degraded input DNA, or other artifacts can also produce non-local
+assignments.
 
-Two common alternatives have drawbacks of their own. Classifying against a local,
-region-specific reference database does make non-local assignments impossible,
-but that database is only a subset of the global one, so it classifies far fewer
-reads, giving up any assignment at all for reads whose local species is not in
-it. Hand-curating a reference database is less flexible, and less reproducible
-and citeable, than a date-stamped download from public biodiversity databases,
-which carries a persistent DOI in the case of GBIF.
+A common workaround is to classify reads against a local reference database built
+from a hand-curated regional species list. This prevents non-local species names
+from appearing in the classifier output, but local databases are often specific
+to an individual researcher, working group, study system, or publication. They
+can be powerful, but they are not always easy to update, adapt to new regions or
+primer targets, reproduce exactly, or cite in a standardized way. They also do
+not solve the problem of how to interpret existing global-database assignments
+that are genetically plausible but geographically unsupported.
 
 ## How REGATTA helps
 
-REGATTA compares each classifier assignment against a checklist of the species
-known from your region, which it assembles automatically from public
-biodiversity databases. When an assigned species has a regional record, REGATTA
-keeps the species-level call. When it does not, REGATTA walks the assignment up
-the taxonomic tree only as far as the regional evidence requires, downgrading to
-genus, family, or a higher rank instead of discarding the read. The result is
-reproducible, needs no hand-curated reference database, and keeps as much
-taxonomic specificity as the regional checklist can support.
+REGATTA addresses both needs with the same regional checklist. First, it builds a
+flexible, reproducible, and citable species list from public biodiversity
+databases and optional local sources. That list can be used to build a local
+reference database for future classifier runs. Second, REGATTA uses the same
+checklist to reconcile global-database classifier output, retaining species-level
+assignments when they are regionally supported and downgrading unsupported
+assignments only as far as the checklist requires.
 
 ## The three modules
 
