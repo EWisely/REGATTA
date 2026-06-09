@@ -83,19 +83,20 @@ flowchart TD
         D --> E[taxonomize_checklist] --> F[("Regional checklist<br/>7 ranks, taxonomized")]
     end
 
-    subgraph MOD2["MODULE 2"]
+    subgraph MOD2["MODULE 2 · Reconcile eDNA taxa with the regional checklist"]
         G["One classifier output<br/>obitools / vsearch / Kraken2 / BLAST / …"]
     end
 
-    subgraph MOD3["MODULE 3 (optional)"]
+    subgraph MOD3["MODULE 3 (optional) · Reconcile alternate-database results, then the checklist"]
         GL["Second classifier output<br/>(same ASVs, second DB)"]
         Q[reconcile_global_local]
     end
 
-    %% edges into reconcile_checklist declared M1, M2, M3 so they read left-to-right
-    F ==> M[reconcile_checklist]
+    %% edges into reconcile_checklist declared M3, M2, M1 -- the first-declared
+    %% edge lands rightmost, so this reads Module 1 (left) -> 2 -> 3 (right)
+    Q -.-> M[reconcile_checklist]
     G ==> M
-    Q -.-> M
+    F ==> M
     M ==> RES[("taxonomy_table<br/>tracking · summary")]
 
     GL -.-> Q
