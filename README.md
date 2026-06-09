@@ -75,6 +75,7 @@ canonical taxonomy before the comparison (e.g. *Lagenorhynchus obliquidens* →
 *Sagmatias obliquidens*). A synonym on either side still matches in the LCA walk.
 
 ```mermaid
+%%{init: {"flowchart": {"rankSpacing": 30}}}%%
 flowchart TD
     %% Subgraphs declared 3, 2, 1 so the render (its mirror) reads 1 -> 2 -> 3.
     %% Module titles are borderless header NODES: multi-line node labels render
