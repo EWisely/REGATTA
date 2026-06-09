@@ -289,8 +289,15 @@ reconcile_global_local <- function(global_table,
     database[global_lca_to_local_triggered] <- "global_lca_to_local"
   }
 
-  database[both_unassigned]        <- NA_character_
-  preferred_pctid[both_unassigned] <- NA_real_
+  # An ASV whose preferred lineage came out entirely empty is not assigned --
+  # either both DBs were unassigned, or a global_lca_to_local row where global
+  # and local share no rank at all (empty LCA, e.g. a cross-domain
+  # disagreement). Mark it unassigned so the database label, pct_id, and the
+  # "assigned" count stay consistent with the (empty) lineage.
+  empty_lineage <- rowSums(!is.na(as.matrix(preferred_lineage[, ranks]))) == 0
+  database[empty_lineage]                      <- NA_character_
+  preferred_pctid[empty_lineage]               <- NA_real_
+  global_lca_to_local_triggered[empty_lineage] <- FALSE
 
   # Lowest non-NA rank in the preferred lineage
   preferred_scientific_name <- vapply(seq_len(nrow(joined)), function(i) {

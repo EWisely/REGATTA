@@ -58,6 +58,27 @@ test_that("a 0-1 global pct_id is auto-rescaled before comparison", {
   expect_equal(rec2$tracking$preferred_database[i], "global_lca_to_local")
 })
 
+test_that("global_lca_to_local with no shared rank is consistently unassigned", {
+  # global wins %ID but local disagrees at EVERY rank (cross-domain) -> the LCA
+  # is empty. The row must be unassigned everywhere consistently, not counted as
+  # assigned with an empty lineage.
+  mk <- function(lin, pid) {
+    d <- as.data.frame(as.list(stats::setNames(lin, ranks)), stringsAsFactors = FALSE)
+    d$ASV_id <- "X"; d$pct_id <- pid; d
+  }
+  g <- mk(c("Eukaryota","Chordata","Actinopteri","Perciformes","Serranidae",
+            "Epinephelus","Epinephelus bontoides"), 99)
+  l <- mk(c("Bacteria","Firmicutes","Bacilli","Bacillales","Bacillaceae",
+            "Bacillus","Bacillus subtilis"), 98)
+  rec3 <- suppressMessages(reconcile_global_local(
+    g, l, global_pct_id_scale = "0-100", local_pct_id_scale = "0-100"))
+  expect_true(all(is.na(rec3$result[1, ranks])))         # empty preferred lineage
+  expect_true(is.na(rec3$tracking$preferred_database))   # -> not "global_lca_to_local"
+  expect_true(is.na(rec3$result$pct_id))                 # -> no carried pct_id
+  expect_false(rec3$tracking$global_lca_to_local_triggered)
+  expect_equal(rec3$stats$count[rec3$stats$metric == "assigned ASVs"], 0)
+})
+
 test_that("missing required columns error", {
   bad <- data.frame(ASV_id = "A1", domain = "Eukaryota", stringsAsFactors = FALSE)
   expect_error(reconcile_global_local(bad, bad, output_dir = NULL),
