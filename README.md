@@ -76,36 +76,41 @@ canonical taxonomy before the comparison (e.g. *Lagenorhynchus obliquidens* →
 
 ```mermaid
 flowchart TD
-    %% Subgraphs declared in REVERSE (3, 2, 1): the render mirrors the
-    %% declaration order, so this lays them out Module 1 (left) -> 2 -> 3 (right).
-    %% (Multi-line subgraph titles render below the box on GitHub's mermaid, so
-    %% the titles are kept to one line; full descriptions are in the text above.)
-    subgraph MOD3["MODULE 3 (optional) · Reconcile two databases, then the checklist"]
+    %% Subgraphs declared 3, 2, 1 so the render (its mirror) reads 1 -> 2 -> 3.
+    %% Module titles are borderless header NODES: multi-line node labels render
+    %% cleanly and reserve vertical space, whereas a multi-line subgraph title
+    %% would overlap the box content on GitHub's mermaid.
+    classDef modtitle fill:none,stroke:none;
+
+    subgraph MOD3[" "]
+        H3["<b>MODULE 3 (optional)</b><br/>Reconcile alternate-database results,<br/>then the checklist"]:::modtitle
         GL["Second classifier output<br/>(same ASVs, second DB)"]
-        RR3["run_regatta(list(global=, local=))"]
         Q[reconcile_global_local]
-        GL --> RR3 --> Q
+        H3 ~~~ GL
+        GL -.-> Q
     end
 
-    subgraph MOD2["MODULE 2 · Reconcile eDNA taxa with the regional checklist"]
+    subgraph MOD2[" "]
+        H2["<b>MODULE 2</b><br/>Reconcile eDNA taxa<br/>with the regional checklist"]:::modtitle
         G["One classifier output<br/>obitools / vsearch / Kraken2 / BLAST / …"]
-        RR2["run_regatta(input = one output)"]
-        G --> RR2
+        H2 ~~~ G
     end
 
-    subgraph M1["MODULE 1 · Build the regional species checklist"]
+    subgraph M1[" "]
+        H1["<b>MODULE 1</b><br/>Build the regional species checklist"]:::modtitle
         A[OBIS_download] --> D[build_regional_checklist]
         B[GBIF_download] --> D
         C["local CSV(s)"] --> D
         D --> F[("Regional checklist<br/>7 ranks, taxonomized")]
+        H1 ~~~ A
     end
 
     F ==> M[reconcile_checklist]
-    RR2 ==> M
+    G ==> M
     Q -.-> M
     M ==> RES[("taxonomy_table<br/>tracking · summary")]
 
-    G -. "global" .-> RR3
+    G -.-> Q
 ```
 
 The solid path (one classifier → `reconcile_checklist`) is **Module 2**. **Module
