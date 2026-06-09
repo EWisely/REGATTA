@@ -109,10 +109,8 @@ test_that("two-DB has four columns; source-breakdown lives only in the global_lo
   dn <- s[s$row_names == "ASVs downgraded (specificity reduced)", ]
   expect_false(is.na(dn$regatta_global_local_result))   # the LCA downgraded some
   expect_false(is.na(dn$regatta_checklist_result))       # the checklist downgraded some
-  # the global-local-only headline stays in its own column
-  tg <- s[s$row_names == "global_lca_to_local triggered", ]
-  expect_false(is.na(tg$regatta_global_local_result))
-  expect_true(is.na(tg$regatta_checklist_result))
+  # the per-ASV global_lca_to_local triggered flag is in the tracking, not here
+  expect_false(any(s$row_names == "global_lca_to_local triggered"))
   # local-preferred + global-preferred = ASVs the global DB assigned (denominator)
   lp <- s$regatta_global_local_result[s$row_names == "count of local assignment preferred"]
   gp <- s$regatta_global_local_result[s$row_names == "count of global assignment preferred"]

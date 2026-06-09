@@ -89,10 +89,10 @@
 #'   always is when the walk reaches domain), one `downgraded: <from> -> <to>`
 #'   row per rank pair that occurred, and (when the checklist carries a target
 #'   group) the off-target/non-local breakdown -- so the total row count is
-#'   dynamic, varying with the data. The per-rank-pair `downgraded: <from> ->
-#'   <to>` rows are shared across steps: each carries the global-local count and
-#'   the checklist count in their respective columns (a two-DB run also adds a
-#'   `global_lca_to_local triggered` headline in `regatta_global_local_result`).
+#'   dynamic, varying with the data. The transition headline rows (`ASVs
+#'   unchanged`/`downgraded`) and the per-rank-pair `downgraded: <from> -> <to>`
+#'   rows are shared across steps: each carries the global-local count and the
+#'   checklist count in their respective columns.
 #'
 #' @export
 summarize_regatta <- function(reconciled     = NULL,
@@ -307,14 +307,11 @@ summarize_regatta <- function(reconciled     = NULL,
   gl_ok <- has_stats(reconciled)     && "regatta_global_local_result" %in% stage_cols
   ck_ok <- has_stats(post_checklist) && "regatta_checklist_result"     %in% stage_cols
 
-  # 1. global-local step headline
-  if (gl_ok) {
-    v <- reconciled$stats$count[reconciled$stats$metric == "global_lca_to_local triggered"]
-    if (length(v)) add("global_lca_to_local triggered", "regatta_global_local_result", v[1])
-  }
-  # 2. shared transition headline -- unchanged / downgraded from EACH step into
-  #    its own column (both steps downgrade); plus the checklist-only "dropped"
-  #    row when nonzero
+  # (The per-ASV global_lca_to_local_triggered flag lives in the tracking file,
+  # not the summary.)
+  # Shared transition headline -- unchanged / downgraded from EACH step into
+  # its own column (both steps downgrade); plus the checklist-only "dropped"
+  # row when nonzero
   hl <- function(st, col) for (m in c("ASVs unchanged (specificity kept)",
                                       "ASVs downgraded (specificity reduced)")) {
     v <- st$count[st$metric == m]; if (length(v)) add(m, col, v[1])
