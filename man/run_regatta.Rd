@@ -12,7 +12,7 @@ run_regatta(
   label,
   sql_path = .regatta_default_sql_path(),
   overwrite_taxonomy_files = FALSE,
-  overwrite = FALSE,
+  overwrite = TRUE,
   id_col = "ASV_id",
   Local_advantage = TRUE
 )
@@ -66,10 +66,10 @@ names+nodes only.)}
 
 \item{overwrite}{Controls what happens when this run's dated
 \verb{<region>_<label>_<Date>} folder already exists (e.g. a second run of the
-same region/label the same day). \code{FALSE} (default): never silently reuse it
--- interactively you are asked to overwrite or write to a new (\verb{_2}, \verb{_3},
-...) folder; non-interactively a new folder is created with a warning.
-\code{TRUE}: replace the existing folder.}
+same region/label the same day). \code{TRUE} (default): delete that folder and
+start fresh, so the new run never mixes with the old one. \code{FALSE}: leave the
+old folder alone and write this run to a new numbered (\verb{_2}, \verb{_3}, ...)
+folder. Either way the existing run is never written into on top of.}
 
 \item{id_col}{Name of the per-ASV identifier column. Default
 \code{"ASV_id"} (matches the obitools and vsearch preprocessors). For
