@@ -42,11 +42,17 @@ You give REGATTA three things:
    produced (obitools `.tab`, vsearch, Kraken2/BestTaxon, …). The format is
    auto-detected.
 
-This tutorial runs the whole pipeline on the package's worked example —
-**Galapagos reef fish from the MiFish primer, classified with obitools against
-the global NCBI database.** Nothing in the pipeline is fish-, marine-, or
-Galapagos-specific; swap in your own group, polygon, and results file and the
-calls are identical.
+REGATTA is organized as three modules. This tutorial covers the first two:
+**Module 1** — build the regional species checklist (run it on its own for a
+species list, or as the prequel to the rest) — and **Module 2** — reconcile one
+classifier's output against that checklist. **Module 3** (reconciling a global +
+a local database before the checklist) is in
+`vignette("REGATTA-two-database")`.
+
+It runs on the package's worked example — **Galapagos reef fish from the MiFish
+primer, classified with obitools against the global NCBI database.** Nothing in
+the pipeline is fish-, marine-, or Galapagos-specific; swap in your own group,
+polygon, and results file and the calls are identical.
 
 ---
 
@@ -77,6 +83,13 @@ tools::R_user_dir("REGATTA", "cache")
 pre-taxonomized checklist bundled with the package.)
 
 ---
+
+# Module 1 — Build the regional species checklist
+
+This module assembles a taxonomized regional species list from public
+biodiversity databases (and any local checklists you have). Its output feeds
+Module 2 below — but it is also useful on its own if you just want a clean
+species list for a region × group.
 
 ## `resolve_taxa()`
 
@@ -251,6 +264,12 @@ checklist <- taxonomize_checklist(
 
 ---
 
+# Module 2 — Reconcile your classifier against the checklist
+
+With the Module 1 checklist in hand, this module takes your taxonomy-assignment
+software's output and walks each call up the tree only as far as the regional
+checklist forces — so the eDNA assignment and the regional range limits agree.
+
 ## `run_regatta()`
 
 **Why this matters:** once the checklist is taxonomized, one call turns your raw
@@ -390,9 +409,9 @@ CSVs per stage):
   per-ASV id column isn't `ASV_id` (e.g. a sequence `Hash`), pass
   `id_col = "Hash"`; a long per-sample table is collapsed to one row per ASV
   automatically. See `?run_regatta`.
-* **Two reference databases?** If you classified the same ASVs against both a
-  global and a locally-curated database, REGATTA can reconcile the two
-  classifier runs against each other before the checklist step. See
+* **Two reference databases? (Module 3)** If you classified the same ASVs
+  against both a global and a locally-curated database, REGATTA can reconcile the
+  two classifier runs against each other before the checklist step. See
   `vignette("REGATTA-two-database")` and `?reconcile_global_local`.
 * **One pass per primer.** Run the pipeline once per taxonomic group your
   primers target. This also keeps genuine off-target amplifications (a
