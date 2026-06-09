@@ -83,13 +83,22 @@ flowchart TD
         D --> E[taxonomize_checklist] --> F[("Regional checklist<br/>7 ranks, taxonomized")]
     end
 
-    G["One classifier output<br/>obitools / vsearch / Kraken2 / BLAST / …"] ==> M[reconcile_checklist]
+    subgraph MOD2["MODULE 2"]
+        G["One classifier output<br/>obitools / vsearch / Kraken2 / BLAST / …"]
+    end
+
+    subgraph MOD3["MODULE 3 (optional)"]
+        GL["Second classifier output<br/>(same ASVs, second DB)"]
+        Q[reconcile_global_local]
+    end
+
+    G ==> M[reconcile_checklist]
     F ==> M
     M ==> RES[("taxonomy_table<br/>tracking · summary")]
 
-    GL["Second classifier output<br/>(same ASVs, second DB)"] -. "MODULE 3" .-> Q[reconcile_global_local]
-    G -. "MODULE 3" .-> Q
-    Q -. "MODULE 3" .-> M
+    GL -.-> Q
+    G -.-> Q
+    Q -.-> M
 ```
 
 The solid path (one classifier → `reconcile_checklist`) is **Module 2**. **Module
