@@ -27,9 +27,14 @@ non-reproducible or sacrifice specificity unnecessarily.
 
 ## The three modules
 
-REGATTA is organized as three modules. You can run **Module 1 on its own**, or
-chain **1 → 2** (one classifier) or **1 → 3** (two classifiers). Modules 2 and 3
-are both driven by the single `run_regatta()` entry point.
+REGATTA is organized as three modules. A full REGATTA run is **Module 1 → Module
+2** (one classifier) **or Module 1 → Module 3** (two classifiers) — and you can
+also run **Module 1 on its own** if all you want is the regional species list.
+Modules 2 and 3 share the same checklist reconciliation and are both driven by
+the single `run_regatta()` entry point; **the only thing that makes Module 3
+different from Module 2 is one optional extra step in front of it —
+`reconcile_global_local()` (the dashed branch in the diagram below)**, which
+reconciles the two databases before the shared checklist step.
 
 **Module 1 — Build the regional species checklist.** Pull a regional species
 list from public biodiversity databases (OBIS, GBIF) plus any local checklists
@@ -87,8 +92,11 @@ flowchart TD
     Q -. "MODULE 3" .-> M
 ```
 
-The solid path (one classifier → `reconcile_checklist`) is **Module 2**; the
-dashed branch through `reconcile_global_local` is **Module 3**.
+The solid path (one classifier → `reconcile_checklist`) is **Module 2**. **Module
+3** adds only the dashed branch — `reconcile_global_local` reconciles a global +
+local pair first, then hands its result to the **same** `reconcile_checklist`
+step. So a run is Module 1 plus either the solid path (Module 2) or the dashed
+branch + solid path (Module 3).
 
 ## Installation
 
