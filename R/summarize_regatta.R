@@ -182,13 +182,21 @@ summarize_regatta <- function(reconciled     = NULL,
     n_assigned   <- n_assigned_any(t)
     pct_assigned <- if (n_total > 0) 100 * n_assigned / n_total else NA_real_
 
-    kin_only <- sum(!is.na(t$domain)  & is.na(t$phylum))
-    phy_only <- sum(!is.na(t$phylum)  & is.na(t$class))
-    cla_only <- sum(!is.na(t$class)   & is.na(t$order))
-    ord_only <- sum(!is.na(t$order)   & is.na(t$family))
-    fam_only <- sum(!is.na(t$family)  & is.na(t$genus))
-    gen_only <- sum(!is.na(t$genus)   & is.na(t$species))
-    sp_count <- sum(!is.na(t$species))
+    # Specificity buckets = each ASV's DEEPEST assigned rank, so the buckets
+    # partition the assigned ASVs and sum to the "assigned ASVs" count. A naive
+    # "this rank present AND the next rank NA" test double-counts lineages with an
+    # internal gap: NCBI places many ray-finned fish in class Actinopteri with no
+    # standard `order`, so a class -> (gap) -> species lineage would otherwise be
+    # counted under BOTH "class only" and "species".
+    Mr      <- !is.na(as.matrix(t[, ranks, drop = FALSE]))
+    deepest <- max.col(Mr, ties.method = "last") * (rowSums(Mr) > 0L)
+    kin_only <- sum(deepest == 1L)  # domain
+    phy_only <- sum(deepest == 2L)
+    cla_only <- sum(deepest == 3L)
+    ord_only <- sum(deepest == 4L)
+    fam_only <- sum(deepest == 5L)
+    gen_only <- sum(deepest == 6L)
+    sp_count <- sum(deepest == 7L)  # species (deepest rank)
 
     n_distinct <- function(x) length(unique(x[!is.na(x)]))
     div <- vapply(ranks[-1], function(r) n_distinct(t[[r]]), integer(1))

@@ -371,7 +371,7 @@ when given an `output_dir`):
 
 - **The regional checklist is only as good as its sources.** Names in your local
   CSVs that don't resolve in NCBI become inert (they can never match classifier
-  output, which is also NCBI-canonical) — but they don't degrade correctness.
+  output, which is also NCBI-canonical).
 - **Rank set is fixed at 7 levels:** `domain`, `phylum`, `class`, `order`,
   `family`, `genus`, `species`. Subspecies and superkingdom are not used.
 
@@ -383,8 +383,12 @@ is heading toward a CRAN submission and a companion methods paper.
 ## Authors
 
 Eldridge Wisely (Scripps Institution of Oceanography, UC San Diego), developer
-and maintainer, with contributions from Ella Crotty (OBIS and GBIF
-download function generalizations and summary output formatting).
+and maintainer, with contributions from Ella Crotty (Generalizing OBIS and GBIF
+download functions and summary output formatting).
+
+## AI Usage Statement
+
+This package started as an R script that Eldridge Wisely wrote and used for 2 years before using Claude Code (Opus 4.8) to create the package from the working code base.  Eldridge and Ella tested the package on their own datasets before and after Claude was used in order to verify that the behavior of the code didn't change before and after the AI Usage.  
 
 ## License
 
