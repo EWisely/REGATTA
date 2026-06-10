@@ -383,8 +383,8 @@ is heading toward a CRAN submission and a companion methods paper.
 ## Authors
 
 Eldridge Wisely (Scripps Institution of Oceanography, UC San Diego), developer
-and maintainer, with contributions from Ella Crotty (OBIS and GBIF
-download function generalizations and summary output formatting).
+and maintainer, with contributions from Ella Crotty (Generalizing OBIS and GBIF
+download functions and summary output formatting).
 
 ## AI Usage Statement
 
