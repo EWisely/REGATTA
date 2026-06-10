@@ -117,6 +117,37 @@ test_that("two-DB has four columns; source-breakdown lives only in the global_lo
   expect_equal(lp + gp, n_assigned_any_test(global))
 })
 
+test_that("specificity buckets count each ASV's DEEPEST rank, even with lineage gaps", {
+  # Regression: NCBI places many ray-finned fish in class Actinopteri with no
+  # standard `order`, so a lineage can have class present, order NA, and deeper
+  # ranks filled. A naive "rank present & next rank NA" bucket would count such
+  # an ASV under BOTH "class only" and its true deepest rank, inflating the
+  # column so the specificity rows no longer sum to the assigned-ASV count.
+  spec <- c("ID'ed to kingdom only", "ID'ed to phylum only", "ID'ed to class only",
+            "ID'ed to order only", "ID'ed to family only", "ID'ed to genus only",
+            "ID'ed to species")
+  tab <- data.frame(
+    ASV_id  = paste0("ASV_", 1:4),
+    domain  = "Eukaryota", phylum = "Chordata", class = "Actinopteri",
+    order   = c(NA,              NA,              "Perciformes", NA),
+    family  = c("Pomacentridae", "Pomacentridae", "Sciaenidae",  NA),
+    genus   = c("Abudefduf",      NA,             "Bairdiella",   NA),
+    species = c("Abudefduf saxatilis", NA,         NA,            NA),
+    stringsAsFactors = FALSE)
+  # deepest assigned rank: ASV_1 species, ASV_2 family, ASV_3 genus, ASV_4 class
+  s <- summarize_regatta(input_file = tab)
+  val <- function(lbl) s$input_file[s$row_names == lbl]
+
+  expect_equal(val("assigned ASVs"), 4)
+  expect_equal(val("ID'ed to species"),     1)   # ASV_1, despite the order gap
+  expect_equal(val("ID'ed to family only"), 1)   # ASV_2, despite the order gap
+  expect_equal(val("ID'ed to genus only"),  1)   # ASV_3
+  expect_equal(val("ID'ed to class only"),  1)   # ASV_4
+  expect_equal(val("ID'ed to order only"),  0)
+  # the buckets PARTITION the assigned ASVs -> they sum to the assigned count
+  expect_equal(sum(s$input_file[s$row_names %in% spec]), val("assigned ASVs"))
+})
+
 test_that("summarize_regatta errors with no inputs and on a malformed list", {
   expect_error(summarize_regatta(), "Supply at least one")
   expect_error(summarize_regatta(post_checklist = list(foo = 1)), "result")
