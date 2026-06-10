@@ -59,3 +59,13 @@ step that ran. A two-DB run has \code{global} + \code{local} inputs,
 \code{regatta_global_local_result}, and \code{regatta_checklist_result}; a single-DB
 run has \code{input_file} and \code{regatta_checklist_result}.
 }
+\examples{
+# Summarize a single-classifier checklist reconciliation (offline).
+tax <- read.csv(system.file("extdata", "mifish_obitools_example.csv",
+                            package = "REGATTA"))
+checklist <- readRDS(system.file("extdata", "galapagos_fish_checklist.rds",
+                                 package = "REGATTA"))
+post <- reconcile_checklist(tax, checklist, output_dir = NULL)
+summarize_regatta(post_checklist = post, input_file = tax, checklist = checklist)
+
+}

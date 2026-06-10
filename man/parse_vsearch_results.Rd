@@ -34,3 +34,16 @@ LCA file carries the \emph{consensus} across the top-N (often more
 conservative). Calling reconciliation on the LCA taxonomy matches
 the original code semantics and is methodologically more honest.
 }
+\examples{
+# Join a vsearch LCA file (consensus taxonomy) with its --userout file
+# (percent identity, first hit per ASV). Tiny example files:
+lca <- tempfile(fileext = ".txt")
+writeLines(c(
+  "ASV_1\td:Eukaryota,p:Chordata,c:Actinopteri,o:Perciformes,f:Lutjanidae,g:Lutjanus,s:Lutjanus_kasmira",
+  "ASV_2\td:Eukaryota,p:Chordata,c:Actinopteri,o:Mugiliformes,f:Mugilidae,g:Mugil"), lca)
+uo <- tempfile(fileext = ".txt")
+writeLines(c("ASV_1\tSEQ;tax=x\t99.5\t170\t1\t0",
+             "ASV_2\tSEQ;tax=x\t97.0\t170\t2\t0"), uo)
+parse_vsearch_results(lca, uo)
+
+}

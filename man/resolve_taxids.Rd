@@ -35,3 +35,15 @@ Resolves a column of NCBI taxIDs into a full 7-rank lineage using
 NA taxIDs become all-NA rows. Optionally writes the augmented table to
 disk as \verb{<output_prefix>_full_tax_table.csv}.
 }
+\examples{
+\dontrun{
+# Resolve NCBI taxIDs to a 7-rank lineage. Needs the local taxonomizr
+# database (built on first use, or pass an existing one via sql_path).
+resolve_taxids(c(8030, 8022))
+
+# From a data.frame column, keeping the other columns:
+resolve_taxids(data.frame(ASV_id = c("ASV_1", "ASV_2"), TAXID = c(8030, 8022)),
+               taxid_col = "TAXID")
+}
+
+}

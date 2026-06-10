@@ -62,6 +62,18 @@ clean_taxon_names <- function(x) {
 #' @return The input augmented with the 7 rank columns + an
 #'   `name_match_type` column (`"scientific name"` / `"synonym"` / NA).
 #'
+#' @examples
+#' \dontrun{
+#' # Resolve mixed-rank scientific names (e.g. Kraken2 / BestTaxon output) to a
+#' # 7-rank lineage. Junk strings are stripped first and synonyms are matched.
+#' # Needs the local taxonomizr database.
+#' resolve_names(c("Lutjanus kasmira", "Mugil", "Caranx sp."))
+#'
+#' # From a data.frame column:
+#' resolve_names(data.frame(taxon = c("Lutjanus kasmira", "Mugil")),
+#'               name_col = "taxon")
+#' }
+#'
 #' @importFrom utils write.csv
 #' @export
 resolve_names <- function(input,

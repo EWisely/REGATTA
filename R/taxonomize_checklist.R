@@ -42,6 +42,18 @@
 #'   (`"scientific name"`/`"synonym"`/`NA`), `taxID`, and the 7 lowercase rank
 #'   columns (`domain` through `species`, `NA` where unresolved).
 #'
+#' @examples
+#' \dontrun{
+#' # Resolve a regional species list to a 7-rank checklist. Needs the local
+#' # taxonomizr database (names + nodes, built on first use). The result is the
+#' # `checklist` input to reconcile_checklist() / run_regatta().
+#' checklist <- taxonomize_checklist(
+#'   c("Lutjanus kasmira", "Mugil curema", "Caranx melampygus"))
+#'
+#' # Or from a checklist file with a Species column:
+#' taxonomize_checklist("my_region_species.csv")
+#' }
+#'
 #' @importFrom utils read.delim
 #' @export
 taxonomize_checklist <- function(input,

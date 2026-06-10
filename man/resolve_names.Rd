@@ -44,3 +44,16 @@ Strips common abbreviations (\code{sp.}, \code{spp.}, \code{cf.}, \code{aff.}, \
 \verb{scientific name} and \code{synonym} types by default so older nomenclature
 is normalized to the current canonical name.
 }
+\examples{
+\dontrun{
+# Resolve mixed-rank scientific names (e.g. Kraken2 / BestTaxon output) to a
+# 7-rank lineage. Junk strings are stripped first and synonyms are matched.
+# Needs the local taxonomizr database.
+resolve_names(c("Lutjanus kasmira", "Mugil", "Caranx sp."))
+
+# From a data.frame column:
+resolve_names(data.frame(taxon = c("Lutjanus kasmira", "Mugil")),
+              name_col = "taxon")
+}
+
+}

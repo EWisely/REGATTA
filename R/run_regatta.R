@@ -426,6 +426,28 @@
 #'   `reconciled`) and the parsed input table(s). The same outputs are written as
 #'   CSVs plus `run_log.txt` into the dated run subfolder of `out_dir`.
 #'
+#' @examples
+#' # Single-classifier run end to end, writing the output bundle to a temporary
+#' # folder. Offline: the bundled input is already rank-resolved and the bundled
+#' # checklist is pre-taxonomized, so no taxonomy database is needed.
+#' checklist <- readRDS(system.file("extdata", "galapagos_fish_checklist.rds",
+#'                                  package = "REGATTA"))
+#' tax_csv <- system.file("extdata", "mifish_obitools_example.csv",
+#'                        package = "REGATTA")
+#' res <- run_regatta(input = tax_csv, checklist = checklist,
+#'                    out_dir = tempdir(), region = "galapagos", label = "fish")
+#' res$taxonomy_table[, c("ASV_id", "genus", "species")]
+#'
+#' \dontrun{
+#' # Two-database workflow: pass global + local classifier results as a named
+#' # list; `cl` is a build_regional_checklist() result.
+#' run_regatta(
+#'   input = list(global = "MiFish_obitools.tab",
+#'                local  = c("MiFish_vsearch_lca.txt", "MiFish_vsearch_userout.txt")),
+#'   checklist = cl$for_LCA, out_dir = "regatta_out",
+#'   region = "galapagos", label = "fish")
+#' }
+#'
 #' @importFrom utils read.csv read.delim write.csv
 #' @export
 run_regatta <- function(input,

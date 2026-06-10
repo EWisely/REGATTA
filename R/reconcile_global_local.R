@@ -149,6 +149,16 @@
 #'     remaining classifier columns.
 #'   * `stats`: (metric, count) data.frame.
 #'
+#' @examples
+#' # Reconcile the same 12 ASVs classified two ways (obitools vs. vsearch),
+#' # both bundled with the package. Runs offline.
+#' global <- read.csv(system.file("extdata", "mifish_obitools_example.csv",
+#'                                package = "REGATTA"))
+#' local  <- read.csv(system.file("extdata", "mifish_vsearch_example.csv",
+#'                                package = "REGATTA"))
+#' rec <- reconcile_global_local(global, local, output_dir = NULL)
+#' rec$result[, c("ASV_id", "genus", "species", "pct_id")]
+#'
 #' @importFrom utils write.csv
 #' @export
 reconcile_global_local <- function(global_table,
