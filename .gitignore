@@ -26,3 +26,4 @@ REGATTA_*.txt
 # .Rbuildignore; kept on disk for validation, not in the repo)
 checklist_sources/
 local_database_checklist/
+.positai

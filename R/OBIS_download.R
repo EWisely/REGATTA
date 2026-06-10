@@ -13,7 +13,9 @@
 #'   is then queried **by AphiaID**, so ambiguous names resolve to the right
 #'   taxon -- e.g. `"Vertebrata"` returns vertebrates, not the red-algae genus
 #'   of the same name. Any fish synonym (`Teleostei`, `Actinopteri`,
-#'   `Actinopterygii`, `Osteichthyes`) works.
+#'   `Actinopterygii`, `Osteichthyes`) works. Sub- or super- taxa (e.g. Superfamily, 
+#'   Subphylum, Subfamily) are not recommended and typically return either an
+#'   error or the same results as the closest standard taxonomic level.
 #' @param worms_taxa A character vector of substitute taxon names to use
 #'   instead of `obis_taxa` when looking up WoRMS IDs. NA reuses
 #'   `obis_taxa`. Rarely needed now that names route through [resolve_taxa()].
