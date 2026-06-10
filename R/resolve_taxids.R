@@ -32,6 +32,17 @@
 #' @return The input augmented with the 7 lowercase rank columns
 #'   (`domain` through `species`); all original columns are preserved.
 #'
+#' @examples
+#' \dontrun{
+#' # Resolve NCBI taxIDs to a 7-rank lineage. Needs the local taxonomizr
+#' # database (built on first use, or pass an existing one via sql_path).
+#' resolve_taxids(c(8030, 8022))
+#'
+#' # From a data.frame column, keeping the other columns:
+#' resolve_taxids(data.frame(ASV_id = c("ASV_1", "ASV_2"), TAXID = c(8030, 8022)),
+#'                taxid_col = "TAXID")
+#' }
+#'
 #' @importFrom utils write.csv
 #' @export
 resolve_taxids <- function(input,

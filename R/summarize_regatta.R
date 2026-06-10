@@ -94,6 +94,15 @@
 #'   rows are shared across steps: each carries the global-local count and the
 #'   checklist count in their respective columns.
 #'
+#' @examples
+#' # Summarize a single-classifier checklist reconciliation (offline).
+#' tax <- read.csv(system.file("extdata", "mifish_obitools_example.csv",
+#'                             package = "REGATTA"))
+#' checklist <- readRDS(system.file("extdata", "galapagos_fish_checklist.rds",
+#'                                  package = "REGATTA"))
+#' post <- reconcile_checklist(tax, checklist, output_dir = NULL)
+#' summarize_regatta(post_checklist = post, input_file = tax, checklist = checklist)
+#'
 #' @export
 summarize_regatta <- function(reconciled     = NULL,
                               post_checklist = NULL,

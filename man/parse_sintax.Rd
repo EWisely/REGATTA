@@ -26,3 +26,11 @@ columns. Accepts either a character vector or a data.frame plus
 accepted; missing ranks come back as NA. Species values have
 underscores converted to spaces.
 }
+\examples{
+# Split SINTAX taxonomy strings into the 7 rank columns; the second string
+# is truncated at genus, so its deeper ranks come back NA.
+parse_sintax(c(
+  "d:Eukaryota,p:Chordata,c:Actinopteri,o:Perciformes,f:Lutjanidae,g:Lutjanus,s:Lutjanus_kasmira",
+  "d:Eukaryota,p:Chordata,c:Actinopteri,o:Mugiliformes,f:Mugilidae,g:Mugil"))
+
+}
