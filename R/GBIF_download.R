@@ -139,6 +139,11 @@ GBIF_download <- function(obis_taxa = NULL,
   } else {
     corrects <- F
   }
+  # throw an error if user is trying to find crustaceans
+  if ("Crustacea" %in% obis_taxa | "Pancrustacea" %in% obis_taxa) {
+    stop("GBIF doesn't recognize Crustacea or Pancrustacea. Consider using Arthropoda.")
+  }
+  
   ## Download GBIF dataset of occurences by geometry ####
   # Add just backbone key for a certain taxon, like fish or crustaceans
   #### Find GBIF keys for taxa of interest ####
@@ -165,6 +170,7 @@ GBIF_download <- function(obis_taxa = NULL,
   print("GBIF backbone keys:")
   print(backbone_keys)
   backbonekeyno <- length(backbone_keys)
+  # throw an error if no backbone keys are found
   if (backbonekeyno == 0) {
     stop("No usable GBIF backbone keys for your query taxa (",
          paste(query_taxa, collapse = ", "), "). GBIF's backbone lacks keys ",
