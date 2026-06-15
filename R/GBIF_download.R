@@ -119,6 +119,10 @@ GBIF_download <- function(obis_taxa = NULL,
                           download_dir = NULL,
                           existing_download = NULL
     ) {
+  # throw an error if user is trying to find crustaceans
+  if ("Crustacea" %in% obis_taxa | "Pancrustacea" %in% obis_taxa) {
+    stop("GBIF doesn't recognize Crustacea or Pancrustacea. Consider using Arthropoda.")
+  }
   # Where rgbif drops the occurrence .zip. Default keeps it out of the working
   # directory: the chosen output_dir if given, else a temp dir (CRAN-safe).
   zip_dir <- if (!is.null(download_dir)) download_dir
@@ -139,10 +143,7 @@ GBIF_download <- function(obis_taxa = NULL,
   } else {
     corrects <- F
   }
-  # throw an error if user is trying to find crustaceans
-  if ("Crustacea" %in% obis_taxa | "Pancrustacea" %in% obis_taxa) {
-    stop("GBIF doesn't recognize Crustacea or Pancrustacea. Consider using Arthropoda.")
-  }
+  
   
   ## Download GBIF dataset of occurences by geometry ####
   # Add just backbone key for a certain taxon, like fish or crustaceans
