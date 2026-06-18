@@ -383,7 +383,9 @@ resolve_taxa <- function(taxa,
   if (nrow(bad) > 0L) {
     msg <- paste0("resolve_taxa() could not resolve ", nrow(bad), " of ",
                   nrow(out), " taxon name(s):\n",
-                  paste0("  - ", bad$input, ": ", bad$note, collapse = "\n"))
+                  paste0("  - ", bad$input, ": ", bad$note, collapse = "\n"),
+                  "Did you specify kingdom? Options recognized by WoRMS include Animalia, 
+                  Archaea, Bacteria, Chromista, Fungi, Plantae, Protozoa, and Viruses")
     if (identical(on_ambiguous, "error")) stop(msg, call. = FALSE)
     warning(msg, call. = FALSE)
   }

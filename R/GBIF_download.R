@@ -119,10 +119,7 @@ GBIF_download <- function(obis_taxa = NULL,
                           download_dir = NULL,
                           existing_download = NULL
     ) {
-  # throw an error if user is trying to find crustaceans
-  if ("Crustacea" %in% obis_taxa | "Pancrustacea" %in% obis_taxa) {
-    stop("GBIF doesn't recognize Crustacea or Pancrustacea. Consider using Arthropoda.")
-  }
+  
   # Where rgbif drops the occurrence .zip. Default keeps it out of the working
   # directory: the chosen output_dir if given, else a temp dir (CRAN-safe).
   zip_dir <- if (!is.null(download_dir)) download_dir
@@ -134,7 +131,8 @@ GBIF_download <- function(obis_taxa = NULL,
          "new download. To reuse a finished one, pass `existing_download` ",
          "(a GBIF download key or occ_download object) instead.")
   query_taxa <- if (is.na(worms_taxa[1])) obis_taxa else worms_taxa
-
+  
+  
   # throw an error if polygon is incorrect
   if(grepl("POLYGON \\(\\([-. |[[:digit:]]|,]*\\)\\)", # finds POLYGON (( [-, space, period, 
            # comma or any number] continue for any length, ))
@@ -142,6 +140,13 @@ GBIF_download <- function(obis_taxa = NULL,
     corrects <- T
   } else {
     corrects <- F
+  }
+  if ("Crustacea" %in% obis_taxa | "Pancrustacea" %in% obis_taxa) {
+    stop("GBIF doesn't recognize Crustacea or Pancrustacea. Consider using Arthropoda.")
+  }
+  if ("Tantulocarida" %in% obis_taxa | "Thecostraca" %in% obis_taxa | "Tantulocarida" %in% obis_taxa) {
+    stop("GBIF doesn't return accurate results from some taxa within Crustacea (troubleshooting in progress). 
+         Consider using Arthropoda.")
   }
   
   
@@ -158,9 +163,11 @@ GBIF_download <- function(obis_taxa = NULL,
   # plus `gbif_keys` -- the taxon's own backbone key when usable, otherwise the
   # keys reached by walking WoRMS down to orders/families (the fix for broad
   # nodes GBIF lacks a usable key for: ray-finned fish, Crustacea, Vertebrata).
-  resolved <- resolve_taxa(query_taxa, kingdom = kingdom, check_gbif = TRUE,
+  resolved <- resolve_taxa(taxa = query_taxa, kingdom = kingdom, check_gbif = TRUE,
                            gbif_descend_to = gbif_descend_to,
                            gbif_fill_families = gbif_fill_families)
+  # throw an error if user is trying to find crustaceans
+  
   message("GBIF query resolved to: ",
           paste0(resolved$valid_name, " (AphiaID ", resolved$aphia_id, ")",
                  collapse = "; "))

@@ -24,7 +24,9 @@ validated and disambiguated by \code{\link[=resolve_taxa]{resolve_taxa()}} (king
 is then queried \strong{by AphiaID}, so ambiguous names resolve to the right
 taxon -- e.g. \code{"Vertebrata"} returns vertebrates, not the red-algae genus
 of the same name. Any fish synonym (\code{Teleostei}, \code{Actinopteri},
-\code{Actinopterygii}, \code{Osteichthyes}) works.}
+\code{Actinopterygii}, \code{Osteichthyes}) works. Sub- or super- taxa (e.g. Superfamily,
+Subphylum, Subfamily) are not recommended and typically return either an
+error or the same results as the closest standard taxonomic level.}
 
 \item{worms_taxa}{A character vector of substitute taxon names to use
 instead of \code{obis_taxa} when looking up WoRMS IDs. NA reuses
