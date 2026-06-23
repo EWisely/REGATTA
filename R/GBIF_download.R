@@ -144,10 +144,10 @@ GBIF_download <- function(obis_taxa = NULL,
   if ("Crustacea" %in% obis_taxa | "Pancrustacea" %in% obis_taxa) {
     stop("GBIF doesn't recognize Crustacea or Pancrustacea. Consider using Arthropoda.")
   }
-  if ("Tantulocarida" %in% obis_taxa | "Thecostraca" %in% obis_taxa | "Tantulocarida" %in% obis_taxa) {
-    stop("GBIF doesn't return accurate results from some taxa within Crustacea (troubleshooting in progress). 
-         Consider using Arthropoda.")
-  }
+  #if ("Tantulocarida" %in% obis_taxa | "Thecostraca" %in% obis_taxa | "Tantulocarida" %in% obis_taxa) {
+  #  stop("GBIF doesn't return accurate results from some taxa within Crustacea (troubleshooting in progress). 
+  #       Consider using Arthropoda.")
+  #}
   
   
   ## Download GBIF dataset of occurences by geometry ####
@@ -183,7 +183,8 @@ GBIF_download <- function(obis_taxa = NULL,
     stop("No usable GBIF backbone keys for your query taxa (",
          paste(query_taxa, collapse = ", "), "). GBIF's backbone lacks keys ",
          "for some broad classes (notably ray-finned fish). Use OBIS for these ",
-         "taxa, or pass narrower class names GBIF recognizes.")
+         "taxa, or pass narrower class names GBIF recognizes. Additionally,
+         SUB- or SUPER-taxa (e.g. subfamily, superclass) are not recognized by GBIF.")
   }
 
   print("Downloading Database from GBIF")
