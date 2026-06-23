@@ -19,6 +19,11 @@ Useful links:
 \author{
 \strong{Maintainer}: Eldridge Wisely \email{eldridge.wisely@gmail.com}
 
+Authors:
+\itemize{
+  \item Eldridge Wisely \email{eldridge.wisely@gmail.com}
+}
+
 Other contributors:
 \itemize{
   \item Ella Crotty (Summary-table format designed by Ella Crotty.) [contributor]
