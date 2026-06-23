@@ -13,10 +13,3 @@ test_that("Searching GBIF for Pancrustacea returns an error", {
   expect_error(GBIF_download(obis_taxa = c("Pancrustacea"), 
                              regional_poly = "POLYGON ((-117.07 32.55, -117.81 34.27, -121.06 34.56, -120.84 31.69, -117.07 32.55))"))
 }) 
-
-
-G_Teleostei <- GBIF_download(
-  obis_taxa = c("Teleostei"),
-  regional_poly = "POLYGON ((-117.07 32.55, -117.81 34.27, -121.06 34.56, -120.84 31.69, -117.07 32.55))"
-)
-system("say gee biff download for tests complete")
