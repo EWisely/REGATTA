@@ -156,30 +156,19 @@ vignette("REGATTA-tutorial")       # Modules 1 + 2 (one classifier)
 vignette("REGATTA-two-database")   # Module 3 (global + local)
 ```
 
-Building the vignettes needs `pandoc` (RStudio bundles it); from a plain R
-session without pandoc, drop `build_vignettes = TRUE`. Module 1 (and resolving
-classifier output that isn't already in the 7 ranks) needs a local NCBI taxonomy
-database — set that up first (see [Setup](#setup)); the core reconciliation on a
-pre-taxonomized checklist and a pre-resolved table does not.
 
 ## Setup
 
-A few one-time things before Module 1.
-
-**The NCBI taxonomy database.** Everything REGATTA does to a *name* — building
+**The NCBI taxonomy database.** Everything REGATTA does to a *name* (building
 the regional checklist, resolving classifier output that arrives as NCBI taxIDs
 or scientific names, and updating older nomenclature to current canonical
-taxonomy — runs against a local NCBI taxonomy snapshot built by `taxonomizr`.
+taxonomy) runs against a local NCBI taxonomy snapshot built by `taxonomizr`.
 `build_regional_checklist()`, `taxonomize_checklist()`, and any `run_regatta()`
 run whose input isn't already resolved to the 7 ranks default `sql_path` to a
 **persistent per-user cache** (`tools::R_user_dir("REGATTA","cache")`), shared
 across projects/sessions, and build only the lightweight names+nodes (~a few
 hundred MB, a few minutes — not the multi-GB accession data) on first use.
-**Override** it by pointing `sql_path` at an existing DB you already have. When a
-needed DB is missing they prompt to build it (interactively) or, in a script,
-error with the one-line build command unless `overwrite_taxonomy_files = TRUE`.
-The cache is a **snapshot** of NCBI taxonomy and is never rebuilt silently (for
-reproducibility) — its build date is reported and recorded in `cl$methods`;
+The cache is a **snapshot** of NCBI taxonomy and its build date is reported and recorded in `cl$methods`;
 `overwrite_taxonomy_files = TRUE` refreshes it. Set `sql_path = NULL` in
 `build_regional_checklist()` to skip taxonomizing there and defer it to
 `run_regatta()`. (Only accession-based input needs the full
