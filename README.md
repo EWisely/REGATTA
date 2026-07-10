@@ -6,26 +6,22 @@
 
 **Reconciling eDNA Geographic Assignments via Taxonomy Table Adjustment**
 
-An R package that reconciles eDNA metabarcoding taxonomic assignments against a
-regional species checklist — downgrading the taxonomic specificity of
-species-level calls to taxa with no records in the study area, rather than
-discarding them — without manual curation, and preserving as much taxonomic
-specificity as the regional evidence supports.
+REGATTA is an R package that reconciles taxonomic assignments from eDNA metabarcoding workflows against a
+regional species checklist by downgrading the taxonomic specificity of non-local
+assignments to the level at which the eDNA taxonomic assignment agrees with the regional species checklist.  The advantages of this method are that it is reproducible, citable, does not introduce human error or bias in taxonomic data curation, does not discard eDNA signal that may have been assigned to a geographically implausible relative to the true local species, and does not rely on arbitrary percent identity cutoffs for taxonomic level curation.  Thus, the REGATTA method is designed to reproducibly and retain as much taxonomic specificity as the regional evidence supports.
 
 ## The problem
 
 Global reference databases such as NCBI and EMBL are broad, but they are not
-geographically constrained. As a result, they can confidently assign eDNA reads
+geographically constrained. As a result, they allow for the assignment of eDNA reads
 to species that do not occur in the study region, even when the read belongs to
 the taxonomic group targeted by the primer. For example, a fish primer may return
-a confident species-level fish assignment for a species that is freshwater,
+a species-level fish assignment for a species that is freshwater,
 non-local, or otherwise implausible in a marine study area. This is different from
 off-target amplification: the read is still within the target group, but the
 species-level assignment is geographically unsupported. These calls often arise
 when the true local species is absent from the reference database and the read
-matches the closest sequenced relative available at the amplified marker. Lab
-contamination, degraded input DNA, or other artifacts can also produce non-local
-assignments.
+matches the closest sequenced relative available at the amplified marker. 
 
 A common workaround is to classify reads against a local reference database built
 from a hand-curated regional species list. This prevents non-local species names
