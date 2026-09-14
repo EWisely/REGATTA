@@ -11,166 +11,50 @@ vignette: >
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 ```
 
-REGATTA helps reconcile eDNA taxonomic assignments with the species that are
-actually known from your study region.
+REGATTA reconciles eDNA taxonomic assignments with the species actually known
+from your study region. When a classifier assigns a read to a species that is
+taxonomically plausible but geographically unlikely, REGATTA walks that
+assignment up the taxonomic tree only as far as the regional checklist requires:
+species-level calls are kept where the species is regionally supported, and
+unsupported calls are downgraded to the lowest supported rank rather than
+discarded.
 
-This is useful when a classifier assigns reads to a species that is
-taxonomically plausible but geographically unlikely. For example, a fish primer
-may produce a confident species-level fish assignment, but the assigned species
-may not occur in your region. This often happens when the true local species is
-missing from the reference database, so the read is assigned to the closest
-sequenced relative available. It can also reflect contamination or low-quality
-input DNA.
+This tutorial runs the whole workflow end to end on a Galapagos reef-fish
+example — build the regional checklist (**Module 1**), then reconcile a
+classifier's output against it (**Module 2**). Run the chunks in order; each one
+works as written (with an internet connection).
 
-REGATTA addresses this by comparing classifier output against a regional species
-checklist. If an assigned species has no regional record, REGATTA walks the
-assignment up the taxonomic tree only as far as needed. Species-level calls are
-retained when the species is regionally supported; otherwise, the call is
-downgraded to the lowest supported rank, such as genus or family.
+You provide three things: the taxonomic group your primer targets (`"fish"`
+here), a regional polygon as a WKT string, and your classifier's output table.
+Reconciling the same reads against a second (global + local) database is
+**Module 3**, covered in `vignette("REGATTA-two-database")`; optional pre-checks,
+GBIF setup, tuning, and other classifier formats are in
+`vignette("REGATTA-advanced")`.
 
-This approach preserves useful taxonomic information without relying on a blanket
-percent-identity cutoff that could discard valid species-level calls.
+## Setup
 
-## What you provide
+Load the package and choose where the local NCBI taxonomy snapshot lives. REGATTA
+uses this snapshot (built by `taxonomizr`) to resolve names and taxIDs to full
+lineages. By default we keep it in the working directory; it is built on first
+use — a few hundred MB, a few minutes — and reused afterwards. The first checklist
+build below will offer to create it.
 
-You provide REGATTA with three inputs:
-
-1. The taxonomic group or groups targeted by your primer, as taxon names.
-2. A regional polygon, supplied as a WKT `POLYGON((...))` string. You can draw
-   one at [wktmap.com](https://wktmap.com/) and copy the generated text.
-3. A classifier results file from your taxonomy-assignment step, such as
-   obitools, vsearch, Kraken2, or a similar output table.
-
-If your classifier format is not currently supported, please open an issue so we
-can improve compatibility.
-
-## Tutorial overview
-
-REGATTA is organized into three modules. This tutorial covers the first two:
-
-- **Module 1:** Build a regional species checklist.
-- **Module 2:** Reconcile one classifier output against that checklist.
-
-Module 3, which reconciles global and local database classifications before the
-checklist step, is covered separately in `vignette("REGATTA-two-database")`.
-
-The worked example uses Galapagos reef fish amplified with the MiFish primer and
-classified with obitools against the global EMBL database. The workflow is not
-specific to fish, marine systems, or the Galapagos. You can use the same
-functions with your own taxonomic group, polygon, and classifier output.
-
----
-
-# Set up the taxonomy database first
-
-REGATTA uses a local NCBI taxonomy snapshot built by `taxonomizr`. This taxonomy
-database supports both checklist building and classifier reconciliation, so we
-recommend setting it up before running the workflow.
-
-By default, REGATTA stores one taxonomy database in a persistent per-user cache:
-
-```{r show-cache, eval = FALSE}
-tools::R_user_dir("REGATTA", "cache")
-```
-
-This cache is shared across projects and R sessions. On first use, REGATTA builds
-the lightweight names-and-nodes database, which is usually a few hundred MB and
-takes a few minutes. It does not build the multi-GB accession database unless you
-explicitly provide or create one.
-
-You can also point REGATTA to an existing taxonomy database:
-
-```{r sql-existing, eval = FALSE}
-sql_path <- "/path/to/your/accessionTaxa.sql"
-```
-
-The taxonomy database is treated as a reproducible snapshot. REGATTA does not
-rebuild it silently. Instead, it reports the taxonomy build date and records it
-in `cl$methods`, so the taxonomy version travels with your methods.
-
-To refresh the cached database, use `overwrite_taxonomy_files = TRUE`. To skip
-taxonomizing during checklist building and defer it to `run_regatta()`, use
-`sql_path = NULL`.
-
-The runnable demo at the end of this tutorial does not require a taxonomy database
-because it uses a pre-taxonomized checklist bundled with the package.
-
----
-
-# Module 1: Build the regional species checklist
-
-Module 1 builds a taxonomized species list for your region and target group. This
-checklist is used in Module 2, but it is also useful on its own if you need a
-clean regional species list for reference database construction or biodiversity
-summaries.
-
-## `resolve_taxa()`
-
-Use `resolve_taxa()` to check how REGATTA interprets your target taxon names
-before starting a long checklist download.
-
-This matters because the checklist should include every group your primer can
-amplify. Missing groups can affect both downstream steps:
-
-- Reference-database construction. If a group is missing from the checklist,
-  tools such as CRABS will not download references for that group.
-- Geographic reconciliation. If a real local species is missing from the
-  checklist, REGATTA may be forced to downgrade a valid assignment because the
-  species has no regional record in the checklist.
-
-Scientific names work directly when both OBIS and GBIF recognize them. For
-example:
-
-```{r resolve, eval = FALSE}
+```{r setup-run}
 library(REGATTA)
 
-resolve_taxa("Mammalia")
-#>      input alias_used aphia_id valid_name  rank  kingdom worms_status n_candidates gbif_key gbif_usable     note
-#> 1 Mammalia       <NA>     1837   Mammalia Class Animalia           ok            1      359        TRUE resolved
+sql_path <- "accessionTaxa.sql"   # stored in your working directory; edit to taste
 ```
 
-Some names are not matched cleanly. For example, some ray-finned fish classes do
-not have usable GBIF backbone keys, and some names are ambiguous. `Vertebrata`,
-for example, is also a red-algae genus.
+## Module 1: build the regional checklist
 
-For common cases, REGATTA includes quoted shortcuts that expand to the
-appropriate target groups:
-
-- `"fish"`: ray-finned fishes, sharks and rays, hagfishes, and lampreys. This is
-  the usual MiFish target set.
-- `"vertebrates"`: the `"fish"` set plus Mammalia, Aves, Reptilia, and Amphibia.
-  This works in both OBIS and GBIF, unlike the bare subphylum name `Vertebrata`.
-
-Before starting a large download, run `resolve_taxa()` on your planned names to
-confirm how they resolve and whether GBIF has a usable key.
-
----
-
-## `build_regional_checklist()`
-
-Use `build_regional_checklist()` to assemble the regional checklist.
-
-REGATTA compares every classifier assignment against the species known from your
-region. The more complete this checklist is, the fewer true local species will be
-mistaken for geographically spurious assignments and downgraded later.
-
-`build_regional_checklist()` pulls biodiversity records, merges sources,
-taxonomizes the least-common-ancestor list, returns the resulting objects, and
-writes the outputs to disk. Writing outputs is intentional: checklist building
-can be expensive, and the written files let you reuse the artifacts without
-rebuilding them.
-
-OBIS runs by default and is often the more complete source for marine taxa. GBIF
-is off by default because `occ_download()` is slower and asynchronous. You can
-switch GBIF on with `GBIF = TRUE`, or reuse a completed GBIF download by passing
-its key or download object to `GBIF =`.
-
-You can also include your own regional checklist with `CSV =`. A local checklist
-is especially useful when you have a citable regional list or expert-curated
-records that may not be complete in public databases.
+`build_regional_checklist()` downloads a regional species list (OBIS by default),
+resolves it to NCBI taxonomy, and returns the pieces you need — writing them to
+`output_dir` as well. Draw your own study-area polygon at
+[wktmap.com](https://wktmap.com/) and paste the WKT string; the one below is a
+box around the Galapagos.
 
 ```{r build, eval = FALSE}
-poly <- "POLYGON ((-117.421875 31.952162, -91.933594 -6.315299, -81.386719 -6.315299, -76.113281 7.710992, -82.089844 8.581021, -87.011719 13.581921, -104.238281 20.303418, -112.5 32.249974, -117.421875 31.952162))"
+poly <- "POLYGON ((-92 2, -89 2, -89 -2, -92 -2, -92 2))"
 
 cl <- build_regional_checklist(
   region        = "galapagos",
@@ -178,295 +62,63 @@ cl <- build_regional_checklist(
   taxa          = "fish",
   regional_poly = poly,
   OBIS          = TRUE,
-  GBIF          = FALSE,
-  CSV           = "2016Aug24_Tirado-Sanchez_et_al_Galapagos_Pisces_Checklist.csv",
   marine        = TRUE,
   terrestrial   = FALSE,
-  output_dir    = "local_database_checklist",
-  sql_path      = file.path(tools::R_user_dir("REGATTA", "cache"), "accessionTaxa.sql")
+  output_dir    = "regatta_checklist",
+  sql_path      = sql_path
 )
 ```
 
-In this example:
-
-- `region` names the output files.
-- `label` gives the run a short readable label.
-- `taxa` defines the taxonomic query.
-- `regional_poly` defines the study region.
-- `OBIS` and `GBIF` control public biodiversity data sources.
-- `CSV` adds an optional local checklist.
-- `marine` and `terrestrial` help filter records by habitat.
-- `output_dir` is required and tells REGATTA where to write outputs.
-- `sql_path` points to the taxonomy database. The path shown above is the default
-  cache location.
-
-### Using GBIF
-
-A fresh GBIF run submits an `occ_download()` job and waits while GBIF assembles
-the download server-side. This usually takes several minutes, and larger regions
-or broad taxonomic groups may take longer.
-
-GBIF requires a free account. `rgbif` authenticates using three values stored in
-your `~/.Renviron` file:
-
-```
-GBIF_USER=your_gbif_username
-GBIF_PWD=your_gbif_password
-GBIF_EMAIL=the_email_you_registered_with
-```
-
-You can edit this file from R with:
-
-```{r edit-renviron, eval = FALSE}
-usethis::edit_r_environ()
-```
-
-Save the file and restart R so the variables load.
-
-After a GBIF download finishes, you can reuse it instead of starting a new
-download by passing its key to `GBIF =`, for example `GBIF = "<download_key>"`.
-
-When GBIF is used, REGATTA records the download key, DOI, and full citation in
-`cl$methods` and in the written methods file. This keeps GBIF provenance with the
-rest of the workflow rather than in a separate file.
-
-### Checklist outputs
-
-`build_regional_checklist()` returns a list and writes the same outputs to a
-dated subfolder of `output_dir`, using the pattern `<region>_<label>_<date>/`.
-
-The main returned elements are:
+`cl` holds the checklist in a few forms:
 
 | Element | Contents |
 |---|---|
-| `cl$for_making_localdb` | A character vector of unique species binomials. This is also written one name per line for use with FASTA-building tools such as CRABS. |
-| `cl$checklist_summary` | The full taxonomized checklist, including how each name resolved. This is useful for auditing. It is `NULL` if no taxonomy database was available. |
-| `cl$for_LCA` | The taxID column plus seven taxonomic ranks, cleaned and ready to pass to `run_regatta(checklist = cl$for_LCA)`. |
-| `cl$methods` | A ready-to-adapt methods and provenance record, including region, label, queried taxa, sources, date, WKT polygon, taxonomy snapshot date, and relevant citations. Verify each reference against your own reference manager before submission. |
+| `cl$for_LCA` | The taxID column plus the seven ranks — pass this to `run_regatta()`. |
+| `cl$for_making_localdb` | Unique species binomials, also written one per line for reference-database builders such as CRABS. |
+| `cl$checklist_summary` | The full taxonomized checklist, showing how each name resolved. |
+| `cl$methods` | A ready-to-adapt methods and provenance record, with citations. |
 
----
+## Module 2: reconcile a classifier against the checklist
 
-## `taxonomize_checklist()`
-
-You usually do not need to call `taxonomize_checklist()` directly.
-`build_regional_checklist()` runs it for you, and `run_regatta()` or
-`reconcile_checklist()` can taxonomize an untaxonomized checklist on the fly.
-
-Direct use is mainly helpful if you want to inspect or cache the lineage table
-yourself.
-
-```{r taxonomize, eval = FALSE}
-checklist <- taxonomize_checklist(
-  input    = "local_database_checklist/galapagos_fish_list_for_LCA.txt",
-  sql_path = "/path/to/accessionTaxa.sql"
-)
-```
-
-This step adds the full lineage needed for reconciliation. It also updates older
-names to current canonical NCBI taxonomy, so synonyms can still match where
-possible.
-
----
-
-# Module 2: Reconcile classifier output against the checklist
-
-Module 2 takes your classifier output and compares it with the taxonomized
-regional checklist from Module 1.
-
-If a species-level assignment is supported by the regional checklist, REGATTA
-keeps it. If the species is not regionally supported, REGATTA walks the
-assignment up the taxonomic tree until it reaches the lowest rank supported by
-the checklist.
-
----
-
-## `run_regatta()`
-
-Use `run_regatta()` for the standard workflow. It reads your classifier output,
-resolves lineages, runs the checklist reconciliation, and writes an audited
-output table.
+`run_regatta()` reads your classifier output, resolves lineages, reconciles each
+call against the checklist, and returns the final tables (writing them to
+`out_dir`). Point `input` at your own results file; here we use the obitools
+example bundled with the package so the chunk runs as written.
 
 ```{r run, eval = FALSE}
+input_tab <- system.file("extdata", "mifish_obitools_example.csv",
+                         package = "REGATTA")
+
 res <- run_regatta(
-  input     = "MiFish_obitools.tab",
+  input     = input_tab,
   checklist = cl$for_LCA,
   out_dir   = "regatta_out",
   region    = "galapagos",
   label     = "fish"
 )
+
+res$taxonomy_table
+res$summary
 ```
 
-In this example:
+## Interpreting the outputs
 
-- `input` is the classifier output. Here, it is an obitools `.tab` file
-  recognized by its `TAXID` column.
-- `checklist` is the taxonomized checklist from Module 1.
-- `out_dir` is required and tells REGATTA where to write results.
-- `region` and `label` name the run subfolder.
-
-`run_regatta()` returns `res$taxonomy_table`, `res$tracking`, and `res$summary`,
-and writes outputs to a dated `regatta_out/galapagos_fish_<date>/` subfolder.
-
-On the worked dataset, 542 ASVs were assigned by obitools out of 1,438 total
-ASVs. After REGATTA reconciliation, the assignments matched the regional
-checklist at these ranks:
-
-| Match rank | ASVs |
-|---|---:|
-| species | 287 |
-| genus | 229 |
-| family | 16 |
-| order | 1 |
-| class | 9 |
-
-The genus-level and class-level results are the kinds of geographically spurious
-species-level calls REGATTA is designed to reconcile. The classifier made
-globally confident species assignments, but those species had no Galapagos
-record. REGATTA retained the taxonomic information that the regional checklist
-could support and downgraded only the unsupported specificity.
-
-If you classified the same ASVs against both a global and a locally curated
-database, see `vignette("REGATTA-two-database")`. That workflow reconciles the
-two classifier runs before the checklist step.
-
----
-
-## `reconcile_checklist()`
-
-`reconcile_checklist()` is the core reconciliation step called by
-`run_regatta()`. You can also run it directly.
-
-This is useful for learning how REGATTA behaves because it can run with no
-internet and no taxonomy database when using the bundled example data.
-
-```{r demo}
-library(REGATTA)
-
-checklist <- readRDS(system.file(
-  "extdata", "galapagos_fish_checklist.rds",
-  package = "REGATTA"
-))
-
-tax <- read.csv(system.file(
-  "extdata", "mifish_obitools_example.csv",
-  package = "REGATTA"
-), stringsAsFactors = FALSE)
-
-res <- reconcile_checklist(tax, checklist, output_dir = NULL)
-```
-
-The example uses 12 real obitools-assigned ASVs from the worked dataset. The
-subset was chosen to show all three checklist outcomes.
-
-To inspect what happened to each ASV:
-
-```{r demo-tracking}
-res$tracking[, c(
-  "before_species",
-  "pct_id",
-  "regatta_match_rank",
-  "after_genus",
-  "after_family"
-)]
-```
-
-The checklist step can produce three outcomes:
-
-1. **Kept at species:** the assigned species is present on the regional
-   checklist.
-2. **Downgraded to genus:** the assigned species is absent, but the genus is
-   regionally supported.
-3. **Downgraded to family:** both the assigned species and genus are absent, but
-   the family is regionally supported.
-
-In the example:
-
-- **Kept at species:** *Abudefduf saxatilis*, *Prionurus laticlavius*,
-  *Lutjanus kasmira*, *Caranx melampygus*, *Mugil curema*, and
-  *Etrumeus micropus*.
-- **Downgraded to genus:** *Abudefduf taurus*, *Prionurus biafraensis*,
-  *Epinephelus bontoides*, and *Cubiceps squamiceps*.
-- **Downgraded to family:** *Archosargus rhomboidalis* and *Conodon nobilis*.
-
-These examples show why regional reconciliation can outperform a flat
-percent-identity cutoff. *Abudefduf saxatilis* and *Abudefduf taurus* both
-matched the global database at 100% identity, but only *A. saxatilis* is on the
-Galapagos checklist. REGATTA therefore keeps *A. saxatilis* at species and
-downgrades *A. taurus* to genus.
-
-Similarly, *Prionurus laticlavius* is retained at species, while
-*Prionurus biafraensis*, a West African congener assigned at 98.8% identity, is
-downgraded to genus. The global database may be naming the closest sequenced
-relative rather than the true local species. REGATTA keeps the reliable
-genus-level information and removes the unsupported species-level specificity.
-
-You can summarize the before-and-after transition with:
-
-```{r demo-stats}
-res$stats
-```
-
-Six ASVs were kept at species in this checklist-only example. Three of those
-calls change when the optional second-database reconciliation step is included.
-See `vignette("REGATTA-two-database")`.
-
----
-
-# Interpreting REGATTA outputs
-
-Every REGATTA step that produces a taxonomy table returns the same three core
-elements. This makes the results easier to pass into downstream tools such as
-`phyloseq` or MetabaR while preserving an audit trail.
+`run_regatta()` returns three things — also written to a dated
+`<region>_<label>_<date>/` subfolder of `out_dir` — and every REGATTA step that
+produces a taxonomy table returns the same shape, so results drop straight into
+phyloseq or MetabaR and stay auditable:
 
 | Element | Contents |
 |---|---|
-| `$result` | The exchange-format taxonomy table: ID column, `pct_id` when available, and seven lowercase taxonomic ranks. For a `phyloseq::tax_table()` or MetabaR MOTU table, drop `pct_id` first. |
-| `$tracking` | Per-ASV audit table showing before and after taxonomy, match rank, reconciliation reason, and passthrough columns. |
-| `$stats` | Step-level counts, including kept, downgraded, dropped, and rank-pair downgrade summaries. |
+| `res$taxonomy_table` | The reconciled exchange-format table: `ASV_id`, `pct_id` when available (normalized to 0–100), then the seven ranks. For a phyloseq `tax_table()`, drop `pct_id` first. |
+| `res$tracking` | Per-ASV audit: before/after taxonomy, the rank each call matched, the reconciliation reason, and passthrough columns. |
+| `res$summary` | Per-stage counts — kept, downgraded, dropped, and the per-rank-pair downgrade breakdown. |
 
-The tracking table is the best place to check why a call changed. Depending on
-the available checklist information, `regatta_reason` can distinguish outcomes
-such as:
+The tracking table is where you check why a call changed. When the checklist
+carries a target group, `regatta_reason` distinguishes outcomes such as `kept`,
+`non-local (geographic)`, and `off-target (taxonomic)`.
 
-- `kept`
-- `non-local (geographic)`
-- `off-target (taxonomic)`
-
----
-
-# Where to go next
-
-## Use a different classifier format
-
-`run_regatta()` can auto-detect several common input types, including:
-
-- obitools `.tab`
-- vsearch LCA output
-- vsearch `--userout`
-- Kraken2-style or BestTaxon-style name tables
-
-If your ASV ID column has a different name, pass it explicitly with
-`id_col = "Hash"`. Long per-sample tables are collapsed to one row per ASV
-automatically. See `?run_regatta`.
-
-## Reconcile global and local database results
-
-If you classified the same ASVs against both a global database and a locally
-curated database, REGATTA can reconcile those two classifier runs before applying
-the regional checklist. See `vignette("REGATTA-two-database")` and
-`?reconcile_global_local`.
-
-## Run one pass per primer
-
-Run REGATTA once per taxonomic group targeted by your primer set.
-
-This helps keep genuine off-target amplifications visible. For example, if an
-invertebrate is amplified by a fish primer, running the fish checklist separately
-prevents that non-target record from passing through as part of a mixed
-"megalist."
-
-## Pre-check taxon names
-
-Before starting a long OBIS or GBIF download, check your target names with
-`resolve_taxa()`. For GBIF and OBIS troubleshooting, see the README
-troubleshooting section.
+That is the whole workflow. For a second classifier (Module 3) see
+`vignette("REGATTA-two-database")`; for pre-checking taxon names, GBIF setup,
+tuning, inspecting the checklist step ASV by ASV, and other classifier formats,
+see `vignette("REGATTA-advanced")`.

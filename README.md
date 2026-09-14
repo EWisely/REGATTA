@@ -10,6 +10,23 @@ REGATTA is an R package that reconciles taxonomic assignments from eDNA metabarc
 regional species checklist by downgrading the taxonomic specificity of non-local
 assignments to the level at which the eDNA taxonomic assignment agrees with the regional species checklist.  The advantages of this method are that it is reproducible, citable, does not introduce human error or bias in taxonomic data curation, does not discard eDNA signal that may have been assigned to a geographically implausible relative to the true local species, and does not rely on arbitrary percent identity cutoffs for taxonomic level curation.  Thus, the REGATTA method is designed to reproducibly retain as much taxonomic specificity as the regional evidence supports.
 
+## Installation
+
+All dependencies are on CRAN and install automatically:
+
+```r
+# install.packages("devtools")
+devtools::install_github("EWisely/REGATTA", build_vignettes = TRUE)
+library(REGATTA)
+```
+
+Then read the worked examples:
+
+```r
+vignette("REGATTA-tutorial")       # Modules 1 + 2 (one classifier)
+vignette("REGATTA-two-database")   # Module 3 (global + local)
+```
+
 ## The problem
 
 Global reference databases such as NCBI and EMBL are broad, but they are not
@@ -138,24 +155,6 @@ The solid path (one classifier → `reconcile_checklist`) is **Module 2**. **Mod
 local pair first, then hands its result to the **same** `reconcile_checklist`
 step. So a run is Module 1 plus either the solid path (Module 2) or the dashed
 branch + solid path (Module 3).
-
-## Installation
-
-All dependencies are on CRAN and install automatically:
-
-```r
-# install.packages("devtools")
-devtools::install_github("EWisely/REGATTA", build_vignettes = TRUE)
-library(REGATTA)
-```
-
-Then read the worked examples:
-
-```r
-vignette("REGATTA-tutorial")       # Modules 1 + 2 (one classifier)
-vignette("REGATTA-two-database")   # Module 3 (global + local)
-```
-
 
 ## Setup
 
