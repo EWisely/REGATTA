@@ -235,8 +235,7 @@ cl <- build_regional_checklist(
 primers target — fish with a fish-only list, crustaceans with a crustacean-only
 list, and so on. This also keeps genuine *off-target amplifications* visible: a
 crustacean picked up by a fish primer stands out against a fish-only checklist
-instead of passing silently through a mixed megalist. Nothing in the pipeline is
-fish-, marine-, or Galapagos-specific.
+instead of passing silently through a mixed-primer list. 
 
 ## Module 2 — Reconcile one classifier against the checklist
 
