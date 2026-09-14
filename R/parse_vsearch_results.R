@@ -33,6 +33,18 @@
 #' @return A data.frame with `id_col` + 7 rank columns + `pct_id`.
 #'   ASVs in the LCA file with no userout hit get `pct_id = NA`.
 #'
+#' @examples
+#' # Join a vsearch LCA file (consensus taxonomy) with its --userout file
+#' # (percent identity, first hit per ASV). Tiny example files:
+#' lca <- tempfile(fileext = ".txt")
+#' writeLines(c(
+#'   "ASV_1\td:Eukaryota,p:Chordata,c:Actinopteri,o:Perciformes,f:Lutjanidae,g:Lutjanus,s:Lutjanus_kasmira",
+#'   "ASV_2\td:Eukaryota,p:Chordata,c:Actinopteri,o:Mugiliformes,f:Mugilidae,g:Mugil"), lca)
+#' uo <- tempfile(fileext = ".txt")
+#' writeLines(c("ASV_1\tSEQ;tax=x\t99.5\t170\t1\t0",
+#'              "ASV_2\tSEQ;tax=x\t97.0\t170\t2\t0"), uo)
+#' parse_vsearch_results(lca, uo)
+#'
 #' @importFrom utils read.delim
 #' @export
 parse_vsearch_results <- function(lca_path,

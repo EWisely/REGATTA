@@ -62,6 +62,16 @@
 #'
 #' @return A data.frame: `id_col` + 7 rank columns + `pct_id`.
 #'
+#' @examples
+#' # Parse a vsearch --userout file: taxonomy from the best hit (column 2, after
+#' # the ";tax=" prefix) plus its percent identity. The second ASV is truncated
+#' # at genus.
+#' uo <- tempfile(fileext = ".txt")
+#' writeLines(c(
+#'   "ASV_1\tSEQ;tax=d:Eukaryota,p:Chordata,c:Actinopteri,o:Perciformes,f:Lutjanidae,g:Lutjanus,s:Lutjanus_kasmira\t99.5\t170\t1\t0",
+#'   "ASV_2\tSEQ;tax=d:Eukaryota,p:Chordata,c:Actinopteri,o:Mugiliformes,f:Mugilidae,g:Mugil\t97.0\t170\t2\t0"), uo)
+#' parse_vsearch_userout(uo)
+#'
 #' @importFrom utils read.delim
 #' @export
 parse_vsearch_userout <- function(path,

@@ -120,3 +120,26 @@ Either side may itself be a vsearch LCA + userout pair (matching
 \verb{global_lca*} + \verb{global_userout*} etc.).
 }
 }
+\examples{
+# Single-classifier run end to end, writing the output bundle to a temporary
+# folder. Offline: the bundled input is already rank-resolved and the bundled
+# checklist is pre-taxonomized, so no taxonomy database is needed.
+checklist <- readRDS(system.file("extdata", "galapagos_fish_checklist.rds",
+                                 package = "REGATTA"))
+tax_csv <- system.file("extdata", "mifish_obitools_example.csv",
+                       package = "REGATTA")
+res <- run_regatta(input = tax_csv, checklist = checklist,
+                   out_dir = tempdir(), region = "galapagos", label = "fish")
+res$taxonomy_table[, c("ASV_id", "genus", "species")]
+
+\dontrun{
+# Two-database workflow: pass global + local classifier results as a named
+# list; `cl` is a build_regional_checklist() result.
+run_regatta(
+  input = list(global = "MiFish_obitools.tab",
+               local  = c("MiFish_vsearch_lca.txt", "MiFish_vsearch_userout.txt")),
+  checklist = cl$for_LCA, out_dir = "regatta_out",
+  region = "galapagos", label = "fish")
+}
+
+}

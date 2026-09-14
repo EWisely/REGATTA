@@ -96,3 +96,15 @@ run-level \code{summarize_regatta()} report is the single summary). If a prior
 \code{reconcile_global_local} output folder is present, the returned (and written)
 \verb{$tracking} is an \emph{augmented} version combining both stages.
 }
+\examples{
+# Reconcile 12 real obitools-assigned ASVs against the bundled Galapagos
+# fish checklist. Runs offline -- no internet, no taxonomy database.
+tax <- read.csv(system.file("extdata", "mifish_obitools_example.csv",
+                            package = "REGATTA"))
+checklist <- readRDS(system.file("extdata", "galapagos_fish_checklist.rds",
+                                 package = "REGATTA"))
+rec <- reconcile_checklist(tax, checklist, output_dir = NULL)
+rec$result[, c("ASV_id", "genus", "species")]
+rec$stats
+
+}

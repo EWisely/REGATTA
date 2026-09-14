@@ -31,6 +31,13 @@
 #'
 #' @return The input augmented with the 7 rank columns.
 #'
+#' @examples
+#' # Split SINTAX taxonomy strings into the 7 rank columns; the second string
+#' # is truncated at genus, so its deeper ranks come back NA.
+#' parse_sintax(c(
+#'   "d:Eukaryota,p:Chordata,c:Actinopteri,o:Perciformes,f:Lutjanidae,g:Lutjanus,s:Lutjanus_kasmira",
+#'   "d:Eukaryota,p:Chordata,c:Actinopteri,o:Mugiliformes,f:Mugilidae,g:Mugil"))
+#'
 #' @importFrom utils write.csv
 #' @export
 parse_sintax <- function(input,
