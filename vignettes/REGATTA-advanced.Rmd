@@ -152,20 +152,9 @@ it names the nearest relative it has.
 res$stats
 ```
 
-## Interpreting the outputs
-
-Every REGATTA step that produces a taxonomy table returns the same three
-elements, so results drop straight into phyloseq or MetabaR and stay auditable:
-
-| Element | Contents |
-|---|---|
-| `$result` | The exchange-format table: id column, `pct_id` when available (normalized to 0–100), then the seven ranks. For a phyloseq `tax_table()`, drop `pct_id` first. |
-| `$tracking` | Per-ASV audit: before/after taxonomy, match rank, reconciliation reason, and passthrough columns. |
-| `$stats` | Step-level counts — kept, downgraded, dropped, and the per-rank-pair downgrade breakdown. |
-
-The tracking table is where you check why a call changed. When the checklist
-carries a target group, `regatta_reason` distinguishes outcomes such as `kept`,
-`non-local (geographic)`, and `off-target (taxonomic)`.
+For a walkthrough of what each output element contains and how to read the
+tracking table, see the "Interpreting the outputs" section of
+`vignette("REGATTA-tutorial")`.
 
 ## Other classifier formats
 

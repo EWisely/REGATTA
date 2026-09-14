@@ -101,14 +101,22 @@ res$taxonomy_table
 res$summary
 ```
 
-`run_regatta()` returns three things, also written to a dated
-`<region>_<label>_<date>/` subfolder of `out_dir`:
+## Interpreting the outputs
+
+`run_regatta()` returns three things — also written to a dated
+`<region>_<label>_<date>/` subfolder of `out_dir` — and every REGATTA step that
+produces a taxonomy table returns the same shape, so results drop straight into
+phyloseq or MetabaR and stay auditable:
 
 | Element | Contents |
 |---|---|
-| `res$taxonomy_table` | The reconciled table: `ASV_id`, `pct_id`, and the seven ranks. For a phyloseq `tax_table()`, drop `pct_id` first. |
-| `res$tracking` | A per-ASV audit: before/after taxonomy, the rank each call matched, and why. |
-| `res$summary` | Per-stage counts — how many calls were kept, downgraded, or dropped. |
+| `res$taxonomy_table` | The reconciled exchange-format table: `ASV_id`, `pct_id` when available (normalized to 0–100), then the seven ranks. For a phyloseq `tax_table()`, drop `pct_id` first. |
+| `res$tracking` | Per-ASV audit: before/after taxonomy, the rank each call matched, the reconciliation reason, and passthrough columns. |
+| `res$summary` | Per-stage counts — kept, downgraded, dropped, and the per-rank-pair downgrade breakdown. |
+
+The tracking table is where you check why a call changed. When the checklist
+carries a target group, `regatta_reason` distinguishes outcomes such as `kept`,
+`non-local (geographic)`, and `off-target (taxonomic)`.
 
 That is the whole workflow. For a second classifier (Module 3) see
 `vignette("REGATTA-two-database")`; for pre-checking taxon names, GBIF setup,
