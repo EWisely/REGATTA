@@ -340,7 +340,7 @@ when given an `output_dir`):
 
 ## Status
 
-Ready for release. Function names and signatures are stable, and the package
+Function names and signatures are stable, and the package
 is heading toward a CRAN submission and a companion methods paper.
 
 ## Authors
