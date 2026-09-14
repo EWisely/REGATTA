@@ -55,13 +55,11 @@ reconciles the two databases before the shared checklist step.
 
 **Module 1 — Build the regional species checklist.** Pull a regional species
 list from public biodiversity databases (OBIS, GBIF) plus any local checklists
-you supply, and resolve it to NCBI taxonomy. Run it on its own if you just want
-a clean, taxonomized species list for a region × group — or as the prequel that
-feeds Modules 2 and 3.
-→ `build_regional_checklist()`
+you supply, and resolve it to NCBI taxonomy. It is the prequel to Modules 2 and 3 (→ `build_regional_checklist()`), but can be run on its own if you just want a clean, taxonomized regional species list for any region/group.
+
 
 **Module 2 — Reconcile one classifier against the checklist.** Take the output
-of your taxonomy-assignment software (obitools, vsearch, Kraken2, BLAST+LCA, …)
+of your taxonomy-assignment software (obitools, vsearch, Kraken2, BLAST+LCA, etc.)
 and reconcile it against the Module 1 checklist, walking each call up the
 taxonomic tree only as far as needed for the eDNA assignment **and** the regional
 range limits to agree.
