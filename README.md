@@ -159,40 +159,23 @@ vignette("REGATTA-two-database")   # Module 3 (global + local)
 
 ## Setup
 
-**The NCBI taxonomy database.** Everything REGATTA does to a *name* (building
-the regional checklist, resolving classifier output that arrives as NCBI taxIDs
-or scientific names, and updating older nomenclature to current canonical
-taxonomy) runs against a local NCBI taxonomy snapshot built by `taxonomizr`.
-`build_regional_checklist()`, `taxonomize_checklist()`, and any `run_regatta()`
-run whose input isn't already resolved to the 7 ranks default `sql_path` to a
-**persistent per-user cache** (`tools::R_user_dir("REGATTA","cache")`), shared
-across projects/sessions, and build only the lightweight names+nodes (~a few
-hundred MB, a few minutes — not the multi-GB accession data) on first use.
-The cache is a **snapshot** of NCBI taxonomy and its build date is reported and recorded in `cl$methods`;
-`overwrite_taxonomy_files = TRUE` refreshes it. Set `sql_path = NULL` in
-`build_regional_checklist()` to skip taxonomizing there and defer it to
-`run_regatta()`. (Only accession-based input needs the full
-`taxonomizr::prepareDatabase()` build with `accession2taxid`.)
-
-**GBIF credentials** (only if you turn GBIF on in Module 1). `GBIF_download()`
-and `build_regional_checklist(GBIF = TRUE)` need a free
-[GBIF account](https://www.gbif.org/user/profile) and authenticate with your
-account credentials — there is no separate "API key". Add `GBIF_USER` /
-`GBIF_PWD` / `GBIF_EMAIL` to your `.Renviron` (`usethis::edit_r_environ()`, then
-restart R). A fresh GBIF download is an asynchronous `occ_download` that **takes
-several minutes** while GBIF assembles it server-side.
-
-**Output locations.** The two entry points — `build_regional_checklist()`
-(`output_dir`) and `run_regatta()` (`out_dir`) — **require** an output directory
-and write each run into its own dated `<region>_<label>_<Date>` subfolder of it,
-so successive runs don't pile up. The results are also returned as R objects. The
-lower-level building blocks keep their output dir **optional** so they compose
-cleanly. Local checklist CSVs (each with `Genus` and `Species` columns) can live
-anywhere; pass their paths to `build_regional_checklist(CSV = ...)`.
-
-**Draw your polygon** (Module 1) at [wktmap.com](https://wktmap.com) and copy the
-WKT `POLYGON ((long lat, long lat, ...))` string for the `regional_poly`
-argument.
+- **Taxonomy database.** Module 1, and any classifier output not already resolved
+  to the 7 ranks, need a local NCBI taxonomy snapshot (`taxonomizr`). It is built
+  on first use into a per-user cache (`tools::R_user_dir("REGATTA", "cache")`,
+  ~few hundred MB) and reused across projects. Point `sql_path` at an existing DB
+  to reuse one; `overwrite_taxonomy_files = TRUE` refreshes it. The core
+  reconciliation on a pre-taxonomized checklist + pre-resolved table needs no DB.
+- **GBIF** (only if you turn GBIF on in Module 1 with `GBIF = TRUE`). Needs a free
+  [GBIF account](https://www.gbif.org/user/profile); put `GBIF_USER` / `GBIF_PWD`
+  / `GBIF_EMAIL` in `.Renviron` (`usethis::edit_r_environ()`, then restart R). A
+  fresh download takes several minutes.
+- **Polygon.** Draw one at [wktmap.com](https://wktmap.com) and copy the WKT
+  `POLYGON ((long lat, ...))` string for `regional_poly`.
+- **Output.** `build_regional_checklist(output_dir=)` and `run_regatta(out_dir=)`
+  are required; each run writes a dated `<region>_<label>_<Date>` subfolder and
+  also returns the results as R objects.
+- `resolve_taxa()` pre-checks group names before a long download. Shorthands:
+  `"fish"` (ray-finned + sharks/rays/hagfish/lampreys) and `"vertebrates"`.
 
 > **Tip:** check group names with `resolve_taxa()` before a long download — it
 > disambiguates names against WoRMS by kingdom and flags GBIF backbone coverage.
