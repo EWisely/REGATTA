@@ -44,15 +44,6 @@ assignments only as far as the checklist requires.
 
 ## The three modules
 
-REGATTA is organized as three modules. A full REGATTA run is **Module 1 → Module
-2** (one classifier) **or Module 1 → Module 3** (two classifiers) — and you can
-also run **Module 1 on its own** if all you want is the regional species list.
-Modules 2 and 3 share the same checklist reconciliation and are both driven by
-the single `run_regatta()` entry point; **the only thing that makes Module 3
-different from Module 2 is one optional extra step in front of it —
-`reconcile_global_local()` (the dashed branch in the diagram below)**, which
-reconciles the two databases before the shared checklist step.
-
 **Module 1 — Build the regional species checklist.** Pull a regional species
 list from public biodiversity databases (OBIS, GBIF) plus any local checklists
 you supply, and resolve it to NCBI taxonomy. Run it on its own if you just want
@@ -74,6 +65,15 @@ keeping the coverage of the global DB and the regional fidelity of the local one
 — then run that result through the Module 2 checklist reconciliation to polish
 the final call.
 → `run_regatta(input = list(global = …, local = …))`
+
+A full REGATTA run is **Module 1 → Module 2** (one classifier) 
+**or Module 1 → Module 3** (two classifiers) — and you can
+also run **Module 1 on its own** if all you want is the regional species list.
+Modules 2 and 3 share the same checklist reconciliation and are both driven by
+the single `run_regatta()` entry point; **the only thing that makes Module 3
+different from Module 2 is one optional extra step in front of it —
+`reconcile_global_local()` (the dashed branch in the diagram below)**, which
+reconciles the two databases before the shared checklist step.
 
 ### How the reconciliation works (Modules 2 & 3)
 
