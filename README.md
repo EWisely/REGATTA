@@ -8,7 +8,7 @@
 
 REGATTA is an R package that reconciles taxonomic assignments from eDNA metabarcoding workflows against a
 regional species checklist by downgrading the taxonomic specificity of non-local
-assignments to the level at which the eDNA taxonomic assignment agrees with the regional species checklist.  The advantages of this method are that it is reproducible, citable, does not introduce human error or bias in taxonomic data curation, does not discard eDNA signal that may have been assigned to a geographically implausible relative to the true local species, and does not rely on arbitrary percent identity cutoffs for taxonomic level curation.  Thus, the REGATTA method is designed to reproducibly and retain as much taxonomic specificity as the regional evidence supports.
+assignments to the level at which the eDNA taxonomic assignment agrees with the regional species checklist.  The advantages of this method are that it is reproducible, citable, does not introduce human error or bias in taxonomic data curation, does not discard eDNA signal that may have been assigned to a geographically implausible relative to the true local species, and does not rely on arbitrary percent identity cutoffs for taxonomic level curation.  Thus, the REGATTA method is designed to reproducibly retain as much taxonomic specificity as the regional evidence supports.
 
 ## The problem
 
