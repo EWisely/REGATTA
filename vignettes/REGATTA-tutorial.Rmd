@@ -78,22 +78,34 @@ the lightweight names-and-nodes database, which is usually a few hundred MB and
 takes a few minutes. It does not build the multi-GB accession database unless you
 explicitly provide or create one.
 
-You can also point REGATTA to an existing taxonomy database:
+Choose where your taxonomy snapshot should live. Running the chunk below sets
+`sql_path` for the rest of the tutorial: in an interactive session it asks you
+for a location, and if you leave the answer blank — or when this vignette is
+knitted non-interactively — it falls back to the default cache shown above. Point
+it at an `accessionTaxa.sql` you already have to reuse that one instead of
+building a new snapshot.
 
-```{r sql-existing, eval = FALSE}
-sql_path <- "/path/to/your/accessionTaxa.sql"
+```{r choose-sql-path}
+sql_path <- if (interactive()) {
+  readline("Where should the taxonomy snapshot (accessionTaxa.sql) live? [blank = default cache] ")
+} else ""
+if (!nzchar(sql_path)) {
+  sql_path <- file.path(tools::R_user_dir("REGATTA", "cache"), "accessionTaxa.sql")
+}
+sql_path
 ```
 
-The taxonomy database is treated as a reproducible snapshot. REGATTA does not
-rebuild it silently. Instead, it reports the taxonomy build date and records it
-in `cl$methods`, so the taxonomy version travels with your methods.
+The database is treated as a reproducible snapshot. REGATTA does not rebuild it
+silently. Instead, it reports the taxonomy build date and records it in
+`cl$methods`, so the taxonomy version travels with your methods.
 
 To refresh the cached database, use `overwrite_taxonomy_files = TRUE`. To skip
 taxonomizing during checklist building and defer it to `run_regatta()`, use
 `sql_path = NULL`.
 
-The runnable demo at the end of this tutorial does not require a taxonomy database
-because it uses a pre-taxonomized checklist bundled with the package.
+The runnable demos in this tutorial — `run_regatta()` in Module 2 and
+`reconcile_checklist()` — need no taxonomy database, because they use a
+pre-taxonomized checklist bundled with the package.
 
 ---
 
@@ -179,11 +191,11 @@ cl <- build_regional_checklist(
   regional_poly = poly,
   OBIS          = TRUE,
   GBIF          = FALSE,
-  CSV           = "2016Aug24_Tirado-Sanchez_et_al_Galapagos_Pisces_Checklist.csv",
+  CSV           = NULL,   # optional: path(s) to your own local checklist CSV(s)
   marine        = TRUE,
   terrestrial   = FALSE,
   output_dir    = "local_database_checklist",
-  sql_path      = file.path(tools::R_user_dir("REGATTA", "cache"), "accessionTaxa.sql")
+  sql_path      = sql_path   # the location you chose in setup, above
 )
 ```
 
@@ -197,8 +209,7 @@ In this example:
 - `CSV` adds an optional local checklist.
 - `marine` and `terrestrial` help filter records by habitat.
 - `output_dir` is required and tells REGATTA where to write outputs.
-- `sql_path` points to the taxonomy database. The path shown above is the default
-  cache location.
+- `sql_path` points to the taxonomy database — the location you chose in setup.
 
 ### Using GBIF
 
@@ -258,7 +269,7 @@ yourself.
 ```{r taxonomize, eval = FALSE}
 checklist <- taxonomize_checklist(
   input    = "local_database_checklist/galapagos_fish_list_for_LCA.txt",
-  sql_path = "/path/to/accessionTaxa.sql"
+  sql_path = sql_path   # the location you chose in setup, above
 )
 ```
 
@@ -286,30 +297,49 @@ Use `run_regatta()` for the standard workflow. It reads your classifier output,
 resolves lineages, runs the checklist reconciliation, and writes an audited
 output table.
 
-```{r run, eval = FALSE}
+You can run it right now on the data bundled with the package — the 12-ASV
+obitools slice and the pre-taxonomized Galapagos fish checklist — with no
+download and no taxonomy database. Outputs go to a temporary folder here; with
+your own data you would give a real `out_dir`.
+
+```{r run, message = FALSE, warning = FALSE}
+library(REGATTA)
+
+checklist <- readRDS(system.file("extdata", "galapagos_fish_checklist.rds",
+                                 package = "REGATTA"))
+input_tab <- system.file("extdata", "mifish_obitools_example.csv",
+                         package = "REGATTA")
+
 res <- run_regatta(
-  input     = "MiFish_obitools.tab",
-  checklist = cl$for_LCA,
-  out_dir   = "regatta_out",
+  input     = input_tab,
+  checklist = checklist,
+  out_dir   = tempdir(),
+  region    = "galapagos",
+  label     = "fish"
+)
+
+res$taxonomy_table[, c("ASV_id", "pct_id", "genus", "species")]
+```
+
+With your own data you would point `input` at your classifier file and
+`checklist` at the `cl$for_LCA` object from Module 1:
+
+```{r run-real, eval = FALSE}
+res <- run_regatta(
+  input     = "MiFish_obitools.tab",   # obitools .tab, recognized by its TAXID column
+  checklist = cl$for_LCA,              # taxonomized checklist from Module 1
+  out_dir   = "regatta_out",           # a real output directory
   region    = "galapagos",
   label     = "fish"
 )
 ```
 
-In this example:
-
-- `input` is the classifier output. Here, it is an obitools `.tab` file
-  recognized by its `TAXID` column.
-- `checklist` is the taxonomized checklist from Module 1.
-- `out_dir` is required and tells REGATTA where to write results.
-- `region` and `label` name the run subfolder.
-
 `run_regatta()` returns `res$taxonomy_table`, `res$tracking`, and `res$summary`,
-and writes outputs to a dated `regatta_out/galapagos_fish_<date>/` subfolder.
+and writes them to a dated `<region>_<label>_<date>/` subfolder of `out_dir`.
 
-On the worked dataset, 542 ASVs were assigned by obitools out of 1,438 total
-ASVs. After REGATTA reconciliation, the assignments matched the regional
-checklist at these ranks:
+On the full worked dataset (not the 12-ASV slice above), 542 of 1,438 ASVs were
+assigned by obitools, and REGATTA matched them to the regional checklist at these
+ranks:
 
 | Match rank | ASVs |
 |---|---:|
