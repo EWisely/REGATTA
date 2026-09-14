@@ -268,14 +268,11 @@ res$summary          # per-stage stats summary
 
 ## Module 3 — Reconcile a global + a local database, then the checklist
 
-When you have the same ASVs classified two ways, pass them as a named
-`list(global =, local =)`. `run_regatta()` runs `reconcile_global_local()` first
+When you have the same ASVs classified two ways, `run_regatta()` runs `reconcile_global_local()` first
 — per ASV it keeps the call with the higher percent identity, but when the
 **global** call wins yet the **local** database disagrees, it downgrades to the
 lowest common ancestor of the two (a local win is kept outright) — then the
-Module 2 checklist reconciliation, in one call. Roles are declared explicitly via
-the list, never inferred from filenames; either side may be a vsearch
-`lca + userout` pair.
+Module 2 checklist reconciliation, in one call. 
 
 ```r
 res <- run_regatta(
