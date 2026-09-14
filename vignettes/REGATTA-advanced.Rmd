@@ -1,0 +1,188 @@
+---
+title: "REGATTA advanced usage: pre-checks, tuning, and formats"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{REGATTA advanced usage}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+This vignette collects optional steps and details that build on the core
+workflow in `vignette("REGATTA-tutorial")`: pre-checking taxon names, taxonomy-
+database options, turning on GBIF, resolving a checklist yourself, inspecting the
+checklist step ASV by ASV, reading the outputs, and handling other classifier
+formats. None of it is needed for a first run.
+
+## Pre-check your taxon names with `resolve_taxa()`
+
+The checklist should include every group your primer can amplify. A missing group
+breaks two things: a reference-database builder such as CRABS never downloads
+references for it, and a real local species left off the checklist can force a
+valid assignment to be downgraded. `resolve_taxa()` shows how REGATTA interprets
+your target names — and whether GBIF has a usable backbone key — before you start
+a long download.
+
+Scientific names work directly when both OBIS and GBIF recognize them:
+
+```{r resolve, eval = FALSE}
+library(REGATTA)
+
+resolve_taxa("Mammalia")
+#>      input alias_used aphia_id valid_name  rank  kingdom worms_status n_candidates gbif_key gbif_usable     note
+#> 1 Mammalia       <NA>     1837   Mammalia Class Animalia           ok            1      359        TRUE resolved
+```
+
+Some names are not matched cleanly: a few ray-finned fish classes have no usable
+GBIF backbone key, and some names are ambiguous (`Vertebrata` is also a red-algae
+genus). For common cases REGATTA ships shortcuts that expand to the right groups:
+
+- `"fish"`: ray-finned fishes, sharks and rays, hagfishes, and lampreys — the
+  usual MiFish target set.
+- `"vertebrates"`: the `"fish"` set plus Mammalia, Aves, Reptilia, and Amphibia.
+  This works in both OBIS and GBIF, unlike the bare subphylum name `Vertebrata`.
+
+## Taxonomy-database options
+
+The tutorial keeps the snapshot in the working directory and builds it on first
+use. You can point `sql_path` anywhere, including an `accessionTaxa.sql` you
+already have, to reuse it instead of building a new one:
+
+```{r sql-existing, eval = FALSE}
+sql_path <- "/path/to/an/existing/accessionTaxa.sql"
+```
+
+The database is a reproducible snapshot: REGATTA never rebuilds it silently. It
+reports the build date and records it in `cl$methods`, so the taxonomy version
+travels with your methods. To refresh a stale snapshot in place, pass
+`overwrite_taxonomy_files = TRUE`. To skip taxonomizing during checklist building
+and defer it to `run_regatta()`, pass `sql_path = NULL`.
+
+## Turning on GBIF
+
+OBIS runs by default and is often the more complete marine source. GBIF is off by
+default because its download is slower and asynchronous. Switch it on with
+`GBIF = TRUE`, or reuse a finished download by passing its key or download object
+to `GBIF =`.
+
+A fresh GBIF run submits an `occ_download()` job and waits while GBIF assembles
+it server-side — usually several minutes, longer for large regions or broad taxa.
+GBIF requires a free account. `rgbif` authenticates using three values stored in
+your `~/.Renviron` file:
+
+```
+GBIF_USER=your_gbif_username
+GBIF_PWD=your_gbif_password
+GBIF_EMAIL=the_email_you_registered_with
+```
+
+Edit that file from R, then save and restart R so the variables load:
+
+```{r edit-renviron, eval = FALSE}
+usethis::edit_r_environ()
+```
+
+Whenever GBIF is used, REGATTA records the download key, DOI, and full citation in
+`cl$methods` and in the written methods file, keeping GBIF provenance with the
+rest of the workflow. Verify each reference against your own reference manager
+before submission.
+
+## Resolving a checklist yourself with `taxonomize_checklist()`
+
+You usually do not call this directly — `build_regional_checklist()` runs it for
+you, and `run_regatta()` will taxonomize an untaxonomized checklist on the fly.
+Call it directly only to inspect or cache the lineage table:
+
+```{r taxonomize, eval = FALSE}
+checklist <- taxonomize_checklist(
+  input    = "regatta_checklist/galapagos_fish_list_for_LCA.txt",
+  sql_path = "accessionTaxa.sql"
+)
+```
+
+It adds the full lineage each name needs for reconciliation and updates older
+names to current canonical NCBI taxonomy, so synonyms still match.
+
+## Inside the checklist step: `reconcile_checklist()`
+
+`reconcile_checklist()` is the core step `run_regatta()` calls for you. Running it
+directly shows what happens to each ASV — and, because it uses data bundled with
+the package, it runs here with no internet and no taxonomy database. The demo uses
+12 real obitools-assigned ASVs chosen to show all three outcomes.
+
+```{r demo}
+library(REGATTA)
+
+checklist <- readRDS(system.file("extdata", "galapagos_fish_checklist.rds",
+                                 package = "REGATTA"))
+tax <- read.csv(system.file("extdata", "mifish_obitools_example.csv",
+                            package = "REGATTA"), stringsAsFactors = FALSE)
+
+res <- reconcile_checklist(tax, checklist, output_dir = NULL)
+
+res$tracking[, c("before_species", "pct_id", "regatta_match_rank",
+                 "after_genus", "after_family")]
+```
+
+The checklist step has three outcomes, all present here:
+
+- **Kept at species** (the call is on the checklist): *Abudefduf saxatilis*,
+  *Prionurus laticlavius*, *Lutjanus kasmira*, *Caranx melampygus*,
+  *Mugil curema*, *Etrumeus micropus*.
+- **Downgraded to genus** (species off the checklist, genus on): *Abudefduf
+  taurus*, *Prionurus biafraensis*, *Epinephelus bontoides*, *Cubiceps
+  squamiceps*.
+- **Downgraded to family** (species and genus off): *Archosargus rhomboidalis*,
+  *Conodon nobilis*.
+
+The two within-genus splits show why this beats a flat percent-identity cutoff.
+*Abudefduf saxatilis* and *A. taurus* both matched the global database at 100%
+identity, yet only *saxatilis* is on the Galapagos checklist, so *taurus* drops to
+genus — no cutoff could separate them. Likewise *Prionurus laticlavius* stays at
+species while *P. biafraensis*, a West African congener called at 98.8%, drops to
+genus: the global database simply has no reference for some Galapagos species, so
+it names the nearest relative it has.
+
+`$stats` summarizes the before/after transition:
+
+```{r demo-stats}
+res$stats
+```
+
+## Interpreting the outputs
+
+Every REGATTA step that produces a taxonomy table returns the same three
+elements, so results drop straight into phyloseq or MetabaR and stay auditable:
+
+| Element | Contents |
+|---|---|
+| `$result` | The exchange-format table: id column, `pct_id` when available (normalized to 0–100), then the seven ranks. For a phyloseq `tax_table()`, drop `pct_id` first. |
+| `$tracking` | Per-ASV audit: before/after taxonomy, match rank, reconciliation reason, and passthrough columns. |
+| `$stats` | Step-level counts — kept, downgraded, dropped, and the per-rank-pair downgrade breakdown. |
+
+The tracking table is where you check why a call changed. When the checklist
+carries a target group, `regatta_reason` distinguishes outcomes such as `kept`,
+`non-local (geographic)`, and `off-target (taxonomic)`.
+
+## Other classifier formats
+
+`run_regatta()` auto-detects several input types:
+
+- obitools `.tab` (recognized by its `TAXID` column)
+- vsearch LCA output
+- vsearch `--userout`
+- Kraken2-style or BestTaxon-style name tables
+
+If your ASV id column has a different name, pass it explicitly with
+`id_col = "Hash"`. Long per-sample tables are collapsed to one row per ASV
+automatically. See `?run_regatta`.
+
+## One pass per primer
+
+Run REGATTA once per taxonomic group your primers target. This keeps genuine
+off-target amplifications visible: if an invertebrate is amplified by a fish
+primer, running the fish checklist separately prevents that non-target record
+from passing through as part of a mixed "megalist."
